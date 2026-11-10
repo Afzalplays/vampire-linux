@@ -1,2 +1,11 @@
-# vampire-linux
-An independent open-source Linux operating system built from upstream source code by VampireNodes. Featuring a custom Linux kernel configuration, Vampire Init, package manager, shell, desktop environment and server edition.
+# Vampire OS
+
+An independent, open-source Linux operating system
+built from upstream source code by VampireNodes.
+
+**Editions**
+- Vampire Desktop
+- Vampire Server
+
+**Architecture:** x86_64
+**Status:** Experimental development
