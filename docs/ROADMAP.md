@@ -12,6 +12,8 @@ feature release-ready.
 - [x] Add VPM experimental client, signed-index verification and unit tests.
 - [x] Add shell/configuration CI checks and QEMU BIOS/UEFI smoke-test script.
 - [x] Add initial service dispatcher, DHCP helper and opt-in nftables helper.
+- [x] Add validated settings storage and an interactive console launcher MVP.
+- [x] Add isolated tests for settings validation and desktop launcher syntax.
 - [ ] Complete a clean live ISO build and retain its artifact.
 - [ ] Pass QEMU BIOS and UEFI boot tests and verify console login.
 - [ ] Verify VFetch, DHCP, reboot and shutdown inside the image.
@@ -38,7 +40,8 @@ feature release-ready.
 
 ## Desktop edition
 
-- [ ] Wayland compositor, display manager and Vampire Desktop shell.
+- [ ] Wayland compositor, display manager and graphical Vampire Desktop shell.
+- [x] Console-mode `vdesktop` launcher and `vsettings` preference backend (bring-up tools only).
 - [ ] Original top panel, floating dock, launcher and window management.
 - [ ] File manager, terminal and settings application.
 - [ ] Display, network, sound, power and personalization controls.
