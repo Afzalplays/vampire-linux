@@ -21,9 +21,9 @@ fi
 MEMORY=$(awk '/MemTotal:/ {t=$2} /MemAvailable:/ {a=$2} END {if(t>0) printf "%.1f GiB / %.1f GiB", (t-a)/1048576, t/1048576; else print "Unknown"}' /proc/meminfo 2>/dev/null)
 UPTIME=$(uptime -p 2>/dev/null | sed 's/^up //' || true)
 [ -n "$UPTIME" ] || UPTIME=Unknown
-SHELL_NAME=$(basename "$SHELL" 2>/dev/null || printf Unknown)
-TERM_NAME=$TERM
-DE_NAME=$XDG_CURRENT_DESKTOP
+SHELL_NAME=$(basename "${SHELL:-unknown}" 2>/dev/null || printf Unknown)
+TERM_NAME=${TERM:-Unknown}
+DE_NAME=${XDG_CURRENT_DESKTOP:-}
 [ -n "$DE_NAME" ] || DE_NAME=TTY
 IP=$(hostname -I 2>/dev/null | awk '{print $1}')
 [ -n "$IP" ] || IP=Not detected
