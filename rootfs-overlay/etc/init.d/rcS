@@ -1,0 +1,12 @@
+#!/bin/sh
+# Minimal live-system initialization for Vampire OS.
+mount -t proc proc /proc 2>/dev/null || true
+mount -t sysfs sysfs /sys 2>/dev/null || true
+mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
+mkdir -p /dev/pts /run /tmp /var/log
+mount -t devpts devpts /dev/pts 2>/dev/null || true
+hostname vampire-os
+printf '\n'
+printf '  Vampire OS 0.1.0-dev | x86_64 live environment\n'
+printf '  Type vfetch for system information.\n'
+printf '\n'
