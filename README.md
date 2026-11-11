@@ -37,6 +37,10 @@ CPU, GPU, memory, package count, uptime, and other host details.
 
 - [Product and engineering blueprint](docs/PRODUCT-BLUEPRINT.md)
 - [Desktop UX specification](docs/DESKTOP-UX-SPEC.md)
+- [Settings, voice, updates and boot specification](docs/SETTINGS-VOICE-UPDATES-BOOT.md)
+- [Voice Access design](docs/VOICE-ACCESS.md)
+- [BIOS/UEFI installer and recovery design](docs/BOOT-INSTALLER-RECOVERY.md)
+- [Settings defaults](docs/SETTINGS-DEFAULTS.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Package management design](docs/PACKAGE-MANAGEMENT.md)
 - [Software Center and app ecosystem](docs/SOFTWARE-CENTER.md)
