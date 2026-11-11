@@ -7,19 +7,21 @@ trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/bin" "$TMP/services.d"
 
 # Test vctl dispatch without touching the live system's service directory.
-sed "s|DIR=/etc/vampire/services.d|DIR=$TMP/services.d|" "$ROOT/rootfs-overlay/usr/bin/vctl" > "$TMP/vctl"
+: # vctl uses isolated environment overrides below
 cat > "$TMP/services.d/mocksvc" <<'SERVICE'
 #!/bin/sh
 printf '%s\n' "$1" >> "$VCTL_CALLS"
 SERVICE
-chmod +x "$TMP/vctl" "$TMP/services.d/mocksvc"
+chmod +x "$TMP/services.d/mocksvc"
 export VCTL_CALLS="$TMP/vctl-calls"
-"$TMP/vctl" list | grep -qx mocksvc
-"$TMP/vctl" start mocksvc
-"$TMP/vctl" restart mocksvc
+export VAMPIRE_SERVICE_DIR="$TMP/services.d"
+export VAMPIRE_ENABLED_FILE="$TMP/services.enabled"
+"$ROOT/rootfs-overlay/usr/bin/vctl" list | grep -q "mocksvc (disabled)"
+"$ROOT/rootfs-overlay/usr/bin/vctl" start mocksvc
+"$ROOT/rootfs-overlay/usr/bin/vctl" restart mocksvc
 printf 'start\nstop\nstart\n' > "$TMP/expected-vctl"
 diff -u "$TMP/expected-vctl" "$VCTL_CALLS"
-if "$TMP/vctl" start '../mocksvc' >/dev/null 2>&1; then
+if "$ROOT/rootfs-overlay/usr/bin/vctl" start '../mocksvc' >/dev/null 2>&1; then
   echo "vctl accepted a path traversal service name" >&2
   exit 1
 fi
