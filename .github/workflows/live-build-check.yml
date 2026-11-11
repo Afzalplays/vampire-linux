@@ -7,12 +7,14 @@ on:
       - "build/**"
       - "rootfs-overlay/**"
       - "fetch/**"
+      - "scripts/**"
       - ".github/workflows/live-build-check.yml"
   pull_request:
     paths:
       - "build/**"
       - "rootfs-overlay/**"
       - "fetch/**"
+      - "scripts/**"
       - ".github/workflows/live-build-check.yml"
 
 permissions:
@@ -26,6 +28,7 @@ jobs:
       - name: Check shell syntax
         run: |
           bash -n build/build-live-iso.sh
+          bash -n scripts/test-live-iso.sh
           bash -n fetch/vfetch
           sh -n rootfs-overlay/etc/init.d/rcS
       - name: Check required image configuration
@@ -38,3 +41,11 @@ jobs:
           test -s build/grub.cfg
           test -s rootfs-overlay/etc/inittab
           test -s rootfs-overlay/etc/os-release
+      - name: Test VFetch output contract
+        run: |
+          bash fetch/vfetch > vfetch-output.txt
+          grep -q 'V A M P I R E' vfetch-output.txt
+          grep -q 'OS:' vfetch-output.txt
+          grep -q 'Kernel:' vfetch-output.txt
+          grep -q 'Memory:' vfetch-output.txt
+          grep -q 'Locale:' vfetch-output.txt
