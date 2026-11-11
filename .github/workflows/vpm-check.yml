@@ -1,0 +1,27 @@
+name: Vampire package manager checks
+
+on:
+  push:
+    paths:
+      - "vpm/**"
+      - ".github/workflows/vpm-check.yml"
+  pull_request:
+    paths:
+      - "vpm/**"
+      - ".github/workflows/vpm-check.yml"
+  workflow_dispatch:
+
+jobs:
+  python-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Compile client
+        run: python -m py_compile vpm/vpm vpm/test_vpm.py
+      - name: Check command interface
+        run: python vpm/vpm --help
+      - name: Test archive extraction safety
+        run: python -m unittest discover -s vpm -p 'test_*.py' -v
