@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: "3.x"
       - name: Compile client
-        run: python -m py_compile vpm/vpm vpm/test_vpm.py vpm/repo_tool.py vpm/test_repo_tool.py
+        run: python -m py_compile vpm/vpm vpm/test_vpm.py vpm/repo_tool.py vpm/test_repo_tool.py vpm/doctor.py
       - name: Validate settings defaults
         run: python -m json.tool settings/defaults.json > /dev/null
       - name: Check branded command interface
