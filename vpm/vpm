@@ -254,7 +254,7 @@ def command_remove(args):
         fail("package has no trustworthy file ownership record; refusing removal")
     root = ROOT.resolve()
     for relative in files:
-        if not isinstance(relative, str) or not relative or relative.startswith("/") or "\\\\" in relative:
+        if not isinstance(relative, str) or not relative or relative.startswith("/") or "\\" in relative:
             fail("invalid installed-file record; refusing removal")
         target = (root / relative).resolve()
         if target != root and root not in target.parents:
@@ -268,7 +268,7 @@ def command_remove(args):
     del db[args.name]
     DB.parent.mkdir(parents=True, exist_ok=True)
     tmp = DB.with_suffix(".tmp")
-    tmp.write_text(json.dumps(db, indent=2) + "\\n")
+    tmp.write_text(json.dumps(db, indent=2) + "\n")
     tmp.replace(DB)
     print(f"Removed recorded package files: {args.name}")
 
