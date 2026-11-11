@@ -43,6 +43,7 @@ CPU, GPU, memory, package count, uptime, and other host details.
 - [Remote Desktop / RDP security design](docs/REMOTE-DESKTOP.md)
 - [OS security baseline](docs/SECURITY-BASELINE.md)
 - [Vampire Package Manager prototype](vpm/README.md)
+- [VPM repository builder](vpm/REPOSITORY-BUILDER.md)
 - [Development roadmap](docs/ROADMAP.md)
 - [Third-party licensing policy](docs/LICENSING.md)
 - [Contributing](CONTRIBUTING.md)
