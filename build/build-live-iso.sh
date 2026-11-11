@@ -14,7 +14,7 @@ die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 need() { command -v "$1" >/dev/null 2>&1 || die "Missing host tool: $1"; }
 
 for tool in git make gcc g++ perl python3 rsync cpio file patch bc bison flex \
-            xorriso grub-mkrescue mformat; do
+            xorriso grub-mkrescue mformat wget unzip xz; do
   need "$tool"
 done
 
