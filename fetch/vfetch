@@ -1,72 +1,114 @@
 #!/usr/bin/env bash
 # Vampire Fetch - system information display. SPDX-License-Identifier: MIT
 set -u
+
 RED=$'\033[38;5;196m'
-DIM=$'\033[2m'
 WHITE=$'\033[97m'
+DIM=$'\033[2m'
 RESET=$'\033[0m'
-HOST=$(hostname 2>/dev/null || printf unknown)
-WHO=$(id -un 2>/dev/null || printf user)
-OS=Linux
-if [ -r /etc/os-release ]; then OS=$(. /etc/os-release; printf '%s' "$PRETTY_NAME"); fi
-KERNEL=$(uname -r 2>/dev/null || printf Unknown)
-ARCH=$(uname -m 2>/dev/null || printf Unknown)
+MUTED=$'\033[38;5;245m'
+
+HOST=$(hostname 2>/dev/null || printf 'unknown')
+WHO=$(id -un 2>/dev/null || printf 'user')
+OS='Vampire OS x86_64'
+if [ -r /etc/os-release ]; then
+  PRETTY=$(sed -n 's/^PRETTY_NAME=//p' /etc/os-release | head -n 1 | tr -d '"')
+  [ -n "$PRETTY" ] && OS=$PRETTY
+fi
+KERNEL=$(uname -r 2>/dev/null || printf 'Unknown')
+UPTIME=$(uptime -p 2>/dev/null | sed 's/^up //' || true)
+[ -n "$UPTIME" ] || UPTIME=Unknown
+
+PACKAGES=Unknown
+if [ -r /var/lib/vpm/installed.json ] && command -v python3 >/dev/null 2>&1; then
+  PACKAGES=$(python3 -c 'import json; p=json.load(open("/var/lib/vpm/installed.json")); print(len(p.get("packages", {})))' 2>/dev/null || printf 'Unknown')
+elif command -v apk >/dev/null 2>&1; then
+  PACKAGES=$(apk info 2>/dev/null | wc -l | tr -d ' ')
+elif command -v dpkg-query >/dev/null 2>&1; then
+  PACKAGES=$(dpkg-query -f '.' -W 2>/dev/null | wc -c | tr -d ' ')
+elif command -v rpm >/dev/null 2>&1; then
+  PACKAGES=$(rpm -qa 2>/dev/null | wc -l | tr -d ' ')
+elif command -v pacman >/dev/null 2>&1; then
+  PACKAGES=$(pacman -Q 2>/dev/null | wc -l | tr -d ' ')
+fi
+
+SHELL_NAME=$(basename "${SHELL:-unknown}" 2>/dev/null || printf 'Unknown')
+DISPLAY_INFO=TTY
+if [ -n "${WAYLAND_DISPLAY:-}" ]; then
+  DISPLAY_INFO="Wayland ${WAYLAND_DISPLAY}"
+elif [ -n "${DISPLAY:-}" ]; then
+  DISPLAY_INFO="X11 ${DISPLAY}"
+fi
+if command -v xrandr >/dev/null 2>&1 && [ -n "${DISPLAY:-}" ]; then
+  RES=$(xrandr 2>/dev/null | awk '/\*/ {print $1; exit}')
+  [ -n "$RES" ] && DISPLAY_INFO="$RES"
+fi
+DE_NAME=${XDG_CURRENT_DESKTOP:-Vampire Desktop}
+WM_NAME=${XDG_SESSION_DESKTOP:-Unknown}
+[ -n "$WM_NAME" ] || WM_NAME=Unknown
+if [ -n "${XDG_SESSION_TYPE:-}" ]; then
+  WM_NAME="$WM_NAME (${XDG_SESSION_TYPE})"
+fi
+THEME=${GTK_THEME:-Vampire Dark}
+TERM_NAME=${TERM_PROGRAM:-${TERM:-Unknown}}
 CPU=$(awk -F: '/model name/ {sub(/^[ \t]+/, "", $2); print $2; exit}' /proc/cpuinfo 2>/dev/null)
 [ -n "$CPU" ] || CPU=Unknown
-GPU=Not detected
+GPU='Not detected'
 if command -v lspci >/dev/null 2>&1; then
   DETECTED_GPU=$(lspci 2>/dev/null | awk -F': ' '/VGA compatible controller|3D controller|Display controller/ {print $2; exit}')
   [ -n "$DETECTED_GPU" ] && GPU=$DETECTED_GPU
 fi
 MEMORY=$(awk '/MemTotal:/ {t=$2} /MemAvailable:/ {a=$2} END {if(t>0) printf "%.1f GiB / %.1f GiB", (t-a)/1048576, t/1048576; else print "Unknown"}' /proc/meminfo 2>/dev/null)
-UPTIME=$(uptime -p 2>/dev/null | sed 's/^up //' || true)
-[ -n "$UPTIME" ] || UPTIME=Unknown
-SHELL_NAME=$(basename "${SHELL:-unknown}" 2>/dev/null || printf Unknown)
-TERM_NAME=${TERM:-Unknown}
-DE_NAME=${XDG_CURRENT_DESKTOP:-}
-[ -n "$DE_NAME" ] || DE_NAME=TTY
 IP=$(hostname -I 2>/dev/null | awk '{print $1}')
-[ -n "$IP" ] || IP=Not detected
-PACKAGES=Unknown
-if command -v apk >/dev/null 2>&1; then PACKAGES=$(apk info 2>/dev/null | wc -l | tr -d ' ')
-elif command -v dpkg-query >/dev/null 2>&1; then PACKAGES=$(dpkg-query -f '.' -W 2>/dev/null | wc -c | tr -d ' ')
-elif command -v rpm >/dev/null 2>&1; then PACKAGES=$(rpm -qa 2>/dev/null | wc -l | tr -d ' ')
-elif command -v pacman >/dev/null 2>&1; then PACKAGES=$(pacman -Q 2>/dev/null | wc -l | tr -d ' ')
-fi
-EDITION=$(printenv VAMPIRE_EDITION 2>/dev/null || printf Experimental)
-VERSION=$(printenv VAMPIRE_VERSION 2>/dev/null || printf 0.1.0-dev)
+[ -n "$IP" ] || IP='Not detected'
+LOCALE=${LC_ALL:-${LC_CTYPE:-${LANG:-Unknown}}}
+EDITION=${VAMPIRE_EDITION:-Desktop}
+VERSION=${VAMPIRE_VERSION:-0.1.0-dev}
+case "$OS" in
+  *Vampire*) OS="Vampire OS x86_64" ;;
+esac
 
-paste <(cat <<'LOGO'
-              /\
-         /\  /  \  /\
-        /  \/ /\ \/  \
-       /____/  V \____\
-          /  /\ /\  \
-     /\  /__/  V  \__\  /\
-    /  \ |  []   []  | /  \
-   /____\|____V______|/____\
-   | []   /  / \  \   [] |
-   |_____/__/___\__\______|
-        V A M P I R E
-             O S
-LOGO
-) <(printf '%s\n' \
-  "$RED$WHO@$HOST$RESET" \
-  "$DIM────────────────────────────────────$RESET" \
-  "$WHITE OS $RESET:        $OS" \
-  "Edition:   $EDITION" \
-  "Version:   $VERSION" \
-  "Host:      $HOST" \
-  "Kernel:    $KERNEL" \
-  "Arch:      $ARCH" \
-  "Shell:     $SHELL_NAME" \
-  "Terminal:  $TERM_NAME" \
-  "DE / WM:   $DE_NAME" \
-  "CPU:       $CPU" \
-  "GPU:       $GPU" \
-  "Memory:    $MEMORY" \
-  "Packages:  $PACKAGES" \
-  "Uptime:    $UPTIME" \
-  "Local IP:  $IP" \
-  "Rise beyond the ordinary.")
-printf '\n%b  ■  ■  ■  ■  ■  ■  ■  ■%b\n' "$RED" "$RESET"
+# Keep the logo and information in two columns. The logo width is 24 cells.
+LOGO=$(cat <<'ART'
+      ██╗     ██╗
+      ██║     ██║
+      ██║     ██║
+      ╚██╗   ██╔╝
+       ╚██╗ ██╔╝
+        ╚████╔╝
+         ╚═══╝
+    V A M P I R E
+         O S
+ART
+)
+
+INFO=$(printf '%s\n' \
+  "$RED$WHO@vampire-os$RESET" \
+  "$DIM────────────────────────────────────────$RESET" \
+  "$WHITE OS:$RESET        $OS" \
+  "Host:       Vampire Desktop" \
+  "Kernel:     $KERNEL" \
+  "Uptime:     $UPTIME" \
+  "Packages:   $PACKAGES" \
+  "Shell:      Vampire Shell ($SHELL_NAME)" \
+  "Display:    $DISPLAY_INFO" \
+  "DE:         $DE_NAME" \
+  "WM:         $WM_NAME" \
+  "Theme:      $THEME" \
+  "Terminal:   $TERM_NAME" \
+  "CPU:        $CPU" \
+  "GPU:        $GPU" \
+  "Memory:     $MEMORY" \
+  "Local IP:   $IP" \
+  "Locale:     $LOCALE")
+
+# Add two blank logo rows so the user header begins above the system fields.
+{
+  printf '\n\n'
+  printf '%s\n' "$LOGO"
+} | paste -d '' - <(printf '%s\n' "$INFO") | while IFS= read -r line; do
+  printf '%b\n' "$line"
+done
+
+printf '\n'
+printf '%b●  ●  ●  ●  ●  ●%b\n' "$RED" "$RESET"
