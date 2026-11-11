@@ -43,6 +43,8 @@ CPU, GPU, memory, package count, uptime, and other host details.
 - [BIOS/UEFI installer and recovery design](docs/BOOT-INSTALLER-RECOVERY.md)
 - [Settings defaults](docs/SETTINGS-DEFAULTS.md)
 - [Console tools guide](docs/CONSOLE-TOOLS.md)
+- [Hardware diagnostics](docs/HARDWARE-DIAGNOSTICS.md)
+- [Optional firewall](docs/FIREWALL.md)
 - [Vampire Files console manager](docs/FILES-CONSOLE.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Package management design](docs/PACKAGE-MANAGEMENT.md)
