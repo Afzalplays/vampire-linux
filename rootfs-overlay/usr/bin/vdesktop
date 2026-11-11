@@ -43,6 +43,7 @@ while :; do
   printf '  4) System monitor\n'
   printf '  5) Open shell\n'
   printf '  6) Show all settings\n'
+  printf '  7) Installer storage preflight\n'
   printf '  0) Exit launcher\n'
   printf '  Select: '
   IFS= read -r choice || exit 0
