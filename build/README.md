@@ -49,3 +49,13 @@ Python 3 (TLS and zlib), and Minisign. These increase image size and build time.
 Weston is an upstream graphical bring-up layer; it is not the final Vampire
 Desktop. VPM is copied into the root filesystem for development, but ships
 without a configured package repository.
+
+
+## Separate editions
+
+- Desktop: `bash build/build-live-iso.sh` (Weston DRM preview enabled).
+- Server: `VAMPIRE_EDITION=server bash build/build-live-iso.sh` (Weston omitted; Dropbear tools included but SSH is not auto-started).
+
+The build outputs are isolated in `.build/output-desktop` and
+`.build/output-server`, and ISO names include the edition. Test either image
+with the same `VAMPIRE_EDITION` value passed to `scripts/test-live-iso.sh`.
