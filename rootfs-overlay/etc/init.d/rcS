@@ -1,13 +1,10 @@
 #!/bin/sh
-# Minimal live-system initialization for Vampire OS.
 mount -t proc proc /proc 2>/dev/null || true
 mount -t sysfs sysfs /sys 2>/dev/null || true
 mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
-mkdir -p /dev/pts /run /tmp /var/log
+mkdir -p /dev/pts /run /tmp /var/log /var/lib/vampire
 mount -t devpts devpts /dev/pts 2>/dev/null || true
 hostname vampire-os
-
-# Start eudev so DRM and input devices can be discovered.
 if command -v udevd >/dev/null 2>&1; then
   udevd --daemon || true
   if command -v udevadm >/dev/null 2>&1; then
@@ -16,15 +13,12 @@ if command -v udevd >/dev/null 2>&1; then
     udevadm settle --timeout=10 || true
   fi
 fi
-
-# Seed writable live-session preferences on first boot.
 if [ ! -f /etc/vampire/settings.conf ] && [ -r /etc/vampire/settings.defaults ]; then
   cp /etc/vampire/settings.defaults /etc/vampire/settings.conf
   chmod 600 /etc/vampire/settings.conf
 fi
 printf '\n  Vampire OS 0.1.0-dev | x86_64 live environment\n'
 printf '  Type vfetch for system information.\n\n'
-# DHCP failure must never prevent the live console from starting.
 if [ -x /usr/bin/vctl ]; then
-  /usr/bin/vctl start network || printf 'Vampire OS: network startup skipped or failed\n' >&2
+  /usr/bin/vctl start-all || printf 'Vampire OS: one or more services failed to start\n' >&2
 fi

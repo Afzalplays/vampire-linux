@@ -1,18 +1,68 @@
 #!/bin/sh
-# Vampire service dispatcher: /etc/vampire/services.d/<name> {start|stop|status}
-set -eu
-DIR=/etc/vampire/services.d
-[ "$#" -ge 1 ] || { echo "Usage: vctl {start|stop|restart|status|list} SERVICE" >&2; exit 2; }
+set -u
+DIR=\${VAMPIRE_SERVICE_DIR:-/etc/vampire/services.d}
+ENABLED=\${VAMPIRE_ENABLED_FILE:-/etc/vampire/services.enabled}
+usage() { echo "Usage: vctl {list|start|stop|restart|status|enable|disable} SERVICE | {start-all|stop-all}" >&2; exit 2; }
+valid_name() { case "$1" in ''|*[!A-Za-z0-9_.-]*) return 1 ;; *) return 0 ;; esac; }
+run_service() {
+  name=$1 action=$2
+  valid_name "$name" || { echo "vctl: invalid service name: $name" >&2; return 2; }
+  service="$DIR/$name"
+  [ -x "$service" ] || { echo "vctl: service not found: $name" >&2; return 1; }
+  "$service" "$action"
+}
+is_enabled() { [ -f "$ENABLED" ] && grep -Fxq "$1" "$ENABLED"; }
+set_enabled() {
+  name=$1 mode=$2
+  valid_name "$name" || { echo "vctl: invalid service name" >&2; return 2; }
+  [ -x "$DIR/$name" ] || { echo "vctl: service not found: $name" >&2; return 1; }
+  mkdir -p "\${ENABLED%/*}" || return 1
+  tmp="$ENABLED.tmp.$$"
+  : > "$tmp" || return 1
+  if [ -f "$ENABLED" ]; then
+    while IFS= read -r item; do
+      [ -n "$item" ] || continue
+      [ "$item" = "$name" ] && continue
+      printf '%s\n' "$item" >> "$tmp"
+    done < "$ENABLED"
+  fi
+  [ "$mode" = enable ] && printf '%s\n' "$name" >> "$tmp"
+  if [ -s "$tmp" ]; then sort -u "$tmp" -o "$tmp"; fi
+  mv -f "$tmp" "$ENABLED"
+  printf 'vctl: %s %s at boot\n' "$name" "\${mode}d"
+}
+[ "$#" -ge 1 ] || usage
 action=$1
-case "$action" in start|stop|restart|status|list) ;; *) exit 2 ;; esac
-if [ "$action" = list ]; then
-  for service in "$DIR"/*; do [ -x "$service" ] && basename "$service"; done
-  exit 0
-fi
-[ "$#" -eq 2 ] || { echo "Usage: vctl $action SERVICE" >&2; exit 2; }
-name=$2
-case "$name" in ''|*[!A-Za-z0-9_.-]*) echo "vctl: invalid service name" >&2; exit 2 ;; esac
-service="$DIR/$name"
-[ -x "$service" ] || { echo "vctl: service not found: $name" >&2; exit 1; }
-if [ "$action" = restart ]; then "$service" stop || true; action=start; fi
-exec "$service" "$action"
+case "$action" in
+  list)
+    [ "$#" -eq 1 ] || usage
+    for service in "$DIR"/*; do
+      [ -x "$service" ] || continue
+      name=\${service##*/}
+      if is_enabled "$name"; then printf '* %s (enabled)\n' "$name"; else printf '  %s (disabled)\n' "$name"; fi
+    done
+    exit 0 ;;
+  start-all|stop-all)
+    [ "$#" -eq 1 ] || usage
+    [ -f "$ENABLED" ] || exit 0
+    result=0
+    while IFS= read -r name; do
+      [ -n "$name" ] || continue
+      valid_name "$name" || { echo "vctl: ignoring invalid service entry" >&2; result=1; continue; }
+      if [ "$action" = start-all ]; then run_service "$name" start || result=1
+      else run_service "$name" stop || result=1
+      fi
+    done < "$ENABLED"
+    exit "$result" ;;
+  enable|disable)
+    [ "$#" -eq 2 ] || usage
+    set_enabled "$2" "$action"
+    exit $? ;;
+  start|stop|restart|status)
+    [ "$#" -eq 2 ] || usage
+    if [ "$action" = restart ]; then run_service "$2" stop || true; run_service "$2" start
+    else run_service "$2" "$action"
+    fi
+    exit $? ;;
+  *) usage ;;
+esac
