@@ -20,7 +20,7 @@ jobs:
         with:
           python-version: "3.x"
       - name: Compile client
-        run: python -m py_compile vpm/vpm vpm/test_vpm.py
+        run: python -m py_compile vpm/vpm vpm/test_vpm.py vpm/repo_tool.py vpm/test_repo_tool.py
       - name: Check command interface
         run: python vpm/vpm --help
       - name: Test archive extraction safety
