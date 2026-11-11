@@ -1,0 +1,30 @@
+#!/bin/sh
+# Explicit nftables baseline. Review SSH_PORT before applying remotely.
+set -eu
+SSH_PORT=${VAMPIRE_SSH_PORT:-22}
+case "$SSH_PORT" in ''|*[!0-9]*) echo "vguard: invalid SSH port" >&2; exit 2 ;; esac
+[ "$SSH_PORT" -ge 1 ] && [ "$SSH_PORT" -le 65535 ] || exit 2
+case "${1:-status}" in
+ status) command -v nft >/dev/null 2>&1 && nft list ruleset || echo "vguard: nftables is not installed" ;;
+ apply)
+  command -v nft >/dev/null 2>&1 || { echo "vguard: nftables is not installed" >&2; exit 1; }
+  nft -f - <<EOF
+table inet vampire_filter {
+ chain input {
+  type filter hook input priority 0; policy drop;
+  iifname "lo" accept
+  ct state established,related accept
+  ct state invalid drop
+  ip protocol icmp accept
+  ip6 nexthdr ipv6-icmp accept
+  tcp dport $SSH_PORT ct state new accept
+ }
+ chain forward { type filter hook forward priority 0; policy drop; }
+ chain output { type filter hook output priority 0; policy accept; }
+}
+EOF
+  echo "vguard: firewall applied; inbound TCP $SSH_PORT allowed"
+  ;;
+ clear) command -v nft >/dev/null 2>&1 || exit 1; nft delete table inet vampire_filter 2>/dev/null || true ;;
+ *) echo "Usage: vguard {status|apply|clear}" >&2; exit 2 ;;
+esac
