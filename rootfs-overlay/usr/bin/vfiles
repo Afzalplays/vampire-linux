@@ -1,0 +1,59 @@
+#!/bin/sh
+# Vampire Files — safe keyboard-driven console file manager.
+set -eu
+START=${VFILES_START_DIR:-$PWD}
+[ -d "$START" ] || START=$PWD
+cd "$START"
+pause() { printf 'Press Enter to continue...'; IFS= read -r _ || true; }
+confirm() {
+  printf '%s [y/N]: ' "$1"
+  IFS= read -r answer || return 1
+  case "$answer" in y|Y|yes|YES) return 0 ;; *) return 1 ;; esac
+}
+while :; do
+  printf '\n  V A M P I R E  /  FILES\n'
+  printf '  Location: %s\n' "$PWD"
+  ls -la
+  printf '\n  Commands: list, cd, up, mkdir, touch, copy, move, delete, edit, shell, quit\n'
+  printf '  Command: '
+  IFS= read -r action || exit 0
+  case "$action" in
+    list) ls -la ;;
+    cd)
+      printf 'Directory: '; IFS= read -r path
+      if [ -n "$path" ] && [ -d "$path" ]; then cd "$path"; else echo "Directory not found."; fi ;;
+    up) cd .. ;;
+    mkdir)
+      printf 'New directory name: '; IFS= read -r path
+      [ -n "$path" ] && mkdir -p -- "$path" ;;
+    touch)
+      printf 'New file name: '; IFS= read -r path
+      [ -n "$path" ] && : > "$path" ;;
+    copy)
+      printf 'Source: '; IFS= read -r source
+      printf 'Destination: '; IFS= read -r destination
+      if [ -e "$source" ] && [ -n "$destination" ]; then cp -a -- "$source" "$destination"; else echo "Source or destination invalid."; fi ;;
+    move)
+      printf 'Source: '; IFS= read -r source
+      printf 'Destination: '; IFS= read -r destination
+      if [ -e "$source" ] && [ -n "$destination" ]; then mv -- "$source" "$destination"; else echo "Source or destination invalid."; fi ;;
+    delete)
+      printf 'Path to delete (directories must be empty): '; IFS= read -r path
+      case "$path" in ""|/|.|..) echo "Refusing unsafe path." ;;
+        *)
+          if [ -e "$path" ] || [ -L "$path" ]; then
+            if confirm "Delete $path?"; then
+              if [ -d "$path" ] && [ ! -L "$path" ]; then rmdir -- "$path"
+              else rm -f -- "$path"; fi
+            else echo "Delete cancelled."; fi
+          else echo "Path not found."; fi ;;
+      esac ;;
+    edit)
+      printf 'File to edit: '; IFS= read -r path
+      if [ -f "$path" ]; then "${EDITOR:-vi}" "$path"; else echo "Regular file not found."; fi ;;
+    shell) "${SHELL:-/bin/sh}" ;;
+    quit|q|exit) exit 0 ;;
+    *) echo "Unknown command." ;;
+  esac
+  pause
+done
