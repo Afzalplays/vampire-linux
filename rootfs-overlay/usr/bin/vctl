@@ -23,11 +23,12 @@ set_enabled() {
     while IFS= read -r item; do
       [ -n "$item" ] || continue
       [ "$item" = "$name" ] && continue
-      printf '%s\n' "$item" >> "$tmp"
+      grep -Fxq "$item" "$tmp" || printf '%s\n' "$item" >> "$tmp"
     done < "$ENABLED"
   fi
-  [ "$mode" = enable ] && printf '%s\n' "$name" >> "$tmp"
-  if [ -s "$tmp" ]; then sort -u "$tmp" -o "$tmp"; fi
+  if [ "$mode" = enable ]; then
+    grep -Fxq "$name" "$tmp" || printf '%s\n' "$name" >> "$tmp"
+  fi
   mv -f "$tmp" "$ENABLED"
   printf 'vctl: %s %s at boot\n' "$name" "${mode}d"
 }
