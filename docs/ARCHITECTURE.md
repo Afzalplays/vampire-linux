@@ -29,7 +29,11 @@ foundation.
    and reproducible package builds.
 4. Stage 3: implement installation, upgrades, recovery, and administration.
 5. Stage 4: build the graphical session, Vampire Desktop shell, and settings.
-6. Stage 5: add signed release artifacts, checksums, SBOMs, hardware testing,
+6. Stage 5: build the Vampire Software Center, signed application catalogue,
+   reproducible package pipeline, and privileged install service.
+7. Stage 6: integrate secure RDP Mode with adaptive display quality, session
+   isolation, authentication, policy controls, and audit logging.
+8. Stage 7: add signed release artifacts, checksums, SBOMs, hardware testing,
    and release criteria.
 
 ## Current status
