@@ -59,3 +59,8 @@ uninstall, upgrades, conflict resolution, rollback, repository key rotation,
 or a production-grade sandbox. Do not use it on a production machine or against
 the host root filesystem. A native implementation and security review are
 required before system integration.
+
+
+## Environment diagnostics
+
+Run `python3 vpm/doctor.py` to check the local prerequisites used by the experimental client: Python version, Minisign availability, repository configuration, cache access, install target and root permissions. A warning is expected until a real signed repository is configured. This diagnostic does not install or modify system packages.
