@@ -64,3 +64,10 @@ required before system integration.
 ## Environment diagnostics
 
 Run `python3 vpm/doctor.py` to check the local prerequisites used by the experimental client: Python version, Minisign availability, repository configuration, cache access, install target and root permissions. A warning is expected until a real signed repository is configured. This diagnostic does not install or modify system packages.
+
+
+## Package ownership and removal prototype
+
+The experimental client now records the relative regular-file paths created by each package installation. The new `vpm remove PACKAGE` command removes only those recorded files, then updates the installed database. It refuses legacy records without a file manifest and rejects paths that escape the configured target root.
+
+This is not yet a production-safe uninstall or upgrade system. It does not track shared directories, configuration-file modifications, hard links, package triggers, or concurrent filesystem changes. Installation is not transactional: an error partway through a multi-package install can leave files behind. Do not use this prototype to manage a host operating system. Upgrade, rollback and atomic staging remain pending.
