@@ -218,7 +218,8 @@ def command_install(args):
     print("Installed (experimental): " + ", ".join(p["name"] for p, _ in downloads))
 
 def main():
-    parser = argparse.ArgumentParser(prog="vpm", description="Vampire Package Manager (experimental)")
+    parser = argparse.ArgumentParser(prog="vpm", description="Vampire Package Manager — signed software installer for Vampire OS (experimental)")
+    parser.add_argument("--version", action="version", version="Vampire Package Manager 0.1.0-dev")
     sub = parser.add_subparsers(dest="command", required=True)
     p = sub.add_parser("update", help="refresh and verify signed repository indexes")
     p.set_defaults(func=command_update)
@@ -227,6 +228,8 @@ def main():
     p = sub.add_parser("list", help="list recorded installed packages"); p.set_defaults(func=command_list)
     p = sub.add_parser("install", help="download, verify and install a package"); p.add_argument("name"); p.set_defaults(func=command_install)
     args = parser.parse_args()
+    print("VAMPIRE OS  /  VAMPIRE PACKAGE MANAGER")
+    print("──────────────────────────────────────")
     args.func(args)
 
 if __name__ == "__main__":
