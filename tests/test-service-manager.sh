@@ -22,7 +22,8 @@ sh -n "$VCTL"
 "$VCTL" enable second
 grep -Fxq mock "$VAMPIRE_ENABLED_FILE"
 grep -Fxq second "$VAMPIRE_ENABLED_FILE"
-"$VCTL" list | grep -Fq 'mock (enabled)'
+"$VCTL" list > "$TMP/list"
+grep -Fq 'mock (enabled)' "$TMP/list"
 "$VCTL" start-all
 grep -Fxq 'mock:start' "$VAMPIRE_TEST_LOG"
 grep -Fxq 'second:start' "$VAMPIRE_TEST_LOG"
@@ -33,6 +34,7 @@ grep -Fxq 'mock:status' "$VAMPIRE_TEST_LOG"
 [ "$(tail -n 2 "$VAMPIRE_TEST_LOG" | tr '\n' ' ')" = "second:stop mock:stop " ]
 "$VCTL" disable mock
 ! grep -Fxq mock "$VAMPIRE_ENABLED_FILE"
-"$VCTL" list | grep -Fq 'mock (disabled)'
+"$VCTL" list > "$TMP/list"
+grep -Fq 'mock (disabled)' "$TMP/list"
 if "$VCTL" enable '../escape' 2>/dev/null; then echo "unsafe service name accepted" >&2; exit 1; fi
 echo "Vampire service manager tests passed."
