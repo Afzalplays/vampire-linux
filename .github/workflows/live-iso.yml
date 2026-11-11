@@ -3,8 +3,14 @@ name: Vampire OS live ISO
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     tags:
       - "v0.*"
+    paths:
+      - "build/**"
+      - "rootfs-overlay/**"
+      - "fetch/vfetch"
+      - ".github/workflows/live-iso.yml"
 
 permissions:
   contents: read
