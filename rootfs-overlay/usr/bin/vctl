@@ -46,13 +46,20 @@ case "$action" in
     [ "$#" -eq 1 ] || usage
     [ -f "$ENABLED" ] || exit 0
     result=0
+    order_file=$ENABLED
+    if [ "$action" = stop-all ]; then
+      # Shutdown must unwind startup order. Keep the list as data, never source it.
+      order_file=${TMPDIR:-/tmp}/vctl-stop-order.$
+      (umask 077; sed '1!G;h;$!d' "$ENABLED" > "$order_file") || exit 1
+    fi
     while IFS= read -r name; do
       [ -n "$name" ] || continue
       valid_name "$name" || { echo "vctl: ignoring invalid service entry" >&2; result=1; continue; }
       if [ "$action" = start-all ]; then run_service "$name" start || result=1
       else run_service "$name" stop || result=1
       fi
-    done < "$ENABLED"
+    done < "$order_file"
+    if [ "$action" = stop-all ]; then rm -f "$order_file"; fi
     exit "$result" ;;
   enable|disable)
     [ "$#" -eq 2 ] || usage

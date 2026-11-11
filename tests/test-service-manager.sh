@@ -15,12 +15,17 @@ export VAMPIRE_TEST_LOG="$TMP/actions"
 VCTL="$ROOT/rootfs-overlay/usr/bin/vctl"
 sh -n "$VCTL"
 "$VCTL" enable mock
+"$VCTL" enable second
 grep -Fxq mock "$VAMPIRE_ENABLED_FILE"
+grep -Fxq second "$VAMPIRE_ENABLED_FILE"
 "$VCTL" list | grep -Fq 'mock (enabled)'
 "$VCTL" start-all
-grep -Fxq start "$VAMPIRE_TEST_LOG"
+grep -Fxq 'mock:start' "$VAMPIRE_TEST_LOG"
+grep -Fxq 'second:start' "$VAMPIRE_TEST_LOG"
 "$VCTL" status mock
-grep -Fxq status "$VAMPIRE_TEST_LOG"
+grep -Fxq 'mock:status' "$VAMPIRE_TEST_LOG"
+"$VCTL" stop-all
+[ "$(tail -n 2 "$VAMPIRE_TEST_LOG" | tr '\\n' ' ')" = "second:stop mock:stop " ]
 "$VCTL" disable mock
 ! grep -Fxq mock "$VAMPIRE_ENABLED_FILE"
 "$VCTL" list | grep -Fq 'mock (disabled)'

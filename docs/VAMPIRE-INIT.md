@@ -16,8 +16,10 @@ per line in `/etc/vampire/services.enabled`.
 - `vctl enable network` / `vctl disable network` — persist boot enablement.
 - `vctl start-all` / `vctl stop-all` — operate on enabled services.
 
-The live image enables DHCP networking by default. Boot startup continues if
-an optional service fails. Service names are restricted to alphanumeric
+The live image enables DHCP networking by default. The enabled-file order is
+the startup order; shutdown walks that list in reverse so dependent services
+are stopped before the services they rely on. Boot startup continues if an
+optional service fails. Service names are restricted to alphanumeric
 characters, underscore, dot and hyphen; the enabled list is never evaluated
 as shell code.
 
