@@ -1,0 +1,8 @@
+# Vampire Desktop preference defaults (key=value; no secrets).
+theme=dark
+blur=medium
+terminal_opacity=90
+dock_size=medium
+reduced_motion=false
+update_channel=stable
+voice_access=false
