@@ -34,6 +34,7 @@ jobs:
           sh -n rootfs-overlay/etc/init.d/rcS
           bash -n tests/test-rootfs-contract.sh
           bash tests/test-rootfs-contract.sh
+          bash tests/test-command-tools.sh
       - name: Check required image configuration
         run: |
           grep -qx 'BR2_x86_64=y' build/vampire_defconfig
