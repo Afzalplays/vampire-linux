@@ -46,7 +46,7 @@ feature release-ready.
 - [ ] Display manager and graphical Vampire Desktop shell.
 - [x] Console-mode `vdesktop` launcher and `vsettings` preference backend (bring-up tools only).
 - [ ] Original top panel, floating dock, launcher and window management.
-- [ ] File manager, terminal and settings application.
+- [x] Add a confirmation-gated console file manager for basic file operations.\n- [ ] Graphical file manager, terminal and settings applications.
 - [ ] Display, network, sound, power and personalization controls.
 - [ ] Audio, Bluetooth, printing, accessibility and voice access.
 - [ ] Graphical installer and first-boot experience (disk-writing installer remains unimplemented).
