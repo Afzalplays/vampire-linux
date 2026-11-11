@@ -41,6 +41,7 @@ jobs:
           bash tests/test-settings-desktop.sh
           bash tests/test-installer-preflight.sh
           bash tests/test-software-center.sh
+          bash tests/test-ssh-tool.sh
       - name: Check Buildroot configuration
         run: |
           grep -qx 'BR2_x86_64=y' build/vampire_defconfig
@@ -51,6 +52,7 @@ jobs:
           grep -qx 'BR2_PACKAGE_WESTON=y' build/vampire_defconfig
           grep -qx 'BR2_PACKAGE_PYTHON3=y' build/vampire_defconfig
           grep -qx 'BR2_PACKAGE_MINISIGN=y' build/vampire_defconfig
+          grep -qx 'BR2_PACKAGE_DROPBEAR=y' build/vampire_defconfig
           test -s build/grub.cfg
           test -s rootfs-overlay/etc/inittab
           test -s rootfs-overlay/etc/os-release
