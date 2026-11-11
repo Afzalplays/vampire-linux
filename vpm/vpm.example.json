@@ -1,0 +1,9 @@
+{
+  "repositories": [
+    {
+      "name": "vampire-stable",
+      "url": "https://packages.example.invalid/vampire/x86_64",
+      "minisign_public_key": "REPLACE_WITH_REAL_MINISIGN_PUBLIC_KEY"
+    }
+  ]
+}
