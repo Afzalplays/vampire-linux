@@ -1,7 +1,7 @@
 #!/bin/sh
 set -u
-DIR=\${VAMPIRE_SERVICE_DIR:-/etc/vampire/services.d}
-ENABLED=\${VAMPIRE_ENABLED_FILE:-/etc/vampire/services.enabled}
+DIR=${VAMPIRE_SERVICE_DIR:-/etc/vampire/services.d}
+ENABLED=${VAMPIRE_ENABLED_FILE:-/etc/vampire/services.enabled}
 usage() { echo "Usage: vctl {list|start|stop|restart|status|enable|disable} SERVICE | {start-all|stop-all}" >&2; exit 2; }
 valid_name() { case "$1" in ''|*[!A-Za-z0-9_.-]*) return 1 ;; *) return 0 ;; esac; }
 run_service() {
@@ -16,7 +16,7 @@ set_enabled() {
   name=$1 mode=$2
   valid_name "$name" || { echo "vctl: invalid service name" >&2; return 2; }
   [ -x "$DIR/$name" ] || { echo "vctl: service not found: $name" >&2; return 1; }
-  mkdir -p "\${ENABLED%/*}" || return 1
+  mkdir -p "${ENABLED%/*}" || return 1
   tmp="$ENABLED.tmp.$$"
   : > "$tmp" || return 1
   if [ -f "$ENABLED" ]; then
@@ -29,7 +29,7 @@ set_enabled() {
   [ "$mode" = enable ] && printf '%s\n' "$name" >> "$tmp"
   if [ -s "$tmp" ]; then sort -u "$tmp" -o "$tmp"; fi
   mv -f "$tmp" "$ENABLED"
-  printf 'vctl: %s %s at boot\n' "$name" "\${mode}d"
+  printf 'vctl: %s %s at boot\n' "$name" "${mode}d"
 }
 [ "$#" -ge 1 ] || usage
 action=$1
@@ -38,7 +38,7 @@ case "$action" in
     [ "$#" -eq 1 ] || usage
     for service in "$DIR"/*; do
       [ -x "$service" ] || continue
-      name=\${service##*/}
+      name=${service##*/}
       if is_enabled "$name"; then printf '* %s (enabled)\n' "$name"; else printf '  %s (disabled)\n' "$name"; fi
     done
     exit 0 ;;
