@@ -49,8 +49,9 @@ case "$action" in
     order_file=$ENABLED
     if [ "$action" = stop-all ]; then
       # Shutdown must unwind startup order. Keep the list as data, never source it.
-      order_file=${TMPDIR:-/tmp}/vctl-stop-order.$
-      (umask 077; sed '1!G;h;$!d' "$ENABLED" > "$order_file") || exit 1
+      order_file=$(mktemp "${TMPDIR:-/tmp}/vctl-stop-order.XXXXXX") || exit 1
+      trap 'rm -f "$order_file"' EXIT
+      sed '1!G;h;$!d' "$ENABLED" > "$order_file" || exit 1
     fi
     while IFS= read -r name; do
       [ -n "$name" ] || continue
