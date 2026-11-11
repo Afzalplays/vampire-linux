@@ -1,0 +1,47 @@
+#!/bin/sh
+# Text-mode launcher for the early console image. Not the future graphical DE.
+set -eu
+SETTINGS=${VAMPIRE_SETTINGS_CMD:-vsettings}
+FETCH=${VAMPIRE_FETCH_CMD:-vfetch}
+NETWORK=${VAMPIRE_NETWORK_CMD:-vnetwork}
+pause() { printf '\nPress Enter to continue...'; IFS= read -r _ || true; }
+appearance_menu() {
+  while :; do
+    printf '\nVampire Settings — Appearance\n'
+    "$SETTINGS" list
+    printf '\n1) Theme (dark/light/system)\n2) Blur preset (off/low/medium/high/extreme)\n3) Terminal opacity (0..100, steps of 10)\n4) Dock size (small/medium/large)\n5) Reduced motion (true/false)\n0) Back\nChoice: '
+    IFS= read -r choice || exit 0
+    case "$choice" in
+      1) key=theme; printf 'Value: '; IFS= read -r value; "$SETTINGS" set "$key" "$value" ;;
+      2) key=blur; printf 'Value: '; IFS= read -r value; "$SETTINGS" set "$key" "$value" ;;
+      3) key=terminal_opacity; printf 'Value: '; IFS= read -r value; "$SETTINGS" set "$key" "$value" ;;
+      4) key=dock_size; printf 'Value: '; IFS= read -r value; "$SETTINGS" set "$key" "$value" ;;
+      5) key=reduced_motion; printf 'Value: '; IFS= read -r value; "$SETTINGS" set "$key" "$value" ;;
+      0) return ;;
+      *) echo "Invalid choice." ;;
+    esac
+  done
+}
+while :; do
+  printf '\n'
+  printf '  V A M P I R E  O S\n'
+  printf '  Vampire Desktop — Console Preview\n'
+  printf '  -------------------------------\n'
+  printf '  1) System information\n'
+  printf '  2) Appearance settings\n'
+  printf '  3) Network status\n'
+  printf '  4) Open shell\n'
+  printf '  5) Show all settings\n'
+  printf '  0) Exit launcher\n'
+  printf '  Select: '
+  IFS= read -r choice || exit 0
+  case "$choice" in
+    1) "$FETCH"; pause ;;
+    2) appearance_menu ;;
+    3) "$NETWORK" status; pause ;;
+    4) "${SHELL:-/bin/sh}" ;;
+    5) "$SETTINGS" list; pause ;;
+    0) exit 0 ;;
+    *) echo "Invalid choice." ;;
+  esac
+done
