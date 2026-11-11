@@ -281,7 +281,7 @@ def main():
     p = sub.add_parser("search", help="search available packages"); p.add_argument("query"); p.set_defaults(func=command_search)
     p = sub.add_parser("info", help="show package metadata"); p.add_argument("name"); p.set_defaults(func=command_info)
     p = sub.add_parser("list", help="list recorded installed packages"); p.set_defaults(func=command_list)
-    p = sub.add_parser("install", help="download, verify and install a package"); p.add_argument("name"); p.set_defaults(func=command_install)
+    p = sub.add_parser("install", help="download, verify and install a package"); p.add_argument("name"); p.add_argument("-y", "--yes", action="store_true", help="accept non-interactive install (the prototype currently has no prompts)"); p.set_defaults(func=command_install)
     p = sub.add_parser("remove", help="remove files recorded as owned by a package"); p.add_argument("name"); p.set_defaults(func=command_remove)
     args = parser.parse_args()
     print("VAMPIRE OS  /  VAMPIRE PACKAGE MANAGER")
