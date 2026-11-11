@@ -202,7 +202,11 @@ def command_install(args):
         url = urllib.parse.urljoin(pkg["_repo_base"], pkg["url"])
         archive = CACHE / (pkg["name"] + "-" + pkg["version"] + ".tar.gz")
         fetch(url, archive, MAX_PACKAGE)
-        digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+        digest_obj = hashlib.sha256()
+        with archive.open("rb") as stream:
+            for block in iter(lambda: stream.read(1024 * 1024), b""):
+                digest_obj.update(block)
+        digest = digest_obj.hexdigest()
         if digest.lower() != pkg["sha256"].lower():
             fail(f"SHA-256 mismatch for {pkg['name']}")
         downloads.append((pkg, archive))
