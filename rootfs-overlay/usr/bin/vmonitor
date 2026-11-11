@@ -1,0 +1,35 @@
+#!/bin/sh
+# Lightweight read-only system monitor for the early Vampire live environment.
+set -eu
+printf '\n  VAMPIRE MONITOR\n  ===============\n'
+printf '  Host:   %s\n' "$(hostname 2>/dev/null || echo unknown)"
+printf '  Kernel: %s\n' "$(uname -r 2>/dev/null || echo unknown)"
+if [ -r /proc/uptime ]; then
+  awk '{ s=int($1); d=int(s/86400); h=int((s%86400)/3600); m=int((s%3600)/60); printf "  Uptime: %dd %02dh %02dm\n", d,h,m }' /proc/uptime
+fi
+if [ -r /proc/loadavg ]; then
+  awk '{ printf "  Load:   %s %s %s\n", $1,$2,$3 }' /proc/loadavg
+fi
+if [ -r /proc/meminfo ]; then
+  awk '
+    /^MemTotal:/ { total=$2 }
+    /^MemAvailable:/ { avail=$2 }
+    END {
+      if (total > 0) {
+        used=total-avail
+        printf "  Memory: %d MiB used / %d MiB total\n", used/1024, total/1024
+      } else print "  Memory: unavailable"
+    }' /proc/meminfo
+fi
+if command -v df >/dev/null 2>&1; then
+  printf '\n  Filesystem:\n'
+  df -h / 2>/dev/null | awk 'NR==1 || NR==2 { print "  " $0 }'
+fi
+printf '\n  Network:\n'
+if command -v ip >/dev/null 2>&1; then
+  ip -brief addr 2>/dev/null || true
+elif command -v ifconfig >/dev/null 2>&1; then
+  ifconfig 2>/dev/null || true
+else
+  echo "  Network tools unavailable"
+fi
