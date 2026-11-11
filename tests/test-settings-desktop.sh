@@ -7,6 +7,7 @@ CONFIG="$TMP/settings.conf"
 export VAMPIRE_SETTINGS_FILE="$CONFIG"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vsettings"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vdesktop"
+sh -n "$ROOT/rootfs-overlay/usr/bin/vmonitor"
 # Use the shipped defaults as the defaults source for this isolated test.
 mkdir -p "$TMP/etc/vampire"
 cp "$ROOT/rootfs-overlay/etc/vampire/settings.defaults" "$TMP/etc/vampire/settings.defaults"
@@ -30,4 +31,6 @@ if "$TMP/vsettings" get unknown >/dev/null 2>&1; then
   exit 1
 fi
 grep -q '^voice_access=false$' "$CONFIG"
-echo "Vampire settings and desktop launcher tests passed."
+"$ROOT/rootfs-overlay/usr/bin/vmonitor" > "$TMP/monitor.out"
+grep -q "VAMPIRE MONITOR" "$TMP/monitor.out"
+echo "Vampire settings, desktop launcher and monitor tests passed."
