@@ -7,7 +7,7 @@ OUTPUT_DIR="${VAMPIRE_OUTPUT_DIR:-$ROOT_DIR/out}"
 BUILDROOT_VERSION="${BUILDROOT_VERSION:-2025.02}"
 EDITION="${VAMPIRE_EDITION:-desktop}"
 case "$EDITION" in desktop|server) ;; *) printf "ERROR: VAMPIRE_EDITION must be desktop or server.\\n" >&2; exit 2 ;; esac
-DEFCONFIG="$ROOT_DIR/build/vampire_${EDITION}_defconfig"
+if [[ "$EDITION" == "desktop" ]]; then DEFCONFIG="$ROOT_DIR/build/vampire_defconfig"; else DEFCONFIG="$ROOT_DIR/build/vampire_server_defconfig"; fi
 BUILD_OUTPUT="$BUILD_DIR/output-$EDITION"
 [[ -s "$DEFCONFIG" ]] || { printf "ERROR: missing edition defconfig: %s\\n" "$DEFCONFIG" >&2; exit 1; }
 JOBS="${JOBS:-$(getconf _NPROCESSORS_ONLN 2>/dev/null || printf '2')}"
