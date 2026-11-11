@@ -1,0 +1,9 @@
+{
+  "name": "hello-vampire",
+  "version": "0.1.0",
+  "description": "A minimal example package for testing the Vampire package repository.",
+  "architecture": "any",
+  "license": "MIT",
+  "depends": [],
+  "archive": "dist/hello-vampire-0.1.0.tar.gz"
+}
