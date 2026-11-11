@@ -8,6 +8,7 @@ on:
       - "rootfs-overlay/**"
       - "fetch/**"
       - "scripts/**"
+      - "tests/**"
       - ".github/workflows/live-build-check.yml"
   pull_request:
     paths:
