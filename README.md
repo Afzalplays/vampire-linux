@@ -36,6 +36,7 @@ CPU, GPU, memory, package count, uptime, and other host details.
 ## Project documentation
 
 - [Product and engineering blueprint](docs/PRODUCT-BLUEPRINT.md)
+- [Server edition](docs/SERVER-EDITION.md)
 - [Desktop UX specification](docs/DESKTOP-UX-SPEC.md)
 - [Settings, voice, updates and boot specification](docs/SETTINGS-VOICE-UPDATES-BOOT.md)
 - [Voice Access design](docs/VOICE-ACCESS.md)

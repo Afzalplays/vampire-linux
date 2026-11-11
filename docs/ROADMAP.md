@@ -53,7 +53,7 @@ feature release-ready.
 
 ## Server edition
 
-- [x] Add opt-in Dropbear SSH with public-key-only startup guard (live-session prototype).\n- [ ] Headless install profile, persistent SSH host keys, non-root onboarding and hardened defaults.
+- [x] Add opt-in Dropbear SSH with public-key-only startup guard (live-session prototype).\n- [x] Add a separate console-first Server Buildroot defconfig and ISO workflow (live prototype).\n- [ ] Headless install profile, persistent SSH host keys, non-root onboarding and hardened defaults.
 - [ ] Multi-host administration, SSH terminal and file transfer.
 - [ ] Monitoring, service control, deployment and recovery.
 - [ ] Secure remote desktop integration and session controls.

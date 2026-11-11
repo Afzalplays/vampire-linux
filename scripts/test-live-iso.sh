@@ -3,7 +3,8 @@
 set -Eeuo pipefail
 
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-ISO="${1:-$ROOT_DIR/out/vampire-os-0.1.0-dev-x86_64.iso}"
+EDITION="${VAMPIRE_EDITION:-desktop}"
+ISO="${1:-$ROOT_DIR/out/vampire-os-0.1.0-dev-$EDITION-x86_64.iso}"
 LOG_DIR="${VAMPIRE_QEMU_LOG_DIR:-$ROOT_DIR/out/qemu-logs}"
 TIMEOUT_SECONDS="${VAMPIRE_QEMU_TIMEOUT:-75}"
 
