@@ -13,11 +13,15 @@ ISO_ROOT="$BUILD_DIR/iso-root"
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 need() { command -v "$1" >/dev/null 2>&1 || die "Missing host tool: $1"; }
 
-for tool in git make gcc g++ perl python3 rsync cpio file patch bc bison flex             xorriso grub-mkrescue mformat; do
+for tool in git make gcc g++ perl python3 rsync cpio file patch bc bison flex \
+            xorriso grub-mkrescue mformat; do
   need "$tool"
 done
 
-mkdir -p "$BUILD_DIR" "$OUTPUT_DIR"
+mkdir -p "$BUILD_DIR" "$OUTPUT_DIR" "$OVERLAY/usr/bin"
+install -m 0755 "$ROOT_DIR/fetch/vfetch" "$OVERLAY/usr/bin/vfetch"
+chmod 0755 "$OVERLAY/etc/init.d/rcS"
+
 if [[ ! -d "$BUILD_DIR/buildroot/.git" ]]; then
   git clone --depth 1 --branch "$BUILDROOT_VERSION" \
     https://github.com/buildroot/buildroot.git "$BUILD_DIR/buildroot"
@@ -27,9 +31,9 @@ BR_DIR="$BUILD_DIR/buildroot"
 make -C "$BR_DIR" O="$BUILD_DIR/output" \
   BR2_DEFCONFIG="$ROOT_DIR/build/vampire_defconfig" defconfig
 
-# Keep host paths out of the committed defconfig; inject the local overlay at build time.
-"$BR_DIR/support/kconfig/merge_config.sh" -m -O "$BUILD_DIR/output" \
-  "$BUILD_DIR/output/.config" <(printf 'BR2_ROOTFS_OVERLAY="%s"\n' "$OVERLAY")
+# Inject the local overlay path without storing machine-specific paths in Git.
+sed -i "s|^BR2_ROOTFS_OVERLAY=.*|BR2_ROOTFS_OVERLAY=\"$OVERLAY\"|" \
+  "$BUILD_DIR/output/.config"
 make -C "$BR_DIR" O="$BUILD_DIR/output" olddefconfig
 make -C "$BR_DIR" O="$BUILD_DIR/output" -j"$JOBS"
 
