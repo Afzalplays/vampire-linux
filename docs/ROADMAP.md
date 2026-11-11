@@ -1,87 +1,71 @@
 # Vampire OS roadmap
 
-Status rule: a feature is complete only after its implementation has passed
-relevant automated tests and runtime validation. Documentation or a build
-script alone does not make a feature release-ready.
+A feature is complete only after implementation, automated tests, and relevant
+runtime validation. A design document or build script alone does not make a
+feature release-ready.
 
-## Current release target: 0.1.0-dev live bring-up
+## 0.1 Developer live environment
 
-- [x] Define independent-distribution scope (Buildroot is the build system, not the runtime base)
-- [x] Establish x86_64 as the first target
-- [x] Add initial Vampire Fetch utility
-- [x] Add a minimal musl + BusyBox + Linux kernel Buildroot configuration
-- [x] Add a GRUB hybrid ISO packaging script and SHA-256 generation
-- [x] Add CI checks for build-script syntax, required configuration and VFetch output contract
-- [x] Add automated QEMU BIOS/UEFI boot smoke-test script and run it before publishing the ISO artifact
-- [ ] Complete the first automated live ISO build
-- [ ] Boot the ISO in QEMU in BIOS mode and capture serial/console output
-- [ ] Boot the ISO in QEMU in UEFI mode and capture serial/console output
-- [ ] Validate the live console, init sequence, VFetch, networking and shutdown
-- [ ] Publish the first downloadable development ISO and checksum
+- [x] Define an independent x86_64 distribution target.
+- [x] Add musl, BusyBox init, Linux kernel and Buildroot image configuration.
+- [x] Add VFetch, GRUB hybrid ISO builder and SHA-256 generation.
+- [x] Add VPM experimental client, signed-index verification and unit tests.
+- [x] Add shell/configuration CI checks and QEMU BIOS/UEFI smoke-test script.
+- [x] Add initial service dispatcher, DHCP helper and opt-in nftables helper.
+- [ ] Complete a clean live ISO build and retain its artifact.
+- [ ] Pass QEMU BIOS and UEFI boot tests and verify console login.
+- [ ] Verify VFetch, DHCP, reboot and shutdown inside the image.
+- [ ] Publish a checksum-verified developer ISO.
 
 ## Core operating system
 
-- [ ] Pin and verify upstream source archives and toolchain inputs
-- [ ] Establish reproducible clean builds and build provenance
-- [ ] Build a dedicated cross-toolchain (Binutils, GCC, musl)
-- [ ] Implement Vampire Init, service supervision, device management and logging
-- [ ] Implement users, groups, permissions and filesystem layout
-- [ ] Implement network configuration and DNS management
-- [ ] Add hardware discovery and firmware handling
-- [ ] Add crash recovery, rescue shell and boot repair
+- [ ] Pin and verify source archives and toolchain inputs.
+- [ ] Establish reproducible builds and build provenance.
+- [ ] Build a dedicated cross-toolchain and stable filesystem layout.
+- [ ] Implement a real Vampire Init supervisor.
+- [ ] Implement users, groups, permissions, logging and device management.
+- [ ] Complete network profiles, DNS, Wi-Fi and VPN support.
+- [ ] Add hardware discovery, firmware handling and rescue mode.
 
-## Vampire Package Manager (VPM)
+## Package management
 
-- [x] Prototype CLI commands: update, search, info, list, install and remove
-- [x] Verify signed repository metadata and package SHA-256 payloads
-- [x] Add dependency resolution, architecture checks and guarded archive extraction
-- [x] Add basic installed-file ownership tracking and removal tests
-- [ ] Add real package recipes built from pinned upstream source
-- [ ] Publish and operate a signed package repository with production keys
-- [ ] Add transactional install/upgrade, rollback and recovery
-- [ ] Add safe shared-file/directory ownership and configuration-file handling
-- [ ] Integrate VPM into the live/root filesystem and installer
-- [ ] Build a graphical Vampire Software Center
+- [x] Experimental VPM CLI, signed metadata and payload hash verification.
+- [x] Dependency resolution, architecture checks and guarded extraction.
+- [ ] Reproducible package recipes and maintained signed repository.
+- [ ] Transactional install/upgrade, rollback and recovery.
+- [ ] Integrate VPM into root filesystem and graphical installer.
+- [ ] Build Vampire Software Center.
 
-## Vampire Server edition
+## Desktop edition
 
-- [ ] Minimal server installation profile
-- [ ] SSH setup, firewall defaults and secure first-boot configuration
-- [ ] Service management and headless administration
-- [ ] Multi-server SSH dashboard, file transfer and monitoring
-- [ ] Server hardening and recovery guide
-- [ ] RDP server/client integration with secure session defaults
+- [ ] Wayland compositor, display manager and Vampire Desktop shell.
+- [ ] Original top panel, floating dock, launcher and window management.
+- [ ] File manager, terminal and settings application.
+- [ ] Display, network, sound, power and personalization controls.
+- [ ] Audio, Bluetooth, printing, accessibility and voice access.
+- [ ] Graphical installer and first-boot experience.
 
-## Vampire Desktop edition
+## Server edition
 
-- [ ] Graphics stack, compositor and display manager
-- [ ] Vampire Desktop shell, launcher, floating dock and top system panel
-- [ ] File manager, terminal and branded application launcher
-- [ ] Settings app: display, network, sound, power and personalization
-- [ ] Transparency/blur controls and theme integration
-- [ ] Audio, Bluetooth, printing and power management
-- [ ] Voice Access with supported speech models and confirmation for destructive actions
-- [ ] Graphical installer and first-boot setup
+- [ ] Headless install profile, SSH onboarding and hardened defaults.
+- [ ] Multi-host administration, SSH terminal and file transfer.
+- [ ] Monitoring, service control, deployment and recovery.
+- [ ] Secure remote desktop integration and session controls.
 
-## Updates and security
+## Security and updates
 
-- [ ] Signed OS and application update pipeline
-- [ ] Update history, rollback and recovery
-- [ ] Firewall, login protection, audit logs and least-privilege defaults
-- [ ] Secure Boot signing and verification
-- [ ] Disk encryption and application isolation
-- [ ] Curated optional security-tool packages
-- [ ] SBOM, license notices and vulnerability response process
+- [ ] Signed OS and application update pipeline.
+- [ ] Atomic updates, history, rollback and recovery.
+- [ ] Secure Boot signing, disk encryption and application isolation.
+- [ ] Audit logging, login protection and firewall policy management.
+- [ ] Curated optional security tools, SBOM and vulnerability response.
 
-## Installer and release gates
+## Stable release gates
 
-- [ ] BIOS and UEFI boot validation on virtual and physical hardware
-- [ ] Graphical installer with disk/partition handling and clear destructive-action confirmation
-- [ ] Install, reboot, upgrade and recovery test matrix
-- [ ] Hardware compatibility matrix and release notes
-- [ ] Reproducible release artifacts, checksums and signed release metadata
+- [ ] BIOS/UEFI validation on virtual and physical hardware.
+- [ ] Graphical installer, partitioning, reinstall and recovery tests.
+- [ ] Hardware compatibility and accessibility test matrix.
+- [ ] Reproducible signed artifacts, notices and release notes.
 
-A development ISO is not a stable release. Do not call Vampire OS stable until
-clean builds are reproducible, boot and installation tests pass, update and
-recovery paths are tested, security updates are documented, and licensing
-notices are complete.
+A development image is not a stable release. Production readiness requires all
+relevant release gates to pass.
