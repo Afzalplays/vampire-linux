@@ -1,6 +1,6 @@
 # Vampire Desktop — layout and interaction specification
 
-**Status:** Approved design direction from the desktop preview discussion; implementation is not yet complete.
+**Status:** Approved design direction. The current image has a text-mode `vdesktop` launcher and `vsettings` preference backend for early bring-up. There is no graphical shell, compositor, panel, dock, or window manager yet.
 
 ## 1. Overall layout
 
