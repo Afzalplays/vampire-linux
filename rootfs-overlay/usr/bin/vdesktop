@@ -30,8 +30,9 @@ while :; do
   printf '  1) System information\n'
   printf '  2) Appearance settings\n'
   printf '  3) Network status\n'
-  printf '  4) Open shell\n'
-  printf '  5) Show all settings\n'
+  printf '  4) System monitor\n'
+  printf '  5) Open shell\n'
+  printf '  6) Show all settings\n'
   printf '  0) Exit launcher\n'
   printf '  Select: '
   IFS= read -r choice || exit 0
@@ -39,8 +40,9 @@ while :; do
     1) "$FETCH"; pause ;;
     2) appearance_menu ;;
     3) "$NETWORK" status; pause ;;
-    4) "${SHELL:-/bin/sh}" ;;
-    5) "$SETTINGS" list; pause ;;
+    4) vmonitor; pause ;;
+    5) "${SHELL:-/bin/sh}" ;;
+    6) "$SETTINGS" list; pause ;;
     0) exit 0 ;;
     *) echo "Invalid choice." ;;
   esac
