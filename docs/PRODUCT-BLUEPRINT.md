@@ -62,13 +62,13 @@ Use the same logo language for boot branding, login screen, installer, desktop s
 
 ### 3.1 Desktop experience
 
-The desktop should feel familiar to Windows 11 users without copying its complete interface. It should remain recognizably Linux and Vampire-branded.
+The desktop should feel familiar to Windows 11 users without copying its complete interface. It should remain recognizably Linux and Vampire-branded. The approved layout uses a macOS-inspired top system panel and a floating hover-to-reveal dock instead of a permanent bottom taskbar.
 
 Core layout:
 
 - Clean desktop workspace with wallpaper support.
-- Bottom taskbar/panel with Vampire Button, pinned apps, running apps, tray and clock.
-- Optional centred taskbar layout; left-aligned mode available.
+- macOS-inspired top system panel with Vampire Button on the left and date, time, network and system controls on the right.
+- Floating, horizontally centred bottom dock that hides when not in use and reveals on hover/edge activation; no permanent bottom taskbar.
 - Window title bars and controls with Vampire styling.
 - Rounded but restrained window corners, consistent spacing, keyboard navigation.
 - Virtual workspaces and window tiling/snap layouts.
