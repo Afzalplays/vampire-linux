@@ -48,7 +48,7 @@ Each repository serves:
 - `index.json.minisig`: detached minisign signature
 - Package archives referenced by relative HTTPS URLs
 
-See [REPOSITORY-FORMAT.md](REPOSITORY-FORMAT.md).
+See [REPOSITORY-FORMAT.md](REPOSITORY-FORMAT.md) and [REPOSITORY-BUILDER.md](REPOSITORY-BUILDER.md). The first local index builder is available as `repo_tool.py`; it creates static repository metadata and can sign it with a locally held Minisign key. It does not yet compile source packages or produce reproducible builds.
 
 ## Security and limitations
 
