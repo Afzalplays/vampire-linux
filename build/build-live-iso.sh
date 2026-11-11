@@ -20,9 +20,7 @@ done
 
 mkdir -p "$BUILD_DIR" "$OUTPUT_DIR" "$OVERLAY/usr/bin" "$OVERLAY/etc/vampire/services.d"
 install -m 0755 "$ROOT_DIR/fetch/vfetch" "$OVERLAY/usr/bin/vfetch"
-for utility in vctl vnetwork vguard; do
-  install -m 0755 "$ROOT_DIR/rootfs-overlay/usr/bin/$utility" "$OVERLAY/usr/bin/$utility"
-done
+chmod 0755 "$OVERLAY/usr/bin/vctl" "$OVERLAY/usr/bin/vnetwork" "$OVERLAY/usr/bin/vguard"
 chmod 0755 "$OVERLAY/etc/init.d/rcS" "$OVERLAY/etc/vampire/services.d/network"
 
 if [[ ! -d "$BUILD_DIR/buildroot/.git" ]]; then
