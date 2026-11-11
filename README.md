@@ -45,6 +45,7 @@ CPU, GPU, memory, package count, uptime, and other host details.
 - [Architecture](docs/ARCHITECTURE.md)
 - [Package management design](docs/PACKAGE-MANAGEMENT.md)
 - [Software Center and app ecosystem](docs/SOFTWARE-CENTER.md)
+- [Software Center console frontend](docs/SOFTWARE-CENTER-CONSOLE.md)
 - [Remote Desktop / RDP security design](docs/REMOTE-DESKTOP.md)
 - [OS security baseline](docs/SECURITY-BASELINE.md)
 - [Vampire Package Manager prototype](vpm/README.md)

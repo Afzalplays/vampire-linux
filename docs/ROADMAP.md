@@ -38,7 +38,7 @@ feature release-ready.
 - [ ] Transactional install/upgrade, rollback and recovery.
 - [x] Integrate experimental VPM client and doctor into the live root filesystem.
 - [ ] Configure a maintained signed repository and integrate VPM into a graphical installer.
-- [ ] Build Vampire Software Center.
+- [x] Add a confirmation-gated console frontend for VPM package operations.\n- [ ] Build graphical Vampire Software Center.
 
 ## Desktop edition
 

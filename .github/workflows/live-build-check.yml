@@ -40,6 +40,7 @@ jobs:
           bash tests/test-command-tools.sh
           bash tests/test-settings-desktop.sh
           bash tests/test-installer-preflight.sh
+          bash tests/test-software-center.sh
       - name: Check Buildroot configuration
         run: |
           grep -qx 'BR2_x86_64=y' build/vampire_defconfig
