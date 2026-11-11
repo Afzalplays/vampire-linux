@@ -1,0 +1,51 @@
+#!/bin/sh
+# Explicit, public-key-only Dropbear SSH service control.
+set -eu
+PORT=${VAMPIRE_SSH_PORT:-22}
+KEY=/etc/dropbear/dropbear_ed25519_host_key
+AUTHORIZED=/root/.ssh/authorized_keys
+usage() { echo "Usage: vssh start|stop|status|connect user@host"; }
+valid_port() {
+  case "$PORT" in ''|*[!0-9]*) return 1 ;; esac
+  [ "$PORT" -ge 1 ] && [ "$PORT" -le 65535 ]
+}
+case "${1:-}" in
+  start)
+    [ "$(id -u)" -eq 0 ] || { echo "vssh start requires root." >&2; exit 1; }
+    valid_port || { echo "Invalid VAMPIRE_SSH_PORT (1-65535)." >&2; exit 2; }
+    if pidof dropbear >/dev/null 2>&1; then echo "Dropbear is already running."; exit 0; fi
+    [ -s "$AUTHORIZED" ] || {
+      echo "Refusing to start: add a trusted public key to $AUTHORIZED first." >&2
+      echo "Password authentication is disabled; no default key is installed." >&2
+      exit 1
+    }
+    grep -Eq '^(ssh-ed25519|ecdsa-sha2-nistp256|sk-ssh-ed25519@openssh.com) ' "$AUTHORIZED" || {
+      echo "No supported modern public key found in $AUTHORIZED." >&2
+      exit 1
+    }
+    mkdir -p /root/.ssh /etc/dropbear
+    chmod 0700 /root/.ssh
+    chmod 0600 "$AUTHORIZED"
+    if [ ! -s "$KEY" ]; then
+      dropbearkey -t ed25519 -f "$KEY"
+      chmod 0600 "$KEY"
+    fi
+    dropbear -p "$PORT" -s -g -r "$KEY"
+    echo "Dropbear started on port $PORT with password authentication disabled."
+    echo "Live-image host keys are ephemeral and change after reboot."
+    ;;
+  stop)
+    if pidof dropbear >/dev/null 2>&1; then killall dropbear; echo "Dropbear stopped."
+    else echo "Dropbear is not running."; fi
+    ;;
+  status)
+    if pidof dropbear >/dev/null 2>&1; then echo "Dropbear is running."
+    else echo "Dropbear is stopped."; fi
+    ;;
+  connect)
+    [ "$#" -eq 2 ] || { usage >&2; exit 2; }
+    command -v ssh >/dev/null 2>&1 || { echo "SSH client is not installed." >&2; exit 127; }
+    exec ssh "$2"
+    ;;
+  *) usage >&2; exit 2 ;;
+esac
