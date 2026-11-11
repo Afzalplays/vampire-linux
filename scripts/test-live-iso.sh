@@ -20,16 +20,16 @@ run_boot() {
   local -a firmware=()
   if [[ "$mode" == "uefi" ]]; then
     local ovmf
-    ovmf="$(find /usr/share/OVMF /usr/share/ovmf -type f \\( -name 'OVMF_CODE.fd' -o -name 'OVMF_CODE_4M.fd' \\) -print -quit 2>/dev/null || true)"
+    ovmf="$(find /usr/share/OVMF /usr/share/ovmf -type f \( -name 'OVMF_CODE.fd' -o -name 'OVMF_CODE_4M.fd' \) -print -quit 2>/dev/null || true)"
     [[ -n "$ovmf" ]] || die "UEFI firmware (OVMF_CODE.fd) not found"
     firmware=(-bios "$ovmf")
   fi
 
   rm -f "$log"
   # QEMU is expected to be stopped by timeout after the login prompt appears.
-  timeout --signal=TERM "$TIMEOUT_SECONDS" qemu-system-x86_64 \\
-    -machine accel=tcg -m 1024 -smp 2 -cdrom "$ISO" -boot d \\
-    -display none -monitor none -serial "file:$log" -no-reboot \\
+  timeout --signal=TERM "$TIMEOUT_SECONDS" qemu-system-x86_64 \
+    -machine accel=tcg -m 1024 -smp 2 -cdrom "$ISO" -boot d \
+    -display none -monitor none -serial "file:$log" -no-reboot \
     "${firmware[@]}" >/dev/null 2>&1 || {
       status=$?
       [[ "$status" -eq 124 || "$status" -eq 143 ]] || die "$mode QEMU exited unexpectedly (status $status)"
