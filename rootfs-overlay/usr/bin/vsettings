@@ -1,0 +1,79 @@
+#!/bin/sh
+# Vampire Settings: validated, atomic key/value preference storage.
+set -eu
+CONFIG=${VAMPIRE_SETTINGS_FILE:-/etc/vampire/settings.conf}
+DEFAULTS=/etc/vampire/settings.defaults
+usage() {
+  echo "Usage: vsettings {list|keys|get KEY|set KEY VALUE|reset}" >&2
+  exit 2
+}
+valid_key() {
+  case "$1" in theme|blur|terminal_opacity|dock_size|reduced_motion|update_channel|voice_access) return 0 ;; *) return 1 ;; esac
+}
+valid_value() {
+  key=$1 value=$2
+  case "$key:$value" in
+    theme:dark|theme:light|theme:system) return 0 ;;
+    blur:off|blur:low|blur:medium|blur:high|blur:extreme) return 0 ;;
+    terminal_opacity:0|terminal_opacity:10|terminal_opacity:20|terminal_opacity:30|terminal_opacity:40|terminal_opacity:50|terminal_opacity:60|terminal_opacity:70|terminal_opacity:80|terminal_opacity:90|terminal_opacity:100) return 0 ;;
+    dock_size:small|dock_size:medium|dock_size:large) return 0 ;;
+    reduced_motion:true|reduced_motion:false|voice_access:true|voice_access:false) return 0 ;;
+    update_channel:stable|update_channel:testing) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+read_value() {
+  [ -r "$CONFIG" ] || return 1
+  awk -F= -v wanted="$1" '$1 == wanted { value=$2; found=1 } END { if (found) print value; else exit 1 }' "$CONFIG"
+}
+[ "$#" -ge 1 ] || usage
+case "$1" in
+  keys)
+    printf '%s\n' theme blur terminal_opacity dock_size reduced_motion update_channel voice_access
+    ;;
+  list)
+    for key in theme blur terminal_opacity dock_size reduced_motion update_channel voice_access; do
+      value=$(read_value "$key" 2>/dev/null || awk -F= -v k="$key" '$1==k {print $2}' "$DEFAULTS")
+      printf '%-20s %s\n' "$key" "${value:-unset}"
+    done
+    ;;
+  get)
+    [ "$#" -eq 2 ] || usage
+    valid_key "$2" || { echo "vsettings: unknown setting: $2" >&2; exit 1; }
+    read_value "$2"
+    ;;
+  set)
+    [ "$#" -eq 3 ] || usage
+    key=$2 value=$3
+    valid_key "$key" || { echo "vsettings: unknown setting: $key" >&2; exit 1; }
+    valid_value "$key" "$value" || { echo "vsettings: invalid value for $key: $value" >&2; exit 1; }
+    dir=${CONFIG%/*}
+    [ "$dir" = "$CONFIG" ] && dir=.
+    mkdir -p "$dir"
+    tmp="$CONFIG.tmp.$$"
+    (set -C; : > "$tmp") 2>/dev/null || { echo "vsettings: temporary file already exists" >&2; exit 1; }
+    trap 'rm -f "$tmp"' EXIT HUP INT TERM
+    if [ -f "$CONFIG" ]; then
+      awk -F= -v k="$key" -v v="$value" 'BEGIN { updated=0 } $1==k { if (!updated) print k "=" v; updated=1; next } { print } END { if (!updated) print k "=" v }' "$CONFIG" > "$tmp"
+    else
+      printf '%s=%s\n' "$key" "$value" > "$tmp"
+    fi
+    chmod 600 "$tmp"
+    mv -f "$tmp" "$CONFIG"
+    trap - EXIT HUP INT TERM
+    printf 'Saved %s=%s\n' "$key" "$value"
+    ;;
+  reset)
+    [ "$#" -eq 1 ] || usage
+    [ -r "$DEFAULTS" ] || { echo "vsettings: defaults file missing" >&2; exit 1; }
+    dir=${CONFIG%/*}
+    [ "$dir" = "$CONFIG" ] && dir=.
+    mkdir -p "$dir"
+    tmp="$CONFIG.tmp.$$"
+    cp "$DEFAULTS" "$tmp"
+    chmod 600 "$tmp"
+    mv -f "$tmp" "$CONFIG"
+    echo "Vampire settings reset to defaults."
+    ;;
+  *) usage ;;
+esac
