@@ -2,6 +2,8 @@ import importlib.machinery
 import importlib.util
 import io
 import pathlib
+import subprocess
+import sys
 import tarfile
 import tempfile
 import unittest
@@ -13,6 +15,13 @@ vpm = importlib.util.module_from_spec(SPEC)
 LOADER.exec_module(vpm)
 
 class ArchiveSafetyTests(unittest.TestCase):
+    def test_install_accepts_yes_flag(self):
+        result = subprocess.run(
+            [sys.executable, str(VPM_PATH), "install", "--help"],
+            capture_output=True, text=True, check=True)
+        self.assertIn("-y, --yes", result.stdout)
+
+
     def test_extract_regular_file(self):
         with tempfile.TemporaryDirectory() as tmp:
             archive = pathlib.Path(tmp) / "ok.tar.gz"
