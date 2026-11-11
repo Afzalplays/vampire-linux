@@ -1,0 +1,40 @@
+name: Vampire OS build checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "build/**"
+      - "rootfs-overlay/**"
+      - "fetch/**"
+      - ".github/workflows/live-build-check.yml"
+  pull_request:
+    paths:
+      - "build/**"
+      - "rootfs-overlay/**"
+      - "fetch/**"
+      - ".github/workflows/live-build-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  shell-and-config:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check shell syntax
+        run: |
+          bash -n build/build-live-iso.sh
+          bash -n fetch/vfetch
+          sh -n rootfs-overlay/etc/init.d/rcS
+      - name: Check required image configuration
+        run: |
+          grep -qx 'BR2_x86_64=y' build/vampire_defconfig
+          grep -qx 'BR2_TOOLCHAIN_BUILDROOT_MUSL=y' build/vampire_defconfig
+          grep -qx 'BR2_LINUX_KERNEL=y' build/vampire_defconfig
+          grep -qx 'BR2_TARGET_ROOTFS_CPIO=y' build/vampire_defconfig
+          grep -qx 'BR2_PACKAGE_BASH=y' build/vampire_defconfig
+          test -s build/grub.cfg
+          test -s rootfs-overlay/etc/inittab
+          test -s rootfs-overlay/etc/os-release
