@@ -62,14 +62,12 @@ CPU, GPU, memory, package count, uptime, and other host details.
 
 ## Development status
 
-The first live-image build path is now in the repository under `build/`. The console image also includes `vsettings` for validated preference storage and `vdesktop` as an interactive text-mode launcher; these are early bring-up utilities, not a graphical desktop environment.
-It assembles an x86_64 kernel + musl/BusyBox initramfs using upstream
-Buildroot, then packages the result as a GRUB hybrid ISO. The initial image is
-console-only and intended for development/QEMU bring-up.
+The live-image build path is in `build/`. The Desktop profile includes Weston as an upstream Wayland/DRM graphical bring-up preview; the Server profile is console-first and uses a separate Buildroot defconfig. Both include the Vampire console tools, VPM runtime, signed-update verifier and optional public-key-only SSH service. The custom Vampire graphical shell is still under development.
+
+Build the Desktop ISO with `bash build/build-live-iso.sh`; build the Server ISO with `VAMPIRE_EDITION=server bash build/build-live-iso.sh`. Each edition has a separate Buildroot output directory and ISO filename.
 
 The ISO has not yet been built and boot-validated in this repository's release
-pipeline. A graphical desktop, disk installer, production package manager,
-update/rollback service, and supported hardware matrix remain incomplete.
+pipeline. The custom graphical desktop, disk-writing installer, production package repository and transactional package manager, update application/rollback service, and supported hardware matrix remain incomplete.
 See [the live ISO build guide](build/README.md) and the roadmap.
 
 ## Independence and upstream sources
