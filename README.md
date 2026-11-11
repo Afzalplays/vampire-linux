@@ -36,6 +36,7 @@ CPU, GPU, memory, package count, uptime, and other host details.
 ## Project documentation
 
 - [Product and engineering blueprint](docs/PRODUCT-BLUEPRINT.md)
+- [Desktop UX specification](docs/DESKTOP-UX-SPEC.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Package management design](docs/PACKAGE-MANAGEMENT.md)
 - [Software Center and app ecosystem](docs/SOFTWARE-CENTER.md)
