@@ -1,3 +1,4 @@
+import importlib.machinery
 import importlib.util
 import io
 import pathlib
@@ -5,9 +6,11 @@ import tarfile
 import tempfile
 import unittest
 
-SPEC = importlib.util.spec_from_file_location("vpm", pathlib.Path(__file__).with_name("vpm"))
+VPM_PATH = pathlib.Path(__file__).with_name("vpm")
+LOADER = importlib.machinery.SourceFileLoader("vpm", str(VPM_PATH))
+SPEC = importlib.util.spec_from_loader("vpm", LOADER)
 vpm = importlib.util.module_from_spec(SPEC)
-SPEC.loader.exec_module(vpm)
+LOADER.exec_module(vpm)
 
 class ArchiveSafetyTests(unittest.TestCase):
     def test_extract_regular_file(self):
