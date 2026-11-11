@@ -1,0 +1,82 @@
+#!/bin/sh
+# Vampire OS installer discovery/preflight. This command is intentionally read-only.
+set -eu
+SYS_BLOCK=${VAMPIRE_SYS_BLOCK:-/sys/block}
+DEV_ROOT=${VAMPIRE_DEV_ROOT:-/dev}
+MOUNTS_FILE=${VAMPIRE_MOUNTS_FILE:-/proc/mounts}
+MIN_SECTORS=16777216 # 8 GiB using 512-byte sectors
+usage() {
+  cat <<'EOF'
+Vampire Installer — safe storage preflight
+Usage:
+  vinstall list
+  vinstall preflight /dev/DEVICE
+  vinstall help
+This build only discovers disks and checks installation readiness.
+It does NOT partition, format, mount, or write to any disk.
+EOF
+}
+disk_name() {
+  case "$1" in "$DEV_ROOT"/*) name=${1#"$DEV_ROOT"/} ;; *) return 1 ;; esac
+  case "$name" in ""|*/*|*[!A-Za-z0-9._-]*) return 1 ;; esac
+  printf '%s\n' "$name"
+}
+read_attr() {
+  file=$1
+  if [ -r "$file" ]; then IFS= read -r value < "$file" || value=; printf '%s' "$value"
+  else printf '?'; fi
+}
+list_disks() {
+  [ -d "$SYS_BLOCK" ] || { printf 'Block-device inventory unavailable.\n' >&2; return 1; }
+  printf '%-14s %10s %-5s %-5s %s\n' DEVICE SIZE_MiB RO REMOVABLE MODEL
+  found=0
+  for path in "$SYS_BLOCK"/*; do
+    [ -d "$path" ] || continue
+    name=${path##*/}
+    case "$name" in loop*|ram*|zram*) continue ;; esac
+    sectors=$(read_attr "$path/size")
+    case "$sectors" in ''|*[!0-9]*) continue ;; esac
+    mib=$((sectors / 2048))
+    ro=$(read_attr "$path/ro"); removable=$(read_attr "$path/removable")
+    model=$(read_attr "$path/device/model")
+    printf '%-14s %10s %-5s %-5s %s\n' "$DEV_ROOT/$name" "$mib" "$ro" "$removable" "$model"
+    found=1
+  done
+  [ "$found" -eq 1 ] || printf 'No eligible block devices detected.\n'
+}
+preflight() {
+  device=$1
+  name=$(disk_name "$device") || { printf 'ERROR: use a direct device path below %s.\n' "$DEV_ROOT" >&2; return 2; }
+  sys="$SYS_BLOCK/$name"
+  [ -e "$DEV_ROOT/$name" ] || { printf 'ERROR: device does not exist: %s\n' "$device" >&2; return 2; }
+  [ -d "$sys" ] || { printf 'ERROR: no sysfs block-device record for %s.\n' "$device" >&2; return 2; }
+  sectors=$(read_attr "$sys/size")
+  case "$sectors" in ''|*[!0-9]*) printf 'ERROR: cannot read device capacity.\n' >&2; return 2 ;; esac
+  ro=$(read_attr "$sys/ro"); removable=$(read_attr "$sys/removable")
+  mib=$((sectors / 2048))
+  printf 'Vampire Installer storage preflight: %s\n' "$device"
+  printf 'Capacity: %s MiB\nRead-only: %s\nRemovable: %s\n' "$mib" "$ro" "$removable"
+  ready=1
+  if [ "$sectors" -lt "$MIN_SECTORS" ]; then printf 'BLOCKER: disk is smaller than the 8 GiB minimum target.\n'; ready=0; fi
+  if [ "$ro" = 1 ]; then printf 'BLOCKER: kernel reports this device as read-only.\n'; ready=0; fi
+  if [ -r "$MOUNTS_FILE" ]; then
+    while IFS=' ' read -r source target rest; do
+      case "$source" in "$device"|"$device"[0-9]*|"$device"p[0-9]*)
+        printf 'BLOCKER: device or partition is mounted at %s (%s).\n' "$target" "$source"
+        ready=0 ;;
+      esac
+    done < "$MOUNTS_FILE"
+  else printf 'WARNING: mount table unavailable; mounted-partition check skipped.\n'; fi
+  if [ "$ready" -eq 1 ]; then
+    printf 'PREFLIGHT: basic checks passed. No disk changes were made.\n'
+  else
+    printf 'PREFLIGHT: do not install to this device until blockers are resolved.\n'
+    return 1
+  fi
+}
+case "${1:-help}" in
+  list) [ "$#" -eq 1 ] || { usage >&2; exit 2; }; list_disks ;;
+  preflight) [ "$#" -eq 2 ] || { usage >&2; exit 2; }; preflight "$2" ;;
+  help|-h|--help) usage ;;
+  *) usage >&2; exit 2 ;;
+esac

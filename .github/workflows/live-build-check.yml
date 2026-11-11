@@ -36,6 +36,7 @@ jobs:
           bash tests/test-rootfs-contract.sh
           bash tests/test-command-tools.sh
           bash tests/test-settings-desktop.sh
+          bash tests/test-installer-preflight.sh
       - name: Check required image configuration
         run: |
           grep -qx 'BR2_x86_64=y' build/vampire_defconfig

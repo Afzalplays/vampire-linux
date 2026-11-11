@@ -14,6 +14,7 @@ feature release-ready.
 - [x] Add initial service dispatcher, DHCP helper and opt-in nftables helper.
 - [x] Add validated settings storage and an interactive console launcher MVP.
 - [x] Add isolated tests for settings validation and desktop launcher syntax.
+- [x] Add read-only installer disk discovery and target preflight checks.
 - [ ] Complete a clean live ISO build and retain its artifact.
 - [ ] Pass QEMU BIOS and UEFI boot tests and verify console login.
 - [ ] Verify VFetch, DHCP, reboot and shutdown inside the image.
@@ -46,7 +47,7 @@ feature release-ready.
 - [ ] File manager, terminal and settings application.
 - [ ] Display, network, sound, power and personalization controls.
 - [ ] Audio, Bluetooth, printing, accessibility and voice access.
-- [ ] Graphical installer and first-boot experience.
+- [ ] Graphical installer and first-boot experience (disk-writing installer remains unimplemented).
 
 ## Server edition
 

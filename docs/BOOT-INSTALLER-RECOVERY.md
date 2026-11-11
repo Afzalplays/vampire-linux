@@ -44,3 +44,11 @@
 
 ## Release acceptance
 A release candidate must boot on UEFI and legacy BIOS VMs, install to a blank virtual disk, reboot from installed disk, recover from a simulated failed update and pass a disk-layout test matrix. Hardware support is published only after physical-device testing.
+
+
+## Implemented developer-stage preflight
+
+The live root filesystem now includes vinstall list and
+vinstall preflight /dev/DEVICE. This is a read-only inventory and basic
+safety check, not an installer. See [INSTALLER-PREFLIGHT.md](INSTALLER-PREFLIGHT.md)
+for its exact scope and limitations.
