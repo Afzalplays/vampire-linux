@@ -39,6 +39,7 @@ CPU, GPU, memory, package count, uptime, and other host details.
 - [Package management design](docs/PACKAGE-MANAGEMENT.md)
 - [Software Center and app ecosystem](docs/SOFTWARE-CENTER.md)
 - [Remote Desktop / RDP security design](docs/REMOTE-DESKTOP.md)
+- [OS security baseline](docs/SECURITY-BASELINE.md)
 - [Vampire Package Manager prototype](vpm/README.md)
 - [Development roadmap](docs/ROADMAP.md)
 - [Third-party licensing policy](docs/LICENSING.md)
