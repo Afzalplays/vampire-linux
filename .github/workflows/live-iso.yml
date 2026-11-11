@@ -1,0 +1,42 @@
+name: Vampire OS live ISO
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v0.*"
+
+permissions:
+  contents: read
+
+jobs:
+  build-live-iso:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 240
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Install host build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            bc bison build-essential cpio file flex g++ gcc git \
+            grub-common grub-pc-bin grub-efi-amd64-bin libelf-dev \
+            libncurses-dev libssl-dev mtools patch perl python3 rsync \
+            xorriso unzip wget xz-utils
+
+      - name: Build Vampire OS live ISO
+        env:
+          JOBS: "2"
+        run: bash build/build-live-iso.sh
+
+      - name: Upload ISO and checksum
+        uses: actions/upload-artifact@v4
+        with:
+          name: vampire-os-live-x86_64
+          path: |
+            out/vampire-os-0.1.0-dev-x86_64.iso
+            out/vampire-os-0.1.0-dev-x86_64.iso.sha256
+          if-no-files-found: error
+          retention-days: 14
