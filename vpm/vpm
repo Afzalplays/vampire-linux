@@ -145,30 +145,51 @@ def command_list(_args):
         print(f"{name:<24} {info.get('version', 'unknown')}")
 
 def safe_extract(archive, destination):
+    """Extract regular files only and return installed relative file paths.
+
+    Experimental only: a production package manager needs staging, atomic
+    transactions, ownership metadata and protection against concurrent changes.
+    """
     destination = destination.resolve()
+    written = []
     with tarfile.open(archive, "r:gz") as tf:
         members = tf.getmembers()
+        if len(members) > 10000:
+            fail("archive contains too many entries")
+        if sum(m.size for m in members if m.isfile()) > 2 * 1024 * 1024 * 1024:
+            fail("archive expanded size exceeds safety limit")
+        seen = set()
         for member in members:
+            if not member.name or member.name.startswith("/") or "\\\\" in member.name:
+                fail(f"unsafe archive path: {member.name!r}")
             target = (destination / member.name).resolve()
             if target != destination and destination not in target.parents:
                 fail(f"unsafe archive path: {member.name}")
+            relative = target.relative_to(destination).as_posix()
+            if relative in seen:
+                fail(f"duplicate archive path: {member.name}")
+            seen.add(relative)
             if member.issym() or member.islnk() or member.isdev() or member.isfifo():
                 fail(f"unsupported special archive entry: {member.name}")
             if not (member.isfile() or member.isdir()):
                 fail(f"unsupported archive entry: {member.name}")
         for member in members:
-            target = destination / member.name
+            target = (destination / member.name).resolve()
             if member.isdir():
                 target.mkdir(parents=True, exist_ok=True)
                 continue
             target.parent.mkdir(parents=True, exist_ok=True)
+            target = (destination / member.name).resolve()
+            if target != destination and destination not in target.parents:
+                fail(f"unsafe destination path: {member.name}")
             source = tf.extractfile(member)
             if source is None:
                 fail(f"cannot read archive entry: {member.name}")
-            with source, target.open("wb") as out:
+            with source, target.open("xb") as out:
                 shutil.copyfileobj(source, out)
             target.chmod(member.mode & 0o755)
-
+            written.append(target.relative_to(destination).as_posix())
+    return written
 def command_install(args):
     if os.geteuid() != 0 and ROOT == pathlib.Path("/"):
         fail("installation to / requires root; use sudo vpm install PACKAGE")
@@ -213,13 +234,43 @@ def command_install(args):
     if ROOT.exists() is False:
         fail(f"target root does not exist: {ROOT}")
     for pkg, archive in downloads:
-        safe_extract(archive, ROOT)
-        db[pkg["name"]] = {"version": pkg["version"], "files": "not-yet-tracked"}
+        installed_files = safe_extract(archive, ROOT)
+        db[pkg["name"]] = {"version": pkg["version"], "files": installed_files}
     DB.parent.mkdir(parents=True, exist_ok=True)
     tmp = DB.with_suffix(".tmp")
     tmp.write_text(json.dumps(db, indent=2) + "\n")
     tmp.replace(DB)
     print("Installed (experimental): " + ", ".join(p["name"] for p, _ in downloads))
+
+def command_remove(args):
+    if os.geteuid() != 0 and ROOT == pathlib.Path("/"):
+        fail("removal from / requires root; use sudo vpm remove PACKAGE")
+    db = installed_db()
+    info = db.get(args.name)
+    if info is None:
+        fail(f"package is not recorded as installed: {args.name}")
+    files = info.get("files")
+    if not isinstance(files, list):
+        fail("package has no trustworthy file ownership record; refusing removal")
+    root = ROOT.resolve()
+    for relative in files:
+        if not isinstance(relative, str) or not relative or relative.startswith("/") or "\\\\" in relative:
+            fail("invalid installed-file record; refusing removal")
+        target = (root / relative).resolve()
+        if target != root and root not in target.parents:
+            fail(f"installed-file record escapes target root: {relative}")
+        if target.is_symlink():
+            fail(f"refusing to follow symlink during removal: {relative}")
+        if target.is_file():
+            target.unlink()
+        elif target.exists():
+            fail(f"refusing to remove non-file package path: {relative}")
+    del db[args.name]
+    DB.parent.mkdir(parents=True, exist_ok=True)
+    tmp = DB.with_suffix(".tmp")
+    tmp.write_text(json.dumps(db, indent=2) + "\\n")
+    tmp.replace(DB)
+    print(f"Removed recorded package files: {args.name}")
 
 def main():
     parser = argparse.ArgumentParser(prog="vpm", description="Vampire Package Manager — signed software installer for Vampire OS (experimental)")
@@ -231,6 +282,7 @@ def main():
     p = sub.add_parser("info", help="show package metadata"); p.add_argument("name"); p.set_defaults(func=command_info)
     p = sub.add_parser("list", help="list recorded installed packages"); p.set_defaults(func=command_list)
     p = sub.add_parser("install", help="download, verify and install a package"); p.add_argument("name"); p.set_defaults(func=command_install)
+    p = sub.add_parser("remove", help="remove files recorded as owned by a package"); p.add_argument("name"); p.set_defaults(func=command_remove)
     args = parser.parse_args()
     print("VAMPIRE OS  /  VAMPIRE PACKAGE MANAGER")
     print("──────────────────────────────────────")
