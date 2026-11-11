@@ -1,0 +1,12 @@
+NAME="Vampire OS"
+PRETTY_NAME="Vampire OS 0.1.0-dev"
+ID=vampire
+ID_LIKE=""
+VERSION="0.1.0-dev"
+VERSION_ID="0.1.0-dev"
+VERSION_CODENAME=nightfall
+BUILD_ID=experimental
+ANSI_COLOR="1;31"
+HOME_URL="https://github.com/Afzalplays/vampire-linux"
+SUPPORT_URL="https://github.com/Afzalplays/vampire-linux/issues"
+BUG_REPORT_URL="https://github.com/Afzalplays/vampire-linux/issues"
