@@ -1,0 +1,233 @@
+#!/usr/bin/env python3
+"""Vampire Package Manager prototype. SPDX-License-Identifier: MIT
+
+Experimental developer client. Not suitable for production system upgrades.
+Repository metadata must be signed with minisign; package payloads are SHA-256
+verified before extraction. Package scripts are deliberately not executed.
+"""
+import argparse
+import hashlib
+import json
+import os
+import pathlib
+import shutil
+import subprocess
+import sys
+import tarfile
+import tempfile
+import urllib.error
+import urllib.parse
+import urllib.request
+
+CONFIG = pathlib.Path(os.environ.get("VPM_CONFIG", "/etc/vpm/vpm.json"))
+CACHE = pathlib.Path(os.environ.get("VPM_CACHE", "~/.cache/vpm")).expanduser()
+DB = pathlib.Path(os.environ.get("VPM_DB", "/var/lib/vpm/installed.json"))
+ROOT = pathlib.Path(os.environ.get("VPM_ROOT", "/"))
+MAX_INDEX = 8 * 1024 * 1024
+MAX_PACKAGE = 1024 * 1024 * 1024
+
+def fail(message):
+    print("vpm: error:", message, file=sys.stderr)
+    raise SystemExit(1)
+
+def load_config():
+    if not CONFIG.is_file():
+        fail(f"configuration not found: {CONFIG} (see vpm/vpm.example.json)")
+    try:
+        cfg = json.loads(CONFIG.read_text())
+        if not isinstance(cfg.get("repositories"), list) or not cfg["repositories"]:
+            fail("no repositories configured")
+        return cfg
+    except (OSError, json.JSONDecodeError) as exc:
+        fail(f"cannot read config: {exc}")
+
+def fetch(url, destination, limit):
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme != "https" or not parsed.netloc:
+        fail("repository and package URLs must use HTTPS")
+    req = urllib.request.Request(url, headers={"User-Agent": "vpm/0.1"})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as response:
+            if response.status != 200:
+                fail(f"download returned HTTP {response.status}")
+            total = 0
+            with destination.open("wb") as out:
+                while True:
+                    block = response.read(1024 * 1024)
+                    if not block:
+                        break
+                    total += len(block)
+                    if total > limit:
+                        fail("download exceeds configured size limit")
+                    out.write(block)
+    except (OSError, urllib.error.URLError) as exc:
+        fail(f"download failed: {exc}")
+
+def verify_signature(index_path, signature_path, public_key):
+    if not shutil.which("minisign"):
+        fail("minisign is required to verify repository metadata")
+    result = subprocess.run(
+        ["minisign", "-Vm", str(index_path), "-x", str(signature_path),
+         "-P", public_key],
+        stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+    if result.returncode:
+        fail("repository signature verification failed")
+
+def load_index(refresh=False):
+    cfg = load_config()
+    CACHE.mkdir(parents=True, exist_ok=True)
+    merged = {}
+    for repo in cfg["repositories"]:
+        name = repo.get("name", "unnamed")
+        base = repo.get("url", "").rstrip("/") + "/"
+        key = repo.get("minisign_public_key", "")
+        if not key:
+            fail(f"repository {name} has no minisign public key")
+        index_file = CACHE / (name + "-index.json")
+        sig_file = CACHE / (name + "-index.json.minisig")
+        if refresh or not index_file.exists() or not sig_file.exists():
+            fetch(urllib.parse.urljoin(base, "index.json"), index_file, MAX_INDEX)
+            fetch(urllib.parse.urljoin(base, "index.json.minisig"), sig_file, 65536)
+        verify_signature(index_file, sig_file, key)
+        try:
+            data = json.loads(index_file.read_text())
+        except (OSError, json.JSONDecodeError) as exc:
+            fail(f"invalid index from {name}: {exc}")
+        if data.get("format") != 1 or not isinstance(data.get("packages"), list):
+            fail(f"unsupported index format from {name}")
+        for pkg in data["packages"]:
+            if not isinstance(pkg, dict) or not all(k in pkg for k in
+                    ("name", "version", "url", "sha256")):
+                fail(f"malformed package entry in {name}")
+            if pkg["name"] in merged:
+                fail(f"duplicate package name: {pkg['name']}")
+            pkg["_repo_base"] = base
+            merged[pkg["name"]] = pkg
+    return merged
+
+def installed_db():
+    try:
+        value = json.loads(DB.read_text())
+        return value if isinstance(value, dict) else {}
+    except FileNotFoundError:
+        return {}
+    except (OSError, json.JSONDecodeError) as exc:
+        fail(f"installed database is unreadable: {exc}")
+
+def command_update(_args):
+    index = load_index(refresh=True)
+    print(f"Updated package metadata: {len(index)} packages available.")
+
+def command_search(args):
+    index = load_index()
+    term = args.query.lower()
+    found = [p for p in index.values()
+             if term in p["name"].lower() or term in p.get("description", "").lower()]
+    for p in sorted(found, key=lambda x: x["name"]):
+        print(f'{p["name"]:<24} {p["version"]:<14} {p.get("description", "")}')
+    if not found:
+        print("No matching packages.")
+
+def command_info(args):
+    index = load_index()
+    pkg = index.get(args.name)
+    if not pkg:
+        fail(f"package not found: {args.name}")
+    for key in ("name", "version", "description", "architecture", "license", "depends", "url", "sha256"):
+        if key in pkg:
+            print(f"{key}: {pkg[key]}")
+
+def command_list(_args):
+    db = installed_db()
+    if not db:
+        print("No packages recorded as installed.")
+    for name, info in sorted(db.items()):
+        print(f"{name:<24} {info.get('version', 'unknown')}")
+
+def safe_extract(archive, destination):
+    destination = destination.resolve()
+    with tarfile.open(archive, "r:gz") as tf:
+        members = tf.getmembers()
+        for member in members:
+            target = (destination / member.name).resolve()
+            if target != destination and destination not in target.parents:
+                fail(f"unsafe archive path: {member.name}")
+            if member.issym() or member.islnk() or member.isdev() or member.isfifo():
+                fail(f"unsupported special archive entry: {member.name}")
+            if not (member.isfile() or member.isdir()):
+                fail(f"unsupported archive entry: {member.name}")
+        for member in members:
+            target = destination / member.name
+            if member.isdir():
+                target.mkdir(parents=True, exist_ok=True)
+                continue
+            target.parent.mkdir(parents=True, exist_ok=True)
+            source = tf.extractfile(member)
+            if source is None:
+                fail(f"cannot read archive entry: {member.name}")
+            with source, target.open("wb") as out:
+                shutil.copyfileobj(source, out)
+            target.chmod(member.mode & 0o755)
+
+def command_install(args):
+    if os.geteuid() != 0 and ROOT == pathlib.Path("/"):
+        fail("installation to / requires root; use sudo vpm install PACKAGE")
+    index = load_index()
+    db = installed_db()
+    pending, visiting = [], set()
+
+    def resolve(name):
+        if name in db or any(p["name"] == name for p in pending):
+            return
+        if name in visiting:
+            fail(f"dependency cycle involving {name}")
+        pkg = index.get(name)
+        if not pkg:
+            fail(f"package or dependency not found: {name}")
+        if pkg.get("architecture", "any") not in ("any", os.uname().machine):
+            fail(f"{name} is not available for {os.uname().machine}")
+        visiting.add(name)
+        for dep in pkg.get("depends", []):
+            resolve(dep)
+        visiting.remove(name)
+        pending.append(pkg)
+
+    resolve(args.name)
+    if not pending:
+        print(f"{args.name} is already recorded as installed.")
+        return
+    CACHE.mkdir(parents=True, exist_ok=True)
+    downloads = []
+    for pkg in pending:
+        url = urllib.parse.urljoin(pkg["_repo_base"], pkg["url"])
+        archive = CACHE / (pkg["name"] + "-" + pkg["version"] + ".tar.gz")
+        fetch(url, archive, MAX_PACKAGE)
+        digest = hashlib.sha256(archive.read_bytes()).hexdigest()
+        if digest.lower() != pkg["sha256"].lower():
+            fail(f"SHA-256 mismatch for {pkg['name']}")
+        downloads.append((pkg, archive))
+    if ROOT.exists() is False:
+        fail(f"target root does not exist: {ROOT}")
+    for pkg, archive in downloads:
+        safe_extract(archive, ROOT)
+        db[pkg["name"]] = {"version": pkg["version"], "files": "not-yet-tracked"}
+    DB.parent.mkdir(parents=True, exist_ok=True)
+    tmp = DB.with_suffix(".tmp")
+    tmp.write_text(json.dumps(db, indent=2) + "\n")
+    tmp.replace(DB)
+    print("Installed (experimental): " + ", ".join(p["name"] for p, _ in downloads))
+
+def main():
+    parser = argparse.ArgumentParser(prog="vpm", description="Vampire Package Manager (experimental)")
+    sub = parser.add_subparsers(dest="command", required=True)
+    p = sub.add_parser("update", help="refresh and verify signed repository indexes")
+    p.set_defaults(func=command_update)
+    p = sub.add_parser("search", help="search available packages"); p.add_argument("query"); p.set_defaults(func=command_search)
+    p = sub.add_parser("info", help="show package metadata"); p.add_argument("name"); p.set_defaults(func=command_info)
+    p = sub.add_parser("list", help="list recorded installed packages"); p.set_defaults(func=command_list)
+    p = sub.add_parser("install", help="download, verify and install a package"); p.add_argument("name"); p.set_defaults(func=command_install)
+    args = parser.parse_args()
+    args.func(args)
+
+if __name__ == "__main__":
+    main()
