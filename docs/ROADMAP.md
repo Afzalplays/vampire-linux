@@ -60,7 +60,7 @@ feature release-ready.
 
 ## Security and updates
 
-- [ ] Signed OS and application update pipeline.
+- [x] Add signed update-manifest verification and checksum-verified image staging (no apply/rollback).\n- [ ] Signed OS and application update application pipeline.
 - [ ] Atomic updates, history, rollback and recovery.
 - [ ] Secure Boot signing, disk encryption and application isolation.
 - [ ] Audit logging, login protection and firewall policy management.

@@ -49,6 +49,7 @@ CPU, GPU, memory, package count, uptime, and other host details.
 - [OS security baseline](docs/SECURITY-BASELINE.md)
 - [Vampire Package Manager prototype](vpm/README.md)
 - [VPM live-image integration](docs/VPM-INTEGRATION.md)
+- [Signed update metadata MVP](docs/SECURE-UPDATES-MVP.md)
 - [Graphical session bring-up](docs/GRAPHICAL-SESSION.md)
 - [VPM repository builder](vpm/REPOSITORY-BUILDER.md)
 - [Development roadmap](docs/ROADMAP.md)
