@@ -1,0 +1,21 @@
+#!/bin/sh
+# Minimal DHCP helper for the initial BusyBox live environment.
+set -eu
+command -v udhcpc >/dev/null 2>&1 || { echo "vnetwork: udhcpc not installed" >&2; exit 1; }
+iface=${2:-}
+if [ -z "$iface" ]; then
+  for path in /sys/class/net/*; do
+    [ -e "$path" ] || continue
+    candidate=${path##*/}
+    [ "$candidate" = lo ] && continue
+    iface=$candidate
+    break
+  done
+fi
+[ -n "$iface" ] || { echo "vnetwork: no network interface found" >&2; exit 1; }
+case "${1:-}" in
+ start) udhcpc -n -q -i "$iface"; echo "vnetwork: DHCP configured $iface" ;;
+ stop) echo "vnetwork: lease release is not automated in this prototype" ;;
+ status) ip addr show dev "$iface" 2>/dev/null || ifconfig "$iface" 2>/dev/null || true ;;
+ *) echo "Usage: vnetwork {start|stop|status} [interface]" >&2; exit 2 ;;
+esac
