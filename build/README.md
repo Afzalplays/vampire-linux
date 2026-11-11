@@ -42,3 +42,10 @@ real firmware and virtual machines before release.
 The image includes the Vampire OS identity and BusyBox console. The build
 script stages the repository's `vfetch` utility into the target filesystem
 before compilation.
+
+
+The current defconfig also enables eudev, Weston DRM desktop-shell support,
+Python 3 (TLS and zlib), and Minisign. These increase image size and build time.
+Weston is an upstream graphical bring-up layer; it is not the final Vampire
+Desktop. VPM is copied into the root filesystem for development, but ships
+without a configured package repository.

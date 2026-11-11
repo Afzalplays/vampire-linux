@@ -1,6 +1,6 @@
 # Vampire Desktop — layout and interaction specification
 
-**Status:** Approved design direction. The current image has a text-mode `vdesktop` launcher and `vsettings` preference backend for early bring-up. There is no graphical shell, compositor, panel, dock, or window manager yet.
+**Status:** Approved design direction. The current image has a text-mode `vdesktop` launcher and `vsettings` preference backend for early bring-up. The image now includes upstream Weston with a DRM backend and desktop shell as a graphical bring-up preview. There is still no custom Vampire shell, branded panel, dock, launcher or Vampire window manager.
 
 ## 1. Overall layout
 

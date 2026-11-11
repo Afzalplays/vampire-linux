@@ -79,3 +79,12 @@ vinstall preflight /dev/sda
 
 This only inspects sysfs and mounted partitions. It never partitions, formats or
 writes to storage. A passing preflight is not approval to erase a disk.
+
+
+## Graphical preview and package manager
+
+- `vgraphical` starts the upstream Weston DRM desktop shell when a DRM GPU is available.
+  This is not the branded Vampire Desktop; see [GRAPHICAL-SESSION.md](GRAPHICAL-SESSION.md).
+- `vpm --version`, `vpm list` and `vpm doctor` are included in the image.
+  The repository list is empty until a signed Vampire package repository exists;
+  see [VPM-INTEGRATION.md](VPM-INTEGRATION.md).

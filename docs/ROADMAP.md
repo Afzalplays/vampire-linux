@@ -36,12 +36,14 @@ feature release-ready.
 - [x] Dependency resolution, architecture checks and guarded extraction.
 - [ ] Reproducible package recipes and maintained signed repository.
 - [ ] Transactional install/upgrade, rollback and recovery.
-- [ ] Integrate VPM into root filesystem and graphical installer.
+- [x] Integrate experimental VPM client and doctor into the live root filesystem.
+- [ ] Configure a maintained signed repository and integrate VPM into a graphical installer.
 - [ ] Build Vampire Software Center.
 
 ## Desktop edition
 
-- [ ] Wayland compositor, display manager and graphical Vampire Desktop shell.
+- [x] Add Weston DRM/Wayland compositor and upstream desktop-shell packages for graphical bring-up (custom shell remains pending).
+- [ ] Display manager and graphical Vampire Desktop shell.
 - [x] Console-mode `vdesktop` launcher and `vsettings` preference backend (bring-up tools only).
 - [ ] Original top panel, floating dock, launcher and window management.
 - [ ] File manager, terminal and settings application.
