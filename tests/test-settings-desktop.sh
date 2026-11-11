@@ -31,6 +31,6 @@ if "$TMP/vsettings" get unknown >/dev/null 2>&1; then
   exit 1
 fi
 grep -q '^voice_access=false$' "$CONFIG"
-"$ROOT/rootfs-overlay/usr/bin/vmonitor" > "$TMP/monitor.out"
+sh "$ROOT/rootfs-overlay/usr/bin/vmonitor" > "$TMP/monitor.out"
 grep -q "VAMPIRE MONITOR" "$TMP/monitor.out"
 echo "Vampire settings, desktop launcher and monitor tests passed."
