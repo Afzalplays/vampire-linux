@@ -41,6 +41,7 @@ CPU, GPU, memory, package count, uptime, and other host details.
 - [Voice Access design](docs/VOICE-ACCESS.md)
 - [BIOS/UEFI installer and recovery design](docs/BOOT-INSTALLER-RECOVERY.md)
 - [Settings defaults](docs/SETTINGS-DEFAULTS.md)
+- [Console tools guide](docs/CONSOLE-TOOLS.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Package management design](docs/PACKAGE-MANAGEMENT.md)
 - [Software Center and app ecosystem](docs/SOFTWARE-CENTER.md)
