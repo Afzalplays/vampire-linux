@@ -22,9 +22,7 @@ install -m 0755 "$ROOT_DIR/fetch/vfetch" "$OVERLAY/usr/bin/vfetch"
 install -m 0644 "$ROOT_DIR/vpm/vpm" "$OVERLAY/usr/lib/vampire/vpm"
 install -m 0644 "$ROOT_DIR/vpm/doctor.py" "$OVERLAY/usr/lib/vampire/doctor.py"
 install -m 0644 "$ROOT_DIR/vpm/update_client.py" "$OVERLAY/usr/lib/vampire/update_client.py"
-install -m 0644 "$ROOT_DIR/rootfs-overlay/etc/vampire/update.json" "$OVERLAY/etc/vampire/update.json"
 install -m 0644 "$ROOT_DIR/vpm/vpm.example.json" "$OVERLAY/etc/vpm/vpm.example.json"
-install -m 0644 "$ROOT_DIR/rootfs-overlay/etc/vpm/vpm.json" "$OVERLAY/etc/vpm/vpm.json"
 chmod 0755 "$OVERLAY/usr/bin/vctl" "$OVERLAY/usr/bin/vnetwork" "$OVERLAY/usr/bin/vguard" \
   "$OVERLAY/usr/bin/vsettings" "$OVERLAY/usr/bin/vdesktop" "$OVERLAY/usr/bin/vmonitor" \
   "$OVERLAY/usr/bin/vinstall" "$OVERLAY/usr/bin/vpm" "$OVERLAY/usr/bin/vgraphical" "$OVERLAY/usr/bin/vupdate" "$OVERLAY/usr/bin/vsoftware" "$OVERLAY/usr/bin/vssh"
