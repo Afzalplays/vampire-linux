@@ -11,7 +11,8 @@ script alone does not make a feature release-ready.
 - [x] Add initial Vampire Fetch utility
 - [x] Add a minimal musl + BusyBox + Linux kernel Buildroot configuration
 - [x] Add a GRUB hybrid ISO packaging script and SHA-256 generation
-- [x] Add CI checks for build-script syntax and required configuration
+- [x] Add CI checks for build-script syntax, required configuration and VFetch output contract
+- [x] Add automated QEMU BIOS/UEFI boot smoke-test script and run it before publishing the ISO artifact
 - [ ] Complete the first automated live ISO build
 - [ ] Boot the ISO in QEMU in BIOS mode and capture serial/console output
 - [ ] Boot the ISO in QEMU in UEFI mode and capture serial/console output
