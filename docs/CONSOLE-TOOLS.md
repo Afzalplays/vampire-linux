@@ -88,3 +88,11 @@ writes to storage. A passing preflight is not approval to erase a disk.
 - `vpm --version`, `vpm list` and `vpm doctor` are included in the image.
   The repository list is empty until a signed Vampire package repository exists;
   see [VPM-INTEGRATION.md](VPM-INTEGRATION.md).
+
+
+## SSH service
+
+The image includes Dropbear client/server tools. The daemon is not auto-started.
+Run `vssh status` to inspect it. To start it, first place a trusted modern
+public key in `/root/.ssh/authorized_keys`, then use `vssh start`.
+Password authentication is disabled. See [SSH-ONBOARDING.md](SSH-ONBOARDING.md).
