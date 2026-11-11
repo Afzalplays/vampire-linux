@@ -33,19 +33,8 @@ appearance_menu() {
   done
 }
 while :; do
-  printf '\n'
-  printf '  V A M P I R E  O S\n'
-  printf '  Vampire Desktop — Console Preview\n'
-  printf '  -------------------------------\n'
-  printf '  1) System information\n'
-  printf '  2) Appearance settings\n'
-  printf '  3) Network status\n'
-  printf '  4) System monitor\n'
-  printf '  5) Open shell\n'
-  printf '  6) Show all settings\n'
-  printf '  7) Installer storage preflight\n'
-  printf '  0) Exit launcher\n'
-  printf '  Select: '
+  printf '\n  V A M P I R E  O S\n  Vampire Desktop — Console Preview\n  -------------------------------\n'
+  printf '  1) System information\n  2) Appearance settings\n  3) Network status\n  4) System monitor\n  5) Open shell\n  6) Show all settings\n  7) Installer storage preflight\n  8) Graphical session (Weston preview)\n  9) VPM package manager diagnostics\n  0) Exit launcher\n  Select: '
   IFS= read -r choice || exit 0
   case "$choice" in
     1) "$FETCH"; pause ;;
@@ -55,6 +44,8 @@ while :; do
     5) "${SHELL:-/bin/sh}" ;;
     6) "$SETTINGS" list; pause ;;
     7) installer_menu ;;
+    8) vgraphical; pause ;;
+    9) vpm doctor; pause ;;
     0) exit 0 ;;
     *) echo "Invalid choice." ;;
   esac

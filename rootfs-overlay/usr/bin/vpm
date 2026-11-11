@@ -1,0 +1,7 @@
+#!/bin/sh
+set -eu
+if [ "${1:-}" = "doctor" ]; then
+  shift
+  exec python3 /usr/lib/vampire/doctor.py "$@"
+fi
+exec python3 /usr/lib/vampire/vpm "$@"

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-for file in rootfs-overlay/usr/bin/vctl rootfs-overlay/usr/bin/vnetwork rootfs-overlay/usr/bin/vguard rootfs-overlay/usr/bin/vsettings rootfs-overlay/usr/bin/vdesktop rootfs-overlay/usr/bin/vmonitor rootfs-overlay/usr/bin/vinstall rootfs-overlay/etc/vampire/settings.defaults rootfs-overlay/etc/vampire/services.d/network rootfs-overlay/etc/profile.d/vampire.sh; do
+for file in rootfs-overlay/usr/bin/vctl rootfs-overlay/usr/bin/vnetwork rootfs-overlay/usr/bin/vguard rootfs-overlay/usr/bin/vsettings rootfs-overlay/usr/bin/vdesktop rootfs-overlay/usr/bin/vmonitor rootfs-overlay/usr/bin/vinstall rootfs-overlay/usr/bin/vpm rootfs-overlay/usr/bin/vgraphical rootfs-overlay/etc/vpm/vpm.json rootfs-overlay/etc/vampire/settings.defaults rootfs-overlay/etc/vampire/services.d/network rootfs-overlay/etc/profile.d/vampire.sh; do
   test -s "$ROOT/$file"
 done
 bash -n "$ROOT/rootfs-overlay/usr/bin/vctl"
@@ -11,6 +11,8 @@ sh -n "$ROOT/rootfs-overlay/usr/bin/vsettings"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vdesktop"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vmonitor"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vinstall"
+sh -n "$ROOT/rootfs-overlay/usr/bin/vpm"
+sh -n "$ROOT/rootfs-overlay/usr/bin/vgraphical"
 sh -n "$ROOT/rootfs-overlay/etc/init.d/rcS"
 sh -n "$ROOT/rootfs-overlay/etc/vampire/services.d/network"
 grep -q 'BusyBox init' "$ROOT/rootfs-overlay/etc/vampire/os.conf"
@@ -19,4 +21,8 @@ grep -q '/usr/bin/vctl start network' "$ROOT/rootfs-overlay/etc/init.d/rcS"
 grep -q 'VAMPIRE_SSH_PORT' "$ROOT/rootfs-overlay/usr/bin/vguard"
 grep -q 'udhcpc -n -q -i' "$ROOT/rootfs-overlay/usr/bin/vnetwork"
 grep -q 'settings.conf' "$ROOT/rootfs-overlay/etc/init.d/rcS"
+grep -q 'BR2_PACKAGE_WESTON=y' "$ROOT/build/vampire_defconfig"
+grep -q 'BR2_PACKAGE_PYTHON3_SSL=y' "$ROOT/build/vampire_defconfig"
+grep -q 'usr/lib/vampire/vpm' "$ROOT/build/build-live-iso.sh"
+grep -q 'udevd --daemon' "$ROOT/rootfs-overlay/etc/init.d/rcS"
 echo "Vampire rootfs contract checks passed."
