@@ -56,10 +56,15 @@ CPU, GPU, memory, package count, uptime, and other host details.
 
 ## Development status
 
-This repository is an experimental development scaffold. A reproducible
-bootable ISO, installer, package manager, desktop environment, update mechanism,
-and supported hardware matrix are not yet complete. See the roadmap for the
-current work breakdown.
+The first live-image build path is now in the repository under `build/`.
+It assembles an x86_64 kernel + musl/BusyBox initramfs using upstream
+Buildroot, then packages the result as a GRUB hybrid ISO. The initial image is
+console-only and intended for development/QEMU bring-up.
+
+The ISO has not yet been built and boot-validated in this repository's release
+pipeline. A graphical desktop, disk installer, production package manager,
+update/rollback service, and supported hardware matrix remain incomplete.
+See [the live ISO build guide](build/README.md) and the roadmap.
 
 ## Independence and upstream sources
 
