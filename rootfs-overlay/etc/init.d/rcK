@@ -1,0 +1,7 @@
+#!/bin/sh
+# BusyBox init shutdown hook: stop enabled services before unmounting filesystems.
+if [ -x /usr/bin/vctl ]; then
+  /usr/bin/vctl stop-all || echo "Vampire OS: one or more services failed to stop" >&2
+fi
+sync
+umount -a -r

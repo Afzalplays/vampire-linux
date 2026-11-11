@@ -27,4 +27,6 @@ This is not systemd compatibility or a production supervisor. Dependency
 ordering, readiness notifications, restart policies, cgroups, privilege
 separation, structured persistent logs, parallel boot, and a dedicated
 shutdown transaction remain future work. BusyBox init remains responsible
-for PID 1, getty respawning, reboot and shutdown.
+for PID 1, getty respawning, reboot and shutdown. Its shutdown hook runs
+`/etc/init.d/rcK`, which stops enabled services, syncs pending writes, and then
+remounts/unmounts filesystems read-only where supported.
