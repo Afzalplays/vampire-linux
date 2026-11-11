@@ -7,6 +7,12 @@ mkdir -p /dev/pts /run /tmp /var/log
 mount -t devpts devpts /dev/pts 2>/dev/null || true
 hostname vampire-os
 
+# Seed writable live-session preferences on first boot.
+if [ ! -f /etc/vampire/settings.conf ] && [ -r /etc/vampire/settings.defaults ]; then
+  cp /etc/vampire/settings.defaults /etc/vampire/settings.conf
+  chmod 600 /etc/vampire/settings.conf
+fi
+
 printf '\n'
 printf '  Vampire OS 0.1.0-dev | x86_64 live environment\n'
 printf '  Type vfetch for system information.\n'
