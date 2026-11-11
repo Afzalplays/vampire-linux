@@ -10,7 +10,7 @@ vdesktop
 ```
 
 The menu currently opens system information, the appearance preference menu,
-network status, a read-only system monitor and a shell. It is keyboard-driven and exits without modifying
+network status, a read-only system monitor, a shell and a read-only installer storage preflight. It is keyboard-driven and exits without modifying
 the host or disk.
 
 ## Manage preferences
@@ -66,3 +66,16 @@ vguard clear
 
 Review the firewall rules and verify remote access before applying them on a
 remote machine.
+
+
+## Installer storage preflight
+
+From the console launcher choose option 7, or run:
+
+```sh
+vinstall list
+vinstall preflight /dev/sda
+```
+
+This only inspects sysfs and mounted partitions. It never partitions, formats or
+writes to storage. A passing preflight is not approval to erase a disk.

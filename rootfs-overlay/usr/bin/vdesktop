@@ -4,7 +4,17 @@ set -eu
 SETTINGS=${VAMPIRE_SETTINGS_CMD:-vsettings}
 FETCH=${VAMPIRE_FETCH_CMD:-vfetch}
 NETWORK=${VAMPIRE_NETWORK_CMD:-vnetwork}
+INSTALLER=${VAMPIRE_INSTALLER_CMD:-vinstall}
 pause() { printf '\nPress Enter to continue...'; IFS= read -r _ || true; }
+installer_menu() {
+  printf "\nVampire Installer — read-only storage checks\n"
+  printf "No partitioning or formatting is available in this build.\n\n"
+  "$INSTALLER" list
+  printf "\nDevice path to preflight (blank to return, e.g. /dev/sda): "
+  IFS= read -r target || return
+  [ -n "$target" ] && "$INSTALLER" preflight "$target" || true
+  pause
+}
 appearance_menu() {
   while :; do
     printf '\nVampire Settings — Appearance\n'
@@ -43,6 +53,7 @@ while :; do
     4) vmonitor; pause ;;
     5) "${SHELL:-/bin/sh}" ;;
     6) "$SETTINGS" list; pause ;;
+    7) installer_menu ;;
     0) exit 0 ;;
     *) echo "Invalid choice." ;;
   esac
