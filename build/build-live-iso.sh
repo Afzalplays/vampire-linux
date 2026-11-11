@@ -18,9 +18,12 @@ for tool in git make gcc g++ perl python3 rsync cpio file patch bc bison flex \
   need "$tool"
 done
 
-mkdir -p "$BUILD_DIR" "$OUTPUT_DIR" "$OVERLAY/usr/bin"
+mkdir -p "$BUILD_DIR" "$OUTPUT_DIR" "$OVERLAY/usr/bin" "$OVERLAY/etc/vampire/services.d"
 install -m 0755 "$ROOT_DIR/fetch/vfetch" "$OVERLAY/usr/bin/vfetch"
-chmod 0755 "$OVERLAY/etc/init.d/rcS"
+for utility in vctl vnetwork vguard; do
+  install -m 0755 "$ROOT_DIR/rootfs-overlay/usr/bin/$utility" "$OVERLAY/usr/bin/$utility"
+done
+chmod 0755 "$OVERLAY/etc/init.d/rcS" "$OVERLAY/etc/vampire/services.d/network"
 
 if [[ ! -d "$BUILD_DIR/buildroot/.git" ]]; then
   git clone --depth 1 --branch "$BUILDROOT_VERSION" \
