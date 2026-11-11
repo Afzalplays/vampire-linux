@@ -1,0 +1,40 @@
+#!/bin/sh
+# Vampire Software Center — keyboard-driven package-manager frontend.
+set -eu
+VPM=${VAMPIRE_VPM_CMD:-vpm}
+pause() { printf '\nPress Enter to continue...'; IFS= read -r _ || true; }
+confirm() {
+  printf '%s [y/N]: ' "$1"
+  IFS= read -r answer || return 1
+  case "$answer" in y|Y|yes|YES) return 0 ;; *) return 1 ;; esac
+}
+while :; do
+  printf '\n'
+  printf '  V A M P I R E  /  SOFTWARE\n'
+  printf '  -------------------------\n'
+  printf '  1) Refresh signed package indexes\n'
+  printf '  2) Search packages\n'
+  printf '  3) Package information\n'
+  printf '  4) Install package\n'
+  printf '  5) Remove package\n'
+  printf '  6) Installed packages\n'
+  printf '  0) Exit\n'
+  printf '  Select: '
+  IFS= read -r choice || exit 0
+  case "$choice" in
+    1) "$VPM" update; pause ;;
+    2) printf 'Search: '; IFS= read -r term; [ -n "$term" ] && "$VPM" search "$term"; pause ;;
+    3) printf 'Package name: '; IFS= read -r pkg; [ -n "$pkg" ] && "$VPM" info "$pkg"; pause ;;
+    4)
+      printf 'Package name: '; IFS= read -r pkg
+      if [ -n "$pkg" ] && confirm "Install $pkg?"; then "$VPM" install "$pkg" -y; else echo "Install cancelled."; fi
+      pause ;;
+    5)
+      printf 'Package name: '; IFS= read -r pkg
+      if [ -n "$pkg" ] && confirm "Remove $pkg and its recorded files?"; then "$VPM" remove "$pkg"; else echo "Removal cancelled."; fi
+      pause ;;
+    6) "$VPM" list; pause ;;
+    0) exit 0 ;;
+    *) echo "Invalid choice." ;;
+  esac
+done
