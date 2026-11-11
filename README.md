@@ -36,6 +36,8 @@ CPU, GPU, memory, package count, uptime, and other host details.
 ## Project documentation
 
 - [Architecture](docs/ARCHITECTURE.md)
+- [Package management design](docs/PACKAGE-MANAGEMENT.md)
+- [Vampire Package Manager prototype](vpm/README.md)
 - [Development roadmap](docs/ROADMAP.md)
 - [Third-party licensing policy](docs/LICENSING.md)
 - [Contributing](CONTRIBUTING.md)
