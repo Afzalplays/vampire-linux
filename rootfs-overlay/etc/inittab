@@ -2,6 +2,6 @@
 ::sysinit:/etc/init.d/rcS
 ::ctrlaltdel:/sbin/reboot
 ::shutdown:/bin/umount -a -r
-tty1::respawn:/sbin/getty -L tty1 0 vt100
-ttyS0::respawn:/sbin/getty -L ttyS0 0 vt100
+tty1::respawn:/sbin/getty -L 0 tty1 vt100
+ttyS0::respawn:/sbin/getty -L 115200 ttyS0 vt100
 ::restart:/sbin/init
