@@ -10,6 +10,7 @@ on:
       - "build/**"
       - "rootfs-overlay/**"
       - "fetch/vfetch"
+      - "scripts/test-live-iso.sh"
       - ".github/workflows/live-iso.yml"
 
 permissions:
