@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "appearance": {
+    "theme": "dark",
+    "accent": "crimson",
+    "surface_transparency": 30,
+    "blur": "medium",
+    "effects_mode": "balanced",
+    "reduced_motion": false,
+    "terminal_opacity": 88,
+    "dock": {
+      "position": "bottom-center",
+      "auto_hide": true,
+      "magnification": true
+    },
+    "top_panel": {
+      "enabled": true,
+      "show_date": true,
+      "show_clock": true,
+      "show_network": true,
+      "show_power": true
+    }
+  },
+  "voice_access": {
+    "enabled": false,
+    "activation": "push_to_talk",
+    "wake_word": false,
+    "preferred_language": "system",
+    "offline_first": true,
+    "retain_audio": false,
+    "allow_shell_commands": false,
+    "confirm_destructive_actions": true
+  },
+  "updates": {
+    "channel": "stable",
+    "automatic_check": true,
+    "security_updates": "notify",
+    "system_updates": "notify",
+    "firmware_updates": "manual",
+    "reboot_policy": "ask"
+  }
+}
