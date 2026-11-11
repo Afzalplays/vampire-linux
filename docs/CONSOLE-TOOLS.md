@@ -10,7 +10,7 @@ vdesktop
 ```
 
 The menu currently opens system information, the appearance preference menu,
-network status, and a shell. It is keyboard-driven and exits without modifying
+network status, a read-only system monitor and a shell. It is keyboard-driven and exits without modifying
 the host or disk.
 
 ## Manage preferences
