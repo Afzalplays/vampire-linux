@@ -31,7 +31,7 @@ with GRUB into a hybrid ISO and writes a SHA-256 checksum.
 ## Run in QEMU
 
 ```sh
-qemu-system-x86_64 -m 2G -smp 2 -cdrom out/vampire-os-0.1.0-dev-x86_64.iso -boot d
+qemu-system-x86_64 -m 2G -smp 2 -cdrom out/vampire-os-0.1.0-dev-desktop-x86_64.iso -boot d
 ```
 
 Use `-enable-kvm` when KVM is available. The first image is a console-only
