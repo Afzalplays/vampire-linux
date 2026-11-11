@@ -1,0 +1,24 @@
+name: Vampire Fetch checks
+
+on:
+  push:
+    paths:
+      - "fetch/**"
+      - ".github/workflows/vfetch-check.yml"
+  pull_request:
+    paths:
+      - "fetch/**"
+      - ".github/workflows/vfetch-check.yml"
+  workflow_dispatch:
+
+jobs:
+  shell-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Bash syntax
+        run: bash -n fetch/vfetch
+      - name: Run Vampire Fetch smoke test
+        run: |
+          chmod +x fetch/vfetch
+          ./fetch/vfetch
