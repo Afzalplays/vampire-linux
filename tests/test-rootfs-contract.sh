@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-for file in rootfs-overlay/usr/bin/vctl rootfs-overlay/usr/bin/vnetwork rootfs-overlay/usr/bin/vguard rootfs-overlay/usr/bin/vsettings rootfs-overlay/usr/bin/vdesktop rootfs-overlay/usr/bin/vmonitor rootfs-overlay/usr/bin/vinstall rootfs-overlay/usr/bin/vpm rootfs-overlay/usr/bin/vgraphical rootfs-overlay/usr/bin/vupdate rootfs-overlay/usr/bin/vsoftware rootfs-overlay/etc/vpm/vpm.json rootfs-overlay/etc/vampire/update.json rootfs-overlay/etc/vampire/settings.defaults rootfs-overlay/etc/vampire/services.d/network rootfs-overlay/etc/profile.d/vampire.sh; do
+for file in rootfs-overlay/usr/bin/vctl rootfs-overlay/usr/bin/vnetwork rootfs-overlay/usr/bin/vguard rootfs-overlay/usr/bin/vsettings rootfs-overlay/usr/bin/vdesktop rootfs-overlay/usr/bin/vmonitor rootfs-overlay/usr/bin/vinstall rootfs-overlay/usr/bin/vpm rootfs-overlay/usr/bin/vgraphical rootfs-overlay/usr/bin/vupdate rootfs-overlay/usr/bin/vsoftware rootfs-overlay/usr/bin/vssh rootfs-overlay/etc/vpm/vpm.json rootfs-overlay/etc/vampire/update.json rootfs-overlay/etc/vampire/settings.defaults rootfs-overlay/etc/vampire/services.d/network rootfs-overlay/etc/profile.d/vampire.sh; do
   test -s "$ROOT/$file"
 done
 bash -n "$ROOT/rootfs-overlay/usr/bin/vctl"
@@ -15,6 +15,7 @@ sh -n "$ROOT/rootfs-overlay/usr/bin/vpm"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vgraphical"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vupdate"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vsoftware"
+sh -n "$ROOT/rootfs-overlay/usr/bin/vssh"
 sh -n "$ROOT/rootfs-overlay/etc/init.d/rcS"
 sh -n "$ROOT/rootfs-overlay/etc/vampire/services.d/network"
 grep -q 'BusyBox init' "$ROOT/rootfs-overlay/etc/vampire/os.conf"
