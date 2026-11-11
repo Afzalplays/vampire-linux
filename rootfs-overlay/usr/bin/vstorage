@@ -1,0 +1,9 @@
+#!/bin/sh
+# Read-only inventory. Never partitions, formats or writes to disks.
+set -eu
+echo 'VAMPIRE STORAGE'
+if command -v lsblk >/dev/null 2>&1; then lsblk -o NAME,TYPE,SIZE,FSTYPE,MOUNTPOINT
+else awk 'NR==1 || NR>2 {print}' /proc/partitions 2>/dev/null || true; fi
+echo
+if command -v df >/dev/null 2>&1; then df -h; else cat /proc/mounts; fi
+echo 'Read-only report: no storage changes were made.'

@@ -8,6 +8,7 @@ case "${1:-status}" in
  status) command -v nft >/dev/null 2>&1 && nft list ruleset || echo "vguard: nftables is not installed" ;;
  apply)
   command -v nft >/dev/null 2>&1 || { echo "vguard: nftables is not installed" >&2; exit 1; }
+  nft delete table inet vampire_filter 2>/dev/null || true
   nft -f - <<EOF
 table inet vampire_filter {
  chain input {
@@ -17,6 +18,7 @@ table inet vampire_filter {
   ct state invalid drop
   ip protocol icmp accept
   ip6 nexthdr ipv6-icmp accept
+  udp sport 67 udp dport 68 accept
   tcp dport $SSH_PORT ct state new accept
  }
  chain forward { type filter hook forward priority 0; policy drop; }

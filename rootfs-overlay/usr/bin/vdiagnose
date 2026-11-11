@@ -1,0 +1,12 @@
+#!/bin/sh
+# Local support snapshot; inspect before sharing.
+set -eu
+echo 'VAMPIRE SUPPORT SNAPSHOT'
+echo '[HEALTH]'; vhealth || true
+echo '[HARDWARE]'; vhardware
+echo '[MONITOR]'; vmonitor
+echo '[STORAGE]'; vstorage
+echo '[NETWORK]'; vnetwork status || true
+echo '[FIREWALL]'; vguard status || true
+echo '[RECENT LOGS]'; vlogs 2>&1 | tail -n 80 || true
+echo 'Review before sharing: output may contain device, address and log details.'

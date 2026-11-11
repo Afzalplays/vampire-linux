@@ -96,3 +96,15 @@ The image includes Dropbear client/server tools. The daemon is not auto-started.
 Run `vssh status` to inspect it. To start it, first place a trusted modern
 public key in `/root/.ssh/authorized_keys`, then use `vssh start`.
 Password authentication is disabled. See [SSH-ONBOARDING.md](SSH-ONBOARDING.md).
+
+
+## Diagnostics and firewall
+
+Run `vhardware`, `vstorage`, `vhealth`, `vlogs` or `vdiagnose` for
+read-only hardware, storage, health and support information. Review and redact
+`vdiagnose` output before sharing; logs and device details may be sensitive.
+
+The optional nftables profile is managed by `vfirewall status|apply|clear`.
+It is not enabled at boot. Applying a default-deny inbound policy remotely
+can disconnect you; verify the SSH port and recovery access first. See
+[HARDWARE-DIAGNOSTICS.md](HARDWARE-DIAGNOSTICS.md) and [FIREWALL.md](FIREWALL.md).

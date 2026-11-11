@@ -1,0 +1,8 @@
+#!/bin/sh
+[ "$#" -gt 0 ] || set -- ''
+case "$1" in
+ start) exec /usr/bin/vguard apply ;;
+ stop) exec /usr/bin/vguard clear ;;
+ status) exec /usr/bin/vguard status ;;
+ *) echo 'Usage: firewall {start|stop|status}' >&2; exit 2 ;;
+esac

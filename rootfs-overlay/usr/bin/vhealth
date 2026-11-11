@@ -1,0 +1,13 @@
+#!/bin/sh
+# Read-only boot health checks.
+set -u
+fail=0
+check() { if grep -q " $1 " /proc/mounts 2>/dev/null; then echo "[ OK ] $1 mounted"; else echo "[FAIL] $1 not mounted"; fail=$((fail+1)); fi; }
+echo 'VAMPIRE SYSTEM HEALTH'
+for p in /proc /sys /dev; do check "$p"; done
+for c in sh awk grep mount df; do command -v "$c" >/dev/null 2>&1 && echo "[ OK ] command $c" || echo "[WARN] command $c unavailable"; done
+[ -r /etc/os-release ] && echo '[ OK ] OS metadata' || { echo '[FAIL] OS metadata missing'; fail=$((fail+1)); }
+[ -x /usr/bin/vctl ] && echo '[ OK ] service manager' || { echo '[FAIL] service manager missing'; fail=$((fail+1)); }
+[ -r /proc/meminfo ] && echo '[ OK ] memory telemetry' || echo '[WARN] memory telemetry unavailable'
+echo "Failures: $fail"
+[ "$fail" -eq 0 ]

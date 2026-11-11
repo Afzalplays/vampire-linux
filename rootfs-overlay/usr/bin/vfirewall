@@ -1,0 +1,4 @@
+#!/bin/sh
+set -eu
+action=status; [ "$#" -eq 0 ] || action=$1
+case "$action" in status|apply|clear) exec /usr/bin/vguard "$action" ;; *) echo 'Usage: vfirewall {status|apply|clear}' >&2; exit 2 ;; esac

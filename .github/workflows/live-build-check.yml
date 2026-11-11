@@ -47,6 +47,7 @@ jobs:
           bash tests/test-software-center.sh
           bash tests/test-ssh-tool.sh
           bash tests/test-files-tool.sh
+          bash tests/test-diagnostics.sh
           bash tests/test-editions.sh
       - name: Check Buildroot configuration
         run: |
@@ -59,6 +60,8 @@ jobs:
           grep -qx 'BR2_PACKAGE_PYTHON3=y' build/vampire_defconfig
           grep -qx 'BR2_PACKAGE_MINISIGN=y' build/vampire_defconfig
           grep -qx 'BR2_PACKAGE_DROPBEAR=y' build/vampire_defconfig
+          grep -qx 'BR2_PACKAGE_NFTABLES=y' build/vampire_defconfig
+          grep -qx 'BR2_PACKAGE_NFTABLES=y' build/vampire_server_defconfig
           test -s build/grub.cfg
           test -s rootfs-overlay/etc/inittab
           test -s rootfs-overlay/etc/os-release

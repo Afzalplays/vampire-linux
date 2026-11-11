@@ -1,0 +1,20 @@
+#!/bin/sh
+set -eu
+printf '\nVAMPIRE HARDWARE\n================\n'
+printf 'Architecture: %s\nKernel: %s\n' "$(uname -m)" "$(uname -r)"
+awk -F: '/^(model name|Hardware)[[:space:]]*:/ {sub(/^[ \t]+/,"",$2); print "CPU: " $2; exit}' /proc/cpuinfo 2>/dev/null || true
+awk '/^processor[[:space:]]*:/ {n++} END {printf "Logical CPUs: %d\n", n}' /proc/cpuinfo
+awk '/^MemTotal:/ {printf "Memory: %d MiB\n", $2/1024}' /proc/meminfo
+for id in /sys/class/drm/card[0-9]*/device; do
+  [ -d "$id" ] || continue
+  printf 'GPU: vendor=%s device=%s\n' "$(cat "$id/vendor" 2>/dev/null || echo unknown)" "$(cat "$id/device" 2>/dev/null || echo unknown)"
+done
+printf 'Block devices:\n'
+for disk in /sys/block/*; do
+  [ -e "$disk" ] || continue
+  name=$(basename "$disk"); case "$name" in loop*|ram*) continue ;; esac
+  sectors=$(cat "$disk/size" 2>/dev/null || echo 0)
+  awk -v n="$name" -v s="$sectors" 'BEGIN {printf "  %s %.2f GiB\n",n,s*512/1073741824}'
+done
+printf 'Network interfaces:\n'
+for net in /sys/class/net/*; do [ -e "$net" ] || continue; printf '  %s %s\n' "$(basename "$net")" "$(cat "$net/operstate" 2>/dev/null || echo unknown)"; done

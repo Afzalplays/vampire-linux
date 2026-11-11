@@ -1,0 +1,9 @@
+#!/bin/sh
+# Read-only log viewer.
+set -eu
+follow=no; [ "$#" -eq 0 ] || follow=$1
+case "$follow" in --help|-h) echo 'Usage: vlogs [--follow]'; exit 0 ;; no|--follow) ;; *) echo 'Usage: vlogs [--follow]' >&2; exit 2 ;; esac
+if command -v logread >/dev/null 2>&1; then [ "$follow" != --follow ] || exec logread -f; exec logread; fi
+if [ -r /var/log/messages ]; then [ "$follow" != --follow ] || exec tail -f /var/log/messages; exec tail -n 200 /var/log/messages; fi
+if command -v dmesg >/dev/null 2>&1; then [ "$follow" != --follow ] || { echo 'follow mode unavailable' >&2; exit 1; }; exec dmesg; fi
+echo 'No readable log source available' >&2; exit 1
