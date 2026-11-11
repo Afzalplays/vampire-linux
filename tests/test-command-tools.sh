@@ -34,12 +34,12 @@ fi
 NFT
 chmod +x "$TMP/bin/nft"
 export NFT_CALLS="$TMP/nft-calls" NFT_RULES="$TMP/nft-rules"
-PATH="$TMP/bin:$PATH" VAMPIRE_SSH_PORT=2222 "$ROOT/rootfs-overlay/usr/bin/vguard" apply
+PATH="$TMP/bin:$PATH" VAMPIRE_SSH_PORT=2222 sh "$ROOT/rootfs-overlay/usr/bin/vguard" apply
 grep -q 'tcp dport 2222 ct state new accept' "$NFT_RULES"
 grep -q 'policy drop' "$NFT_RULES"
-PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vguard" clear
+PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vguard" clear
 grep -q 'delete table inet vampire_filter' "$NFT_CALLS"
-if PATH="$TMP/bin:$PATH" VAMPIRE_SSH_PORT=70000 "$ROOT/rootfs-overlay/usr/bin/vguard" apply >/dev/null 2>&1; then
+if PATH="$TMP/bin:$PATH" VAMPIRE_SSH_PORT=70000 sh "$ROOT/rootfs-overlay/usr/bin/vguard" apply >/dev/null 2>&1; then
   echo "vguard accepted an invalid SSH port" >&2
   exit 1
 fi
@@ -51,7 +51,7 @@ printf '%s\n' "$*" > "$DHCP_CALLS"
 DHCP
 chmod +x "$TMP/bin/udhcpc"
 export DHCP_CALLS="$TMP/dhcp-calls"
-PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vnetwork" start test0
+PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" start test0
 grep -q -- '-n -q -i test0' "$DHCP_CALLS"
 
 echo "Vampire command integration tests passed."
