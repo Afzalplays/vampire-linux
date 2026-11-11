@@ -98,7 +98,7 @@ def command_download(_args):
         if total!=a["size"]: fail("artifact size does not match signed manifest")
         if digest.hexdigest().lower()!=a["sha256"].lower(): fail("artifact SHA-256 mismatch")
         os.chmod(tmp,0o600); os.replace(tmp,final)
-    except Exception:
+    except BaseException:
         try: os.unlink(tmp)
         except FileNotFoundError: pass
         raise
