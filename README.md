@@ -9,7 +9,7 @@ editions: Vampire Desktop and Vampire Server.
 ## Identity
 
 - **Operating system:** Vampire OS
-- **Desktop environment:** Vampire Desktop (planned)
+- **Desktop environment:** Vampire Desktop (graphical shell planned; console launcher MVP available as `vdesktop`)
 - **Shell:** Vampire Shell (planned)
 - **Fetch utility:** [Vampire Fetch](fetch/README.md) — `vfetch`
 - **Architecture:** x86_64 / AMD64
@@ -56,7 +56,7 @@ CPU, GPU, memory, package count, uptime, and other host details.
 
 ## Development status
 
-The first live-image build path is now in the repository under `build/`.
+The first live-image build path is now in the repository under `build/`. The console image also includes `vsettings` for validated preference storage and `vdesktop` as an interactive text-mode launcher; these are early bring-up utilities, not a graphical desktop environment.
 It assembles an x86_64 kernel + musl/BusyBox initramfs using upstream
 Buildroot, then packages the result as a GRUB hybrid ISO. The initial image is
 console-only and intended for development/QEMU bring-up.
