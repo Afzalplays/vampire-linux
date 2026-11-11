@@ -1,5 +1,5 @@
 #!/bin/sh
-# Read-only inventory. Never partitions, formats or writes to disks.
+# Read-only inventory; never partitions, formats or writes to disks.
 set -eu
 echo 'VAMPIRE STORAGE'
 if command -v lsblk >/dev/null 2>&1; then lsblk -o NAME,TYPE,SIZE,FSTYPE,MOUNTPOINT
