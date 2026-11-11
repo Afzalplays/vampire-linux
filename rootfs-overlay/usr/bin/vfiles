@@ -39,7 +39,7 @@ while :; do
       if [ -e "$source" ] && [ -n "$destination" ]; then mv -- "$source" "$destination"; else echo "Source or destination invalid."; fi ;;
     delete)
       printf 'Path to delete (directories must be empty): '; IFS= read -r path
-      case "$path" in ""|/|.|..) echo "Refusing unsafe path." ;;
+      case "$path" in ""|/|.|"..") echo "Refusing unsafe path." ;;
         *)
           if [ -e "$path" ] || [ -L "$path" ]; then
             if confirm "Delete $path?"; then
