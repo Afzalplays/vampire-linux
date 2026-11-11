@@ -1,29 +1,37 @@
 # Vampire Package Manager (vpm)
 
 `vpm` is the experimental native package-management project for Vampire OS.
-The current Python client is a developer prototype to exercise repository
-metadata, package discovery, HTTPS downloads, signature verification, and
-SHA-256 payload verification. It is not yet suitable for managing a real OS.
+The current Python client is a developer prototype for signed repository
+metadata, package discovery, HTTPS downloads, and SHA-256 payload verification.
+It is not yet suitable for managing a real operating system.
 
-## Planned user commands
+## Implemented prototype commands
 
 ```sh
 vpm update
 vpm search firefox
 vpm info firefox
-vpm install firefox
-vpm upgrade
+vpm install firefox -y
 vpm remove firefox
 vpm list
 ```
 
-Only `update`, `search`, `info`, `install`, and `list` are currently
-implemented. Upgrade and remove are intentionally not exposed until the package
-database tracks exact installed file ownership and safe rollback.
+The `install` command accepts `-y` / `--yes` for apt-style command
+compatibility. The prototype currently has no interactive confirmation prompt,
+so the flag does not bypass a prompt or add a new privilege mode.
+
+Implemented: update, search, info, list, install, basic remove, signed index
+verification, HTTPS-only downloads, SHA-256 payload verification, dependency
+resolution, architecture checks, guarded archive extraction, and basic
+installed-file ownership records.
+
+Not implemented: upgrade, transactions, atomic rollback, conflict resolution,
+shared-directory ownership, package triggers, repository key rotation, or a
+production-grade sandbox.
 
 ## Prototype prerequisites
 
-- Python 3
+- Python 3.10+
 - HTTPS access to a configured repository
 - `minisign` for signed repository-index verification
 - SHA-256 support from Python's standard library
@@ -42,32 +50,28 @@ to download packages. Do not point the client at an untrusted repository.
 
 ## Repository format
 
-Each repository serves:
+Each repository serves `index.json`, its detached
+`index.json.minisig` signature, and package archives referenced by relative
+HTTPS URLs. See [REPOSITORY-FORMAT.md](REPOSITORY-FORMAT.md) and
+[REPOSITORY-BUILDER.md](REPOSITORY-BUILDER.md).
 
-- `index.json`: JSON package catalogue
-- `index.json.minisig`: detached minisign signature
-- Package archives referenced by relative HTTPS URLs
-
-See [REPOSITORY-FORMAT.md](REPOSITORY-FORMAT.md) and [REPOSITORY-BUILDER.md](REPOSITORY-BUILDER.md). The first local index builder is available as `repo_tool.py`; it creates static repository metadata and can sign it with a locally held Minisign key. It does not yet compile source packages or produce reproducible builds.
+The local index builder creates repository metadata and can sign it with a
+locally held Minisign key. It does not yet compile source packages or produce
+reproducible package builds.
 
 ## Security and limitations
 
 The client verifies signed indexes and package SHA-256 hashes, rejects unsafe
-archive paths and special files, and does not execute package scripts. However,
-it does not yet provide transactional installation, file ownership tracking,
-uninstall, upgrades, conflict resolution, rollback, repository key rotation,
-or a production-grade sandbox. Do not use it on a production machine or against
-the host root filesystem. A native implementation and security review are
-required before system integration.
+archive paths and special files, and does not execute package scripts. Removal
+only deletes recorded regular files and refuses legacy records without a
+trustworthy file manifest.
 
+Installation is not transactional: a failure partway through a multi-package
+install can leave files behind. The prototype does not track shared directories,
+configuration-file modifications, hard links, package triggers, or concurrent
+filesystem changes. Do not use it to manage a production machine or host root
+filesystem. A native implementation and security review are required before
+system integration.
 
-## Environment diagnostics
-
-Run `python3 vpm/doctor.py` to check the local prerequisites used by the experimental client: Python version, Minisign availability, repository configuration, cache access, install target and root permissions. A warning is expected until a real signed repository is configured. This diagnostic does not install or modify system packages.
-
-
-## Package ownership and removal prototype
-
-The experimental client now records the relative regular-file paths created by each package installation. The new `vpm remove PACKAGE` command removes only those recorded files, then updates the installed database. It refuses legacy records without a file manifest and rejects paths that escape the configured target root.
-
-This is not yet a production-safe uninstall or upgrade system. It does not track shared directories, configuration-file modifications, hard links, package triggers, or concurrent filesystem changes. Installation is not transactional: an error partway through a multi-package install can leave files behind. Do not use this prototype to manage a host operating system. Upgrade, rollback and atomic staging remain pending.
+Run `python3 vpm/doctor.py` to check local prerequisites. A warning is expected
+until a real signed repository is configured.
