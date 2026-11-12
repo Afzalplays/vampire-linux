@@ -49,6 +49,7 @@ jobs:
           bash -x tests/test-network-lifecycle.sh
           bash tests/test-wayland-terminal.sh
           bash tests/test-weston-launchers.sh
+          bash tests/test-settings-launcher.sh
           bash tests/test-vhelp.sh
           bash tests/test-settings-desktop.sh
           bash tests/test-installer-preflight.sh
