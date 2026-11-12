@@ -22,6 +22,10 @@ cat > "$TMP/bin/ifconfig" <<'MOCK'
 #!/bin/sh
 printf 'ifconfig %s\n' "$*" >> "$NETWORK_CALLS"
 MOCK
+cat > "$TMP/bin/ip" <<'MOCK'
+#!/bin/sh
+printf 'ip %s\n' "$*" >> "$NETWORK_CALLS"
+MOCK
 cat > "$TMP/bin/route" <<'MOCK'
 #!/bin/sh
 printf 'route %s\n' "$*" >> "$NETWORK_CALLS"
@@ -43,4 +47,8 @@ fi
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" stop test0
 test ! -e "$VAMPIRE_RESOLV_CONF"
 test ! -e "$TMP/run/test0.pid"
+printf '%s\n' 'nameserver 9.9.9.9' > "$VAMPIRE_RESOLV_CONF"
+PATH="$TMP/bin:$PATH" interface=test0 sh "$VAMPIRE_DHCP_HOOK" deconfig
+grep -q '^nameserver 9.9.9.9
+ "$VAMPIRE_RESOLV_CONF"
 echo "Vampire DHCP lifecycle and lease hook tests passed."
