@@ -6,7 +6,7 @@ trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/bin" "$TMP/ovmf" "$TMP/logs"
 : > "$TMP/ovmf/OVMF_CODE_4M.fd"
 : > "$TMP/ovmf/OVMF_VARS_4M.fd"
-: > "$TMP/live.iso"
+printf "test iso placeholder\n" > "$TMP/live.iso"
 cat > "$TMP/bin/qemu-system-x86_64" <<'FAKE'
 #!/usr/bin/env bash
 set -eu
@@ -15,7 +15,7 @@ drives=0
 while (($#)); do
   case "$1" in
     -serial) serial=$2; shift 2 ;;
-    -drive) [[ "$2" == if=pflash,* ]] && drives=$((drives + 1)); shift 2 ;;
+    -drive) [[ "$2" == if=pflash,* ]] && { drives=$((drives + 1)); printf "%s\n" "$2" >> "$VAMPIRE_FAKE_DRIVES"; }; shift 2 ;;
     *) shift ;;
   esac
 done
@@ -30,10 +30,12 @@ export VAMPIRE_OVMF_DIR="$TMP/ovmf"
 export VAMPIRE_QEMU_LOG_DIR="$TMP/logs"
 export VAMPIRE_QEMU_TIMEOUT=3
 export VAMPIRE_FAKE_DRIVE_COUNTS="$TMP/drive-counts"
+export VAMPIRE_FAKE_DRIVES="$TMP/drives"
 bash "$ROOT/scripts/test-live-iso.sh" "$TMP/live.iso"
 mapfile -t counts < "$TMP/drive-counts"
 [[ "${counts[0]}" == 0 ]]
 [[ "${counts[1]}" == 2 ]]
-grep -q 'readonly=on' "$TMP/logs/uefi.qemu.stderr" && { echo "unexpected QEMU stderr content" >&2; exit 1; } || true
-[[ ! -e "$TMP/logs/OVMF_VARS.XXXXXX.fd" ]]
+grep -q "readonly=on,file=$TMP/ovmf/OVMF_CODE_4M.fd" "$TMP/drives"
+grep -q "file=$TMP/logs/OVMF_VARS." "$TMP/drives"
+if compgen -G "$TMP/logs/OVMF_VARS.*.fd" >/dev/null; then echo "temporary OVMF vars image was not cleaned up" >&2; exit 1; fi
 echo "UEFI OVMF pflash test passed."
