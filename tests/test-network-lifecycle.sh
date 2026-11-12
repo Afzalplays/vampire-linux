@@ -45,6 +45,14 @@ grep -q '^search example.test$' "$VAMPIRE_RESOLV_CONF"
 if PATH="$TMP/bin:$PATH" interface=test0 ip='192.0.2.999' subnet=255.255.255.0 sh "$VAMPIRE_DHCP_HOOK" bound >/dev/null 2>&1; then
   echo "DHCP hook accepted an invalid IPv4 address" >&2; exit 1
 fi
+
+before_calls="$(wc -l < "$NETWORK_CALLS")"
+if PATH="$TMP/bin:$PATH" interface=test0 ip=192.0.2.25 subnet=255.255.255.0 dns='1.1.1.1 8.8.8.999' sh "$VAMPIRE_DHCP_HOOK" bound >/dev/null 2>&1; then
+  echo "DHCP hook accepted an invalid DNS address" >&2; exit 1
+fi
+after_calls="$(wc -l < "$NETWORK_CALLS")"
+test "$before_calls" = "$after_calls"
+
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" stop test0
 test ! -e "$VAMPIRE_RESOLV_CONF"
 test ! -e "$TMP/run/test0.pid"

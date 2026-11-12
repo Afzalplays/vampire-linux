@@ -13,6 +13,13 @@ valid_ipv4() {
     END { if (NR != 1) exit 1 }
   '
 }
+validate_ipv4_list() {
+  set -f
+  for address in $1; do
+    valid_ipv4 "$address" || { set +f; return 1; }
+  done
+  set +f
+}
 action=${1:-}
 interface=${interface:-}
 valid_iface "$interface" || { echo "udhcpc hook: invalid interface" >&2; exit 1; }
@@ -29,6 +36,8 @@ case "$action" in
     valid_ipv4 "$ip" && valid_ipv4 "$subnet" || {
       echo "udhcpc hook: invalid IPv4 address or subnet mask" >&2; exit 1;
     }
+    validate_ipv4_list "${router:-}" || { echo "udhcpc hook: invalid router address" >&2; exit 1; }
+    validate_ipv4_list "${dns:-}" || { echo "udhcpc hook: invalid DNS address" >&2; exit 1; }
     command -v ifconfig >/dev/null 2>&1 || { echo "udhcpc hook: ifconfig is unavailable" >&2; exit 127; }
     ifconfig "$interface" "$ip" netmask "$subnet" up
     if command -v route >/dev/null 2>&1; then route del default dev "$interface" 2>/dev/null || true; fi
