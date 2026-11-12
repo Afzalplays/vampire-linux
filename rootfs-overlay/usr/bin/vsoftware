@@ -12,6 +12,8 @@ while :; do
   printf '\n'
   printf '  V A M P I R E  /  SOFTWARE\n'
   printf '  -------------------------\n'
+  printf '  Repository readiness:\n'
+  "$VPM" doctor || printf '  Configure a signed repository before package installation.\\n'
   printf '  1) Refresh signed package indexes\n'
   printf '  2) Search packages\n'
   printf '  3) Package information\n'

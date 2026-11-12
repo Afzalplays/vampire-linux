@@ -11,6 +11,7 @@ EOF
 chmod +x "$TMP/fake-vpm"
 export VAMPIRE_VPM_CMD="$TMP/fake-vpm" VPM_LOG="$TMP/log"
 printf '6\n\n0\n' | sh "$ROOT/rootfs-overlay/usr/bin/vsoftware" >/dev/null
+grep -qx 'doctor' "$TMP/log"
 grep -qx 'list' "$TMP/log"
 : > "$TMP/log"
 printf '4\nsample-package\nn\n\n0\n' | sh "$ROOT/rootfs-overlay/usr/bin/vsoftware" >/dev/null
