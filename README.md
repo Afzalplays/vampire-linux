@@ -41,6 +41,7 @@ CPU, GPU, memory, package count, uptime, and other host details.
 - [Settings, voice, updates and boot specification](docs/SETTINGS-VOICE-UPDATES-BOOT.md)
 - [Voice Access design](docs/VOICE-ACCESS.md)
 - [BIOS/UEFI installer and recovery design](docs/BOOT-INSTALLER-RECOVERY.md)
+- [QEMU BIOS/UEFI boot-test procedure](docs/QEMU-BOOT-TESTS.md)
 - [Settings defaults](docs/SETTINGS-DEFAULTS.md)
 - [Console tools guide](docs/CONSOLE-TOOLS.md)
 - [Hardware diagnostics](docs/HARDWARE-DIAGNOSTICS.md)
@@ -65,13 +66,26 @@ CPU, GPU, memory, package count, uptime, and other host details.
 
 ## Development status
 
-The live-image build path is in `build/`. The Desktop profile includes Weston as an upstream Wayland/DRM graphical bring-up preview; the Server profile is console-first and uses a separate Buildroot defconfig. Both include the Vampire console tools, VPM runtime, signed-update verifier and optional public-key-only SSH service. The custom Vampire graphical shell is still under development.
+The live-image build path is in `build/`. The Desktop profile includes Weston as
+an upstream Wayland/DRM graphical bring-up preview; the Server profile is
+console-first and uses a separate Buildroot defconfig. Both include Vampire
+console tools, the experimental VPM runtime, signed-update verifier and an
+optional public-key-only SSH service. The custom Vampire graphical shell is
+still under development.
 
-Build the Desktop ISO with `bash build/build-live-iso.sh`; build the Server ISO with `VAMPIRE_EDITION=server bash build/build-live-iso.sh`. Each edition has a separate Buildroot output directory and ISO filename.
+Build the Desktop ISO with `bash build/build-live-iso.sh`; build the Server ISO
+with `VAMPIRE_EDITION=server bash build/build-live-iso.sh`. Each edition has a
+separate Buildroot output directory and ISO filename. CI has successfully
+produced both ISO images and passed the legacy BIOS live-login test. UEFI
+validation is being re-tested with a paired OVMF CODE/VARS setup; release
+artifacts remain gated on both firmware tests passing. See
+[the live ISO build guide](build/README.md) and
+[the QEMU boot-test guide](docs/QEMU-BOOT-TESTS.md).
 
-The ISO has not yet been built and boot-validated in this repository's release
-pipeline. The custom graphical desktop, disk-writing installer, production package repository and transactional package manager, update application/rollback service, and supported hardware matrix remain incomplete.
-See [the live ISO build guide](build/README.md) and the roadmap.
+The custom graphical desktop, disk-writing installer, production package
+repository and transactional package manager, update application/rollback
+service, and supported hardware matrix remain incomplete. This is a developer
+live environment, not a finished or production-ready operating system.
 
 ## Independence and upstream sources
 
