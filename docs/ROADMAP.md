@@ -27,6 +27,7 @@ feature release-ready.
 - [ ] Pin and verify source archives and toolchain inputs.
 - [ ] Establish reproducible builds and build provenance.
 - [ ] Build a dedicated cross-toolchain and stable filesystem layout.
+- [x] Add the Vampire Shell branded Bash-compatible launcher and interactive profile.
 - [ ] Implement a production Vampire Init supervisor.
 - [ ] Implement users, groups, permissions, logging and device management.
 - [ ] Complete network profiles, DNS, Wi-Fi and VPN support.
@@ -50,6 +51,7 @@ feature release-ready.
 - [x] Add theme, accent, transparency, blur, terminal, dock and top-panel preference storage.
 - [x] Add console file manager, hardware inventory and diagnostics.
 - [ ] Build the branded Vampire Desktop shell: top panel, floating dock, launcher and window integration.
+- [ ] Replace the Bash compatibility engine with a dedicated Vampire Shell parser/runtime.
 - [ ] Add non-root graphical login/session management and display manager.
 - [ ] Build graphical file manager, terminal and settings applications.
 - [ ] Add display, network, sound, power and personalization controls.

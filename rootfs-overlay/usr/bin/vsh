@@ -1,0 +1,43 @@
+#!/bin/sh
+# Vampire Shell entry point: a branded, hardened Bash interactive profile.
+set -eu
+
+BASH_BIN="${VAMPIRE_BASH_CMD:-/bin/bash}"
+RCFILE="${VAMPIRE_SHELL_RC:-/etc/vampire/shellrc}"
+
+case "${1:-}" in
+  --version|-V)
+    printf 'Vampire Shell 0.1.0-dev (Bash-compatible interactive shell)\n'
+    exit 0
+    ;;
+  --help|-h)
+    cat <<'HELP'
+Vampire Shell — branded command-line environment
+
+Usage:
+  vsh                 Start an interactive Vampire Shell
+  vsh -c COMMAND      Run a command using the Vampire Shell profile
+  vsh --version       Show shell integration version
+  vsh --help          Show this help
+
+Vampire Shell currently uses Bash as its execution engine.
+HELP
+    exit 0
+    ;;
+esac
+
+if [ ! -x "$BASH_BIN" ]; then
+  printf 'vsh: Bash executable not found: %s\n' "$BASH_BIN" >&2
+  exit 127
+fi
+if [ ! -r "$RCFILE" ]; then
+  printf 'vsh: shell profile is not readable: %s\n' "$RCFILE" >&2
+  exit 1
+fi
+
+export VAMPIRE_SHELL=1
+export VAMPIRE_SHELL_VERSION=0.1.0-dev
+if [ "$#" -eq 0 ]; then
+  exec "$BASH_BIN" --noprofile --rcfile "$RCFILE" -i
+fi
+exec "$BASH_BIN" --noprofile --rcfile "$RCFILE" "$@"

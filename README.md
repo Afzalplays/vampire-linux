@@ -44,6 +44,7 @@ CPU, GPU, memory, package count, uptime, and other host details.
 - [QEMU BIOS/UEFI boot-test procedure](docs/QEMU-BOOT-TESTS.md)
 - [Settings defaults](docs/SETTINGS-DEFAULTS.md)
 - [Console tools guide](docs/CONSOLE-TOOLS.md)
+- [Vampire Shell](docs/VAMPIRE-SHELL.md)
 - [Hardware diagnostics](docs/HARDWARE-DIAGNOSTICS.md)
 - [Optional firewall](docs/FIREWALL.md)
 - [Vampire Files console manager](docs/FILES-CONSOLE.md)
