@@ -1,0 +1,10 @@
+#!/bin/sh
+# Launch the branded Vampire Shell inside the Wayland terminal.
+set -eu
+command -v foot >/dev/null 2>&1 || {
+  echo "Vampire Terminal: foot is not installed in this image." >&2
+  exit 127
+}
+export SHELL=/usr/bin/vsh
+export TERM=xterm-256color
+exec foot "$@"

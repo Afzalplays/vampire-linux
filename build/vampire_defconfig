@@ -25,6 +25,10 @@ BR2_PACKAGE_WESTON=y
 BR2_PACKAGE_WESTON_DEFAULT_DRM=y
 BR2_PACKAGE_WESTON_SHELL_DESKTOP=y
 
+# A real Wayland terminal for the live desktop preview.
+BR2_PACKAGE_FOOT=y
+BR2_PACKAGE_DEJAVU=y
+
 # VPM runtime: Python 3, TLS, gzip archive support and Minisign.
 BR2_PACKAGE_PYTHON3=y
 BR2_PACKAGE_PYTHON3_PY_ONLY=y

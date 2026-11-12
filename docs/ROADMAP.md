@@ -52,6 +52,7 @@ feature release-ready.
 - [x] Add Weston DRM/Wayland compositor and upstream desktop-shell packages for graphics bring-up.
 - [x] Add console-mode vdesktop launcher and validated vsettings backend.
 - [x] Add theme, accent, transparency, blur, terminal, dock and top-panel preference storage.
+- [x] Add a Wayland terminal autostart with the Vampire Shell profile and branded dark terminal palette.
 - [x] Add console file manager, hardware inventory and diagnostics.
 - [ ] Build the branded Vampire Desktop shell: top panel, floating dock, launcher and window integration.
 - [ ] Add non-root graphical login/session management and display manager.
