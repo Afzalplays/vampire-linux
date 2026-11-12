@@ -81,7 +81,8 @@ wifi_scan() {
   if command -v ip >/dev/null 2>&1; then ip link set "$iface" up 2>/dev/null || true
   elif command -v ifconfig >/dev/null 2>&1; then ifconfig "$iface" up || true; fi
   echo "Scanning Wi-Fi networks on $iface..."
-  iw dev "$iface" scan | awk '
+  scan_output=$(iw dev "$iface" scan) || { echo "vnetwork: Wi-Fi scan failed on $iface" >&2; return 1; }
+  printf '%s\\n' "$scan_output" | awk '
     /^BSS / { if (ssid != "") printf "%-32s %s\n", ssid, signal; ssid=""; signal="signal unknown" }
     /signal:/ { signal=$2 " dBm" }
     /SSID: / { sub(/^[[:space:]]*SSID: /, ""); ssid=$0 }

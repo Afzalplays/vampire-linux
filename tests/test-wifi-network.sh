@@ -16,7 +16,7 @@ cat > "$TMP/bin/iw" <<'MOCK'
 #!/bin/sh
 case "$*" in
   dev) printf 'phy#0\n\tInterface wlan0\n' ;;
-  'dev wlan0 scan') printf 'BSS aa:bb:cc:dd:ee:ff\n\t signal: -42.00 dBm\n\t SSID: Test Network\n' ;;
+  'dev wlan0 scan') [ "${FAIL_SCAN:-0}" = 1 ] && exit 1; printf 'BSS aa:bb:cc:dd:ee:ff\n\t signal: -42.00 dBm\n\t SSID: Test Network\n' ;;
   *) exit 1 ;;
 esac
 MOCK
@@ -60,6 +60,9 @@ chmod +x "$TMP/bin/"*
 export NETWORK_LOG="$TMP/network-log"
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi list | grep -q wlan0
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi scan wlan0 | grep -q 'Test Network'
+if FAIL_SCAN=1 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi scan wlan0 >/dev/null 2>&1; then
+  echo "Wi-Fi scan failure was hidden" >&2; exit 1
+fi
 printf 'correcthorsebatterystaple\n' | PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi connect wlan0 'Test Network'
 CONFIG="$TMP/etc/vampire/wpa_supplicant-wlan0.conf"
 test -s "$CONFIG"
