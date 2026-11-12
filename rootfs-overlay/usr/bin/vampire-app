@@ -5,7 +5,7 @@ command -v foot >/dev/null 2>&1 || {
   echo "Vampire Desktop: Foot terminal is not installed." >&2
   exit 127
 }
-[ "$#" -ge 1 ] || { echo "Usage: vampire-app {files|settings|software}" >&2; exit 2; }
+[ "$#" -ge 1 ] || { echo "Usage: vampire-app {files|settings|software|monitor}" >&2; exit 2; }
 case "$1" in
   files) shift; exec foot /usr/bin/vfiles "$@" ;;
   settings) shift; exec foot /usr/bin/vdesktop "$@" ;;
