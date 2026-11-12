@@ -53,6 +53,7 @@ feature release-ready.
 - [x] Add console-mode vdesktop launcher and validated vsettings backend.
 - [x] Add theme, accent, transparency, blur, terminal, dock and top-panel preference storage.
 - [x] Add a Wayland terminal autostart with the Vampire Shell profile and branded dark terminal palette.
+- [x] Apply validated theme, accent, panel visibility/transparency, reduced-motion and terminal-opacity settings to the next Weston session.
 - [x] Add Weston panel launchers for Terminal, Files, Settings and Software Center.
 - [x] Add console file manager, hardware inventory and diagnostics.
 - [ ] Build the branded Vampire Desktop shell: top panel, floating dock, launcher and window integration.
@@ -73,6 +74,7 @@ feature release-ready.
 
 - [x] Add a separate console-first Server Buildroot configuration and ISO workflow.
 - [x] Add opt-in Dropbear SSH prototype and service controls.
+- [x] Store SSH host keys under configurable `/var/lib/vampire/ssh/` state for persistence on installed systems with persistent `/var`.
 - [x] Add monitoring, network, storage and hardware diagnostics.
 - [ ] Add persistent SSH host keys, non-root onboarding and hardened defaults.
 - [ ] Build multi-host administration, file transfer, deployment and recovery.
