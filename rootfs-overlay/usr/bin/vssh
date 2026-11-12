@@ -2,7 +2,7 @@
 # Explicit, public-key-only Dropbear SSH service control.
 set -eu
 PORT=${VAMPIRE_SSH_PORT:-22}
-KEY=/etc/dropbear/dropbear_ed25519_host_key
+KEY=${VAMPIRE_SSH_HOST_KEY:-/var/lib/vampire/ssh/dropbear_ed25519_host_key}
 AUTHORIZED=/root/.ssh/authorized_keys
 usage() { echo "Usage: vssh start|stop|status|connect user@host"; }
 valid_port() {
@@ -23,8 +23,8 @@ case "${1:-}" in
       echo "No supported modern public key found in $AUTHORIZED." >&2
       exit 1
     }
-    mkdir -p /root/.ssh /etc/dropbear
-    chmod 0700 /root/.ssh
+    mkdir -p /root/.ssh "${KEY%/*}"
+    chmod 0700 /root/.ssh "${KEY%/*}"
     chmod 0600 "$AUTHORIZED"
     if [ ! -s "$KEY" ]; then
       dropbearkey -t ed25519 -f "$KEY"
@@ -32,7 +32,7 @@ case "${1:-}" in
     fi
     dropbear -p "$PORT" -s -g -r "$KEY"
     echo "Dropbear started on port $PORT with password authentication disabled."
-    echo "Live-image host keys are ephemeral and change after reboot."
+    echo "Host key stored at $KEY. It persists across reboot when /var is on persistent storage."
     ;;
   stop)
     if pidof dropbear >/dev/null 2>&1; then killall dropbear; echo "Dropbear stopped."
