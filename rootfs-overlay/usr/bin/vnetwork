@@ -6,6 +6,7 @@ PROC_ROOT=${VAMPIRE_PROC_ROOT:-/proc}
 RUN_DIR=${VAMPIRE_NETWORK_RUN_DIR:-/run/vampire/dhcp}
 WIFI_RUN_DIR=${VAMPIRE_WIFI_RUN_DIR:-/run/vampire/wifi}
 WIFI_CONFIG_DIR=${VAMPIRE_WIFI_CONFIG_DIR:-/etc/vampire}
+WPA_CTRL_DIR=${VAMPIRE_WPA_CTRL_DIR:-/run/wpa_supplicant}
 HOOK=${VAMPIRE_DHCP_HOOK:-/usr/lib/vampire/udhcpc.script}
 usage() {
   echo "Usage: vnetwork {start|stop|restart|status} [IFACE] | wifi {list|scan|status|connect|disconnect} [IFACE] [SSID]" >&2
@@ -116,7 +117,7 @@ wifi_connect() {
     echo "vnetwork: WPA passphrases must contain 8–63 characters" >&2
     return 2
   }
-  mkdir -p "$WIFI_CONFIG_DIR" "$WIFI_RUN_DIR" /run/wpa_supplicant "$RUN_DIR"
+  mkdir -p "$WIFI_CONFIG_DIR" "$WIFI_RUN_DIR" "$WPA_CTRL_DIR" "$RUN_DIR"
   config="$WIFI_CONFIG_DIR/wpa_supplicant-$iface.conf"
   network_tmp=$(mktemp "$config.network.XXXXXX")
   config_tmp=$(mktemp "$config.tmp.XXXXXX")
@@ -134,7 +135,7 @@ wifi_connect() {
     return 1
   }
   {
-    printf 'ctrl_interface=DIR=/run/wpa_supplicant GROUP=0\nupdate_config=1\n'
+    printf 'ctrl_interface=DIR=$WPA_CTRL_DIR GROUP=0\nupdate_config=1\n'
     cat "$network_tmp"
   } > "$config_tmp"
   chmod 600 "$config_tmp"
