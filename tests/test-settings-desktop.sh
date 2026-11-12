@@ -45,9 +45,8 @@ fi
 if "$TMP/vsettings" get unknown >/dev/null 2>&1; then
   echo "settings accepted an unknown key" >&2; exit 1
 fi
-grep -q '^voice_access=true
+grep -q '^voice_access=true$' "$CONFIG"
 grep -q '^dock_magnification=true$' "$CONFIG"
-# Verify the console launcher dispatches option 5 to Vampire Shell.
 mkdir -p "$TMP/mockbin"
 cat > "$TMP/mockbin/vsh" <<'MOCK'
 #!/bin/sh
@@ -58,24 +57,9 @@ export VSH_TEST_LOG="$TMP/vsh.log"
 printf '5\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
 grep -qx 'started' "$VSH_TEST_LOG"
 # Exercise the update-channel and voice-access settings menu choices.
-printf '2\\n16\\ntesting\\n17\\ntrue\\n0\\n0\\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
+printf '2\n16\ntesting\n17\ntrue\n0\n0\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
 test "$("$TMP/vsettings" get update_channel)" = testing
 test "$("$TMP/vsettings" get voice_access)" = true
 sh "$ROOT/rootfs-overlay/usr/bin/vmonitor" > "$TMP/monitor.out"
 grep -q "VAMPIRE MONITOR" "$TMP/monitor.out"
-echo "Vampire settings, desktop launcher, Vampire Shell dispatch and monitor tests passed."
- "$CONFIG"
-grep -q '^dock_magnification=true$' "$CONFIG"
-# Verify the console launcher dispatches option 5 to Vampire Shell.
-mkdir -p "$TMP/mockbin"
-cat > "$TMP/mockbin/vsh" <<'MOCK'
-#!/bin/sh
-printf 'started\n' >> "$VSH_TEST_LOG"
-MOCK
-chmod +x "$TMP/mockbin/vsh"
-export VSH_TEST_LOG="$TMP/vsh.log"
-printf '5\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
-grep -qx 'started' "$VSH_TEST_LOG"
-sh "$ROOT/rootfs-overlay/usr/bin/vmonitor" > "$TMP/monitor.out"
-grep -q "VAMPIRE MONITOR" "$TMP/monitor.out"
-echo "Vampire settings, desktop launcher, Vampire Shell dispatch and monitor tests passed."
+echo "Vampire settings, Desktop preference menu, Vampire Shell dispatch and monitor tests passed."
