@@ -41,7 +41,7 @@ start_network() {
   if is_running; then echo "vnetwork: DHCP already running on $iface"; return 0; fi
   rm -f "$(pidfile_for)"
   echo "vnetwork: requesting DHCP lease on $iface"
-  udhcpc -b -q -i "$iface" -s "$HOOK" -p "$(pidfile_for)"
+  udhcpc -b -i "$iface" -s "$HOOK" -p "$(pidfile_for)"
 }
 stop_network() {
   pidfile=$(pidfile_for)

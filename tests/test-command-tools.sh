@@ -54,5 +54,5 @@ DHCP
 chmod +x "$TMP/bin/udhcpc"
 export DHCP_CALLS="$TMP/dhcp-calls"
 PATH="$TMP/bin:$PATH" VAMPIRE_NETWORK_RUN_DIR="$TMP/run" VAMPIRE_SYS_NET="$TMP/sys/class/net" VAMPIRE_DHCP_HOOK="$ROOT/rootfs-overlay/usr/lib/vampire/udhcpc.script" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" start test0
-grep -q -- '-b -q -i test0' "$DHCP_CALLS"
+grep -q -- '-b -i test0' "$DHCP_CALLS"
 echo "Vampire command integration tests passed."
