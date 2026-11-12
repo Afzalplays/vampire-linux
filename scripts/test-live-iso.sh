@@ -18,23 +18,57 @@ mkdir -p "$LOG_DIR"
 run_boot() {
   local mode="$1"
   local log="$LOG_DIR/$mode.log"
+  local stderr_log="$LOG_DIR/$mode.qemu.stderr"
+  local vars_copy=""
   local -a firmware=()
+
   if [[ "$mode" == "uefi" ]]; then
-    local ovmf
-    ovmf="$(find /usr/share/OVMF /usr/share/ovmf -type f \( -name 'OVMF_CODE.fd' -o -name 'OVMF_CODE_4M.fd' \) -print -quit 2>/dev/null || true)"
-    [[ -n "$ovmf" ]] || die "UEFI firmware (OVMF_CODE.fd) not found"
-    firmware=(-bios "$ovmf")
+    # OVMF is a pair of pflash images. Passing only CODE via -bios can make
+    # QEMU exit before firmware starts, and does not provide writable NVRAM.
+    local ovmf_dir code_name vars_name ovmf_code ovmf_vars
+    ovmf_dir=""
+    for candidate in /usr/share/OVMF /usr/share/ovmf; do
+      [[ -d "$candidate" ]] && { ovmf_dir="$candidate"; break; }
+    done
+    [[ -n "$ovmf_dir" ]] || die "UEFI firmware directory not found (/usr/share/OVMF)"
+    for code_name in OVMF_CODE_4M.fd OVMF_CODE.fd; do
+      case "$code_name" in
+        *_4M.fd) vars_name=OVMF_VARS_4M.fd ;;
+        *) vars_name=OVMF_VARS.fd ;;
+      esac
+      if [[ -s "$ovmf_dir/$code_name" && -s "$ovmf_dir/$vars_name" ]]; then
+        ovmf_code="$ovmf_dir/$code_name"
+        ovmf_vars="$ovmf_dir/$vars_name"
+        break
+      fi
+    done
+    [[ -n "${ovmf_code:-}" && -n "${ovmf_vars:-}" ]] || die "Matching OVMF_CODE and OVMF_VARS firmware pair not found"
+    vars_copy="$(mktemp "$LOG_DIR/OVMF_VARS.XXXXXX.fd")"
+    cp "$ovmf_vars" "$vars_copy"
+    firmware=(
+      -drive "if=pflash,format=raw,unit=0,readonly=on,file=$ovmf_code"
+      -drive "if=pflash,format=raw,unit=1,file=$vars_copy"
+    )
   fi
 
-  rm -f "$log"
+  rm -f "$log" "$stderr_log"
   # QEMU is expected to be stopped by timeout after the login prompt appears.
+  set +e
   timeout --signal=TERM "$TIMEOUT_SECONDS" qemu-system-x86_64 \
     -machine accel=tcg -m 1024 -smp 2 -cdrom "$ISO" -boot d \
     -display none -monitor none -serial "file:$log" -no-reboot \
-    "${firmware[@]}" >/dev/null 2>&1 || {
-      status=$?
-      [[ "$status" -eq 124 || "$status" -eq 143 ]] || die "$mode QEMU exited unexpectedly (status $status)"
-    }
+    "${firmware[@]}" >/dev/null 2>"$stderr_log"
+  local status=$?
+  set -e
+  [[ -z "$vars_copy" ]] || rm -f "$vars_copy"
+
+  if [[ "$status" -ne 124 && "$status" -ne 143 ]]; then
+    printf '%s\n' "---- $mode QEMU stderr ----" >&2
+    cat "$stderr_log" >&2 || true
+    printf '%s\n' "---- $mode boot log ----" >&2
+    cat "$log" >&2 || true
+    die "$mode QEMU exited unexpectedly (status $status)"
+  fi
 
   grep -Fq 'Vampire OS 0.1.0-dev | x86_64 live environment' "$log" || {
     printf '%s\n' "---- $mode boot log ----" >&2
