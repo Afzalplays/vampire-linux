@@ -1,7 +1,7 @@
 name: Vampire OS build checks
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: \${{ github.workflow }}-\${{ github.ref }}
   cancel-in-progress: true
 
 on:
@@ -46,6 +46,7 @@ jobs:
           bash -n tests/test-rootfs-contract.sh
           bash tests/test-rootfs-contract.sh
           bash tests/test-command-tools.sh
+          bash tests/test-network-lifecycle.sh
           bash tests/test-settings-desktop.sh
           bash tests/test-installer-preflight.sh
           bash tests/test-software-center.sh

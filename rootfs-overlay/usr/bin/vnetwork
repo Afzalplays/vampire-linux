@@ -48,13 +48,12 @@ stop_network() {
   if is_running; then
     IFS= read -r pid < "$pidfile"
     kill -TERM "$pid" 2>/dev/null || true
-    interface="$iface" "$HOOK" deconfig || true
-    rm -f "$pidfile"
     echo "vnetwork: DHCP stopped on $iface"
   else
-    rm -f "$pidfile"
-    echo "vnetwork: DHCP is not running on $iface"
+    echo "vnetwork: DHCP was not running on $iface"
   fi
+  interface="$iface" "$HOOK" deconfig || true
+  rm -f "$pidfile"
 }
 status_network() {
   if command -v ip >/dev/null 2>&1; then ip addr show dev "$iface"

@@ -12,7 +12,9 @@ cat > "$TMP/bin/udhcpc" <<'MOCK'
 #!/bin/sh
 printf '%s\n' "$*" > "$DHCP_CALLS"
 while [ "$#" -gt 0 ]; do
-  case "$1" in -p) shift; printf '%s\n' "$$" > "$1" ;; esac
+  case "$1" in
+    -p) shift; sleep 60 & echo "$!" > "$1" ;;
+  esac
   shift
 done
 MOCK
@@ -28,7 +30,7 @@ chmod +x "$TMP/bin/"*
 export DHCP_CALLS="$TMP/dhcp-calls" NETWORK_CALLS="$TMP/network-calls"
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" start test0
 grep -q -- '-b -q -i test0' "$DHCP_CALLS"
-PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" status test0 >/dev/null
+PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" status test0 | grep -q 'DHCP client: running'
 PATH="$TMP/bin:$PATH" interface=test0 ip=192.0.2.25 subnet=255.255.255.0 router='192.0.2.1' dns='1.1.1.1 8.8.8.8' domain=example.test sh "$VAMPIRE_DHCP_HOOK" bound
 grep -q '192.0.2.25' "$NETWORK_CALLS"
 grep -q 'default gw 192.0.2.1' "$NETWORK_CALLS"
@@ -40,4 +42,5 @@ if PATH="$TMP/bin:$PATH" interface=test0 ip='192.0.2.999' subnet=255.255.255.0 s
 fi
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" stop test0
 test ! -e "$VAMPIRE_RESOLV_CONF"
+! kill -0 "$(cat "$TMP/run/test0.pid" 2>/dev/null)" 2>/dev/null
 echo "Vampire DHCP lifecycle and lease hook tests passed."

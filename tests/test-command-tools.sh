@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Safe command-level tests. All external commands are mocked in a temp directory.
 set -Eeuo pipefail
-ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd -- "$(dirname -- "\${BASH_SOURCE[0]}")/.." && pwd)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
-mkdir -p "$TMP/bin" "$TMP/services.d"
+mkdir -p "$TMP/bin" "$TMP/services.d" "$TMP/sys/class/net/test0"
 
 # Test vctl dispatch without touching the live system's service directory.
 : # vctl uses isolated environment overrides below
@@ -46,14 +46,13 @@ if PATH="$TMP/bin:$PATH" VAMPIRE_SSH_PORT=70000 sh "$ROOT/rootfs-overlay/usr/bin
   exit 1
 fi
 
-# Mock udhcpc; pass an explicit interface to avoid depending on host sysfs.
+# Mock udhcpc; pass an isolated interface tree so tests never touch host networking.
 cat > "$TMP/bin/udhcpc" <<'DHCP'
 #!/bin/sh
 printf '%s\n' "$*" > "$DHCP_CALLS"
 DHCP
 chmod +x "$TMP/bin/udhcpc"
 export DHCP_CALLS="$TMP/dhcp-calls"
-PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" start test0
-grep -q -- '-n -q -i test0' "$DHCP_CALLS"
-
+PATH="$TMP/bin:$PATH" VAMPIRE_SYS_NET="$TMP/sys/class/net" VAMPIRE_DHCP_HOOK="$ROOT/rootfs-overlay/usr/lib/vampire/udhcpc.script" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" start test0
+grep -q -- '-b -q -i test0' "$DHCP_CALLS"
 echo "Vampire command integration tests passed."
