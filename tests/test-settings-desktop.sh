@@ -78,9 +78,11 @@ chmod +x "$TMP/mockbin/vsh"
 export VSH_TEST_LOG="$TMP/vsh.log"
 printf '5\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
 grep -qx 'started' "$VSH_TEST_LOG"
-printf '2\n16\ntesting\n17\ntrue\n0\n0\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
+printf '2\n16\ntesting\n17\ntrue\n1\ndark\n0\n0\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
 test "$("$TMP/vsettings" get update_channel)" = testing
 test "$("$TMP/vsettings" get voice_access)" = true
+test "$("$TMP/vsettings" get theme)" = dark
+grep -q "^background-color=0xff08080c$" "$TMP/weston.ini"
 sh "$ROOT/rootfs-overlay/usr/bin/vmonitor" > "$TMP/monitor.out"
 grep -q "VAMPIRE MONITOR" "$TMP/monitor.out"
 echo "Vampire settings, Desktop preference menu, Vampire Shell dispatch and monitor tests passed."

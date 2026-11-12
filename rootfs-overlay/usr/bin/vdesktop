@@ -44,7 +44,13 @@ appearance_menu() {
     esac
     printf 'New value for %s: ' "$key"
     IFS= read -r value || return
-    "$SETTINGS" set "$key" "$value" || true
+    if "$SETTINGS" set "$key" "$value"; then
+      case "$key" in
+        theme|accent|surface_transparency|terminal_opacity|top_panel|reduced_motion)
+          "$SETTINGS" apply
+          ;;
+      esac
+    fi
   done
 }
 while :; do
