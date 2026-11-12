@@ -48,6 +48,11 @@ fi
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" stop test0
 test ! -e "$VAMPIRE_RESOLV_CONF"
 test ! -e "$TMP/run/test0.pid"
+sleep 60 & unrelated_pid=$!
+printf '%s\n' "$unrelated_pid" > "$TMP/run/test0.pid"
+PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" stop test0
+kill -0 "$unrelated_pid"
+kill "$unrelated_pid"
 printf '%s\n' 'nameserver 9.9.9.9' > "$VAMPIRE_RESOLV_CONF"
 PATH="$TMP/bin:$PATH" interface=test0 sh "$VAMPIRE_DHCP_HOOK" deconfig
 grep -q '^nameserver 9.9.9.9$' "$VAMPIRE_RESOLV_CONF"
