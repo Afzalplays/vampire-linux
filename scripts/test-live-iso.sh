@@ -22,7 +22,8 @@ if ! xorriso -osirrox on -indev "$ISO" -extract /os-release "$metadata_file" >/d
   rm -f "$metadata_file"
   die "could not read /os-release from ISO"
 fi
-if ! grep -Fqx "PRETTY_NAME=\"Vampire OS 0.1.0-dev ($EDITION)\"" "$metadata_file"; then
+expected_pretty_name='PRETTY_NAME="Vampire OS 0.1.0-dev ('"$EDITION"')"';
+if ! grep -Fqx "$expected_pretty_name" "$metadata_file"; then
   cat "$metadata_file" >&2
   rm -f "$metadata_file"
   die "ISO release metadata does not match requested edition: $EDITION"
