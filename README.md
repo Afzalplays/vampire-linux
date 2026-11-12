@@ -70,7 +70,7 @@ CPU, GPU, memory, package count, uptime, and other host details.
 
 The live-image build path is in `build/`. The Desktop profile includes Weston,
 a Foot Wayland terminal, a branded dark terminal profile and panel launchers
-for Terminal, Files, Settings and Software Center. The Server profile is
+for Terminal, Files, Settings, Software Center and Monitor. The Server profile is
 console-first and uses a separate Buildroot defconfig. Both include Vampire
 console tools, DHCP networking, the experimental VPM runtime, signed-update
 verifier and an optional public-key-only SSH service. The custom Vampire
