@@ -33,6 +33,8 @@ test "$("$TMP/vsettings" get terminal_opacity)" = 70
 "$TMP/vsettings" set accent rose
 test "$("$TMP/vsettings" get accent)" = rose
 "$TMP/vsettings" set surface_transparency 60
+"$TMP/vsettings" set top_panel false
+"$TMP/vsettings" set reduced_motion true
 test "$("$TMP/vsettings" get surface_transparency)" = 60
 "$TMP/vsettings" set dock_auto_hide false
 test "$("$TMP/vsettings" get dock_auto_hide)" = false
@@ -45,6 +47,8 @@ test "$("$TMP/vsettings" get voice_access)" = true
 "$TMP/vsettings" apply
 grep -q "^background-color=0xfff2f2f6$" "$TMP/weston.ini"
 grep -q "^panel-color=0x6671324c$" "$TMP/weston.ini"
+grep -q "^panel-position=none$" "$TMP/weston.ini"
+grep -q "^animation=none$" "$TMP/weston.ini"
 grep -q "^alpha=0.70$" "$TMP/xdg/foot/foot.ini"
 "$TMP/vsettings" validate
 cp "$CONFIG" "$TMP/settings.good"
