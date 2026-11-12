@@ -17,6 +17,6 @@ if [[ $- == *i* ]]; then
   alias la='ls -A'
   alias ..='cd ..'
   alias vinfo='vfetch'
-  alias vhelp='vsh --help'
-  printf '\033[1;31mVampire Shell\033[0m  |  Type vhelp for shell help.\n'
+  alias help='vhelp'
+  printf '\033[1;31mVampire Shell\033[0m  |  Type vhelp for the command reference.\n'
 fi

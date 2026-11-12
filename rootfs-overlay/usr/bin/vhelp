@@ -1,0 +1,58 @@
+#!/bin/sh
+# Vampire OS command reference.
+set -eu
+cat <<'EOF'
+  V A M P I R E  O S
+  Command Reference
+  =================
+
+SYSTEM
+  vfetch                         Show system identity and hardware summary
+  vdesktop                       Open the Vampire Desktop console launcher
+  vhelp                          Show this command reference
+  vsh                            Start the Vampire Shell
+  vsettings list|keys|get|set    Read or change validated desktop preferences
+
+NETWORK AND SERVICES
+  vnetwork status [IFACE]        Show interface and DHCP state
+  vnetwork start|stop [IFACE]    Start or stop DHCP networking
+  vnetwork restart [IFACE]       Renew the network connection
+  vctl list                      List available services
+  vctl start|stop SERVICE        Control an installed service
+  vctl restart|status SERVICE    Restart or inspect a service
+  vctl enable|disable SERVICE    Change boot-time service selection
+
+SOFTWARE AND UPDATES
+  vpm doctor                     Check package manager prerequisites
+  vpm update                     Refresh signed package indexes
+  vpm search|info PACKAGE        Search or inspect a package
+  vpm install|remove PACKAGE     Install or remove a package
+  vpm list                       List installed packages
+  vsoftware                     Open the console Software Center
+  vupdate check                  Verify the configured signed update manifest
+  vupdate download               Download and verify an update image
+
+FILES AND ADMINISTRATION
+  vfiles                         Open the console file manager
+  vinstall list                  List available installation disks
+  vinstall preflight /dev/DISK   Check a target without writing to it
+  vssh status                    Inspect the optional SSH service
+  vssh start                     Start key-only SSH after installing a trusted key
+  vguard status|apply|clear      Inspect or manage the firewall rules
+
+DIAGNOSTICS
+  vmonitor                       Show live system resource usage
+  vhardware                      Show detected hardware
+  vstorage                       Show block devices and mounts
+  vhealth                        Run system health checks
+  vlogs                          Inspect system logs
+  vdiagnose                      Generate a support snapshot
+  vfirewall status               Show firewall state
+
+SAFETY NOTES
+  - The current installer only lists disks and runs read-only preflight checks.
+  - VPM and OS updates are experimental; a production package repository and
+    transactional rollback are not yet available.
+  - SSH is opt-in and refuses to start without a supported public key.
+  - Use root privileges only for commands that require system administration.
+EOF

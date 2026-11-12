@@ -69,6 +69,7 @@ while :; do
     15) vhealth; pause ;;
     16) vdiagnose; pause ;;
     17) vfirewall status; pause ;;
+    18) vhelp; pause ;;
     0) exit 0 ;;
     *) echo "Invalid choice." ;;
   esac
