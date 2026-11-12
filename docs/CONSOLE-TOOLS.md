@@ -9,8 +9,7 @@ bring-up tools; they do not claim to be the finished graphical Vampire Desktop.
 vdesktop
 ```
 
-The menu currently opens system information, the appearance preference menu,
-network status, a read-only system monitor, a shell and a read-only installer storage preflight. The appearance menu also exposes the stable/testing update channel and voice-access preference. These are stored preferences only; enabling voice access does not start a microphone or speech service. It is keyboard-driven and exits without modifying the host or disk.
+The console launcher opens system information, appearance preferences, network status, a system monitor, Vampire Shell, installer preflight, the Weston preview, VPM diagnostics, update checks, Software Center, SSH status, Files, hardware inventory, health checks, support snapshots, firewall status and the command reference. It is keyboard-driven and exits without modifying disks.
 
 ## Manage preferences
 
@@ -51,12 +50,16 @@ dock, file manager, window manager or installer is included yet.
 
 ```sh
 vnetwork status
+vnetwork start eth0
+vnetwork stop eth0
 vctl list
 vctl status network
 vctl start network
 ```
 
-DHCP startup is attempted during live boot. The firewall helper remains
+DHCP startup is attempted during live boot. The DHCP hook configures the IPv4
+address, default route and DNS resolver from a validated lease. Stopping the
+network service removes only resolver data written by Vampire DHCP. The firewall helper remains
 opt-in because applying an inbound-drop policy can disconnect a remote server:
 
 ```sh
@@ -84,8 +87,10 @@ writes to storage. A passing preflight is not approval to erase a disk.
 
 ## Graphical preview and package manager
 
-- `vgraphical` starts the upstream Weston DRM desktop shell when a DRM GPU is available.
-  This is not the branded Vampire Desktop; see [GRAPHICAL-SESSION.md](GRAPHICAL-SESSION.md).
+- `vgraphical` starts the configured Weston DRM desktop preview when a DRM GPU is available.
+  The preview includes Foot with Vampire Shell and panel launchers for Terminal, Files,
+  Settings and Software Center. It is not yet the custom Vampire shell; see
+  [GRAPHICAL-SESSION.md](GRAPHICAL-SESSION.md).
 - `vpm --version`, `vpm list` and `vpm doctor` are included in the image.
   The repository list is empty until a signed Vampire package repository exists;
   see [VPM-INTEGRATION.md](VPM-INTEGRATION.md).
@@ -109,3 +114,7 @@ The optional nftables profile is managed by `vfirewall status|apply|clear`.
 It is not enabled at boot. Applying a default-deny inbound policy remotely
 can disconnect you; verify the SSH port and recovery access first. See
 [HARDWARE-DIAGNOSTICS.md](HARDWARE-DIAGNOSTICS.md) and [FIREWALL.md](FIREWALL.md).
+
+## Command reference
+
+Run `vhelp` from Vampire Shell or choose option 18 in `vdesktop` for the complete command list and safety notes.
