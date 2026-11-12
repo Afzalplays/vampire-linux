@@ -19,11 +19,15 @@ if [ ! -f /etc/vampire/settings.conf ] && [ -r /etc/vampire/settings.defaults ];
 fi
 if [ -x /usr/bin/vsettings ] && [ -f /etc/vampire/settings.conf ]; then
   if ! /usr/bin/vsettings validate >/dev/null 2>&1; then
-    cp /etc/vampire/settings.conf /var/lib/vampire/settings.conf.invalid 2>/dev/null || true
-    cp /etc/vampire/settings.defaults /etc/vampire/settings.conf.tmp
-    chmod 600 /etc/vampire/settings.conf.tmp
-    mv -f /etc/vampire/settings.conf.tmp /etc/vampire/settings.conf
-    printf 'Vampire OS: invalid settings backed up; defaults restored\\n' >&2
+    if [ -r /etc/vampire/settings.defaults ]; then
+      cp /etc/vampire/settings.conf /var/lib/vampire/settings.conf.invalid 2>/dev/null || true
+      cp /etc/vampire/settings.defaults /etc/vampire/settings.conf.tmp
+      chmod 600 /etc/vampire/settings.conf.tmp
+      mv -f /etc/vampire/settings.conf.tmp /etc/vampire/settings.conf
+      printf 'Vampire OS: invalid settings backed up; defaults restored\n' >&2
+    else
+      printf 'Vampire OS: invalid settings and defaults unavailable\n' >&2
+    fi
   fi
 fi
 printf '\n  Vampire OS 0.1.0-dev | x86_64 live environment\n'
