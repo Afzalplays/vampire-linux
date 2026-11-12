@@ -60,24 +60,24 @@ while :; do
   printf '  1) System information\n  2) Appearance and desktop settings\n  3) Network status\n  4) System monitor\n  5) Open Vampire Shell\n  6) Show all settings\n  7) Installer storage preflight\n  8) Graphical session (Weston preview)\n  9) VPM package manager diagnostics\n  10) Signed OS update check\n  11) Vampire Software Center (console)\n  12) SSH service status (opt-in)\n  13) Vampire Files (console)\n  14) Hardware inventory\n  15) System health check\n  16) Generate support snapshot\n  17) Firewall status (read-only)\n  18) Command reference\n  0) Exit launcher\n  Select: '
   IFS= read -r choice || exit 0
   case "$choice" in
-    1) "$FETCH"; pause ;;
-    2) appearance_menu ;;
-    3) "$NETWORK" status; pause ;;
-    4) vmonitor; pause ;;
-    5) if command -v vsh >/dev/null 2>&1; then vsh; else "${SHELL:-/bin/sh}"; fi ;;
-    6) "$SETTINGS" list; pause ;;
-    7) installer_menu ;;
-    8) vgraphical; pause ;;
-    9) vpm doctor; pause ;;
-    10) vupdate check; pause ;;
-    11) vsoftware ;;
-    12) vssh status; printf "Use vssh start only after installing your trusted public key.\n"; pause ;;
-    13) vfiles ;;
-    14) vhardware; pause ;;
-    15) vhealth; pause ;;
-    16) vdiagnose; pause ;;
-    17) vfirewall status; pause ;;
-    18) vhelp; pause ;;
+    1) run_and_pause "$FETCH" ;;
+    2) run_tool appearance_menu ;;
+    3) run_and_pause "$NETWORK" status ;;
+    4) run_and_pause vmonitor ;;
+    5) if command -v vsh >/dev/null 2>&1; then run_tool vsh; else run_tool "${SHELL:-/bin/sh}"; fi ;;
+    6) run_and_pause "$SETTINGS" list ;;
+    7) run_tool installer_menu ;;
+    8) run_and_pause vgraphical ;;
+    9) run_and_pause vpm doctor ;;
+    10) run_and_pause vupdate check ;;
+    11) run_tool vsoftware ;;
+    12) run_tool vssh status; printf "Use vssh start only after installing your trusted public key.\n"; pause ;;
+    13) run_tool vfiles ;;
+    14) run_and_pause vhardware ;;
+    15) run_and_pause vhealth ;;
+    16) run_and_pause vdiagnose ;;
+    17) run_and_pause vfirewall status ;;
+    18) run_and_pause vhelp ;;
     0) exit 0 ;;
     *) echo "Invalid choice." ;;
   esac
