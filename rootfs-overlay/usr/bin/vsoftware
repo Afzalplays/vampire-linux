@@ -8,12 +8,18 @@ confirm() {
   IFS= read -r answer || return 1
   case "$answer" in y|Y|yes|YES) return 0 ;; *) return 1 ;; esac
 }
+run_vpm() {
+  if "$VPM" "$@"; then :; else
+    status=$?
+    printf 'VPM command failed (exit %s). Check repository readiness above.\n' "$status"
+  fi
+}
+printf '  V A M P I R E  /  SOFTWARE\n'
+printf '  Repository readiness:\n'
+"$VPM" doctor || printf '  Configure a signed repository before package installation.\n'
 while :; do
   printf '\n'
-  printf '  V A M P I R E  /  SOFTWARE\n'
   printf '  -------------------------\n'
-  printf '  Repository readiness:\n'
-  "$VPM" doctor || printf '  Configure a signed repository before package installation.\\n'
   printf '  1) Refresh signed package indexes\n'
   printf '  2) Search packages\n'
   printf '  3) Package information\n'
@@ -24,18 +30,26 @@ while :; do
   printf '  Select: '
   IFS= read -r choice || exit 0
   case "$choice" in
-    1) "$VPM" update; pause ;;
-    2) printf 'Search: '; IFS= read -r term; [ -n "$term" ] && "$VPM" search "$term"; pause ;;
-    3) printf 'Package name: '; IFS= read -r pkg; [ -n "$pkg" ] && "$VPM" info "$pkg"; pause ;;
+    1) run_vpm update; pause ;;
+    2)
+      printf 'Search: '; IFS= read -r term
+      if [ -n "$term" ]; then run_vpm search "$term"; fi
+      pause ;;
+    3)
+      printf 'Package name: '; IFS= read -r pkg
+      if [ -n "$pkg" ]; then run_vpm info "$pkg"; fi
+      pause ;;
     4)
       printf 'Package name: '; IFS= read -r pkg
-      if [ -n "$pkg" ] && confirm "Install $pkg?"; then "$VPM" install "$pkg" -y; else echo "Install cancelled."; fi
+      if [ -n "$pkg" ] && confirm "Install $pkg?"; then run_vpm install "$pkg" -y
+      else echo "Install cancelled."; fi
       pause ;;
     5)
       printf 'Package name: '; IFS= read -r pkg
-      if [ -n "$pkg" ] && confirm "Remove $pkg and its recorded files?"; then "$VPM" remove "$pkg"; else echo "Removal cancelled."; fi
+      if [ -n "$pkg" ] && confirm "Remove $pkg and its recorded files?"; then run_vpm remove "$pkg"
+      else echo "Removal cancelled."; fi
       pause ;;
-    6) "$VPM" list; pause ;;
+    6) run_vpm list; pause ;;
     0) exit 0 ;;
     *) echo "Invalid choice." ;;
   esac

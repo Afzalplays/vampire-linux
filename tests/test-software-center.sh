@@ -21,4 +21,16 @@ if grep -q '^install ' "$TMP/log"; then
 fi
 printf '4\nsample-package\ny\n\n0\n' | sh "$ROOT/rootfs-overlay/usr/bin/vsoftware" >/dev/null
 grep -qx 'install sample-package -y' "$TMP/log"
+
+cat > "$TMP/failing-vpm" <<'MOCK'
+#!/bin/sh
+printf '%s\n' "$*" >> "$VPM_LOG"
+exit 1
+MOCK
+chmod +x "$TMP/failing-vpm"
+: > "$TMP/log"
+printf '1\n\n6\n\n0\n' | VAMPIRE_VPM_CMD="$TMP/failing-vpm" sh "$ROOT/rootfs-overlay/usr/bin/vsoftware" >/dev/null
+grep -qx 'update' "$TMP/log"
+grep -qx 'list' "$TMP/log"
+
 echo "Vampire Software Center console tests passed."
