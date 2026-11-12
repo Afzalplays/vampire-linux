@@ -15,6 +15,7 @@ on:
       - "rootfs-overlay/**"
       - "vpm/**"
       - "scripts/test-live-iso.sh"
+      - "scripts/configure-build-output.py"
       - ".github/workflows/server-iso.yml"
 
 permissions:

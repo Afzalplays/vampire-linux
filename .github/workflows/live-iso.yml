@@ -17,6 +17,7 @@ on:
       - "rootfs-overlay/**"
       - "fetch/vfetch"
       - "scripts/test-live-iso.sh"
+      - "scripts/configure-build-output.py"
       - ".github/workflows/live-iso.yml"
 
 permissions:
