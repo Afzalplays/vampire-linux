@@ -12,6 +12,7 @@ SYSTEM
   vhelp                          Show this command reference
   vsh                            Start the Vampire Shell
   vsettings list|keys|get|set    Read or change validated desktop preferences
+  vsettings validate|reset      Validate or restore default preferences
   vsettings apply                Apply theme, accent, panel and terminal settings
 
 NETWORK AND SERVICES
