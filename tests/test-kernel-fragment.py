@@ -28,7 +28,7 @@ class KernelFragmentTests(unittest.TestCase):
             configure(config, overlay, "desktop")
             output = config.read_text(encoding="utf-8")
             self.assertIn(str(fragment.resolve()), output)
-            self.assertIn("EDITION=desktop", (overlay / "etc/vampire/os.conf").read_text())
+            self.assertIn('EDITION="desktop"', (overlay / "etc/vampire/os.conf").read_text())
             self.assertIn("Vampire OS 0.1.0-dev (desktop)", (overlay / "etc/os-release").read_text())
 
     def test_server_does_not_receive_desktop_kernel_fragment(self):
