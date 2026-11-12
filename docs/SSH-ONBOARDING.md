@@ -20,9 +20,9 @@ authentication and root password authentication. The default port is 22;
 override it with `VAMPIRE_SSH_PORT=2222 vssh start`. To stop the service, run
 `vssh stop`. The SSH client is available through `vssh connect user@host`.
 
-This is an opt-in development/live-session service, not a finished server
-edition. Host keys are generated locally and are ephemeral in the current
-read-only initramfs session; production server deployments need persistent
-per-device host keys, non-root user onboarding, firewall integration,
-audit logging and a tested persistent filesystem. Do not expose this live
-image to an untrusted network.
+The Ed25519 host key is stored at `/var/lib/vampire/ssh/dropbear_ed25519_host_key` by default; override it with `VAMPIRE_SSH_HOST_KEY` if required. It persists across reboot only when `/var` is on persistent storage. In the current initramfs live session, `/var` is temporary, so the host key changes after reboot.
+
+This remains an opt-in development/live-session service, not a finished server
+edition. Production deployments still need non-root user onboarding, firewall
+integration, audit logging and a tested persistent filesystem. Do not expose
+this live image to an untrusted network.
