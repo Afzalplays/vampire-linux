@@ -37,6 +37,8 @@ fi
 
 export VAMPIRE_SHELL=1
 export VAMPIRE_SHELL_VERSION=0.1.0-dev
+# Bash reads BASH_ENV for non-interactive commands and --rcfile for interactive sessions.
+export BASH_ENV="$RCFILE"
 if [ "$#" -eq 0 ]; then
   exec "$BASH_BIN" --noprofile --rcfile "$RCFILE" -i
 fi

@@ -9,7 +9,7 @@ cp "$ROOT/rootfs-overlay/etc/vampire/shellrc" "$TMP/etc/vampire/shellrc"
 cat > "$TMP/bin/bash-mock" <<'MOCK'
 #!/bin/sh
 printf '%s\n' "$@" > "$VSH_ARGS"
-printf '%s\n' "${VAMPIRE_SHELL:-}" "${VAMPIRE_SHELL_VERSION:-}" > "$VSH_ENV"
+printf '%s\n' "${VAMPIRE_SHELL:-}" "${VAMPIRE_SHELL_VERSION:-}" "${BASH_ENV:-}" > "$VSH_ENV"
 MOCK
 chmod +x "$TMP/bin/bash-mock"
 export VSH_ARGS="$TMP/args" VSH_ENV="$TMP/env"
@@ -19,6 +19,7 @@ grep -qx -- '--rcfile' "$VSH_ARGS"
 grep -qx -- '-c' "$VSH_ARGS"
 grep -qx '1' "$VSH_ENV"
 grep -qx '0.1.0-dev' "$VSH_ENV"
+grep -qx "$TMP/etc/vampire/shellrc" "$VSH_ENV"
 "$VSH" --version | grep -q 'Vampire Shell 0.1.0-dev'
 "$VSH" --help | grep -q 'Bash as its execution engine'
 if VAMPIRE_BASH_CMD="$TMP/missing" VAMPIRE_SHELL_RC="$TMP/etc/vampire/shellrc" "$VSH" -c true >/dev/null 2>&1; then
