@@ -253,18 +253,34 @@ def command_remove(args):
     if not isinstance(files, list):
         fail("package has no trustworthy file ownership record; refusing removal")
     root = ROOT.resolve()
+    targets = []
+    # Validate the entire manifest before deleting anything. Check each path
+    # component with lstat semantics (Path.is_symlink) before resolving it:
+    # resolving first would hide a final-component symlink and could unlink
+    # the symlink target instead of the package-owned path.
     for relative in files:
-        if not isinstance(relative, str) or not relative or relative.startswith("/") or "\\" in relative:
+        if (not isinstance(relative, str) or not relative
+                or relative.startswith("/") or "\\" in relative):
             fail("invalid installed-file record; refusing removal")
-        target = (root / relative).resolve()
+        parts = pathlib.PurePosixPath(relative).parts
+        if not parts or any(part in ("", ".", "..") for part in parts):
+            fail(f"invalid installed-file path: {relative}")
+        candidate = root
+        for part in parts:
+            candidate = candidate / part
+            if candidate.is_symlink():
+                fail(f"refusing to follow symlink during removal: {relative}")
+        target = candidate.resolve()
         if target != root and root not in target.parents:
             fail(f"installed-file record escapes target root: {relative}")
-        if target.is_symlink():
-            fail(f"refusing to follow symlink during removal: {relative}")
+        if target.exists() and not target.is_file():
+            fail(f"refusing to remove non-file package path: {relative}")
+        targets.append(target)
+
+    # Only mutate the filesystem after every manifest entry has passed checks.
+    for target in targets:
         if target.is_file():
             target.unlink()
-        elif target.exists():
-            fail(f"refusing to remove non-file package path: {relative}")
     del db[args.name]
     DB.parent.mkdir(parents=True, exist_ok=True)
     tmp = DB.with_suffix(".tmp")

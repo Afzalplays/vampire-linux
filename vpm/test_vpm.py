@@ -98,6 +98,55 @@ class ArchiveSafetyTests(unittest.TestCase):
             self.assertTrue(unrelated.exists())
             self.assertNotIn("sample", __import__("json").loads(db_path.read_text()))
 
+    def test_remove_refuses_final_symlink_without_touching_target(self):
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as tmp:
+            base = pathlib.Path(tmp)
+            root = base / "root"
+            root.mkdir()
+            target = root / "usr/share/keep.txt"
+            target.parent.mkdir(parents=True)
+            target.write_text("keep")
+            link = root / "usr/share/owned-link.txt"
+            link.symlink_to(target)
+            db_path = base / "installed.json"
+            db_path.write_text('{"sample": {"version": "1.0", "files": ["usr/share/owned-link.txt"]}}')
+            old_root, old_db = vpm.ROOT, vpm.DB
+            try:
+                vpm.ROOT, vpm.DB = root, db_path
+                with self.assertRaises(SystemExit):
+                    vpm.command_remove(SimpleNamespace(name="sample"))
+            finally:
+                vpm.ROOT, vpm.DB = old_root, old_db
+            self.assertEqual(target.read_text(), "keep")
+            self.assertTrue(link.is_symlink())
+            self.assertIn("sample", __import__("json").loads(db_path.read_text()))
+
+    def test_remove_preflights_all_paths_before_deleting(self):
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as tmp:
+            base = pathlib.Path(tmp)
+            root = base / "root"
+            root.mkdir()
+            owned = root / "usr/share/owned.txt"
+            owned.parent.mkdir(parents=True)
+            owned.write_text("must remain when manifest is unsafe")
+            target = root / "usr/share/keep.txt"
+            target.write_text("keep")
+            (root / "usr/share/unsafe-link").symlink_to(target)
+            db_path = base / "installed.json"
+            db_path.write_text('{"sample": {"version": "1.0", "files": ["usr/share/owned.txt", "usr/share/unsafe-link"]}}')
+            old_root, old_db = vpm.ROOT, vpm.DB
+            try:
+                vpm.ROOT, vpm.DB = root, db_path
+                with self.assertRaises(SystemExit):
+                    vpm.command_remove(SimpleNamespace(name="sample"))
+            finally:
+                vpm.ROOT, vpm.DB = old_root, old_db
+            self.assertEqual(owned.read_text(), "must remain when manifest is unsafe")
+            self.assertEqual(target.read_text(), "keep")
+            self.assertIn("sample", __import__("json").loads(db_path.read_text()))
+
     def test_remove_refuses_untracked_legacy_record(self):
         from types import SimpleNamespace
         with tempfile.TemporaryDirectory() as tmp:
