@@ -87,6 +87,19 @@ test "$("$TMP/vsettings" get update_channel)" = testing
 test "$("$TMP/vsettings" get voice_access)" = true
 test "$("$TMP/vsettings" get theme)" = dark
 grep -q "^background-color=0xff08080c$" "$TMP/weston.ini"
+
+cat > "$TMP/mockbin/vpm" <<'MOCK'
+#!/bin/sh
+exit 1
+MOCK
+cat > "$TMP/mockbin/vupdate" <<'MOCK'
+#!/bin/sh
+exit 1
+MOCK
+chmod +x "$TMP/mockbin/vpm" "$TMP/mockbin/vupdate"
+printf '9\n\n10\n\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/errors.out"
+grep -q 'Command failed (exit 1)' "$TMP/errors.out"
+
 sh "$ROOT/rootfs-overlay/usr/bin/vmonitor" > "$TMP/monitor.out"
 grep -q "VAMPIRE MONITOR" "$TMP/monitor.out"
 echo "Vampire settings, Desktop preference menu, Vampire Shell dispatch and monitor tests passed."
