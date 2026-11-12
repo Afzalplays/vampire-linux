@@ -47,6 +47,7 @@ jobs:
           bash tests/test-rootfs-contract.sh
           bash -x tests/test-command-tools.sh
           bash -x tests/test-network-lifecycle.sh
+          bash tests/test-wifi-network.sh
           bash tests/test-wayland-terminal.sh
           bash tests/test-weston-launchers.sh
           bash tests/test-settings-launcher.sh
@@ -69,6 +70,11 @@ jobs:
           grep -qx 'BR2_PACKAGE_WESTON=y' build/vampire_defconfig
           grep -qx 'BR2_PACKAGE_FOOT=y' build/vampire_defconfig
           grep -qx 'BR2_PACKAGE_DEJAVU=y' build/vampire_defconfig
+          grep -qx 'BR2_PACKAGE_IW=y' build/vampire_defconfig
+          grep -qx 'BR2_PACKAGE_WPA_SUPPLICANT=y' build/vampire_defconfig
+          grep -qx 'BR2_PACKAGE_WPA_SUPPLICANT_CLI=y' build/vampire_defconfig
+          grep -qx 'BR2_PACKAGE_WPA_SUPPLICANT_PASSPHRASE=y' build/vampire_defconfig
+          grep -qx 'BR2_PACKAGE_LINUX_FIRMWARE_IWLWIFI_9XXX=y' build/vampire_defconfig
           grep -qx 'BR2_PACKAGE_PYTHON3=y' build/vampire_defconfig
           grep -qx 'BR2_PACKAGE_MINISIGN=y' build/vampire_defconfig
           grep -qx 'BR2_PACKAGE_DROPBEAR=y' build/vampire_defconfig

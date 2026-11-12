@@ -54,6 +54,11 @@ service or update service.
 vnetwork status
 vnetwork start eth0
 vnetwork stop eth0
+vnetwork wifi list
+vnetwork wifi scan wlan0
+vnetwork wifi connect wlan0 'Home Wi-Fi'
+vnetwork wifi status wlan0
+vnetwork wifi disconnect wlan0
 vctl list
 vctl status network
 vctl start network
@@ -120,3 +125,5 @@ can disconnect you; verify the SSH port and recovery access first. See
 ## Command reference
 
 Run `vhelp` from Vampire Shell or choose option 18 in `vdesktop` for the complete command list and safety notes.
+
+Wi-Fi uses `iw` and `wpa_supplicant`. The connection command prompts for a WPA passphrase without echoing it and stores only the derived PSK in a mode-0600 configuration file. The Desktop image includes common Intel iwlwifi firmware; other adapters still depend on their kernel driver and firmware being available.

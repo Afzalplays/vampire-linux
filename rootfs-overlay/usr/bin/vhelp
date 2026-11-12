@@ -19,6 +19,11 @@ NETWORK AND SERVICES
   vnetwork status [IFACE]        Show interface and DHCP state
   vnetwork start|stop [IFACE]    Start or stop DHCP networking
   vnetwork restart [IFACE]       Renew the network connection
+  vnetwork wifi list             List detected wireless interfaces
+  vnetwork wifi scan IFACE       Scan for nearby access points
+  vnetwork wifi connect IFACE SSID  Connect with a hidden passphrase prompt
+  vnetwork wifi status IFACE     Show Wi-Fi association and DHCP status
+  vnetwork wifi disconnect IFACE Disconnect from a wireless network
   vctl list                      List available services
   vctl start|stop SERVICE        Control an installed service
   vctl restart|status SERVICE    Restart or inspect a service
