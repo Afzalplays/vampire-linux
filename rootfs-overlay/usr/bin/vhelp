@@ -32,6 +32,7 @@ SOFTWARE AND UPDATES
   vsoftware                     Open the console Software Center
   vupdate check                  Verify the configured signed update manifest
   vupdate download               Download and verify an update image
+  vupdate status                 List verified images staged locally
 
 FILES AND ADMINISTRATION
   vfiles                         Open the console file manager
