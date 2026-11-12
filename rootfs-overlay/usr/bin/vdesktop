@@ -8,6 +8,42 @@ INSTALLER=${VAMPIRE_INSTALLER_CMD:-vinstall}
 pause() { printf '\nPress Enter to continue...'; IFS= read -r _ || true; }
 run_tool() { if "$@"; then :; else status=$?; printf "Command failed (exit %s).\n" "$status"; fi; }
 run_and_pause() { run_tool "$@"; pause; }
+
+network_menu() {
+  while :; do
+    printf '\n  VAMPIRE / NETWORK SETTINGS\n'
+    printf '  1) Wired and interface status\n'
+    printf '  2) List wireless interfaces\n'
+    printf '  3) Scan Wi-Fi networks\n'
+    printf '  4) Connect to Wi-Fi\n'
+    printf '  5) Wi-Fi connection status\n'
+    printf '  6) Disconnect Wi-Fi\n'
+    printf '  0) Back\n'
+    printf '  Select: '
+    IFS= read -r network_choice || return 0
+    case "$network_choice" in
+      1) run_and_pause "$NETWORK" status ;;
+      2) run_and_pause "$NETWORK" wifi list ;;
+      3)
+        printf 'Wireless interface (blank = first): '; IFS= read -r wifi_iface
+        run_and_pause "$NETWORK" wifi scan "$wifi_iface" ;;
+      4)
+        printf 'Wireless interface (blank = first): '; IFS= read -r wifi_iface
+        printf 'Network SSID: '; IFS= read -r wifi_ssid
+        run_tool "$NETWORK" wifi connect "$wifi_iface" "$wifi_ssid"
+        pause ;;
+      5)
+        printf 'Wireless interface (blank = first): '; IFS= read -r wifi_iface
+        run_and_pause "$NETWORK" wifi status "$wifi_iface" ;;
+      6)
+        printf 'Wireless interface (blank = first): '; IFS= read -r wifi_iface
+        run_and_pause "$NETWORK" wifi disconnect "$wifi_iface" ;;
+      0) return 0 ;;
+      *) echo "Invalid choice." ;;
+    esac
+  done
+}
+
 installer_menu() {
   printf "\nVampire Installer — read-only storage checks\n"
   printf "No partitioning or formatting is available in this build.\n\n"
@@ -63,12 +99,12 @@ case "${1:-}" in
 esac
 while :; do
   printf '\n  V A M P I R E  O S\n  Vampire Desktop — Console Preview\n  -------------------------------\n'
-  printf '  1) System information\n  2) Appearance and desktop settings\n  3) Network status\n  4) System monitor\n  5) Open Vampire Shell\n  6) Show all settings\n  7) Installer storage preflight\n  8) Graphical session (Weston preview)\n  9) VPM package manager diagnostics\n  10) Signed OS update check\n  11) Vampire Software Center (console)\n  12) SSH service status (opt-in)\n  13) Vampire Files (console)\n  14) Hardware inventory\n  15) System health check\n  16) Generate support snapshot\n  17) Firewall status (read-only)\n  18) Command reference\n  0) Exit launcher\n  Select: '
+  printf '  1) System information\n  2) Appearance and desktop settings\n  3) Network settings\n  4) System monitor\n  5) Open Vampire Shell\n  6) Show all settings\n  7) Installer storage preflight\n  8) Graphical session (Weston preview)\n  9) VPM package manager diagnostics\n  10) Signed OS update check\n  11) Vampire Software Center (console)\n  12) SSH service status (opt-in)\n  13) Vampire Files (console)\n  14) Hardware inventory\n  15) System health check\n  16) Generate support snapshot\n  17) Firewall status (read-only)\n  18) Command reference\n  0) Exit launcher\n  Select: '
   IFS= read -r choice || exit 0
   case "$choice" in
     1) run_and_pause "$FETCH" ;;
     2) run_tool appearance_menu ;;
-    3) run_and_pause "$NETWORK" status ;;
+    3) run_tool network_menu ;;
     4) run_and_pause vmonitor ;;
     5) if command -v vsh >/dev/null 2>&1; then run_tool vsh; else run_tool "${SHELL:-/bin/sh}"; fi ;;
     6) run_and_pause "$SETTINGS" list ;;
