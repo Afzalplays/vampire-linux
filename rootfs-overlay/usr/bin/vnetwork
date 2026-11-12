@@ -182,6 +182,7 @@ wifi_disconnect() {
 }
 wifi_command() {
   subcommand=${2:-list}
+  if [ "$subcommand" != list ] && command -v modprobe >/dev/null 2>&1; then modprobe iwlwifi 2>/dev/null || true; fi
   case "$subcommand" in
     list) [ "$#" -le 2 ] || usage; wifi_list ;;
     scan|status|disconnect)
