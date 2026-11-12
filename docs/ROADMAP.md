@@ -16,6 +16,7 @@ feature release-ready.
 - [x] Add tests for settings validation, desktop launcher and core console tools.
 - [x] Add read-only installer disk discovery and target preflight checks.
 - [x] Add hardware, storage, health, log and support diagnostics.
+- [x] Add DHCP lease application, DNS configuration and network start/stop lifecycle.
 - [x] Build Desktop and Server ISO images in CI.
 - [x] Pass legacy BIOS QEMU live-init and serial-login smoke test.
 - [ ] Pass UEFI QEMU live-init and serial-login test with OVMF.
@@ -26,12 +27,13 @@ feature release-ready.
 
 - [ ] Pin and verify source archives and toolchain inputs.
 - [ ] Establish reproducible builds and build provenance.
-- [ ] Build a dedicated cross-toolchain and stable filesystem layout.
+- [x] Build a dedicated x86_64 musl-based Buildroot toolchain and stable live filesystem layout.
 - [x] Add the Vampire Shell branded Bash-compatible launcher and interactive profile.
 - [ ] Replace the Bash compatibility engine with a dedicated Vampire Shell parser/runtime.
 - [ ] Implement a production Vampire Init supervisor.
 - [ ] Implement users, groups, permissions, logging and device management.
-- [ ] Complete network profiles, DNS, Wi-Fi and VPN support.
+- [x] Implement a DHCP client lifecycle with lease address, default route and DNS updates.
+- [ ] Complete Wi-Fi, VPN and persistent network profile support.
 - [ ] Add firmware handling and a tested rescue mode.
 
 ## Package management
@@ -48,7 +50,7 @@ feature release-ready.
 ## Desktop edition
 
 - [x] Add Weston DRM/Wayland compositor and upstream desktop-shell packages for graphics bring-up.
-- [x] Add console-mode `vdesktop` launcher and validated `vsettings` backend.
+- [x] Add console-mode vdesktop launcher and validated vsettings backend.
 - [x] Add theme, accent, transparency, blur, terminal, dock and top-panel preference storage.
 - [x] Add console file manager, hardware inventory and diagnostics.
 - [ ] Build the branded Vampire Desktop shell: top panel, floating dock, launcher and window integration.

@@ -1,21 +1,78 @@
 #!/bin/sh
-# Minimal DHCP helper for the initial BusyBox live environment.
+# Vampire OS DHCP network manager for the BusyBox live environment.
 set -eu
-command -v udhcpc >/dev/null 2>&1 || { echo "vnetwork: udhcpc not installed" >&2; exit 1; }
-iface=${2:-}
-if [ -z "$iface" ]; then
-  for path in /sys/class/net/*; do
+SYS_NET=\${VAMPIRE_SYS_NET:-/sys/class/net}
+RUN_DIR=\${VAMPIRE_NETWORK_RUN_DIR:-/run/vampire/dhcp}
+HOOK=\${VAMPIRE_DHCP_HOOK:-/usr/lib/vampire/udhcpc.script}
+usage() { echo "Usage: vnetwork {start|stop|restart|status} [interface]" >&2; exit 2; }
+valid_iface() {
+  case "$1" in ''|*[!A-Za-z0-9_.-]*) return 1 ;; esac
+  [ "\${#1}" -le 15 ]
+}
+find_iface() {
+  for path in "$SYS_NET"/*; do
     [ -e "$path" ] || continue
-    candidate=${path##*/}
+    candidate=\${path##*/}
     [ "$candidate" = lo ] && continue
-    iface=$candidate
-    break
+    printf '%s\n' "$candidate"
+    return 0
   done
-fi
-[ -n "$iface" ] || { echo "vnetwork: no network interface found" >&2; exit 1; }
-case "${1:-}" in
- start) udhcpc -n -q -i "$iface"; echo "vnetwork: DHCP configured $iface" ;;
- stop) echo "vnetwork: lease release is not automated in this prototype" ;;
- status) ip addr show dev "$iface" 2>/dev/null || ifconfig "$iface" 2>/dev/null || true ;;
- *) echo "Usage: vnetwork {start|stop|status} [interface]" >&2; exit 2 ;;
+  return 1
+}
+get_iface() {
+  if [ -n "$2" ]; then iface=$2; else iface=$(find_iface) || {
+    echo "vnetwork: no network interface found" >&2; return 1;
+  }; fi
+  valid_iface "$iface" || { echo "vnetwork: invalid interface name" >&2; return 2; }
+  [ -e "$SYS_NET/$iface" ] || { echo "vnetwork: interface does not exist: $iface" >&2; return 1; }
+}
+pidfile_for() { printf '%s/%s.pid' "$RUN_DIR" "$iface"; }
+is_running() {
+  pidfile=$(pidfile_for)
+  [ -s "$pidfile" ] || return 1
+  IFS= read -r pid < "$pidfile" || return 1
+  case "$pid" in ''|*[!0-9]*) return 1 ;; esac
+  kill -0 "$pid" 2>/dev/null
+}
+start_network() {
+  command -v udhcpc >/dev/null 2>&1 || { echo "vnetwork: udhcpc is not installed" >&2; return 127; }
+  [ -x "$HOOK" ] || { echo "vnetwork: DHCP hook is missing or not executable: $HOOK" >&2; return 1; }
+  mkdir -p "$RUN_DIR"
+  if is_running; then echo "vnetwork: DHCP already running on $iface"; return 0; fi
+  rm -f "$(pidfile_for)"
+  echo "vnetwork: requesting DHCP lease on $iface"
+  udhcpc -b -q -i "$iface" -s "$HOOK" -p "$(pidfile_for)"
+}
+stop_network() {
+  pidfile=$(pidfile_for)
+  if is_running; then
+    IFS= read -r pid < "$pidfile"
+    kill -TERM "$pid" 2>/dev/null || true
+    interface="$iface" "$HOOK" deconfig || true
+    rm -f "$pidfile"
+    echo "vnetwork: DHCP stopped on $iface"
+  else
+    rm -f "$pidfile"
+    echo "vnetwork: DHCP is not running on $iface"
+  fi
+}
+status_network() {
+  if command -v ip >/dev/null 2>&1; then ip addr show dev "$iface"
+  elif command -v ifconfig >/dev/null 2>&1; then ifconfig "$iface"
+  else echo "vnetwork: neither ip nor ifconfig is available" >&2; return 1; fi
+  if is_running; then echo "DHCP client: running"; else echo "DHCP client: stopped"; fi
+}
+[ "$#" -le 2 ] || usage
+action=\${1:-help}
+case "$action" in
+  start|stop|restart|status)
+    get_iface "$action" "\${2:-}"
+    case "$action" in
+      start) start_network ;;
+      stop) stop_network ;;
+      restart) stop_network; start_network ;;
+      status) status_network ;;
+    esac ;;
+  help|-h|--help) usage ;;
+  *) usage ;;
 esac
