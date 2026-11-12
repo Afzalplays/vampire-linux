@@ -34,9 +34,9 @@ is_running() {
   IFS= read -r pid < "$pidfile" || return 1
   case "$pid" in ''|*[!0-9]*) return 1 ;; esac
   kill -0 "$pid" 2>/dev/null || return 1
-  [ -r "$PROC_ROOT/$pid/comm" ] || return 1
-  IFS= read -r process_name < "$PROC_ROOT/$pid/comm" || return 1
-  [ "$process_name" = udhcpc ]
+  [ -r "$PROC_ROOT/$pid/cmdline" ] || return 1
+  process_cmdline=$(tr '\000' ' ' < "$PROC_ROOT/$pid/cmdline" 2>/dev/null) || return 1
+  case "$process_cmdline" in *udhcpc*) return 0 ;; *) return 1 ;; esac
 }
 start_network() {
   command -v udhcpc >/dev/null 2>&1 || { echo "vnetwork: udhcpc is not installed" >&2; return 127; }
