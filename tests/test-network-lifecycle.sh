@@ -9,11 +9,8 @@ export VAMPIRE_NETWORK_RUN_DIR="$TMP/run"
 export VAMPIRE_DHCP_HOOK="$ROOT/rootfs-overlay/usr/lib/vampire/udhcpc.script"
 export VAMPIRE_RESOLV_CONF="$TMP/resolv.conf"
 cat > "$TMP/bin/udhcpc" <<'MOCK'
-#!/bin/sh
-if [ "${1:-}" = "--daemon" ]; then
-  trap 'exit 0' TERM INT
-  while :; do sleep 1; done
-fi
+#!/bin/bash
+if [[ "${1:-}" == "--daemon" ]]; then exec -a udhcpc sleep 60; fi
 printf '%s\n' "$*" > "$DHCP_CALLS"
 while [ "$#" -gt 0 ]; do
   case "$1" in
