@@ -11,9 +11,23 @@ TIMEOUT_SECONDS="${VAMPIRE_QEMU_TIMEOUT:-75}"
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 need() { command -v "$1" >/dev/null 2>&1 || die "Missing test tool: $1"; }
 need qemu-system-x86_64
+need xorriso
 need timeout
 [[ -s "$ISO" ]] || die "ISO not found: $ISO"
 mkdir -p "$LOG_DIR"
+
+# Verify the release metadata embedded at ISO root matches this build target.
+metadata_file="$(mktemp "$LOG_DIR/os-release.XXXXXX")"
+if ! xorriso -osirrox on -indev "$ISO" -extract /os-release "$metadata_file" >/dev/null 2>&1; then
+  rm -f "$metadata_file"
+  die "could not read /os-release from ISO"
+fi
+if ! grep -Fqx "PRETTY_NAME=\\"Vampire OS 0.1.0-dev ($EDITION)\\"" "$metadata_file"; then
+  cat "$metadata_file" >&2
+  rm -f "$metadata_file"
+  die "ISO release metadata does not match requested edition: $EDITION"
+fi
+rm -f "$metadata_file"
 
 run_boot() {
   local mode="$1"

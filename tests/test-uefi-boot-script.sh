@@ -25,6 +25,21 @@ printf '%s\n' "$drives" >> "$VAMPIRE_FAKE_DRIVE_COUNTS"
 exit 124
 FAKE
 chmod +x "$TMP/bin/qemu-system-x86_64"
+cat > "$TMP/bin/xorriso" <<'FAKE_XORRISO'
+#!/usr/bin/env bash
+set -eu
+destination=""
+while (($#)); do
+  if [[ "$1" == "-extract" ]]; then
+    destination="$3"
+    break
+  fi
+  shift
+done
+[[ -n "$destination" ]]
+printf 'NAME="Vampire OS"\\nPRETTY_NAME="Vampire OS 0.1.0-dev (%s)"\\n' "${VAMPIRE_EDITION:-desktop}" > "$destination"
+FAKE_XORRISO
+chmod +x "$TMP/bin/xorriso"
 export PATH="$TMP/bin:$PATH"
 export VAMPIRE_OVMF_DIR="$TMP/ovmf"
 export VAMPIRE_QEMU_LOG_DIR="$TMP/logs"
