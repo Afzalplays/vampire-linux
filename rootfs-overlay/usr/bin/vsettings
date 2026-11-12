@@ -2,21 +2,27 @@
 # Vampire Settings: validated, atomic key/value preference storage.
 set -eu
 CONFIG=${VAMPIRE_SETTINGS_FILE:-/etc/vampire/settings.conf}
-DEFAULTS=/etc/vampire/settings.defaults
-usage() {
-  echo "Usage: vsettings {list|keys|get KEY|set KEY VALUE|reset}" >&2
-  exit 2
-}
+DEFAULTS=${VAMPIRE_SETTINGS_DEFAULTS:-/etc/vampire/settings.defaults}
+KEYS='theme accent surface_transparency blur terminal_opacity dock_size dock_position dock_auto_hide dock_magnification top_panel show_date show_clock show_network show_power reduced_motion update_channel voice_access'
+usage() { echo "Usage: vsettings {list|keys|get KEY|set KEY VALUE|reset}" >&2; exit 2; }
 valid_key() {
-  case "$1" in theme|blur|terminal_opacity|dock_size|reduced_motion|update_channel|voice_access) return 0 ;; *) return 1 ;; esac
+  case "$1" in
+    theme|accent|surface_transparency|blur|terminal_opacity|dock_size|dock_position|dock_auto_hide|dock_magnification|top_panel|show_date|show_clock|show_network|show_power|reduced_motion|update_channel|voice_access) return 0 ;;
+    *) return 1 ;;
+  esac
 }
 valid_value() {
   key=$1 value=$2
   case "$key:$value" in
     theme:dark|theme:light|theme:system) return 0 ;;
+    accent:crimson|accent:rose|accent:ice|accent:violet) return 0 ;;
+    surface_transparency:0|surface_transparency:10|surface_transparency:20|surface_transparency:30|surface_transparency:40|surface_transparency:50|surface_transparency:60) return 0 ;;
     blur:off|blur:low|blur:medium|blur:high|blur:extreme) return 0 ;;
     terminal_opacity:0|terminal_opacity:10|terminal_opacity:20|terminal_opacity:30|terminal_opacity:40|terminal_opacity:50|terminal_opacity:60|terminal_opacity:70|terminal_opacity:80|terminal_opacity:90|terminal_opacity:100) return 0 ;;
     dock_size:small|dock_size:medium|dock_size:large) return 0 ;;
+    dock_position:bottom-center|dock_position:left-center|dock_position:right-center) return 0 ;;
+    dock_auto_hide:true|dock_auto_hide:false|dock_magnification:true|dock_magnification:false) return 0 ;;
+    top_panel:true|top_panel:false|show_date:true|show_date:false|show_clock:true|show_clock:false|show_network:true|show_network:false|show_power:true|show_power:false) return 0 ;;
     reduced_motion:true|reduced_motion:false|voice_access:true|voice_access:false) return 0 ;;
     update_channel:stable|update_channel:testing) return 0 ;;
     *) return 1 ;;
@@ -28,13 +34,11 @@ read_value() {
 }
 [ "$#" -ge 1 ] || usage
 case "$1" in
-  keys)
-    printf '%s\n' theme blur terminal_opacity dock_size reduced_motion update_channel voice_access
-    ;;
+  keys) printf '%s\n' $KEYS ;;
   list)
-    for key in theme blur terminal_opacity dock_size reduced_motion update_channel voice_access; do
-      value=$(read_value "$key" 2>/dev/null || awk -F= -v k="$key" '$1==k {print $2}' "$DEFAULTS")
-      printf '%-20s %s\n' "$key" "${value:-unset}"
+    for key in $KEYS; do
+      value=$(read_value "$key" 2>/dev/null || awk -F= -v k="$key" '$1==k {print $2}' "$DEFAULTS" 2>/dev/null || true)
+      printf '%-22s %s\n' "$key" "${value:-unset}"
     done
     ;;
   get)
@@ -47,12 +51,11 @@ case "$1" in
     key=$2 value=$3
     valid_key "$key" || { echo "vsettings: unknown setting: $key" >&2; exit 1; }
     valid_value "$key" "$value" || { echo "vsettings: invalid value for $key: $value" >&2; exit 1; }
-    dir=${CONFIG%/*}
-    [ "$dir" = "$CONFIG" ] && dir=.
+    dir=${CONFIG%/*}; [ "$dir" = "$CONFIG" ] && dir=.
     mkdir -p "$dir"
     tmp="$CONFIG.tmp.$$"
     (set -C; : > "$tmp") 2>/dev/null || { echo "vsettings: temporary file already exists" >&2; exit 1; }
-    trap 'rm -f "$tmp"' EXIT HUP INT TERM
+    trap 'rm -f "$tmp"' 0 HUP INT TERM
     if [ -f "$CONFIG" ]; then
       awk -F= -v k="$key" -v v="$value" 'BEGIN { updated=0 } $1==k { if (!updated) print k "=" v; updated=1; next } { print } END { if (!updated) print k "=" v }' "$CONFIG" > "$tmp"
     else
@@ -60,14 +63,13 @@ case "$1" in
     fi
     chmod 600 "$tmp"
     mv -f "$tmp" "$CONFIG"
-    trap - EXIT HUP INT TERM
+    trap - 0 HUP INT TERM
     printf 'Saved %s=%s\n' "$key" "$value"
     ;;
   reset)
     [ "$#" -eq 1 ] || usage
     [ -r "$DEFAULTS" ] || { echo "vsettings: defaults file missing" >&2; exit 1; }
-    dir=${CONFIG%/*}
-    [ "$dir" = "$CONFIG" ] && dir=.
+    dir=${CONFIG%/*}; [ "$dir" = "$CONFIG" ] && dir=.
     mkdir -p "$dir"
     tmp="$CONFIG.tmp.$$"
     cp "$DEFAULTS" "$tmp"

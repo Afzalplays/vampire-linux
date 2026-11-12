@@ -17,24 +17,37 @@ installer_menu() {
 }
 appearance_menu() {
   while :; do
-    printf '\nVampire Settings — Appearance\n'
+    printf '\nVampire Settings — Appearance and Desktop\n'
     "$SETTINGS" list
-    printf '\n1) Theme (dark/light/system)\n2) Blur preset (off/low/medium/high/extreme)\n3) Terminal opacity (0..100, steps of 10)\n4) Dock size (small/medium/large)\n5) Reduced motion (true/false)\n0) Back\nChoice: '
+    printf '\n 1) Theme (dark/light/system)\n 2) Accent (crimson/rose/ice/violet)\n 3) Surface transparency (0..60)\n 4) Blur (off/low/medium/high/extreme)\n 5) Terminal opacity (0..100)\n 6) Dock size (small/medium/large)\n 7) Dock position (bottom-center/left-center/right-center)\n 8) Dock auto-hide (true/false)\n 9) Dock magnification (true/false)\n10) Top panel (true/false)\n11) Show date (true/false)\n12) Show clock (true/false)\n13) Show network (true/false)\n14) Show power (true/false)\n15) Reduced motion (true/false)\n 0) Back\nChoice: '
     IFS= read -r choice || exit 0
     case "$choice" in
-      1) key=theme; printf 'Value: '; IFS= read -r value; "$SETTINGS" set "$key" "$value" ;;
-      2) key=blur; printf 'Value: '; IFS= read -r value; "$SETTINGS" set "$key" "$value" ;;
-      3) key=terminal_opacity; printf 'Value: '; IFS= read -r value; "$SETTINGS" set "$key" "$value" ;;
-      4) key=dock_size; printf 'Value: '; IFS= read -r value; "$SETTINGS" set "$key" "$value" ;;
-      5) key=reduced_motion; printf 'Value: '; IFS= read -r value; "$SETTINGS" set "$key" "$value" ;;
+      1) key=theme ;;
+      2) key=accent ;;
+      3) key=surface_transparency ;;
+      4) key=blur ;;
+      5) key=terminal_opacity ;;
+      6) key=dock_size ;;
+      7) key=dock_position ;;
+      8) key=dock_auto_hide ;;
+      9) key=dock_magnification ;;
+      10) key=top_panel ;;
+      11) key=show_date ;;
+      12) key=show_clock ;;
+      13) key=show_network ;;
+      14) key=show_power ;;
+      15) key=reduced_motion ;;
       0) return ;;
-      *) echo "Invalid choice." ;;
+      *) echo "Invalid choice."; continue ;;
     esac
+    printf 'New value for %s: ' "$key"
+    IFS= read -r value || return
+    "$SETTINGS" set "$key" "$value" || true
   done
 }
 while :; do
   printf '\n  V A M P I R E  O S\n  Vampire Desktop — Console Preview\n  -------------------------------\n'
-  printf '  1) System information\n  2) Appearance settings\n  3) Network status\n  4) System monitor\n  5) Open shell\n  6) Show all settings\n  7) Installer storage preflight\n  8) Graphical session (Weston preview)\n  9) VPM package manager diagnostics\n  10) Signed OS update check\n  11) Vampire Software Center (console)\n  12) SSH service status (opt-in)\n  13) Vampire Files (console)\n  14) Hardware inventory\n  15) System health check\n  16) Generate support snapshot\n  17) Firewall status (read-only)\n  0) Exit launcher\n  Select: '
+  printf '  1) System information\n  2) Appearance and desktop settings\n  3) Network status\n  4) System monitor\n  5) Open shell\n  6) Show all settings\n  7) Installer storage preflight\n  8) Graphical session (Weston preview)\n  9) VPM package manager diagnostics\n  10) Signed OS update check\n  11) Vampire Software Center (console)\n  12) SSH service status (opt-in)\n  13) Vampire Files (console)\n  14) Hardware inventory\n  15) System health check\n  16) Generate support snapshot\n  17) Firewall status (read-only)\n  0) Exit launcher\n  Select: '
   IFS= read -r choice || exit 0
   case "$choice" in
     1) "$FETCH"; pause ;;
@@ -48,7 +61,7 @@ while :; do
     9) vpm doctor; pause ;;
     10) vupdate check; pause ;;
     11) vsoftware ;;
-    12) vssh status; printf "Use vssh start only after installing your trusted public key.\\n"; pause ;;
+    12) vssh status; printf "Use vssh start only after installing your trusted public key.\n"; pause ;;
     13) vfiles ;;
     14) vhardware; pause ;;
     15) vhealth; pause ;;

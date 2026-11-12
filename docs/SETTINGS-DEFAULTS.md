@@ -1,7 +1,22 @@
 # Vampire Settings defaults
 
-The initial settings profile is stored in settings/defaults.json. It defines product defaults for appearance, top panel, floating dock, voice access and update policy. It seeds `/etc/vampire/settings.conf` on first live boot. The current `vsettings` CLI validates and stores these preferences, and the `vdesktop` console launcher exposes a small appearance menu. No graphical compositor currently consumes the appearance settings, so opacity and blur are saved preferences rather than active visual effects.
+The product-level profile is described in `settings/defaults.json`. The
+runtime key/value defaults in `rootfs-overlay/etc/vampire/settings.defaults`
+are copied to `/etc/vampire/settings.conf` on first live boot. The
+`vsettings` command validates values and atomically replaces the settings
+file; `vdesktop` exposes these preferences through its console preview menu.
 
-Transparency is configurable from 0 to 60 percent. The UI should label presets Off, Low, Medium, High and Extreme. Security prompts and credential dialogs must remain opaque and readable regardless of desktop transparency.
+The current settings backend stores theme, accent, surface transparency,
+blur preset, terminal opacity, dock size/position/auto-hide/magnification,
+top-panel visibility, panel indicators, reduced motion, update channel and
+voice-access preference. Transparency and blur are saved preferences only:
+the current Weston preview does not consume them. The final Vampire compositor
+must apply these settings to its own surfaces and dock.
 
-Voice access is off by default, uses push-to-talk by default, does not retain raw audio and never enables arbitrary shell command execution. Updates notify the user and ask before rebooting by default.
+Surface transparency is configurable from 0 to 60 percent. Security prompts
+and credential dialogs must remain opaque and readable regardless of desktop
+transparency.
+
+Voice access is off by default, uses push-to-talk by default, does not retain
+raw audio and never enables arbitrary shell command execution. Updates notify
+the user and ask before rebooting by default.
