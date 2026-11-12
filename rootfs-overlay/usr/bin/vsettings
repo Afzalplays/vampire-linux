@@ -92,6 +92,7 @@ case "$1" in
     ;;
   apply)
     [ "$#" -eq 1 ] || usage
+    validate_file >/dev/null
     APPLY_SCRIPT=${VAMPIRE_SETTINGS_APPLY:-/usr/lib/vampire/settings_apply.py}
     exec python3 "$APPLY_SCRIPT"
     ;;

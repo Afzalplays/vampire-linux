@@ -12,6 +12,7 @@ export VAMPIRE_WESTON_RUNTIME_CONFIG="$TMP/weston.ini"
 export VAMPIRE_FOOT_BASE="$ROOT/rootfs-overlay/etc/xdg/foot/foot.ini"
 export XDG_CONFIG_HOME="$TMP/xdg"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vsettings"
+python3 -m py_compile "$ROOT/rootfs-overlay/usr/lib/vampire/settings_apply.py"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vdesktop"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vmonitor"
 cp "$ROOT/rootfs-overlay/etc/vampire/settings.defaults" "$VAMPIRE_SETTINGS_DEFAULTS"
@@ -42,8 +43,8 @@ test "$("$TMP/vsettings" get update_channel)" = testing
 "$TMP/vsettings" set voice_access true
 test "$("$TMP/vsettings" get voice_access)" = true
 "$TMP/vsettings" apply
-grep -q "^background-color=0xff08080c$" "$TMP/weston.ini"
-grep -q "^panel-color=0xcc6f2030$" "$TMP/weston.ini"
+grep -q "^background-color=0xfff2f2f6$" "$TMP/weston.ini"
+grep -q "^panel-color=0x6671324c$" "$TMP/weston.ini"
 grep -q "^alpha=0.70$" "$TMP/xdg/foot/foot.ini"
 "$TMP/vsettings" validate
 cp "$CONFIG" "$TMP/settings.good"

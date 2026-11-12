@@ -41,10 +41,12 @@ owner-only permissions. `vsettings validate` rejects malformed lines, unknown ke
 invalid values and duplicate keys without sourcing the file as shell code. For tests,
 set `VAMPIRE_SETTINGS_FILE` to a temporary path.
 
-**Important:** These are stored preferences only. Blur, opacity, dock size,
-voice access and update-channel preferences are not yet connected to a
-graphical compositor, speech service or update service. No graphical panel,
-dock, file manager, window manager or installer is included yet.
+`vsettings apply` generates runtime Weston and Foot configuration from the validated
+preferences. Theme, accent, panel visibility, panel transparency, reduced motion
+and terminal opacity are applied when the graphical session next starts. Blur,
+dock size/position/auto-hide, voice access and update-channel preferences remain
+stored settings only; they are not yet connected to a compositor feature, speech
+service or update service.
 
 ## Network and service tools
 
