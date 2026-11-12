@@ -37,6 +37,8 @@ jobs:
         run: |
           bash -n build/build-live-iso.sh
           bash -n scripts/test-live-iso.sh
+          bash -n tests/test-uefi-boot-script.sh
+          bash tests/test-uefi-boot-script.sh
           bash -n fetch/vfetch
           sh -n rootfs-overlay/etc/init.d/rcS
           bash -n tests/test-rootfs-contract.sh
