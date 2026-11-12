@@ -9,8 +9,8 @@ editions: Vampire Desktop and Vampire Server.
 ## Identity
 
 - **Operating system:** Vampire OS
-- **Desktop environment:** Vampire Desktop (graphical shell planned; console launcher MVP available as `vdesktop`)
-- **Shell:** Vampire Shell (Bash-compatible branded shell launcher available as `vsh`; dedicated engine planned)
+- **Desktop environment:** Vampire Desktop (Weston-based graphical preview with Foot terminal and app launchers; custom shell still in development)
+- **Shell:** Vampire Shell (Bash-compatible branded shell launcher available as `vsh`; dedicated parser/runtime planned)
 - **Fetch utility:** [Vampire Fetch](fetch/README.md) — `vfetch`
 - **Architecture:** x86_64 / AMD64
 - **Editions:** Desktop and Server
@@ -44,6 +44,7 @@ CPU, GPU, memory, package count, uptime, and other host details.
 - [QEMU BIOS/UEFI boot-test procedure](docs/QEMU-BOOT-TESTS.md)
 - [Settings defaults](docs/SETTINGS-DEFAULTS.md)
 - [Console tools guide](docs/CONSOLE-TOOLS.md)
+- [Command reference](rootfs-overlay/usr/bin/vhelp)
 - [Vampire Shell](docs/VAMPIRE-SHELL.md)
 - [Hardware diagnostics](docs/HARDWARE-DIAGNOSTICS.md)
 - [Optional firewall](docs/FIREWALL.md)
@@ -67,19 +68,21 @@ CPU, GPU, memory, package count, uptime, and other host details.
 
 ## Development status
 
-The live-image build path is in `build/`. The Desktop profile includes Weston as
-an upstream Wayland/DRM graphical bring-up preview; the Server profile is
+The live-image build path is in `build/`. The Desktop profile includes Weston,
+a Foot Wayland terminal, a branded dark terminal profile and panel launchers
+for Terminal, Files, Settings and Software Center. The Server profile is
 console-first and uses a separate Buildroot defconfig. Both include Vampire
-console tools, the experimental VPM runtime, signed-update verifier and an
-optional public-key-only SSH service. The custom Vampire graphical shell is
-still under development.
+console tools, DHCP networking, the experimental VPM runtime, signed-update
+verifier and an optional public-key-only SSH service. The custom Vampire
+compositor shell, native graphical apps and multi-user login are still under
+development.
 
 Build the Desktop ISO with `bash build/build-live-iso.sh`; build the Server ISO
 with `VAMPIRE_EDITION=server bash build/build-live-iso.sh`. Each edition has a
-separate Buildroot output directory and ISO filename. CI has successfully
-produced both ISO images and passed the legacy BIOS live-login test. UEFI
-validation is being re-tested with a paired OVMF CODE/VARS setup; release
-artifacts remain gated on both firmware tests passing. See
+separate Buildroot output directory and ISO filename. CI build checks exercise the BIOS and UEFI boot-test scripts. The live ISO
+workflow builds the images and runs the paired OVMF CODE/VARS smoke tests; do
+not treat a green shell/config check as proof of a successful physical-machine
+installation. Release artifacts remain gated on complete firmware validation. See
 [the live ISO build guide](build/README.md) and
 [the QEMU boot-test guide](docs/QEMU-BOOT-TESTS.md).
 
