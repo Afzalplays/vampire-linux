@@ -23,7 +23,7 @@ def replace_assignment(path, key, value, *, allow_missing=False):
 
 
 def main(argv):
-    if len(argv) not in (3, 5):
+    if len(argv) not in (3, 6):
         raise SystemExit(
             "usage: configure-build-output.py CONFIG OVERLAY "
             "[EDITION OS_CONF OS_RELEASE]"
@@ -32,8 +32,8 @@ def main(argv):
     overlay = str(pathlib.Path(argv[2]).resolve())
     replace_assignment(config_path, "BR2_ROOTFS_OVERLAY", overlay,
                        allow_missing=True)
-    if len(argv) == 5:
-        edition, os_conf, os_release = argv[2], argv[3], argv[4]
+    if len(argv) == 6:
+        edition, os_conf, os_release = argv[3], argv[4], argv[5]
         replace_assignment(os_conf, "EDITION", edition)
         replace_assignment(
             os_release, "PRETTY_NAME",
