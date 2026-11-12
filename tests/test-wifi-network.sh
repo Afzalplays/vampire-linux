@@ -73,7 +73,8 @@ grep -q '^[[:space:]]*psk=0123456789abcdef' "$CONFIG"
 ! grep -q '#psk=' "$CONFIG"
 grep -q -- '-B -i wlan0' "$WPA_ARGS"
 grep -q -- '-R -b -i wlan0' "$DHCP_ARGS"
-PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi status wlan0 | grep -q 'wpa_state=COMPLETED'
+PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi status wlan0 > "$TMP/wifi-status.out"
+grep -q 'wpa_state=COMPLETED' "$TMP/wifi-status.out"
 if printf 'short\n' | PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi connect wlan0 'Test Network' >/dev/null 2>&1; then
   echo "Wi-Fi accepted a short WPA passphrase" >&2; exit 1
 fi
