@@ -1,10 +1,10 @@
 #!/bin/sh
 # BusyBox udhcpc lease hook. DHCP-provided values are validated before use.
 set -eu
-RESOLV_CONF=\${VAMPIRE_RESOLV_CONF:-/etc/resolv.conf}
+RESOLV_CONF=${VAMPIRE_RESOLV_CONF:-/etc/resolv.conf}
 valid_iface() {
   case "$1" in ''|*[!A-Za-z0-9_.-]*) return 1 ;; esac
-  [ "\${#1}" -le 15 ]
+  [ "${#1}" -le 15 ]
 }
 valid_ipv4() {
   printf '%s\n' "$1" | awk -F. '
@@ -13,8 +13,8 @@ valid_ipv4() {
     END { if (NR != 1) exit 1 }
   '
 }
-action=\${1:-}
-interface=\${interface:-}
+action=${1:-}
+interface=${interface:-}
 valid_iface "$interface" || { echo "udhcpc hook: invalid interface" >&2; exit 1; }
 case "$action" in
   deconfig)
@@ -22,14 +22,14 @@ case "$action" in
     rm -f "$RESOLV_CONF"
     ;;
   bound|renew)
-    ip=\${ip:-}
-    subnet=\${subnet:-255.255.255.0}
+    ip=${ip:-}
+    subnet=${subnet:-255.255.255.0}
     valid_ipv4 "$ip" && valid_ipv4 "$subnet" || {
       echo "udhcpc hook: invalid IPv4 address or subnet mask" >&2; exit 1;
     }
     command -v ifconfig >/dev/null 2>&1 || { echo "udhcpc hook: ifconfig is unavailable" >&2; exit 127; }
     ifconfig "$interface" "$ip" netmask "$subnet" up
-    if [ -n "\${router:-}" ]; then
+    if [ -n "${router:-}" ]; then
       set -f
       for gateway in $router; do
         valid_ipv4 "$gateway" || { echo "udhcpc hook: invalid router address" >&2; exit 1; }
@@ -41,13 +41,13 @@ case "$action" in
       done
       set +f
     fi
-    dir=\${RESOLV_CONF%/*}
+    dir=${RESOLV_CONF%/*}
     [ "$dir" = "$RESOLV_CONF" ] && dir=.
     mkdir -p "$dir"
     tmp="$RESOLV_CONF.tmp.$$"
     trap 'rm -f "$tmp"' 0 HUP INT TERM
     : > "$tmp"
-    if [ -n "\${dns:-}" ]; then
+    if [ -n "${dns:-}" ]; then
       set -f
       count=0
       for server in $dns; do
@@ -58,7 +58,7 @@ case "$action" in
       done
       set +f
     fi
-    if [ -n "\${domain:-}" ]; then
+    if [ -n "${domain:-}" ]; then
       case "$domain" in *[!A-Za-z0-9.-]*) ;; *) printf 'search %s\n' "$domain" >> "$tmp" ;; esac
     fi
     chmod 644 "$tmp"

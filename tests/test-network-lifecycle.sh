@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-ROOT="$(cd -- "$(dirname -- "\${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/bin" "$TMP/sys/class/net/test0" "$TMP/run"
@@ -42,5 +42,5 @@ if PATH="$TMP/bin:$PATH" interface=test0 ip='192.0.2.999' subnet=255.255.255.0 s
 fi
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" stop test0
 test ! -e "$VAMPIRE_RESOLV_CONF"
-! kill -0 "$(cat "$TMP/run/test0.pid" 2>/dev/null)" 2>/dev/null
+test ! -e "$TMP/run/test0.pid"
 echo "Vampire DHCP lifecycle and lease hook tests passed."

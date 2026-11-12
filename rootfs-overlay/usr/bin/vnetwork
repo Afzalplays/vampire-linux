@@ -1,18 +1,18 @@
 #!/bin/sh
 # Vampire OS DHCP network manager for the BusyBox live environment.
 set -eu
-SYS_NET=\${VAMPIRE_SYS_NET:-/sys/class/net}
-RUN_DIR=\${VAMPIRE_NETWORK_RUN_DIR:-/run/vampire/dhcp}
-HOOK=\${VAMPIRE_DHCP_HOOK:-/usr/lib/vampire/udhcpc.script}
+SYS_NET=${VAMPIRE_SYS_NET:-/sys/class/net}
+RUN_DIR=${VAMPIRE_NETWORK_RUN_DIR:-/run/vampire/dhcp}
+HOOK=${VAMPIRE_DHCP_HOOK:-/usr/lib/vampire/udhcpc.script}
 usage() { echo "Usage: vnetwork {start|stop|restart|status} [interface]" >&2; exit 2; }
 valid_iface() {
   case "$1" in ''|*[!A-Za-z0-9_.-]*) return 1 ;; esac
-  [ "\${#1}" -le 15 ]
+  [ "${#1}" -le 15 ]
 }
 find_iface() {
   for path in "$SYS_NET"/*; do
     [ -e "$path" ] || continue
-    candidate=\${path##*/}
+    candidate=${path##*/}
     [ "$candidate" = lo ] && continue
     printf '%s\n' "$candidate"
     return 0
@@ -62,10 +62,10 @@ status_network() {
   if is_running; then echo "DHCP client: running"; else echo "DHCP client: stopped"; fi
 }
 [ "$#" -le 2 ] || usage
-action=\${1:-help}
+action=${1:-help}
 case "$action" in
   start|stop|restart|status)
-    get_iface "$action" "\${2:-}"
+    get_iface "$action" "${2:-}"
     case "$action" in
       start) start_network ;;
       stop) stop_network ;;
