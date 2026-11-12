@@ -12,6 +12,9 @@ SPEC.loader.exec_module(module)
 
 class BuildOutputConfigurationTests(unittest.TestCase):
     def make_fixture(self, root):
+        build = root / "build"
+        build.mkdir()
+        (build / "vampire-desktop-kernel.fragment").write_text("CONFIG_IWLWIFI=m\\n")
         overlay = root / 'rootfs & overlay | "special"'
         (overlay / "etc/vampire").mkdir(parents=True)
         (overlay / "etc/vampire/os.conf").write_text(
