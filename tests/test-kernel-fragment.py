@@ -2,11 +2,13 @@
 import pathlib
 import tempfile
 import unittest
-import sys
+import importlib.util
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "scripts"))
-from configure_build_output import configure
+spec = importlib.util.spec_from_file_location("configure_build_output", ROOT / "scripts/configure-build-output.py")
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+configure = module.configure
 
 
 class KernelFragmentTests(unittest.TestCase):

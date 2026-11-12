@@ -45,6 +45,7 @@ jobs:
           sh -n rootfs-overlay/etc/init.d/rcS
           bash -n tests/test-rootfs-contract.sh
           bash tests/test-rootfs-contract.sh
+          python3 tests/test-kernel-fragment.py
           bash -x tests/test-command-tools.sh
           bash -x tests/test-network-lifecycle.sh
           bash tests/test-wifi-network.sh
