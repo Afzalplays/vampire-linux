@@ -32,17 +32,15 @@ if [[ ! -d "$BUILD_DIR/buildroot/.git" ]]; then
 fi
 BR_DIR="$BUILD_DIR/buildroot"
 make -C "$BR_DIR" O="$BUILD_OUTPUT" BR2_DEFCONFIG="$DEFCONFIG" defconfig
-sed -i "s|^BR2_ROOTFS_OVERLAY=.*|BR2_ROOTFS_OVERLAY=\\"$OVERLAY\\"|" "$BUILD_OUTPUT/.config"
+python3 "$ROOT_DIR/scripts/configure-build-output.py" "$BUILD_OUTPUT/.config" "$OVERLAY"
 make -C "$BR_DIR" O="$BUILD_OUTPUT" olddefconfig
 make -C "$BR_DIR" O="$BUILD_OUTPUT" -j"$JOBS"
 IMAGES="$BUILD_OUTPUT/images"
 [[ -s "$IMAGES/bzImage" ]] || die "Buildroot did not produce bzImage"
 [[ -s "$IMAGES/rootfs.cpio.gz" ]] || die "Buildroot did not produce rootfs.cpio.gz"
-if [[ -f "$BUILD_OUTPUT/target/etc/vampire/os.conf" ]]; then
-  sed -i "s/^EDITION=.*/EDITION=\\\"$EDITION\\\"/" "$BUILD_OUTPUT/target/etc/vampire/os.conf"
-fi
-if [[ -f "$BUILD_OUTPUT/target/etc/os-release" ]]; then
-  sed -i "s/^PRETTY_NAME=.*/PRETTY_NAME=\\\"Vampire OS 0.1.0-dev ($EDITION)\\\"/" "$BUILD_OUTPUT/target/etc/os-release"
+if [[ -f "$BUILD_OUTPUT/target/etc/vampire/os.conf" && -f "$BUILD_OUTPUT/target/etc/os-release" ]]; then
+  python3 "$ROOT_DIR/scripts/configure-build-output.py" "$BUILD_OUTPUT/.config" "$OVERLAY" "$EDITION" \
+    "$BUILD_OUTPUT/target/etc/vampire/os.conf" "$BUILD_OUTPUT/target/etc/os-release"
 fi
 rm -rf "$ISO_ROOT"
 mkdir -p "$ISO_ROOT/boot/grub"

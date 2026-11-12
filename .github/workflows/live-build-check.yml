@@ -72,6 +72,8 @@ jobs:
           test -s rootfs-overlay/etc/os-release
       - name: Test VPM
         run: python3 -m unittest discover -s vpm -p 'test_*.py' -v
+      - name: Test Buildroot output configuration
+        run: python3 -m unittest discover -s scripts -p 'test_*.py' -v
       - name: Test VFetch output contract
         run: |
           bash fetch/vfetch > vfetch-output.txt
