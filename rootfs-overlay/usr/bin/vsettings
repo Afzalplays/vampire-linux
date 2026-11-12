@@ -4,7 +4,7 @@ set -eu
 CONFIG=${VAMPIRE_SETTINGS_FILE:-/etc/vampire/settings.conf}
 DEFAULTS=${VAMPIRE_SETTINGS_DEFAULTS:-/etc/vampire/settings.defaults}
 KEYS='theme accent surface_transparency blur terminal_opacity dock_size dock_position dock_auto_hide dock_magnification top_panel show_date show_clock show_network show_power reduced_motion update_channel voice_access'
-usage() { echo "Usage: vsettings {list|keys|get KEY|set KEY VALUE|validate|reset}" >&2; exit 2; }
+usage() { echo "Usage: vsettings {list|keys|get KEY|set KEY VALUE|validate|reset|apply}" >&2; exit 2; }
 valid_key() {
   case "$1" in
     theme|accent|surface_transparency|blur|terminal_opacity|dock_size|dock_position|dock_auto_hide|dock_magnification|top_panel|show_date|show_clock|show_network|show_power|reduced_motion|update_channel|voice_access) return 0 ;;
@@ -32,6 +32,70 @@ read_value() {
   [ -r "$CONFIG" ] || return 1
   awk -F= -v wanted="$1" '$1 == wanted { value=$2; found=1 } END { if (found) print value; else exit 1 }' "$CONFIG"
 }
+
+apply_settings() {
+  validate_file >/dev/null
+  base_weston=${VAMPIRE_WESTON_BASE:-/etc/xdg/weston/weston.ini}
+  output_weston=${VAMPIRE_WESTON_RUNTIME_CONFIG:-/run/vampire/weston.ini}
+  base_foot=${VAMPIRE_FOOT_BASE:-/etc/xdg/foot/foot.ini}
+  config_home=${XDG_CONFIG_HOME:-/run/vampire}
+  foot_dir="$config_home/foot"
+  [ -r "$base_weston" ] || { echo "vsettings: Weston base config missing: $base_weston" >&2; return 1; }
+  [ -r "$base_foot" ] || { echo "vsettings: Foot base config missing: $base_foot" >&2; return 1; }
+  theme=$(read_value theme)
+  accent=$(read_value accent)
+  transparency=$(read_value surface_transparency)
+  opacity=$(read_value terminal_opacity)
+  top_panel=$(read_value top_panel)
+  reduced_motion=$(read_value reduced_motion)
+  case "$theme" in
+    light) bg=0xfff2f2f6; foot_bg=f2f2f6; foot_fg=17171d ;;
+    *) bg=0xff08080c; foot_bg=08080c; foot_fg=e8e8ef ;;
+  esac
+  case "$accent" in
+    crimson) rgb=6f2030 ;;
+    rose) rgb=71324c ;;
+    ice) rgb=24546b ;;
+    violet) rgb=483267 ;;
+    *) echo "vsettings: unsupported accent in validated config" >&2; return 1 ;;
+  esac
+  alpha=$((255 - transparency * 255 / 100))
+  alpha_hex=$(printf '%02x' "$alpha")
+  panel="0x${alpha_hex}${rgb}"
+  if [ "$top_panel" = true ]; then panel_position=top; else panel_position=none; fi
+  if [ "$reduced_motion" = true ]; then motion=none; else motion=fade; fi
+  terminal_alpha=$(awk -v n="$opacity" 'BEGIN { printf "%.2f", n / 100 }')
+  weston_dir=${output_weston%/*}
+  [ "$weston_dir" = "$output_weston" ] && weston_dir=.
+  mkdir -p "$weston_dir" "$foot_dir"
+  weston_tmp="$output_weston.tmp.$"
+  foot_tmp="$foot_dir/foot.ini.tmp.$"
+  (set -C; : > "$weston_tmp"; : > "$foot_tmp") 2>/dev/null || {
+    rm -f "$weston_tmp" "$foot_tmp"
+    echo "vsettings: could not create temporary config files" >&2
+    return 1
+  }
+  trap 'rm -f "$weston_tmp" "$foot_tmp"' 0 HUP INT TERM
+  sed \
+    -e "s|^background-color=.*|background-color=$bg|" \
+    -e "s|^panel-color=.*|panel-color=$panel|" \
+    -e "s|^panel-position=.*|panel-position=$panel_position|" \
+    -e "s|^animation=.*|animation=$motion|" \
+    -e "s|^close-animation=.*|close-animation=$motion|" \
+    -e "s|^startup-animation=.*|startup-animation=$motion|" \
+    "$base_weston" > "$weston_tmp"
+  sed \
+    -e "s|^background=.*|background=$foot_bg|" \
+    -e "s|^foreground=.*|foreground=$foot_fg|" \
+    -e "s|^alpha=.*|alpha=$terminal_alpha|" \
+    "$base_foot" > "$foot_tmp"
+  chmod 600 "$weston_tmp" "$foot_tmp"
+  mv -f "$weston_tmp" "$output_weston"
+  mv -f "$foot_tmp" "$foot_dir/foot.ini"
+  trap - 0 HUP INT TERM
+  printf 'Vampire Desktop appearance applied. Restart the graphical session to use the new theme.\n'
+}
+
 validate_file() {
   [ -r "$CONFIG" ] || { echo "vsettings: settings file is not readable" >&2; return 1; }
   seen=" "
@@ -89,6 +153,10 @@ case "$1" in
   validate)
     [ "$#" -eq 1 ] || usage
     validate_file
+    ;;
+  apply)
+    [ "$#" -eq 1 ] || usage
+    apply_settings
     ;;
   reset)
     [ "$#" -eq 1 ] || usage

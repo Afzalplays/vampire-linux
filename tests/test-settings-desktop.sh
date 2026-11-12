@@ -6,6 +6,10 @@ trap 'rm -rf "$TMP"' EXIT
 CONFIG="$TMP/settings.conf"
 export VAMPIRE_SETTINGS_FILE="$CONFIG"
 export VAMPIRE_SETTINGS_DEFAULTS="$TMP/settings.defaults"
+export VAMPIRE_WESTON_BASE="$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
+export VAMPIRE_WESTON_RUNTIME_CONFIG="$TMP/weston.ini"
+export VAMPIRE_FOOT_BASE="$ROOT/rootfs-overlay/etc/xdg/foot/foot.ini"
+export XDG_CONFIG_HOME="$TMP/xdg"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vsettings"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vdesktop"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vmonitor"
@@ -36,6 +40,213 @@ test "$("$TMP/vsettings" get show_network)" = false
 test "$("$TMP/vsettings" get update_channel)" = testing
 "$TMP/vsettings" set voice_access true
 test "$("$TMP/vsettings" get voice_access)" = true
+"$TMP/vsettings" set theme light
+"$TMP/vsettings" set accent rose
+"$TMP/vsettings" set surface_transparency 60
+"$TMP/vsettings" set terminal_opacity 70
+"$TMP/vsettings" set top_panel false
+"$TMP/vsettings" set reduced_motion true
+"$TMP/vsettings" apply
+grep -q '^background-color=0xfff2f2f6
+"$TMP/vsettings" validate
+cp "$CONFIG" "$TMP/settings.good"
+printf 'unknown_key=bad\n' > "$CONFIG"
+if "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validation accepted an unknown key" >&2; exit 1
+fi
+cp "$TMP/settings.good" "$CONFIG"
+printf 'theme=dark\ntheme=light\n' > "$CONFIG"
+if "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validation accepted a duplicate key" >&2; exit 1
+fi
+cp "$TMP/settings.good" "$CONFIG"
+if "$TMP/vsettings" set theme 'dark; touch /tmp/pwned' >/dev/null 2>&1; then
+  echo "settings accepted an invalid/injected value" >&2; exit 1
+fi
+if "$TMP/vsettings" set surface_transparency 90 >/dev/null 2>&1; then
+  echo "settings accepted out-of-range transparency" >&2; exit 1
+fi
+if "$TMP/vsettings" get unknown >/dev/null 2>&1; then
+  echo "settings accepted an unknown key" >&2; exit 1
+fi
+grep -q '^voice_access=true$' "$CONFIG"
+grep -q '^dock_magnification=true$' "$CONFIG"
+mkdir -p "$TMP/mockbin"
+cat > "$TMP/mockbin/vsh" <<'MOCK'
+#!/bin/sh
+printf 'started\n' >> "$VSH_TEST_LOG"
+MOCK
+chmod +x "$TMP/mockbin/vsh"
+export VSH_TEST_LOG="$TMP/vsh.log"
+printf '5\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
+grep -qx 'started' "$VSH_TEST_LOG"
+printf '2\n16\ntesting\n17\ntrue\n0\n0\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
+test "$("$TMP/vsettings" get update_channel)" = testing
+test "$("$TMP/vsettings" get voice_access)" = true
+sh "$ROOT/rootfs-overlay/usr/bin/vmonitor" > "$TMP/monitor.out"
+grep -q "VAMPIRE MONITOR" "$TMP/monitor.out"
+echo "Vampire settings, Desktop preference menu, Vampire Shell dispatch and monitor tests passed."
+ "$TMP/weston.ini"
+grep -q '^panel-position=none
+"$TMP/vsettings" validate
+cp "$CONFIG" "$TMP/settings.good"
+printf 'unknown_key=bad\n' > "$CONFIG"
+if "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validation accepted an unknown key" >&2; exit 1
+fi
+cp "$TMP/settings.good" "$CONFIG"
+printf 'theme=dark\ntheme=light\n' > "$CONFIG"
+if "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validation accepted a duplicate key" >&2; exit 1
+fi
+cp "$TMP/settings.good" "$CONFIG"
+if "$TMP/vsettings" set theme 'dark; touch /tmp/pwned' >/dev/null 2>&1; then
+  echo "settings accepted an invalid/injected value" >&2; exit 1
+fi
+if "$TMP/vsettings" set surface_transparency 90 >/dev/null 2>&1; then
+  echo "settings accepted out-of-range transparency" >&2; exit 1
+fi
+if "$TMP/vsettings" get unknown >/dev/null 2>&1; then
+  echo "settings accepted an unknown key" >&2; exit 1
+fi
+grep -q '^voice_access=true$' "$CONFIG"
+grep -q '^dock_magnification=true$' "$CONFIG"
+mkdir -p "$TMP/mockbin"
+cat > "$TMP/mockbin/vsh" <<'MOCK'
+#!/bin/sh
+printf 'started\n' >> "$VSH_TEST_LOG"
+MOCK
+chmod +x "$TMP/mockbin/vsh"
+export VSH_TEST_LOG="$TMP/vsh.log"
+printf '5\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
+grep -qx 'started' "$VSH_TEST_LOG"
+printf '2\n16\ntesting\n17\ntrue\n0\n0\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
+test "$("$TMP/vsettings" get update_channel)" = testing
+test "$("$TMP/vsettings" get voice_access)" = true
+sh "$ROOT/rootfs-overlay/usr/bin/vmonitor" > "$TMP/monitor.out"
+grep -q "VAMPIRE MONITOR" "$TMP/monitor.out"
+echo "Vampire settings, Desktop preference menu, Vampire Shell dispatch and monitor tests passed."
+ "$TMP/weston.ini"
+grep -q '^animation=none
+"$TMP/vsettings" validate
+cp "$CONFIG" "$TMP/settings.good"
+printf 'unknown_key=bad\n' > "$CONFIG"
+if "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validation accepted an unknown key" >&2; exit 1
+fi
+cp "$TMP/settings.good" "$CONFIG"
+printf 'theme=dark\ntheme=light\n' > "$CONFIG"
+if "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validation accepted a duplicate key" >&2; exit 1
+fi
+cp "$TMP/settings.good" "$CONFIG"
+if "$TMP/vsettings" set theme 'dark; touch /tmp/pwned' >/dev/null 2>&1; then
+  echo "settings accepted an invalid/injected value" >&2; exit 1
+fi
+if "$TMP/vsettings" set surface_transparency 90 >/dev/null 2>&1; then
+  echo "settings accepted out-of-range transparency" >&2; exit 1
+fi
+if "$TMP/vsettings" get unknown >/dev/null 2>&1; then
+  echo "settings accepted an unknown key" >&2; exit 1
+fi
+grep -q '^voice_access=true$' "$CONFIG"
+grep -q '^dock_magnification=true$' "$CONFIG"
+mkdir -p "$TMP/mockbin"
+cat > "$TMP/mockbin/vsh" <<'MOCK'
+#!/bin/sh
+printf 'started\n' >> "$VSH_TEST_LOG"
+MOCK
+chmod +x "$TMP/mockbin/vsh"
+export VSH_TEST_LOG="$TMP/vsh.log"
+printf '5\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
+grep -qx 'started' "$VSH_TEST_LOG"
+printf '2\n16\ntesting\n17\ntrue\n0\n0\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
+test "$("$TMP/vsettings" get update_channel)" = testing
+test "$("$TMP/vsettings" get voice_access)" = true
+sh "$ROOT/rootfs-overlay/usr/bin/vmonitor" > "$TMP/monitor.out"
+grep -q "VAMPIRE MONITOR" "$TMP/monitor.out"
+echo "Vampire settings, Desktop preference menu, Vampire Shell dispatch and monitor tests passed."
+ "$TMP/weston.ini"
+grep -q '^panel-color=0x6671324c
+"$TMP/vsettings" validate
+cp "$CONFIG" "$TMP/settings.good"
+printf 'unknown_key=bad\n' > "$CONFIG"
+if "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validation accepted an unknown key" >&2; exit 1
+fi
+cp "$TMP/settings.good" "$CONFIG"
+printf 'theme=dark\ntheme=light\n' > "$CONFIG"
+if "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validation accepted a duplicate key" >&2; exit 1
+fi
+cp "$TMP/settings.good" "$CONFIG"
+if "$TMP/vsettings" set theme 'dark; touch /tmp/pwned' >/dev/null 2>&1; then
+  echo "settings accepted an invalid/injected value" >&2; exit 1
+fi
+if "$TMP/vsettings" set surface_transparency 90 >/dev/null 2>&1; then
+  echo "settings accepted out-of-range transparency" >&2; exit 1
+fi
+if "$TMP/vsettings" get unknown >/dev/null 2>&1; then
+  echo "settings accepted an unknown key" >&2; exit 1
+fi
+grep -q '^voice_access=true$' "$CONFIG"
+grep -q '^dock_magnification=true$' "$CONFIG"
+mkdir -p "$TMP/mockbin"
+cat > "$TMP/mockbin/vsh" <<'MOCK'
+#!/bin/sh
+printf 'started\n' >> "$VSH_TEST_LOG"
+MOCK
+chmod +x "$TMP/mockbin/vsh"
+export VSH_TEST_LOG="$TMP/vsh.log"
+printf '5\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
+grep -qx 'started' "$VSH_TEST_LOG"
+printf '2\n16\ntesting\n17\ntrue\n0\n0\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
+test "$("$TMP/vsettings" get update_channel)" = testing
+test "$("$TMP/vsettings" get voice_access)" = true
+sh "$ROOT/rootfs-overlay/usr/bin/vmonitor" > "$TMP/monitor.out"
+grep -q "VAMPIRE MONITOR" "$TMP/monitor.out"
+echo "Vampire settings, Desktop preference menu, Vampire Shell dispatch and monitor tests passed."
+ "$TMP/weston.ini"
+grep -q '^alpha=0.70
+"$TMP/vsettings" validate
+cp "$CONFIG" "$TMP/settings.good"
+printf 'unknown_key=bad\n' > "$CONFIG"
+if "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validation accepted an unknown key" >&2; exit 1
+fi
+cp "$TMP/settings.good" "$CONFIG"
+printf 'theme=dark\ntheme=light\n' > "$CONFIG"
+if "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validation accepted a duplicate key" >&2; exit 1
+fi
+cp "$TMP/settings.good" "$CONFIG"
+if "$TMP/vsettings" set theme 'dark; touch /tmp/pwned' >/dev/null 2>&1; then
+  echo "settings accepted an invalid/injected value" >&2; exit 1
+fi
+if "$TMP/vsettings" set surface_transparency 90 >/dev/null 2>&1; then
+  echo "settings accepted out-of-range transparency" >&2; exit 1
+fi
+if "$TMP/vsettings" get unknown >/dev/null 2>&1; then
+  echo "settings accepted an unknown key" >&2; exit 1
+fi
+grep -q '^voice_access=true$' "$CONFIG"
+grep -q '^dock_magnification=true$' "$CONFIG"
+mkdir -p "$TMP/mockbin"
+cat > "$TMP/mockbin/vsh" <<'MOCK'
+#!/bin/sh
+printf 'started\n' >> "$VSH_TEST_LOG"
+MOCK
+chmod +x "$TMP/mockbin/vsh"
+export VSH_TEST_LOG="$TMP/vsh.log"
+printf '5\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
+grep -qx 'started' "$VSH_TEST_LOG"
+printf '2\n16\ntesting\n17\ntrue\n0\n0\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
+test "$("$TMP/vsettings" get update_channel)" = testing
+test "$("$TMP/vsettings" get voice_access)" = true
+sh "$ROOT/rootfs-overlay/usr/bin/vmonitor" > "$TMP/monitor.out"
+grep -q "VAMPIRE MONITOR" "$TMP/monitor.out"
+echo "Vampire settings, Desktop preference menu, Vampire Shell dispatch and monitor tests passed."
+ "$TMP/xdg/foot/foot.ini"
 "$TMP/vsettings" validate
 cp "$CONFIG" "$TMP/settings.good"
 printf 'unknown_key=bad\n' > "$CONFIG"

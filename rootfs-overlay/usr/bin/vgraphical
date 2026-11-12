@@ -1,10 +1,13 @@
 #!/bin/sh
-# Upstream Weston DRM desktop-shell bring-up; not the finished Vampire Desktop.
+# Launch the configured Weston DRM desktop preview.
 set -eu
 command -v weston >/dev/null 2>&1 || { echo "Weston is not installed." >&2; exit 127; }
 [ -e /dev/dri/card0 ] || { echo "No DRM graphics device at /dev/dri/card0." >&2; exit 1; }
 [ "$(id -u)" -eq 0 ] || { echo "This early preview requires root/seat access." >&2; exit 1; }
 export XDG_RUNTIME_DIR=/run/user/0
-mkdir -p "$XDG_RUNTIME_DIR"
-chmod 0700 "$XDG_RUNTIME_DIR"
-exec weston --backend=drm-backend.so --shell=desktop-shell.so --tty=2 "$@"
+export XDG_CONFIG_HOME=/run/vampire
+mkdir -p "$XDG_RUNTIME_DIR" "$XDG_CONFIG_HOME"
+chmod 0700 "$XDG_RUNTIME_DIR" "$XDG_CONFIG_HOME"
+vsettings apply
+WESTON_CONFIG=${VAMPIRE_WESTON_RUNTIME_CONFIG:-/run/vampire/weston.ini}
+exec weston --config="$WESTON_CONFIG" --backend=drm-backend.so --shell=desktop-shell.so --tty=2 "$@"
