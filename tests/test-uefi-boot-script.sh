@@ -4,8 +4,8 @@ ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/bin" "$TMP/ovmf" "$TMP/logs"
-: > "$TMP/ovmf/OVMF_CODE_4M.fd"
-: > "$TMP/ovmf/OVMF_VARS_4M.fd"
+printf "firmware-code" > "$TMP/ovmf/OVMF_CODE_4M.fd"
+printf "firmware-vars" > "$TMP/ovmf/OVMF_VARS_4M.fd"
 printf "test iso placeholder\n" > "$TMP/live.iso"
 cat > "$TMP/bin/qemu-system-x86_64" <<'FAKE'
 #!/usr/bin/env bash
