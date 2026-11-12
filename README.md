@@ -10,7 +10,7 @@ editions: Vampire Desktop and Vampire Server.
 
 - **Operating system:** Vampire OS
 - **Desktop environment:** Vampire Desktop (graphical shell planned; console launcher MVP available as `vdesktop`)
-- **Shell:** Vampire Shell (planned)
+- **Shell:** Vampire Shell (Bash-compatible branded shell launcher available as `vsh`; dedicated engine planned)
 - **Fetch utility:** [Vampire Fetch](fetch/README.md) — `vfetch`
 - **Architecture:** x86_64 / AMD64
 - **Editions:** Desktop and Server

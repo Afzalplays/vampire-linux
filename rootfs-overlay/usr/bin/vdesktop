@@ -47,14 +47,14 @@ appearance_menu() {
 }
 while :; do
   printf '\n  V A M P I R E  O S\n  Vampire Desktop — Console Preview\n  -------------------------------\n'
-  printf '  1) System information\n  2) Appearance and desktop settings\n  3) Network status\n  4) System monitor\n  5) Open shell\n  6) Show all settings\n  7) Installer storage preflight\n  8) Graphical session (Weston preview)\n  9) VPM package manager diagnostics\n  10) Signed OS update check\n  11) Vampire Software Center (console)\n  12) SSH service status (opt-in)\n  13) Vampire Files (console)\n  14) Hardware inventory\n  15) System health check\n  16) Generate support snapshot\n  17) Firewall status (read-only)\n  0) Exit launcher\n  Select: '
+  printf '  1) System information\n  2) Appearance and desktop settings\n  3) Network status\n  4) System monitor\n  5) Open Vampire Shell\n  6) Show all settings\n  7) Installer storage preflight\n  8) Graphical session (Weston preview)\n  9) VPM package manager diagnostics\n  10) Signed OS update check\n  11) Vampire Software Center (console)\n  12) SSH service status (opt-in)\n  13) Vampire Files (console)\n  14) Hardware inventory\n  15) System health check\n  16) Generate support snapshot\n  17) Firewall status (read-only)\n  0) Exit launcher\n  Select: '
   IFS= read -r choice || exit 0
   case "$choice" in
     1) "$FETCH"; pause ;;
     2) appearance_menu ;;
     3) "$NETWORK" status; pause ;;
     4) vmonitor; pause ;;
-    5) "${SHELL:-/bin/sh}" ;;
+    5) if command -v vsh >/dev/null 2>&1; then vsh; else "${SHELL:-/bin/sh}"; fi ;;
     6) "$SETTINGS" list; pause ;;
     7) installer_menu ;;
     8) vgraphical; pause ;;
