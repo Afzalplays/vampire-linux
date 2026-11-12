@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import pathlib
 import tempfile
 import unittest
@@ -10,40 +11,52 @@ SPEC.loader.exec_module(module)
 
 
 class BuildOutputConfigurationTests(unittest.TestCase):
-    def test_overlay_path_with_sed_metacharacters_is_preserved(self):
+    def make_fixture(self, root):
+        overlay = root / 'rootfs & overlay | "special"'
+        (overlay / "etc/vampire").mkdir(parents=True)
+        (overlay / "etc/vampire/os.conf").write_text(
+            'NAME="Vampire OS"\nEDITION="live"\n')
+        (overlay / "etc/os-release").write_text(
+            'NAME="Vampire OS"\nPRETTY_NAME="Vampire OS 0.1.0-dev"\n')
+        config = root / ".config"
+        config.write_text('BR2_X86_64=y\nBR2_ROOTFS_OVERLAY=""\n')
+        return config, overlay
+
+    def test_overlay_path_and_edition_are_configured_before_rootfs_build(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = pathlib.Path(tmp)
-            config = root / ".config"
-            overlay = root / 'rootfs & overlay | "special"'
-            overlay.mkdir()
-            config.write_text("BR2_X86_64=y\nBR2_ROOTFS_OVERLAY=\"\"\n")
-            module.replace_assignment(
-                config, "BR2_ROOTFS_OVERLAY", str(overlay.resolve()))
+            config, overlay = self.make_fixture(root)
+            module.configure(config, overlay, "server")
             self.assertIn(
-                "BR2_ROOTFS_OVERLAY=" + __import__("json").dumps(str(overlay.resolve())),
+                "BR2_ROOTFS_OVERLAY=" + json.dumps(str(overlay.resolve())),
                 config.read_text())
+            self.assertIn('EDITION="server"',
+                          (overlay / "etc/vampire/os.conf").read_text())
+            self.assertIn(
+                'PRETTY_NAME="Vampire OS 0.1.0-dev (server)"',
+                (overlay / "etc/os-release").read_text())
+
+    def test_desktop_edition_is_written_to_overlay(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            config, overlay = self.make_fixture(root)
+            module.configure(config, overlay, "desktop")
+            self.assertIn('EDITION="desktop"',
+                          (overlay / "etc/vampire/os.conf").read_text())
 
     def test_duplicate_assignment_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             config = pathlib.Path(tmp) / ".config"
-            config.write_text("KEY=\"\"\nKEY=\"\"\n")
+            config.write_text('KEY=""\nKEY=""\n')
             with self.assertRaises(ValueError):
                 module.replace_assignment(config, "KEY", "value")
 
-    def test_metadata_is_written_without_shell_or_sed_interpolation(self):
+    def test_unknown_edition_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = pathlib.Path(tmp)
-            os_conf = root / "os.conf"
-            os_release = root / "os-release"
-            os_conf.write_text('NAME="Vampire OS"\nEDITION="desktop"\n')
-            os_release.write_text('NAME="Vampire OS"\nPRETTY_NAME="old"\n')
-            module.replace_assignment(os_conf, "EDITION", "server")
-            module.replace_assignment(
-                os_release, "PRETTY_NAME", "Vampire OS 0.1.0-dev (server)")
-            self.assertIn('EDITION="server"', os_conf.read_text())
-            self.assertIn(
-                'PRETTY_NAME="Vampire OS 0.1.0-dev (server)"',
-                os_release.read_text())
+            config, overlay = self.make_fixture(root)
+            with self.assertRaises(ValueError):
+                module.configure(config, overlay, "preview")
 
 
 if __name__ == "__main__":

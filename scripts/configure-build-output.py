@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Safely write Vampire OS Buildroot output configuration and release metadata."""
+"""Safely configure Buildroot and edition metadata before rootfs creation."""
 import json
 import pathlib
 import sys
@@ -22,23 +22,27 @@ def replace_assignment(path, key, value, *, allow_missing=False):
     path.write_text("\n".join(lines) + "\n")
 
 
-def main(argv):
-    if len(argv) not in (3, 6):
-        raise SystemExit(
-            "usage: configure-build-output.py CONFIG OVERLAY "
-            "[EDITION OS_CONF OS_RELEASE]"
-        )
-    config_path = pathlib.Path(argv[1])
-    overlay = str(pathlib.Path(argv[2]).resolve())
-    replace_assignment(config_path, "BR2_ROOTFS_OVERLAY", overlay,
+def configure(config_path, overlay_path, edition):
+    if edition not in ("desktop", "server"):
+        raise ValueError(f"unsupported edition: {edition}")
+    overlay = pathlib.Path(overlay_path).resolve()
+    replace_assignment(config_path, "BR2_ROOTFS_OVERLAY", str(overlay),
                        allow_missing=True)
-    if len(argv) == 6:
-        edition, os_conf, os_release = argv[3], argv[4], argv[5]
-        replace_assignment(os_conf, "EDITION", edition)
-        replace_assignment(
-            os_release, "PRETTY_NAME",
-            f"Vampire OS 0.1.0-dev ({edition})",
+    # These files are part of the rootfs overlay. Update them before Buildroot
+    # creates target/ and rootfs.cpio.gz so the booted image gets correct data.
+    replace_assignment(overlay / "etc/vampire/os.conf", "EDITION", edition)
+    replace_assignment(
+        overlay / "etc/os-release", "PRETTY_NAME",
+        f"Vampire OS 0.1.0-dev ({edition})",
+    )
+
+
+def main(argv):
+    if len(argv) != 4:
+        raise SystemExit(
+            "usage: configure-build-output.py CONFIG OVERLAY desktop|server"
         )
+    configure(argv[1], argv[2], argv[3])
 
 
 if __name__ == "__main__":

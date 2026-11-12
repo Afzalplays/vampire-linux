@@ -32,16 +32,12 @@ if [[ ! -d "$BUILD_DIR/buildroot/.git" ]]; then
 fi
 BR_DIR="$BUILD_DIR/buildroot"
 make -C "$BR_DIR" O="$BUILD_OUTPUT" BR2_DEFCONFIG="$DEFCONFIG" defconfig
-python3 "$ROOT_DIR/scripts/configure-build-output.py" "$BUILD_OUTPUT/.config" "$OVERLAY"
+python3 "$ROOT_DIR/scripts/configure-build-output.py" "$BUILD_OUTPUT/.config" "$OVERLAY" "$EDITION"
 make -C "$BR_DIR" O="$BUILD_OUTPUT" olddefconfig
 make -C "$BR_DIR" O="$BUILD_OUTPUT" -j"$JOBS"
 IMAGES="$BUILD_OUTPUT/images"
 [[ -s "$IMAGES/bzImage" ]] || die "Buildroot did not produce bzImage"
 [[ -s "$IMAGES/rootfs.cpio.gz" ]] || die "Buildroot did not produce rootfs.cpio.gz"
-if [[ -f "$BUILD_OUTPUT/target/etc/vampire/os.conf" && -f "$BUILD_OUTPUT/target/etc/os-release" ]]; then
-  python3 "$ROOT_DIR/scripts/configure-build-output.py" "$BUILD_OUTPUT/.config" "$OVERLAY" "$EDITION" \
-    "$BUILD_OUTPUT/target/etc/vampire/os.conf" "$BUILD_OUTPUT/target/etc/os-release"
-fi
 rm -rf "$ISO_ROOT"
 mkdir -p "$ISO_ROOT/boot/grub"
 install -m 0644 "$IMAGES/bzImage" "$ISO_ROOT/boot/vmlinuz"
