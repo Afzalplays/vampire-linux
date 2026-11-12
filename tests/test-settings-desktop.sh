@@ -15,7 +15,7 @@ chmod +x "$TMP/vsettings"
 "$TMP/vsettings" reset
 test "$("$TMP/vsettings" get theme)" = dark
 test "$("$TMP/vsettings" get accent)" = crimson
-test "$("$TMP/vsettings" get dock_position)" = bottom-center
+test "$("$TMP/vsettings" get dock_position)" = bottom-center\ntest "$("$TMP/vsettings" get update_channel)" = stable\ntest "$("$TMP/vsettings" get voice_access)" = false
 "$TMP/vsettings" set theme light
 test "$("$TMP/vsettings" get theme)" = light
 "$TMP/vsettings" set blur extreme

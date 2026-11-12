@@ -19,7 +19,7 @@ appearance_menu() {
   while :; do
     printf '\nVampire Settings — Appearance and Desktop\n'
     "$SETTINGS" list
-    printf '\n 1) Theme (dark/light/system)\n 2) Accent (crimson/rose/ice/violet)\n 3) Surface transparency (0..60)\n 4) Blur (off/low/medium/high/extreme)\n 5) Terminal opacity (0..100)\n 6) Dock size (small/medium/large)\n 7) Dock position (bottom-center/left-center/right-center)\n 8) Dock auto-hide (true/false)\n 9) Dock magnification (true/false)\n10) Top panel (true/false)\n11) Show date (true/false)\n12) Show clock (true/false)\n13) Show network (true/false)\n14) Show power (true/false)\n15) Reduced motion (true/false)\n 0) Back\nChoice: '
+    printf '\n 1) Theme (dark/light/system)\n 2) Accent (crimson/rose/ice/violet)\n 3) Surface transparency (0..60)\n 4) Blur (off/low/medium/high/extreme)\n 5) Terminal opacity (0..100)\n 6) Dock size (small/medium/large)\n 7) Dock position (bottom-center/left-center/right-center)\n 8) Dock auto-hide (true/false)\n 9) Dock magnification (true/false)\n10) Top panel (true/false)\n11) Show date (true/false)\n12) Show clock (true/false)\n13) Show network (true/false)\n14) Show power (true/false)\n15) Reduced motion (true/false)\n16) Update channel (stable/testing)\n17) Voice access (true/false)\n 0) Back\nChoice: '
     IFS= read -r choice || exit 0
     case "$choice" in
       1) key=theme ;;
