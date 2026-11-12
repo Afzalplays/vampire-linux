@@ -9,12 +9,13 @@ cat > "$TMP/bin/foot" <<'MOCK'
 printf '%s\n' "$@" > "$FOOT_ARGS"
 MOCK
 chmod +x "$TMP/bin/foot"
-for app in files settings software; do
+for app in files settings software monitor; do
   FOOT_ARGS="$TMP/$app.args" PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vampire-app" "$app"
   case "$app" in
     files) grep -Fxq /usr/bin/vfiles "$TMP/$app.args" ;;
     settings) grep -Fxq /usr/bin/vdesktop "$TMP/$app.args" ;;
     software) grep -Fxq /usr/bin/vsoftware "$TMP/$app.args" ;;
+    monitor) grep -Fxq /usr/bin/vmonitor "$TMP/$app.args" ;;
   esac
 done
 if PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vampire-app" unknown >/dev/null 2>&1; then
@@ -24,4 +25,5 @@ grep -q 'path=/usr/bin/vampire-terminal' "$ROOT/rootfs-overlay/etc/xdg/weston/we
 grep -q 'path=/usr/bin/vampire-app files' "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
 grep -q 'path=/usr/bin/vampire-app settings' "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
 grep -q 'path=/usr/bin/vampire-app software' "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
+grep -q 'path=/usr/bin/vampire-app monitor' "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
 echo "Vampire Weston desktop launcher tests passed."

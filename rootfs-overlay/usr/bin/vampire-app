@@ -10,5 +10,6 @@ case "$1" in
   files) shift; exec foot /usr/bin/vfiles "$@" ;;
   settings) shift; exec foot /usr/bin/vdesktop "$@" ;;
   software) shift; exec foot /usr/bin/vsoftware "$@" ;;
+  monitor) shift; exec foot /usr/bin/vmonitor "$@" ;;
   *) echo "Vampire Desktop: unknown app: $1" >&2; exit 2 ;;
 esac

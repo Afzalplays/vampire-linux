@@ -54,7 +54,7 @@ feature release-ready.
 - [x] Add theme, accent, transparency, blur, terminal, dock and top-panel preference storage.
 - [x] Add a Wayland terminal autostart with the Vampire Shell profile and branded dark terminal palette.
 - [x] Apply validated theme, accent, panel visibility/transparency, reduced-motion and terminal-opacity settings to the next Weston session.
-- [x] Add Weston panel launchers for Terminal, Files, Settings and Software Center.
+- [x] Add Weston panel launchers for Terminal, Files, Settings, Software Center and Monitor.
 - [x] Add console file manager, hardware inventory and diagnostics.
 - [ ] Build the branded Vampire Desktop shell: top panel, floating dock, launcher and window integration.
 - [ ] Add non-root graphical login/session management and display manager.
