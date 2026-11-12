@@ -2,6 +2,7 @@
 # Launch the configured Weston DRM desktop preview.
 set -eu
 command -v weston >/dev/null 2>&1 || { echo "Weston is not installed." >&2; exit 127; }
+if command -v modprobe >/dev/null 2>&1; then modprobe i915 2>/dev/null || true; fi
 [ -e /dev/dri/card0 ] || { echo "No DRM graphics device at /dev/dri/card0." >&2; exit 1; }
 [ "$(id -u)" -eq 0 ] || { echo "This early preview requires root/seat access." >&2; exit 1; }
 export XDG_RUNTIME_DIR=/run/user/0

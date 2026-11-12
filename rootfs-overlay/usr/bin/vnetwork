@@ -72,6 +72,7 @@ status_network() {
   if is_running; then echo "DHCP client: running"; else echo "DHCP client: stopped"; fi
 }
 wifi_list() {
+  if command -v modprobe >/dev/null 2>&1; then modprobe iwlwifi 2>/dev/null || true; fi
   command -v iw >/dev/null 2>&1 || { echo "vnetwork: iw is not installed" >&2; return 127; }
   iw dev
 }
