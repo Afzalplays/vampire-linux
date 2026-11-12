@@ -37,7 +37,7 @@ while (($#)); do
   shift
 done
 [[ -n "$destination" ]]
-printf 'NAME="Vampire OS"\\nPRETTY_NAME="Vampire OS 0.1.0-dev (%s)"\\n' "${VAMPIRE_EDITION:-desktop}" > "$destination"
+printf 'NAME="Vampire OS"\nPRETTY_NAME="Vampire OS 0.1.0-dev (%s)"\n' "${VAMPIRE_EDITION:-desktop}" > "$destination"
 FAKE_XORRISO
 chmod +x "$TMP/bin/xorriso"
 export PATH="$TMP/bin:$PATH"
