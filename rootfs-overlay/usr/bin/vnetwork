@@ -165,11 +165,6 @@ wifi_connect() {
   start_network
 }
 stop_wpa() {
-  stop_wpa
-}
-
-wifi_disconnect() {
-  stop_network
   wifi_pidfile="$WIFI_RUN_DIR/$iface.pid"
   if command -v wpa_cli >/dev/null 2>&1; then wpa_cli -i "$iface" terminate >/dev/null 2>&1 || true; fi
   if [ -s "$wifi_pidfile" ]; then
@@ -184,6 +179,11 @@ wifi_disconnect() {
     esac
   fi
   rm -f "$wifi_pidfile"
+}
+
+wifi_disconnect() {
+  stop_network
+  stop_wpa
   echo "vnetwork: Wi-Fi disconnected on $iface"
 }
 wifi_command() {
