@@ -20,6 +20,8 @@ cp "$ROOT/rootfs-overlay/usr/bin/vsettings" "$TMP/vsettings"
 chmod +x "$TMP/vsettings"
 "$TMP/vsettings" reset
 test "$("$TMP/vsettings" get theme)" = dark
+printf "0\\n" | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" "$ROOT/rootfs-overlay/usr/bin/vdesktop" --settings > "$TMP/settings-menu.out"
+grep -q "Vampire Settings" "$TMP/settings-menu.out"
 test "$("$TMP/vsettings" get accent)" = crimson
 test "$("$TMP/vsettings" get dock_position)" = bottom-center
 test "$("$TMP/vsettings" get update_channel)" = stable

@@ -13,7 +13,7 @@ for app in files settings software monitor; do
   FOOT_ARGS="$TMP/$app.args" PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vampire-app" "$app"
   case "$app" in
     files) grep -Fxq /usr/bin/vfiles "$TMP/$app.args" ;;
-    settings) grep -Fxq /usr/bin/vdesktop "$TMP/$app.args" ;;
+    settings) grep -Fxq /usr/bin/vdesktop "$TMP/$app.args"; grep -Fxq -- --settings "$TMP/$app.args" ;;
     software) grep -Fxq /usr/bin/vsoftware "$TMP/$app.args" ;;
     monitor) grep -Fxq /usr/bin/vmonitor "$TMP/$app.args" ;;
   esac

@@ -8,7 +8,7 @@ command -v foot >/dev/null 2>&1 || {
 [ "$#" -ge 1 ] || { echo "Usage: vampire-app {files|settings|software|monitor}" >&2; exit 2; }
 case "$1" in
   files) shift; exec foot /usr/bin/vfiles "$@" ;;
-  settings) shift; exec foot /usr/bin/vdesktop "$@" ;;
+  settings) shift; exec foot /usr/bin/vdesktop --settings "$@" ;;
   software) shift; exec foot /usr/bin/vsoftware "$@" ;;
   monitor) shift; exec foot /usr/bin/vmonitor "$@" ;;
   *) echo "Vampire Desktop: unknown app: $1" >&2; exit 2 ;;
