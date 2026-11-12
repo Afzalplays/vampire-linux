@@ -50,5 +50,6 @@ test ! -e "$TMP/run/test0.pid"
 printf '%s\n' 'nameserver 9.9.9.9' > "$VAMPIRE_RESOLV_CONF"
 PATH="$TMP/bin:$PATH" interface=test0 sh "$VAMPIRE_DHCP_HOOK" deconfig
 grep -q '^nameserver 9.9.9.9
+echo "Vampire DHCP lifecycle and lease hook tests passed."
  "$VAMPIRE_RESOLV_CONF"
 echo "Vampire DHCP lifecycle and lease hook tests passed."
