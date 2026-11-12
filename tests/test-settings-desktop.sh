@@ -36,6 +36,18 @@ test "$("$TMP/vsettings" get show_network)" = false
 test "$("$TMP/vsettings" get update_channel)" = testing
 "$TMP/vsettings" set voice_access true
 test "$("$TMP/vsettings" get voice_access)" = true
+"$TMP/vsettings" validate
+cp "$CONFIG" "$TMP/settings.good"
+printf 'unknown_key=bad\n' > "$CONFIG"
+if "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validation accepted an unknown key" >&2; exit 1
+fi
+cp "$TMP/settings.good" "$CONFIG"
+printf 'theme=dark\ntheme=light\n' > "$CONFIG"
+if "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validation accepted a duplicate key" >&2; exit 1
+fi
+cp "$TMP/settings.good" "$CONFIG"
 if "$TMP/vsettings" set theme 'dark; touch /tmp/pwned' >/dev/null 2>&1; then
   echo "settings accepted an invalid/injected value" >&2; exit 1
 fi
@@ -56,7 +68,6 @@ chmod +x "$TMP/mockbin/vsh"
 export VSH_TEST_LOG="$TMP/vsh.log"
 printf '5\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
 grep -qx 'started' "$VSH_TEST_LOG"
-# Exercise the update-channel and voice-access settings menu choices.
 printf '2\n16\ntesting\n17\ntrue\n0\n0\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
 test "$("$TMP/vsettings" get update_channel)" = testing
 test "$("$TMP/vsettings" get voice_access)" = true

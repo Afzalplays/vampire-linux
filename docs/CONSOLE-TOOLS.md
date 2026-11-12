@@ -16,6 +16,7 @@ network status, a read-only system monitor, a shell and a read-only installer st
 
 ```sh
 vsettings list
+vsettings validate
 vsettings get theme
 vsettings set theme dark
 vsettings set blur medium
@@ -37,8 +38,9 @@ Allowed values are deliberately constrained:
 
 The live environment seeds `/etc/vampire/settings.conf` from
 `/etc/vampire/settings.defaults` on first boot. The config is stored with
-owner-only permissions. For tests, set `VAMPIRE_SETTINGS_FILE` to a temporary
-path.
+owner-only permissions. `vsettings validate` rejects malformed lines, unknown keys,
+invalid values and duplicate keys without sourcing the file as shell code. For tests,
+set `VAMPIRE_SETTINGS_FILE` to a temporary path.
 
 **Important:** These are stored preferences only. Blur, opacity, dock size,
 voice access and update-channel preferences are not yet connected to a

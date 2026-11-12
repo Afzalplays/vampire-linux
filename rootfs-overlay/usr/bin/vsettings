@@ -4,7 +4,7 @@ set -eu
 CONFIG=${VAMPIRE_SETTINGS_FILE:-/etc/vampire/settings.conf}
 DEFAULTS=${VAMPIRE_SETTINGS_DEFAULTS:-/etc/vampire/settings.defaults}
 KEYS='theme accent surface_transparency blur terminal_opacity dock_size dock_position dock_auto_hide dock_magnification top_panel show_date show_clock show_network show_power reduced_motion update_channel voice_access'
-usage() { echo "Usage: vsettings {list|keys|get KEY|set KEY VALUE|reset}" >&2; exit 2; }
+usage() { echo "Usage: vsettings {list|keys|get KEY|set KEY VALUE|validate|reset}" >&2; exit 2; }
 valid_key() {
   case "$1" in
     theme|accent|surface_transparency|blur|terminal_opacity|dock_size|dock_position|dock_auto_hide|dock_magnification|top_panel|show_date|show_clock|show_network|show_power|reduced_motion|update_channel|voice_access) return 0 ;;
@@ -32,10 +32,30 @@ read_value() {
   [ -r "$CONFIG" ] || return 1
   awk -F= -v wanted="$1" '$1 == wanted { value=$2; found=1 } END { if (found) print value; else exit 1 }' "$CONFIG"
 }
+validate_file() {
+  [ -r "$CONFIG" ] || { echo "vsettings: settings file is not readable" >&2; return 1; }
+  seen=" "
+  while IFS= read -r line || [ -n "$line" ]; do
+    case "$line" in ''|'#'*) continue ;; esac
+    case "$line" in
+      *=*) key=${line%%=*}; value=${line#*=} ;;
+      *) echo "vsettings: malformed settings line" >&2; return 1 ;;
+    esac
+    valid_key "$key" && valid_value "$key" "$value" || {
+      echo "vsettings: invalid setting: $key" >&2; return 1;
+    }
+    case "$seen" in
+      *" $key "*) echo "vsettings: duplicate setting: $key" >&2; return 1 ;;
+    esac
+    seen="$seen$key "
+  done < "$CONFIG"
+  echo "Vampire settings are valid."
+}
 [ "$#" -ge 1 ] || usage
 case "$1" in
-  keys) printf '%s\n' $KEYS ;;
+  keys) [ "$#" -eq 1 ] || usage; printf '%s\n' $KEYS ;;
   list)
+    [ "$#" -eq 1 ] || usage
     for key in $KEYS; do
       value=$(read_value "$key" 2>/dev/null || awk -F= -v k="$key" '$1==k {print $2}' "$DEFAULTS" 2>/dev/null || true)
       printf '%-22s %s\n' "$key" "${value:-unset}"
@@ -65,6 +85,10 @@ case "$1" in
     mv -f "$tmp" "$CONFIG"
     trap - 0 HUP INT TERM
     printf 'Saved %s=%s\n' "$key" "$value"
+    ;;
+  validate)
+    [ "$#" -eq 1 ] || usage
+    validate_file
     ;;
   reset)
     [ "$#" -eq 1 ] || usage
