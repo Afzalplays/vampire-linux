@@ -144,7 +144,8 @@ wifi_connect() {
   mv -f "$config_tmp" "$config"
   rm -f "$network_tmp"
   if wpa_cli -i "$iface" ping >/dev/null 2>&1; then
-    wpa_cli -i "$iface" terminate >/dev/null 2>&1 || true
+    stop_wpa
+    sleep 1
   fi
   echo "vnetwork: connecting to '$ssid' on $iface..."
   wpa_supplicant -B -i "$iface" -c "$config" -P "$WIFI_RUN_DIR/$iface.pid"
@@ -156,12 +157,17 @@ wifi_connect() {
     count=$((count + 1))
   done
   if [ "$connected" != true ]; then
+    stop_wpa
     echo "vnetwork: Wi-Fi association timed out; inspect wpa_supplicant logs" >&2
     return 1
   fi
   trap - 0 HUP INT TERM
   start_network
 }
+stop_wpa() {
+  stop_wpa
+}
+
 wifi_disconnect() {
   stop_network
   wifi_pidfile="$WIFI_RUN_DIR/$iface.pid"
