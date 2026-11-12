@@ -1,8 +1,10 @@
 name: Vampire OS live ISO
 
+# ISO builds are expensive and must not be cancelled by a later source push.
+# Keep the active build and allow one newer revision to wait in the queue.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 on:
   workflow_dispatch:
