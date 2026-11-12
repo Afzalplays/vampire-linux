@@ -10,8 +10,7 @@ vdesktop
 ```
 
 The menu currently opens system information, the appearance preference menu,
-network status, a read-only system monitor, a shell and a read-only installer storage preflight. It is keyboard-driven and exits without modifying
-the host or disk.
+network status, a read-only system monitor, a shell and a read-only installer storage preflight. The appearance menu also exposes the stable/testing update channel and voice-access preference. These are stored preferences only; enabling voice access does not start a microphone or speech service. It is keyboard-driven and exits without modifying the host or disk.
 
 ## Manage preferences
 

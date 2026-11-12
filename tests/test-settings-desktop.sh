@@ -15,7 +15,9 @@ chmod +x "$TMP/vsettings"
 "$TMP/vsettings" reset
 test "$("$TMP/vsettings" get theme)" = dark
 test "$("$TMP/vsettings" get accent)" = crimson
-test "$("$TMP/vsettings" get dock_position)" = bottom-center\ntest "$("$TMP/vsettings" get update_channel)" = stable\ntest "$("$TMP/vsettings" get voice_access)" = false
+test "$("$TMP/vsettings" get dock_position)" = bottom-center
+test "$("$TMP/vsettings" get update_channel)" = stable
+test "$("$TMP/vsettings" get voice_access)" = false
 "$TMP/vsettings" set theme light
 test "$("$TMP/vsettings" get theme)" = light
 "$TMP/vsettings" set blur extreme
@@ -30,6 +32,10 @@ test "$("$TMP/vsettings" get surface_transparency)" = 60
 test "$("$TMP/vsettings" get dock_auto_hide)" = false
 "$TMP/vsettings" set show_network false
 test "$("$TMP/vsettings" get show_network)" = false
+"$TMP/vsettings" set update_channel testing
+test "$("$TMP/vsettings" get update_channel)" = testing
+"$TMP/vsettings" set voice_access true
+test "$("$TMP/vsettings" get voice_access)" = true
 if "$TMP/vsettings" set theme 'dark; touch /tmp/pwned' >/dev/null 2>&1; then
   echo "settings accepted an invalid/injected value" >&2; exit 1
 fi

@@ -37,6 +37,8 @@ appearance_menu() {
       13) key=show_network ;;
       14) key=show_power ;;
       15) key=reduced_motion ;;
+      16) key=update_channel ;;
+      17) key=voice_access ;;
       0) return ;;
       *) echo "Invalid choice."; continue ;;
     esac
