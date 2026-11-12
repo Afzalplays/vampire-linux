@@ -4,8 +4,10 @@ set -eu
 SYS_NET=${VAMPIRE_SYS_NET:-/sys/class/net}
 PROC_ROOT=${VAMPIRE_PROC_ROOT:-/proc}
 RUN_DIR=${VAMPIRE_NETWORK_RUN_DIR:-/run/vampire/dhcp}
+WIFI_RUN_DIR=${VAMPIRE_WIFI_RUN_DIR:-/run/vampire/wifi}
+WIFI_CONFIG_DIR=${VAMPIRE_WIFI_CONFIG_DIR:-/etc/vampire}
 HOOK=${VAMPIRE_DHCP_HOOK:-/usr/lib/vampire/udhcpc.script}
-usage() { echo "Usage: vnetwork {start|stop|restart|status} [interface]" >&2; exit 2; }
+usage() { echo "Usage: vnetwork {start|stop|restart|status} [interface] | wifi {list|scan|status|connect|disconnect} [interface] [SSID]" >&2; exit 2; }
 valid_iface() {
   case "$1" in ''|*[!A-Za-z0-9_.-]*) return 1 ;; esac
   [ "${#1}" -le 15 ]
@@ -65,7 +67,118 @@ status_network() {
   else echo "vnetwork: neither ip nor ifconfig is available" >&2; return 1; fi
   if is_running; then echo "DHCP client: running"; else echo "DHCP client: stopped"; fi
 }
-[ "$#" -le 2 ] || usage
+
+wifi_list() {
+  command -v iw >/dev/null 2>&1 || { echo "vnetwork: iw is not installed" >&2; return 127; }
+  iw dev
+}
+wifi_scan() {
+  command -v iw >/dev/null 2>&1 || { echo "vnetwork: iw is not installed" >&2; return 127; }
+  if command -v ip >/dev/null 2>&1; then ip link set "$iface" up 2>/dev/null || true
+  elif command -v ifconfig >/dev/null 2>&1; then ifconfig "$iface" up || true; fi
+  echo "Scanning Wi-Fi networks on $iface..."
+  iw dev "$iface" scan | awk '
+    /^BSS / { if (ssid != "") printf "%-32s %s\n", ssid, signal; ssid=""; signal="signal unknown" }
+    /signal:/ { signal=$2 " dBm" }
+    /SSID: / { sub(/^[[:space:]]*SSID: /, ""); ssid=$0 }
+    END { if (ssid != "") printf "%-32s %s\n", ssid, signal }
+  '
+}
+wifi_status() {
+  command -v wpa_cli >/dev/null 2>&1 || { echo "vnetwork: wpa_cli is not installed" >&2; return 127; }
+  wpa_cli -i "$iface" status
+  if is_running; then echo "DHCP client: running"; else echo "DHCP client: stopped"; fi
+}
+wifi_connect() {
+  ssid=$3
+  [ -n "$ssid" ] || { echo "Usage: vnetwork wifi connect IFACE SSID" >&2; return 2; }
+  [ "${#ssid}" -le 32 ] || { echo "vnetwork: SSID must be 1–32 bytes" >&2; return 2; }
+  case "$ssid" in *[![:print:]]*) echo "vnetwork: SSID contains non-printable characters" >&2; return 2 ;; esac
+  for tool in iw wpa_cli wpa_passphrase wpa_supplicant udhcpc; do
+    command -v "$tool" >/dev/null 2>&1 || { echo "vnetwork: required Wi-Fi tool missing: $tool" >&2; return 127; }
+  done
+  printf 'Wi-Fi passphrase: '
+  if [ -t 0 ] && command -v stty >/dev/null 2>&1; then
+    stty -echo
+    IFS= read -r passphrase || passphrase=
+    stty echo
+    printf '\n'
+  else
+    IFS= read -r passphrase || passphrase=
+  fi
+  length=${#passphrase}
+  [ "$length" -ge 8 ] && [ "$length" -le 63 ] || {
+    unset passphrase
+    echo "vnetwork: WPA passphrases must contain 8–63 characters" >&2
+    return 2
+  }
+  mkdir -p "$WIFI_CONFIG_DIR" "$WIFI_RUN_DIR" /run/wpa_supplicant
+  config="$WIFI_CONFIG_DIR/wpa_supplicant-$iface.conf"
+  tmp="$config.tmp.$"
+  if ! printf '%s\n' "$passphrase" | wpa_passphrase "$ssid" | sed '/^[[:space:]]*#/d' > "$tmp"; then
+    unset passphrase
+    rm -f "$tmp"
+    echo "vnetwork: could not generate Wi-Fi configuration" >&2
+    return 1
+  fi
+  unset passphrase
+  grep -q '^[[:space:]]*psk=' "$tmp" || { rm -f "$tmp"; echo "vnetwork: wpa_passphrase did not create a PSK" >&2; return 1; }
+  {
+    printf 'ctrl_interface=DIR=/run/wpa_supplicant GROUP=0\nupdate_config=1\n'
+    cat "$tmp"
+  } > "$tmp.final"
+  chmod 600 "$tmp.final"
+  mv -f "$tmp.final" "$config"
+  rm -f "$tmp"
+  if wpa_cli -i "$iface" ping >/dev/null 2>&1; then
+    wpa_cli -i "$iface" terminate >/dev/null 2>&1 || true
+  fi
+  echo "vnetwork: connecting to '$ssid' on $iface..."
+  wpa_supplicant -B -i "$iface" -c "$config" -P "$WIFI_RUN_DIR/$iface.pid"
+  count=0
+  connected=false
+  while [ "$count" -lt 20 ]; do
+    if wpa_cli -i "$iface" status 2>/dev/null | grep -q 'wpa_state=COMPLETED'; then connected=true; break; fi
+    sleep 1
+    count=$((count + 1))
+  done
+  if [ "$connected" != true ]; then
+    echo "vnetwork: Wi-Fi association timed out; inspect wpa_supplicant logs" >&2
+    return 1
+  fi
+  start_network
+}
+wifi_disconnect() {
+  stop_network
+  if command -v wpa_cli >/dev/null 2>&1; then wpa_cli -i "$iface" terminate >/dev/null 2>&1 || true; fi
+  if [ -s "$WIFI_RUN_DIR/$iface.pid" ]; then
+    IFS= read -r pid < "$WIFI_RUN_DIR/$iface.pid" || true
+    case "$pid" in ''|*[!0-9]*) ;; *) kill -TERM "$pid" 2>/dev/null || true ;; esac
+  fi
+  rm -f "$WIFI_RUN_DIR/$iface.pid"
+  echo "vnetwork: Wi-Fi disconnected on $iface"
+}
+wifi_command() {
+  subcommand=${2:-list}
+  case "$subcommand" in
+    list) [ "$#" -eq 2 ] || usage; wifi_list ;;
+    scan|status|disconnect)
+      get_iface "$subcommand" "${3:-}"
+      case "$subcommand" in
+        scan) [ "$#" -eq 3 ] || usage; wifi_scan ;;
+        status) [ "$#" -eq 3 ] || usage; wifi_status ;;
+        disconnect) [ "$#" -eq 3 ] || usage; wifi_disconnect ;;
+      esac ;;
+    connect)
+      [ "$#" -eq 4 ] || usage
+      get_iface "$subcommand" "$3"
+      wifi_connect "$@" ;;
+    *) usage ;;
+  esac
+}
+
+[ "$#" -le 4 ] || usage
+if [ "${1:-}" = wifi ]; then wifi_command "$@"; exit $?; fi
 action=${1:-help}
 case "$action" in
   start|stop|restart|status)
