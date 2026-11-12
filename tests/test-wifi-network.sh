@@ -46,10 +46,14 @@ cat > "$TMP/bin/wpa_cli" <<'MOCK'
 printf '%s\n' "$*" >> "$WPA_LOG"
 case "$*" in
   *ping*) exit 1 ;;
-  *status*) printf 'wpa_state=COMPLETED\nssid=Test Network\n' ;;
+  *status*) if [ "${WPA_TIMEOUT:-0}" = 1 ]; then printf 'wpa_state=SCANNING\n'; else printf 'wpa_state=COMPLETED\nssid=Test Network\n'; fi ;;
   *terminate*) printf 'OK\n' ;;
   *) exit 1 ;;
 esac
+MOCK
+cat > "$TMP/bin/sleep" <<'MOCK'
+#!/bin/sh
+exit 0
 MOCK
 cat > "$TMP/bin/udhcpc" <<'MOCK'
 #!/bin/sh
@@ -79,5 +83,12 @@ if printf 'short\n' | PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vne
   echo "Wi-Fi accepted a short WPA passphrase" >&2; exit 1
 fi
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi disconnect wlan0
+grep -q 'terminate' "$WPA_LOG"
+rm -f "$TMP/run/wifi/wlan0.pid"
+: > "$WPA_LOG"
+if printf 'correcthorsebatterystaple\n' | WPA_TIMEOUT=1 VAMPIRE_WIFI_CONNECT_TIMEOUT=1 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi connect wlan0 'Test Network' >/dev/null 2>&1; then
+  echo "Wi-Fi connection timeout was not reported" >&2; exit 1
+fi
+test ! -e "$TMP/run/wifi/wlan0.pid"
 grep -q 'terminate' "$WPA_LOG"
 echo "Vampire Wi-Fi scan, WPA2 connect and disconnect tests passed."
