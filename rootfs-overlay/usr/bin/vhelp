@@ -9,6 +9,10 @@ cat <<'EOF'
 SYSTEM
   vfetch                         Show system identity and hardware summary
   vdesktop                       Open the Vampire Desktop console launcher
+  vpower status                  Show uptime and power command availability
+  vpower reboot --yes            Reboot after explicit acknowledgement (root)
+  vpower poweroff --yes          Power off after explicit acknowledgement (root)
+  vpower halt --yes              Halt after explicit acknowledgement (root)
   vhelp                          Show this command reference
   vsh                            Start the Vampire Shell
   vsettings list|keys|get|set    Read or change validated desktop preferences
@@ -49,6 +53,9 @@ FILES AND ADMINISTRATION
   vssh status                    Inspect the optional SSH service
   vssh start                     Start key-only SSH after installing a trusted key
   vguard status|apply|clear      Inspect or manage the firewall rules
+
+POWER MANAGEMENT
+  Power actions require root and --yes; the console asks for typed confirmation.
 
 DIAGNOSTICS
   vmonitor [--once|--watch [SECONDS]]  Show resource and thermal telemetry
