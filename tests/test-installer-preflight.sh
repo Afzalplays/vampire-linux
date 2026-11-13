@@ -42,4 +42,27 @@ grep -q 'read-only' "$TMP/out"
 if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/../bad" >/dev/null 2>&1; then
   echo "invalid device path unexpectedly accepted" >&2; exit 1
 fi
+# The readiness check must reject non-x86_64 images before presenting the
+# installer as usable. Stub uname without changing the host environment.
+mkdir -p "$TMP/fakebin"
+cat > "$TMP/fakebin/uname" <<'EOF'
+#!/bin/sh
+echo aarch64
+EOF
+chmod +x "$TMP/fakebin/uname"
+if PATH="$TMP/fakebin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vinstall" system-check >"$TMP/out" 2>&1; then
+  echo "non-x86_64 image unexpectedly passed installer system check" >&2; exit 1
+fi
+grep -q 'targets x86_64/AMD64' "$TMP/out"
+cat > "$TMP/fakebin/uname" <<'EOF'
+#!/bin/sh
+echo x86_64
+EOF
+chmod +x "$TMP/fakebin/uname"
+PATH="$TMP/fakebin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vinstall" system-check >"$TMP/out"
+grep -q 'Architecture: x86_64' "$TMP/out"
+grep -q 'diagnostic only' "$TMP/out"
+if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" system-check extra >/dev/null 2>&1; then
+  echo "system-check unexpectedly accepted extra arguments" >&2; exit 1
+fi
 echo "Vampire installer preflight tests passed."
