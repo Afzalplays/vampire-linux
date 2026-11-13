@@ -79,10 +79,13 @@ development.
 
 Build the Desktop ISO with `bash build/build-live-iso.sh`; build the Server ISO
 with `VAMPIRE_EDITION=server bash build/build-live-iso.sh`. Each edition has a
-separate Buildroot output directory and ISO filename. CI build checks exercise the BIOS and UEFI boot-test scripts. The live ISO
-workflow builds the images and runs the paired OVMF CODE/VARS smoke tests; do
-not treat a green shell/config check as proof of a successful physical-machine
-installation. Release artifacts remain gated on complete firmware validation. See
+separate Buildroot output directory and ISO filename. CI build checks exercise the BIOS and UEFI boot-test scripts. On commit
+`12cc6d99ed4ab8dffa7a82441f2fc52b5dba82a8`, both Desktop and Server ISO builds
+completed and passed QEMU SeaBIOS and OVMF CODE/VARS live-init plus serial-login
+smoke tests (workflow runs `43246672356` and `43246672369`). Checksum-bearing
+developer ISO artifacts were uploaded by those runs. This is virtual firmware
+smoke-test evidence only; physical-machine installation, post-install reboot,
+and hardware compatibility remain unverified. See
 [the live ISO build guide](build/README.md) and
 [the QEMU boot-test guide](docs/QEMU-BOOT-TESTS.md).
 
