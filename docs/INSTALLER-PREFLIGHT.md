@@ -9,7 +9,8 @@ It is not a disk installer and cannot install an operating system.
 - `vinstall list` lists whole-disk devices found in sysfs, excluding partitions, loop, RAM and zram devices.
 - `vinstall preflight /dev/sda` checks that the target exists, has at least 8 GiB,
   is not marked read-only, and has no mounted whole-disk or partition source in
-  the current mount table.
+  the current mount table. If the mount table is missing or unreadable, preflight
+  fails closed rather than approving a disk without this safety check.
 - `vinstall help` prints usage.
 
 Partition device paths are rejected as targets. Linux sysfs partition records are resolved beneath their parent disk, matching the kernel's normal `/sys/block/DISK/PARTITION` layout.
