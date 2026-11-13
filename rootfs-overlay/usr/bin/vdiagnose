@@ -22,6 +22,7 @@ case "${1:-}" in
     [ -n "$directory" ] || usage
     umask 077
     mkdir -p "$directory"
+    chmod 700 "$directory"
     temporary=$(mktemp "$directory/.support.XXXXXX")
     trap 'rm -f "$temporary"' 0 HUP INT TERM
     collect > "$temporary" 2>&1

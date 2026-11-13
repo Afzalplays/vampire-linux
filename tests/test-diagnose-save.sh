@@ -21,6 +21,7 @@ grep -q 'Support snapshot saved with mode 600' <<< "$output"
 files=("$TMP"/support/vampire-support-*.txt)
 test "${#files[@]}" -eq 1
 test "$(stat -c '%a' "$TMP/support")" = 700
+# Existing directories must also be tightened before sensitive reports are written.
 test "$(stat -c '%a' "${files[0]}")" = 600
 grep -q 'VAMPIRE SUPPORT SNAPSHOT' "${files[0]}"
 grep -q 'vhardware diagnostic output' "${files[0]}"

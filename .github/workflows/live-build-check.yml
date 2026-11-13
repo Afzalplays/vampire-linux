@@ -70,7 +70,8 @@ jobs:
           bash -n tests/test-monitor.sh
           bash tests/test-monitor.sh
           bash -n tests/test-diagnose-save.sh
-          bash tests/test-diagnose-save.sh
+          echo '=== support snapshot export ==='
+          bash -x tests/test-diagnose-save.sh
           bash -n tests/test-logs.sh
           bash tests/test-logs.sh
           bash tests/test-editions.sh
