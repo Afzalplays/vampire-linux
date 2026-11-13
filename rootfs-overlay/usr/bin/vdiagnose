@@ -1,12 +1,41 @@
 #!/bin/sh
 # Local support snapshot; inspect before sharing.
 set -eu
-echo 'VAMPIRE SUPPORT SNAPSHOT'
-echo '[HEALTH]'; vhealth || true
-echo '[HARDWARE]'; vhardware
-echo '[MONITOR]'; vmonitor
-echo '[STORAGE]'; vstorage
-echo '[NETWORK]'; vnetwork status || true
-echo '[FIREWALL]'; vguard status || true
-echo '[RECENT LOGS]'; vlogs 2>&1 | tail -n 80 || true
-echo 'Review before sharing: output may contain device, address and log details.'
+usage() { echo "Usage: vdiagnose [--save [DIRECTORY]]" >&2; exit 2; }
+collect() {
+  echo 'VAMPIRE SUPPORT SNAPSHOT'
+  echo '[HEALTH]'; vhealth || true
+  echo '[HARDWARE]'; vhardware || true
+  echo '[MONITOR]'; vmonitor --once || true
+  echo '[STORAGE]'; vstorage || true
+  echo '[NETWORK]'; vnetwork status || true
+  echo '[FIREWALL]'; vguard status || true
+  echo '[RECENT LOGS]'; vlogs 2>&1 | tail -n 80 || true
+  echo 'Review before sharing: output may contain device, address and log details.'
+}
+case "${1:-}" in
+  "") [ "$#" -eq 0 ] || usage; collect ;;
+  --help|-h) usage ;;
+  --save)
+    [ "$#" -le 2 ] || usage
+    directory=${2:-${VAMPIRE_DIAGNOSE_DIR:-/var/log/vampire/support}}
+    [ -n "$directory" ] || usage
+    mkdir -p "$directory"
+    umask 077
+    temporary=$(mktemp "$directory/.support.XXXXXX")
+    trap 'rm -f "$temporary"' 0 HUP INT TERM
+    collect > "$temporary" 2>&1
+    chmod 600 "$temporary"
+    stamp=$(date +%Y%m%d-%H%M%S)
+    case "$stamp" in ''|*[!0-9-]*) echo "vdiagnose: invalid timestamp" >&2; exit 1 ;; esac
+    destination="$directory/vampire-support-$stamp.txt"
+    if [ -e "$destination" ]; then
+      destination="$directory/vampire-support-$stamp-$$.txt"
+    fi
+    mv "$temporary" "$destination"
+    trap - 0 HUP INT TERM
+    echo "Support snapshot saved with mode 600: $destination"
+    echo "Review and redact it before sharing."
+    ;;
+  *) usage ;;
+esac
