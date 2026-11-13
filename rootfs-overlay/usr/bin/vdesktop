@@ -69,7 +69,7 @@ installer_menu() {
 
 power_menu() {
   while :; do
-    printf '\\nVampire Power Controls\\n  1) Status\\n  2) Reboot\\n  3) Power off\\n  0) Back\\nSelect: '
+    printf '\nVampire Power Controls\n  1) Status\n  2) Reboot\n  3) Power off\n  0) Back\nSelect: '
     IFS= read -r pc || return 0
     case "$pc" in
       1) run_and_pause vpower status ;;

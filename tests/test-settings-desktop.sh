@@ -139,11 +139,11 @@ grep -qx 'vinstall plan /dev/mockdisk uefi' "$VINSTALL_TEST_LOG"
 # Power menu status and destructive-action confirmation dispatch.
 cat > "$TMP/mockbin/vpower" <<'MOCK'
 #!/bin/sh
-printf 'vpower %s\\n' "$*" >> "$VPOWER_TEST_LOG"
+printf 'vpower %s\n' "$*" >> "$VPOWER_TEST_LOG"
 MOCK
 chmod +x "$TMP/mockbin/vpower"
 export VPOWER_TEST_LOG="$TMP/power-menu.log"
-printf '22\\n1\\n\\n2\\nREBOOT\\n\\n0\\n0\\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/power-menu.out"
+printf '22\n1\n\n2\nREBOOT\n\n0\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/power-menu.out"
 grep -qx 'vpower status' "$VPOWER_TEST_LOG"
 grep -qx 'vpower reboot --yes' "$VPOWER_TEST_LOG"
 grep -q 'Vampire Power Controls' "$TMP/power-menu.out"
