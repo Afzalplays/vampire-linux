@@ -7,7 +7,7 @@ for command in vfetch vdesktop vsettings vnetwork vctl vpm vsoftware vupdate vfi
 done
 grep -q 'read-only preflight' <<< "$OUT"
 grep -q 'vinstall plan /dev/DISK' <<< "$OUT"
-grep -q 'proposed layout' <<< "$OUT"
+grep -q 'read-only disk layout' <<< "$OUT"
 grep -q 'transactional rollback' <<< "$OUT"
 grep -q 'vupdate verify' <<< "$OUT"
 grep -q 'vlogs \[--follow\]' <<< "$OUT"
