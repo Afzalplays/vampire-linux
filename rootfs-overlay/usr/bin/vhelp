@@ -38,7 +38,8 @@ SOFTWARE AND UPDATES
   vsoftware                     Open the console Software Center
   vupdate check                  Verify the configured signed update manifest
   vupdate download               Download and verify an update image
-  vupdate status                 List verified images staged locally
+  vupdate status                 List staged images in the local cache
+  vupdate verify [FILE]           Recheck a staged image against signed metadata
 
 FILES AND ADMINISTRATION
   vfiles                         Open the console file manager
@@ -49,12 +50,13 @@ FILES AND ADMINISTRATION
   vguard status|apply|clear      Inspect or manage the firewall rules
 
 DIAGNOSTICS
-  vmonitor                       Show live system resource usage
+  vmonitor [--once|--watch [SECONDS]]  Show resource and thermal telemetry
   vhardware                      Show detected hardware
   vstorage                       Show block devices and mounts
   vhealth                        Run system health checks
-  vlogs                          Inspect system logs
-  vdiagnose                      Generate a support snapshot
+  vlogs [--follow] [--lines N]   Inspect recent or live system logs
+  vdiagnose                      Print a support snapshot
+  vdiagnose --save [DIRECTORY]   Save a private mode-600 support report
   vfirewall status               Show firewall state
 
 SAFETY NOTES
