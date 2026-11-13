@@ -107,6 +107,30 @@ def command_download(_args):
     print("Verified update downloaded to: "+str(final))
     print("No system files were changed. Applying updates is not implemented.")
 
+def command_verify(args):
+    manifest = verified_manifest()
+    artifact = manifest["artifact"]
+    path = pathlib.Path(args.file) if args.file else CACHE / (
+        "vampire-os-" + manifest["version"] + "-x86_64.img")
+    if not path.is_file():
+        fail("staged update image not found: " + str(path))
+    try:
+        size = path.stat().st_size
+        if size != artifact["size"]:
+            fail("staged image size does not match the signed manifest")
+        digest = hashlib.sha256()
+        with path.open("rb") as stream:
+            for block in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(block)
+    except OSError as exc:
+        fail("cannot read staged image: " + str(exc))
+    if digest.hexdigest().lower() != artifact["sha256"].lower():
+        fail("staged image SHA-256 does not match the signed manifest")
+    print("Staged update image matches the current signed manifest.")
+    print("Version: " + manifest["version"])
+    print("SHA-256: " + digest.hexdigest())
+    print("Verification only; no system files were changed.")
+
 def command_status(_args):
     print("Vampire OS update cache: "+str(CACHE))
     items=sorted(p.name for p in CACHE.glob("vampire-os-*") if p.is_file()) if CACHE.is_dir() else []
@@ -117,6 +141,9 @@ def main():
     sub=parser.add_subparsers(dest="command",required=True)
     for name,help_text,func in [("check","verify signed release metadata",command_check),("download","download and hash-verify a release image",command_download),("status","list staged update images",command_status)]:
         p=sub.add_parser(name,help=help_text); p.set_defaults(func=func)
+    verify_parser = sub.add_parser("verify", help="recheck a staged image against the current signed manifest")
+    verify_parser.add_argument("file", nargs="?", help="staged image path (defaults to the current version in the update cache)")
+    verify_parser.set_defaults(func=command_verify)
     args=parser.parse_args(); args.func(args)
 
 if __name__=="__main__": main()
