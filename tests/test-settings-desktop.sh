@@ -152,11 +152,11 @@ grep -q 'Vampire Power Controls' "$TMP/power-menu.out"
 # Service manager menu routes read/list/status and lifecycle requests to vctl.
 cat > "$TMP/mockbin/vctl" <<'MOCK'
 #!/bin/sh
-printf 'vctl %s\\n' "$*" >> "$VCTL_TEST_LOG"
+printf 'vctl %s\n' "$*" >> "$VCTL_TEST_LOG"
 MOCK
 chmod +x "$TMP/mockbin/vctl"
 export VCTL_TEST_LOG="$TMP/service-menu.log"
-printf '23\\n1\\n\\n2\\n\\n3\\nmock\\n\\n0\\n0\\n' | VAMPIRE_SERVICE_CMD="$TMP/mockbin/vctl" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/service-menu.out"
+printf '23\n1\n\n2\n\n3\nmock\n\n0\n0\n' | VAMPIRE_SERVICE_CMD="$TMP/mockbin/vctl" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/service-menu.out"
 grep -qx 'vctl list' "$VCTL_TEST_LOG"
 grep -qx 'vctl status-all' "$VCTL_TEST_LOG"
 grep -qx 'vctl start mock' "$VCTL_TEST_LOG"
