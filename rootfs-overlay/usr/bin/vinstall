@@ -27,6 +27,13 @@ read_attr() {
   else printf '?'; fi
 }
 is_partition() { [ -r "$1/partition" ]; }
+canonical_device() {
+  if command -v readlink >/dev/null 2>&1; then
+    resolved=$(readlink -f "$1" 2>/dev/null || true)
+    [ -n "$resolved" ] && { printf '%s\n' "$resolved"; return 0; }
+  fi
+  printf '%s\n' "$1"
+}
 resolve_sys_block() {
   candidate="$SYS_BLOCK/$1"
   if [ -d "$candidate" ]; then printf '%s\n' "$candidate"; return 0; fi
@@ -92,10 +99,30 @@ preflight() {
   if [ "$ro" = 1 ]; then printf 'BLOCKER: kernel reports this device as read-only.\n'; ready=0; fi
   if [ "$removable" = 1 ]; then printf 'WARNING: this is marked as removable media; verify the target carefully.\n'; fi
   if [ -r "$MOUNTS_FILE" ]; then
-    while IFS=' ' read -r source target rest; do
-      case "$source" in "$device"|"$device"[0-9]*|"$device"p[0-9]*)
-        printf 'BLOCKER: device or partition is mounted at %s (%s).\n' "$target" "$source"
-        ready=0 ;;
+    target_real=$(canonical_device "$device")
+    mounted=0
+    for part in "$sys"/*; do
+      [ -d "$part" ] && is_partition "$part" || continue
+      part_name=${part##*/}
+      part_real=$(canonical_device "$DEV_ROOT/$part_name")
+      [ -e "$DEV_ROOT/$part_name" ] || continue
+      while IFS=' ' read -r source mountpoint rest; do
+        case "$source" in /dev/*)
+          source_real=$(canonical_device "$source")
+          if [ "$source_real" = "$target_real" ] || [ "$source_real" = "$part_real" ]; then
+            printf 'BLOCKER: device or partition is mounted at %s (%s).\n' "$mountpoint" "$source"
+            ready=0; mounted=1
+          fi ;;
+        esac
+      done < "$MOUNTS_FILE"
+    done
+    while IFS=' ' read -r source mountpoint rest; do
+      case "$source" in /dev/*)
+        source_real=$(canonical_device "$source")
+        if [ "$source_real" = "$target_real" ]; then
+          printf 'BLOCKER: target disk is mounted at %s (%s).\n' "$mountpoint" "$source"
+          ready=0; mounted=1
+        fi ;;
       esac
     done < "$MOUNTS_FILE"
   else printf 'WARNING: mount table unavailable; mounted-partition check skipped.\n'; fi
