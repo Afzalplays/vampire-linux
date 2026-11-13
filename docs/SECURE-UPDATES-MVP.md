@@ -9,6 +9,7 @@ The development image includes `vupdate`:
   checks exact size and SHA-256, then atomically stages it in
   `/var/cache/vampire/updates`.
 - `vupdate status` lists locally staged images.
+- `vupdate verify [FILE]` rechecks a staged image's exact size and SHA-256 against the currently signed manifest; without `FILE`, it checks the current version in the update cache.
 
 The shipped `/etc/vampire/update.json` has no endpoint or public key because
 there is no production Vampire release service yet. Configure a trusted HTTPS
