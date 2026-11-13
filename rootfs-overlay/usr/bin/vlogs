@@ -1,9 +1,31 @@
 #!/bin/sh
-# Read-only log viewer.
+# Read-only system log viewer.
 set -eu
-follow=no; [ "$#" -eq 0 ] || follow=$1
-case "$follow" in --help|-h) echo 'Usage: vlogs [--follow]'; exit 0 ;; no|--follow) ;; *) echo 'Usage: vlogs [--follow]' >&2; exit 2 ;; esac
-if command -v logread >/dev/null 2>&1; then [ "$follow" != --follow ] || exec logread -f; exec logread; fi
-if [ -r /var/log/messages ]; then [ "$follow" != --follow ] || exec tail -f /var/log/messages; exec tail -n 200 /var/log/messages; fi
-if command -v dmesg >/dev/null 2>&1; then [ "$follow" != --follow ] || { echo 'follow mode unavailable' >&2; exit 1; }; exec dmesg; fi
-echo 'No readable log source available' >&2; exit 1
+follow=no
+lines=200
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --follow|-f) [ "$follow" = no ] || { echo "vlogs: duplicate --follow" >&2; exit 2; }; follow=yes; shift ;;
+    --lines|-n)
+      [ "$#" -ge 2 ] || { echo "Usage: vlogs [--follow] [--lines COUNT]" >&2; exit 2; }
+      case "$2" in ''|*[!0-9]*) echo "vlogs: line count must be an integer" >&2; exit 2 ;; esac
+      [ "$2" -ge 1 ] && [ "$2" -le 5000 ] || { echo "vlogs: line count must be 1–5000" >&2; exit 2; }
+      lines=$2; shift 2 ;;
+    --help|-h) echo "Usage: vlogs [--follow] [--lines COUNT]"; exit 0 ;;
+    *) echo "Usage: vlogs [--follow] [--lines COUNT]" >&2; exit 2 ;;
+  esac
+done
+log_file=${VAMPIRE_LOG_FILE:-/var/log/messages}
+if command -v logread >/dev/null 2>&1; then
+  if [ "$follow" = yes ]; then exec logread -f; else exec logread -l "$lines"; fi
+fi
+if [ -r "$log_file" ]; then
+  if [ "$follow" = yes ]; then exec tail -f "$log_file"; else exec tail -n "$lines" "$log_file"; fi
+fi
+if command -v dmesg >/dev/null 2>&1; then
+  if [ "$follow" = yes ]; then echo "vlogs: follow mode unavailable for dmesg" >&2; exit 1; fi
+  dmesg | tail -n "$lines"
+  exit $?
+fi
+echo "vlogs: no readable log source available" >&2
+exit 1
