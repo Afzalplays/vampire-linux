@@ -119,7 +119,7 @@ while :; do
     13) run_tool vfiles ;;
     14) run_and_pause vhardware ;;
     15) run_and_pause vhealth ;;
-    16) run_and_pause vdiagnose ;;
+    16) run_and_pause vdiagnose --save ;;
     17) run_and_pause vfirewall status ;;
     18) run_and_pause vhelp ;;
     0) exit 0 ;;
