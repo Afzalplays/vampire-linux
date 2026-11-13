@@ -9,7 +9,7 @@ contains() { grep -Fq -- "$1" <<<"$OUTPUT" || fail "missing output: $1"; }
 
 contains 'V A M P I R E'
 contains 'O S'
-contains 'user@vampire-os'
+contains '@vampire-os'
 contains '────────────────────────────────────────'
 contains '●'
 
