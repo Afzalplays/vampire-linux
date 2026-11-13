@@ -32,7 +32,7 @@ diff -u "$TMP/expected" "$VPOWER_CALLS"
 
 : > "$VPOWER_CALLS"
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vpower" halt --yes
-printf 'sync\\nhalt\\n' > "$TMP/expected"
+printf 'sync\nhalt\n' > "$TMP/expected"
 diff -u "$TMP/expected" "$VPOWER_CALLS"
 # A non-root caller is rejected before sync or the power command runs.
 cat > "$TMP/bin/id" <<'MOCK'
