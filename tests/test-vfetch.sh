@@ -34,7 +34,7 @@ grep -Fq 'Locale:' <<<"$MINIMAL_OUTPUT" || fail 'minimal environment lost Locale
 # The same binary must identify the headless Server edition from image metadata.
 SERVER_CONF="$(mktemp)"
 trap 'rm -f "$SERVER_CONF"' EXIT
-printf 'EDITION="server"\\n' > "$SERVER_CONF"
+printf 'EDITION="server"\n' > "$SERVER_CONF"
 SERVER_OUTPUT="$(VAMPIRE_OS_CONF="$SERVER_CONF" bash "$ROOT_DIR/fetch/vfetch")"
 grep -Fq 'Host:       Vampire Server' <<<"$SERVER_OUTPUT" || fail 'Server edition reported the wrong host'
 grep -Fq 'DE:         None (headless)' <<<"$SERVER_OUTPUT" || fail 'Server edition reported a desktop environment'
