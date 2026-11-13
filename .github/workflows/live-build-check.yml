@@ -1,9 +1,8 @@
 name: Vampire OS build checks
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.sha }}
+  cancel-in-progress: false
 on:
   push:
     branches: [main]
