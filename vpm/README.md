@@ -21,9 +21,10 @@ compatibility. The prototype currently has no interactive confirmation prompt,
 so the flag does not bypass a prompt or add a new privilege mode.
 
 Implemented: update, search, info, list, install, basic remove, signed index
-verification, HTTPS-only downloads, SHA-256 payload verification, dependency
-resolution, architecture checks, guarded archive extraction, and basic
-installed-file ownership records.
+verification, HTTPS-only downloads (including redirect downgrade rejection),
+strict package name/version/digest/dependency metadata validation, SHA-256 payload
+verification, dependency resolution, architecture checks, guarded archive
+extraction, and basic installed-file ownership records.
 
 Not implemented: upgrade, transactions, atomic rollback, conflict resolution,
 shared-directory ownership, package triggers, repository key rotation, or a
