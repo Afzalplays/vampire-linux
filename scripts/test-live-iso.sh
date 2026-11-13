@@ -52,11 +52,18 @@ if [[ "$EDITION" == "desktop" ]]; then
   has_entry usr/bin/foot
   has_entry usr/bin/vampire-terminal
 else
-  if grep -Eq '(^|/)usr/bin/weston  local log="$LOG_DIR/$mode.log"
+  if grep -Eq "(/|^)usr/bin/weston$" <<<"$initramfs_listing"; then
+    die "Server initramfs unexpectedly includes the Weston desktop"
+  fi
+fi
+printf "PASS: %s initramfs contains the expected Vampire OS runtime\n" "$EDITION"
+
+run_boot() {
+  local mode="$1"
+  local log="$LOG_DIR/$mode.log"
   local stderr_log="$LOG_DIR/$mode.qemu.stderr"
   local vars_copy=""
   local -a firmware=()
-
   if [[ "$mode" == "uefi" ]]; then
     # OVMF needs a matched CODE/VARS pflash pair; never modify host NVRAM.
     local ovmf_dir="" code_name vars_name ovmf_code="" ovmf_vars="" candidate
