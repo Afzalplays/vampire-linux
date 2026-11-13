@@ -27,6 +27,12 @@ if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2
   echo "mounted device unexpectedly passed preflight" >&2; exit 1
 fi
 grep -q 'mounted at /' "$TMP/out"
+# A whole-disk source must also block preflight, not only child partitions.
+printf '%s\\n' "$DEV/vda /mnt/whole-disk ext4 rw 0 0" > "$MOUNTS"
+if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2>&1; then
+  echo "mounted whole disk unexpectedly passed preflight" >&2; exit 1
+fi
+grep -q 'mounted at /mnt/whole-disk' "$TMP/out"
 mkdir -p "$DEV/disk/by-id"
 ln -s "$DEV/vda1" "$DEV/disk/by-id/vampire-test-partition"
 printf '%s\n' "$DEV/disk/by-id/vampire-test-partition / ext4 rw 0 0" > "$MOUNTS"
