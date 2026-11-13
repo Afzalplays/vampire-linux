@@ -61,10 +61,11 @@ vnetwork wifi status wlan0
 vnetwork wifi disconnect wlan0
 vctl list
 vctl status network
+vctl status-all
 vctl start network
 ```
 
-DHCP startup is attempted during live boot. The DHCP hook configures the IPv4
+The console Desktop also includes a Service Manager menu for listing, inspecting, starting, stopping, restarting and changing boot enablement. Bulk operations preserve configured service order, with shutdown performed in reverse.\n\nDHCP startup is attempted during live boot. The DHCP hook configures the IPv4
 address, default route and DNS resolver from a validated lease. Stopping the
 network service removes only resolver data written by Vampire DHCP. The firewall helper remains
 opt-in because applying an inbound-drop policy can disconnect a remote server:
