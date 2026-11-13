@@ -137,7 +137,7 @@ wifi_connect() {
     return 1
   }
   {
-    printf 'ctrl_interface=DIR=$WPA_CTRL_DIR GROUP=0\nupdate_config=1\n'
+    printf 'ctrl_interface=DIR=%s GROUP=0\nupdate_config=1\n' "$WPA_CTRL_DIR"
     cat "$network_tmp"
   } > "$config_tmp"
   chmod 600 "$config_tmp"
