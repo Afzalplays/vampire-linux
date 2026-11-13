@@ -9,6 +9,7 @@ grep -q '14) Hardware inventory' "$ROOT/rootfs-overlay/usr/bin/vdesktop"
 grep -q '16) Generate support snapshot' "$ROOT/rootfs-overlay/usr/bin/vdesktop"
 grep -q '19) Recent system logs' "$ROOT/rootfs-overlay/usr/bin/vdesktop"
 grep -q '20) Follow live logs' "$ROOT/rootfs-overlay/usr/bin/vdesktop"
+grep -q '21) Live system monitor' "$ROOT/rootfs-overlay/usr/bin/vdesktop"
 grep -qx network "$ROOT/rootfs-overlay/etc/vampire/services.enabled"
 ! grep -qx firewall "$ROOT/rootfs-overlay/etc/vampire/services.enabled"
 echo 'Vampire diagnostics tests passed.'
