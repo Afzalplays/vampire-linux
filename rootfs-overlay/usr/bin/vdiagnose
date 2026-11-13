@@ -20,8 +20,8 @@ case "${1:-}" in
     [ "$#" -le 2 ] || usage
     directory=${2:-${VAMPIRE_DIAGNOSE_DIR:-/var/log/vampire/support}}
     [ -n "$directory" ] || usage
-    mkdir -p "$directory"
     umask 077
+    mkdir -p "$directory"
     temporary=$(mktemp "$directory/.support.XXXXXX")
     trap 'rm -f "$temporary"' 0 HUP INT TERM
     collect > "$temporary" 2>&1
