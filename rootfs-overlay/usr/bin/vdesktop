@@ -101,7 +101,7 @@ case "${1:-}" in
 esac
 while :; do
   printf '\n  V A M P I R E  O S\n  Vampire Desktop — Console Preview\n  -------------------------------\n'
-  printf '  1) System information\n  2) Appearance and desktop settings\n  3) Network settings\n  4) System monitor\n  5) Open Vampire Shell\n  6) Show all settings\n  7) Installer storage preflight\n  8) Graphical session (Weston preview)\n  9) VPM package manager diagnostics\n  10) Signed OS update check\n  11) Vampire Software Center (console)\n  12) SSH service status (opt-in)\n  13) Vampire Files (console)\n  14) Hardware inventory\n  15) System health check\n  16) Generate support snapshot\n  17) Firewall status (read-only)\n  18) Command reference\n  19) Recent system logs\n  20) Follow live logs\n  0) Exit launcher\n  Select: '
+  printf '  1) System information\n  2) Appearance and desktop settings\n  3) Network settings\n  4) System monitor\n  5) Open Vampire Shell\n  6) Show all settings\n  7) Installer storage preflight\n  8) Graphical session (Weston preview)\n  9) VPM package manager diagnostics\n  10) Signed OS update check\n  11) Vampire Software Center (console)\n  12) SSH service status (opt-in)\n  13) Vampire Files (console)\n  14) Hardware inventory\n  15) System health check\n  16) Generate support snapshot\n  17) Firewall status (read-only)\n  18) Command reference\n  19) Recent system logs\n  20) Follow live logs\n  21) Live system monitor (Ctrl+C to return)\n  0) Exit launcher\n  Select: '
   IFS= read -r choice || exit 0
   case "$choice" in
     1) run_and_pause "$FETCH" ;;
@@ -121,7 +121,7 @@ while :; do
     15) run_and_pause vhealth ;;
     16) run_and_pause vdiagnose --save ;;
     17) run_and_pause vfirewall status ;;
-    18) run_and_pause vhelp ;;\n    19) run_and_pause vlogs --lines 100 ;;\n    20) run_and_pause vlogs --follow ;;
+    18) run_and_pause vhelp ;;\n    19) run_and_pause vlogs --lines 100 ;;\n    20) run_and_pause vlogs --follow ;;\n    21) run_and_pause vmonitor --watch 2 ;;
     0) exit 0 ;;
     *) echo "Invalid choice." ;;
   esac
