@@ -46,7 +46,8 @@ jobs:
           bash tests/test-vfetch.sh
           sh -n rootfs-overlay/etc/init.d/rcS
           bash -n tests/test-rootfs-contract.sh
-          bash tests/test-rootfs-contract.sh
+          echo '=== rootfs contract ==='
+          bash -x tests/test-rootfs-contract.sh
           python3 tests/test-kernel-fragment.py
           echo '=== command tools ==='
           bash -x tests/test-command-tools.sh
