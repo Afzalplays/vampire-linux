@@ -165,7 +165,8 @@ installation_plan() {
   printf '\nNo partition table was written. No filesystem was created. No data was changed.\n'
   printf 'This is a proposal only; installer execution and user confirmation are not implemented.\n'
 }
-\ncase "${1:-help}" in
+
+case "${1:-help}" in
   system-check) [ "$#" -eq 1 ] || { usage >&2; exit 2; }; system_check ;;
   list) [ "$#" -eq 1 ] || { usage >&2; exit 2; }; list_disks ;;
   preflight) [ "$#" -eq 2 ] || { usage >&2; exit 2; }; preflight "$2" ;;

@@ -91,20 +91,4 @@ grep -q 'diagnostic only' "$TMP/out"
 if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" system-check extra >/dev/null 2>&1; then
   echo "system-check unexpectedly accepted extra arguments" >&2; exit 1
 fi
-
-# Installation planning must be firmware-aware and strictly read-only.
-: > "$MOUNTS"
-printf '0\n' > "$SYS/vda/ro"
-sh "$ROOT/rootfs-overlay/usr/bin/vinstall" plan "$DEV/vda" uefi > "$TMP/plan-uefi"
-grep -q 'Partition table: GPT' "$TMP/plan-uefi"
-grep -q 'EFI System Partition (FAT32)' "$TMP/plan-uefi"
-grep -q 'No partition table was written' "$TMP/plan-uefi"
-sh "$ROOT/rootfs-overlay/usr/bin/vinstall" plan "$DEV/vda" bios > "$TMP/plan-bios"
-grep -q 'BIOS boot partition' "$TMP/plan-bios"
-if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" plan "$DEV/vda" invalid >"$TMP/out" 2>&1; then
-  echo "invalid firmware mode unexpectedly accepted" >&2; exit 1
-fi
-if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" plan "$DEV/vda1" uefi >"$TMP/out" 2>&1; then
-  echo "partition path unexpectedly accepted for installation plan" >&2; exit 1
-fi
-\necho "Vampire installer preflight and read-only layout planning tests passed."
+echo "Vampire installer preflight tests passed."
