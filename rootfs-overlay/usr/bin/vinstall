@@ -100,24 +100,23 @@ preflight() {
   if [ "$removable" = 1 ]; then printf 'WARNING: this is marked as removable media; verify the target carefully.\n'; fi
   if [ -r "$MOUNTS_FILE" ]; then
     target_real=$(canonical_device "$device")
-    mounted=0
     for part in "$sys"/*; do
       [ -d "$part" ] && is_partition "$part" || continue
       part_name=${part##*/}
       part_real=$(canonical_device "$DEV_ROOT/$part_name")
       [ -e "$DEV_ROOT/$part_name" ] || continue
       while IFS=' ' read -r source mountpoint rest; do
-        case "$source" in /dev/*)
+        case "$source" in "$DEV_ROOT"/*)
           source_real=$(canonical_device "$source")
           if [ "$source_real" = "$target_real" ] || [ "$source_real" = "$part_real" ]; then
             printf 'BLOCKER: device or partition is mounted at %s (%s).\n' "$mountpoint" "$source"
-            ready=0; mounted=1
+            ready=0
           fi ;;
         esac
       done < "$MOUNTS_FILE"
     done
     while IFS=' ' read -r source mountpoint rest; do
-      case "$source" in /dev/*)
+      case "$source" in "$DEV_ROOT"/*)
         source_real=$(canonical_device "$source")
         if [ "$source_real" = "$target_real" ]; then
           printf 'BLOCKER: target disk is mounted at %s (%s).\n' "$mountpoint" "$source"
