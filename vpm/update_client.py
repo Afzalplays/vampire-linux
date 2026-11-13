@@ -47,6 +47,7 @@ def fetch_bytes(url,limit):
     try:
         with urllib.request.urlopen(req,timeout=30) as response:
             if response.status!=200: fail("server returned HTTP "+str(response.status))
+            if not is_https_url(response.geturl()): fail("refusing HTTPS downgrade redirect")
             data=response.read(limit+1)
     except (OSError,urllib.error.URLError) as exc: fail("download failed: "+str(exc))
     if len(data)>limit: fail("download exceeds size limit")
