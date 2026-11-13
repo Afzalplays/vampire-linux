@@ -29,10 +29,10 @@ read_attr() {
 is_partition() { [ -r "$1/partition" ]; }
 resolve_sys_block() {
   candidate="$SYS_BLOCK/$1"
-  if [ -d "$candidate" ]; then printf '%s\\n' "$candidate"; return 0; fi
+  if [ -d "$candidate" ]; then printf '%s\n' "$candidate"; return 0; fi
   for child in "$SYS_BLOCK"/*/"$1"; do
     [ -d "$child" ] || continue
-    printf '%s\\n' "$child"
+    printf '%s\n' "$child"
     return 0
   done
   return 1
