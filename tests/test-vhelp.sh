@@ -7,6 +7,10 @@ for command in vfetch vdesktop vsettings vnetwork vctl vpm vsoftware vupdate vfi
 done
 grep -q 'read-only preflight' <<< "$OUT"
 grep -q 'transactional rollback' <<< "$OUT"
+grep -q 'vupdate verify' <<< "$OUT"
+grep -q 'vlogs \[--follow\]' <<< "$OUT"
+grep -q 'vdiagnose --save' <<< "$OUT"
+grep -q 'Live system monitor' "$ROOT/rootfs-overlay/usr/bin/vdesktop"
 grep -q "18) Command reference" "$ROOT/rootfs-overlay/usr/bin/vdesktop"
 grep -q "alias help='vhelp'" "$ROOT/rootfs-overlay/etc/vampire/shellrc"
 echo "Vampire command reference tests passed."
