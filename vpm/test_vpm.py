@@ -32,6 +32,41 @@ class ArchiveSafetyTests(unittest.TestCase):
                     vpm.fetch("https://repo.example.invalid/package.tar.gz", destination, 1024)
             self.assertFalse(destination.exists())
 
+    def test_validate_package_index_entry(self):
+        valid = {
+            "name": "hello-vampire",
+            "version": "1.0.0",
+            "url": "packages/hello-vampire.tar.gz",
+            "sha256": "a" * 64,
+            "depends": [],
+            "architecture": "any",
+        }
+        self.assertEqual(
+            vpm.validate_package_entry(valid, "https://repo.example.invalid/")["name"],
+            "hello-vampire")
+
+    def test_reject_package_cache_path_traversal(self):
+        invalid = {
+            "name": "../outside",
+            "version": "1.0.0",
+            "url": "packages/outside.tar.gz",
+            "sha256": "a" * 64,
+            "depends": [],
+        }
+        with self.assertRaises(ValueError):
+            vpm.validate_package_entry(invalid, "https://repo.example.invalid/")
+
+    def test_reject_malformed_package_digest_and_dependencies(self):
+        invalid = {
+            "name": "hello-vampire",
+            "version": "1.0.0",
+            "url": "packages/hello-vampire.tar.gz",
+            "sha256": "not-a-digest",
+            "depends": "python",
+        }
+        with self.assertRaises(ValueError):
+            vpm.validate_package_entry(invalid, "https://repo.example.invalid/")
+
     def test_install_accepts_yes_flag(self):
         result = subprocess.run(
             [sys.executable, str(VPM_PATH), "install", "--help"],
