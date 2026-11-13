@@ -78,9 +78,8 @@ list_disks() {
 preflight() {
   device=$1
   name=$(disk_name "$device") || { printf 'ERROR: use a direct device path below %s.\n' "$DEV_ROOT" >&2; return 2; }
-  sys="$SYS_BLOCK/$name"
   [ -e "$DEV_ROOT/$name" ] || { printf 'ERROR: device does not exist: %s\n' "$device" >&2; return 2; }
-  [ -d "$sys" ] || { printf 'ERROR: no sysfs block-device record for %s.\n' "$device" >&2; return 2; }
+  sys=$(resolve_sys_block "$name") || { printf 'ERROR: no sysfs block-device record for %s.\n' "$device" >&2; return 2; }
   is_partition "$sys" && { printf 'ERROR: select the whole disk, not a partition: %s\n' "$device" >&2; return 2; }
   sectors=$(read_attr "$sys/size")
   case "$sectors" in ''|*[!0-9]*) printf 'ERROR: cannot read device capacity.\n' >&2; return 2 ;; esac
