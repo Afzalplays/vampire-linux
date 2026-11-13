@@ -102,6 +102,9 @@ wifi_connect() {
   for tool in iw wpa_cli wpa_passphrase wpa_supplicant udhcpc; do
     command -v "$tool" >/dev/null 2>&1 || { echo "vnetwork: required Wi-Fi tool missing: $tool" >&2; return 127; }
   done
+  connect_timeout=${VAMPIRE_WIFI_CONNECT_TIMEOUT:-20}
+  case "$connect_timeout" in ""|*[!0-9]*) echo "vnetwork: invalid Wi-Fi timeout" >&2; return 2 ;; esac
+  [ "$connect_timeout" -ge 1 ] && [ "$connect_timeout" -le 120 ] || { echo "vnetwork: Wi-Fi timeout must be 1–120 seconds" >&2; return 2; }
   printf 'Wi-Fi passphrase: '
   if [ -t 0 ] && command -v stty >/dev/null 2>&1; then
     stty -echo
@@ -147,9 +150,6 @@ wifi_connect() {
     stop_wpa
     sleep 1
   fi
-  connect_timeout=${VAMPIRE_WIFI_CONNECT_TIMEOUT:-20}
-  case "$connect_timeout" in ""|*[!0-9]*) echo "vnetwork: invalid Wi-Fi timeout" >&2; stop_wpa; return 2 ;; esac
-  [ "$connect_timeout" -ge 1 ] && [ "$connect_timeout" -le 120 ] || { echo "vnetwork: Wi-Fi timeout must be 1–120 seconds" >&2; stop_wpa; return 2; }
   echo "vnetwork: connecting to '$ssid' on $iface..."
   wpa_supplicant -B -i "$iface" -c "$config" -P "$WIFI_RUN_DIR/$iface.pid"
   count=0
