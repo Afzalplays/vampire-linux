@@ -104,4 +104,21 @@ grep -q 'Command failed (exit 1)' "$TMP/errors.out"
 
 sh "$ROOT/rootfs-overlay/usr/bin/vmonitor" > "$TMP/monitor.out"
 grep -q "VAMPIRE MONITOR" "$TMP/monitor.out"
-echo "Vampire settings, Desktop preference menu, Vampire Shell dispatch and monitor tests passed."
+
+# Recent/following log and live monitor menu entries must dispatch exact arguments.
+cat > "$TMP/mockbin/vlogs" <<'MOCK'
+#!/bin/sh
+printf 'vlogs %s\n' "$*" >> "$VLOGS_TEST_LOG"
+MOCK
+cat > "$TMP/mockbin/vmonitor" <<'MOCK'
+#!/bin/sh
+printf 'vmonitor %s\n' "$*" >> "$VLOGS_TEST_LOG"
+MOCK
+chmod +x "$TMP/mockbin/vlogs" "$TMP/mockbin/vmonitor"
+export VLOGS_TEST_LOG="$TMP/log-menu.log"
+printf '19\n\n20\n\n21\n\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/log-menu.out"
+grep -qx 'vlogs --lines 100' "$VLOGS_TEST_LOG"
+grep -qx 'vlogs --follow' "$VLOGS_TEST_LOG"
+grep -qx 'vmonitor --watch 2' "$VLOGS_TEST_LOG"
+
+echo "Vampire settings, Desktop preference menu, log/monitor dispatch, Vampire Shell dispatch and monitor tests passed."

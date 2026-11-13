@@ -121,7 +121,10 @@ while :; do
     15) run_and_pause vhealth ;;
     16) run_and_pause vdiagnose --save ;;
     17) run_and_pause vfirewall status ;;
-    18) run_and_pause vhelp ;;\n    19) run_and_pause vlogs --lines 100 ;;\n    20) run_and_pause vlogs --follow ;;\n    21) run_and_pause vmonitor --watch 2 ;;
+    18) run_and_pause vhelp ;;
+    19) run_and_pause vlogs --lines 100 ;;
+    20) run_and_pause vlogs --follow ;;
+    21) run_and_pause vmonitor --watch 2 ;;
     0) exit 0 ;;
     *) echo "Invalid choice." ;;
   esac
