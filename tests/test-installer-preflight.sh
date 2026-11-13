@@ -94,7 +94,7 @@ fi
 
 # Installation planning must be firmware-aware and strictly read-only.
 : > "$MOUNTS"
-printf '0\\n' > "$SYS/vda/ro"
+printf '0\n' > "$SYS/vda/ro"
 sh "$ROOT/rootfs-overlay/usr/bin/vinstall" plan "$DEV/vda" uefi > "$TMP/plan-uefi"
 grep -q 'Partition table: GPT' "$TMP/plan-uefi"
 grep -q 'EFI System Partition (FAT32)' "$TMP/plan-uefi"
