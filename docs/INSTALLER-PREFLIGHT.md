@@ -5,11 +5,14 @@ It is not a disk installer and cannot install an operating system.
 
 ## Commands
 
-- `vinstall list` lists block devices found in sysfs, excluding loop, RAM and zram devices.
+- `vinstall system-check` reports architecture, firmware mode, detected RAM and basic diagnostic-tool availability.
+- `vinstall list` lists whole-disk devices found in sysfs, excluding partitions, loop, RAM and zram devices.
 - `vinstall preflight /dev/sda` checks that the target exists, has at least 8 GiB,
   is not marked read-only, and has no mounted whole-disk or partition source in
   the current mount table.
 - `vinstall help` prints usage.
+
+Partition device paths are rejected as targets. Linux sysfs partition records are resolved beneath their parent disk, matching the kernel's normal `/sys/block/DISK/PARTITION` layout.
 
 The script reads sysfs and the mount table only. It does not invoke partitioning,
 formatting, mounting, bootloader installation, or filesystem-writing utilities.
