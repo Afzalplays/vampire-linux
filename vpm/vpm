@@ -30,6 +30,10 @@ def fail(message):
     print("vpm: error:", message, file=sys.stderr)
     raise SystemExit(1)
 
+def is_https_url(value):
+    parsed = urllib.parse.urlparse(value if isinstance(value, str) else "")
+    return parsed.scheme == "https" and bool(parsed.netloc) and not parsed.username and not parsed.password
+
 def load_config():
     if not CONFIG.is_file():
         fail(f"configuration not found: {CONFIG} (see vpm/vpm.example.json)")
@@ -50,6 +54,8 @@ def fetch(url, destination, limit):
         with urllib.request.urlopen(req, timeout=30) as response:
             if response.status != 200:
                 fail(f"download returned HTTP {response.status}")
+            if not is_https_url(response.geturl()):
+                fail("refusing HTTPS downgrade redirect")
             total = 0
             with destination.open("wb") as out:
                 while True:
