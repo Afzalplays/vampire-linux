@@ -89,6 +89,7 @@ def command_download(_args):
             req=urllib.request.Request(a["url"],headers={"User-Agent":"vupdate/0.1"})
             with urllib.request.urlopen(req,timeout=60) as response:
                 if response.status!=200: fail("artifact server returned HTTP "+str(response.status))
+                if not is_https_url(response.geturl()): fail("refusing HTTPS downgrade redirect")
                 while True:
                     block=response.read(1024*1024)
                     if not block: break
