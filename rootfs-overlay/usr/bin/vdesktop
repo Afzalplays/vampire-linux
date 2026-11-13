@@ -5,6 +5,7 @@ SETTINGS=${VAMPIRE_SETTINGS_CMD:-vsettings}
 FETCH=${VAMPIRE_FETCH_CMD:-vfetch}
 NETWORK=${VAMPIRE_NETWORK_CMD:-vnetwork}
 INSTALLER=${VAMPIRE_INSTALLER_CMD:-vinstall}
+SERVICE=${VAMPIRE_SERVICE_CMD:-vctl}
 pause() { printf '\nPress Enter to continue...'; IFS= read -r _ || true; }
 run_tool() { if "$@"; then :; else status=$?; printf "Command failed (exit %s).\n" "$status"; fi; }
 run_and_pause() { run_tool "$@"; pause; }
@@ -89,6 +90,30 @@ power_menu() {
   done
 }
 
+services_menu() {
+  while :; do
+    printf '\nVampire Service Manager\n  1) List services\n  2) Status of enabled services\n  3) Start service\n  4) Stop service\n  5) Restart service\n  6) Enable at boot\n  7) Disable at boot\n  0) Back\nSelect: '
+    IFS= read -r service_choice || return 0
+    case "$service_choice" in
+      1) run_and_pause "$SERVICE" list ;;
+      2) run_and_pause "$SERVICE" status-all ;;
+      3|4|5|6|7)
+        printf 'Service name: '; IFS= read -r service_name || return 0
+        [ -n "$service_name" ] || { echo 'Service name cannot be empty.'; continue; }
+        case "$service_choice" in
+          3) run_and_pause "$SERVICE" start "$service_name" ;;
+          4) run_and_pause "$SERVICE" stop "$service_name" ;;
+          5) run_and_pause "$SERVICE" restart "$service_name" ;;
+          6) run_and_pause "$SERVICE" enable "$service_name" ;;
+          7) run_and_pause "$SERVICE" disable "$service_name" ;;
+        esac
+        ;;
+      0) return 0 ;;
+      *) echo 'Invalid choice.' ;;
+    esac
+  done
+}
+
 appearance_menu() {
   while :; do
     printf '\nVampire Settings — Appearance and Desktop\n'
@@ -159,7 +184,7 @@ while :; do
     19) run_and_pause vlogs --lines 100 ;;
     20) run_and_pause vlogs --follow ;;
     21) run_and_pause vmonitor --watch 2 ;;
-    22) power_menu ;;
+    22) power_menu ;;\n    23) services_menu ;;
 
     0) exit 0 ;;
     *) echo "Invalid choice." ;;

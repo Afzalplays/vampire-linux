@@ -31,7 +31,7 @@ NETWORK AND SERVICES
   vctl list                      List available services
   vctl start|stop SERVICE        Control an installed service
   vctl restart|status SERVICE    Restart or inspect a service
-  vctl enable|disable SERVICE    Change boot-time service selection
+  vctl enable|disable SERVICE    Change boot-time service selection\n  vctl status-all                Inspect all boot-enabled services
 
 SOFTWARE AND UPDATES
   vpm doctor                     Check package manager prerequisites

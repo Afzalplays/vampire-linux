@@ -148,4 +148,18 @@ grep -qx 'vpower status' "$VPOWER_TEST_LOG"
 grep -qx 'vpower reboot --yes' "$VPOWER_TEST_LOG"
 grep -q 'Vampire Power Controls' "$TMP/power-menu.out"
 
-echo "Vampire settings, Desktop preference menu, power controls, log/monitor dispatch, Vampire Shell dispatch and monitor tests passed."
+
+# Service manager menu routes read/list/status and lifecycle requests to vctl.
+cat > "$TMP/mockbin/vctl" <<'MOCK'
+#!/bin/sh
+printf 'vctl %s\\n' "$*" >> "$VCTL_TEST_LOG"
+MOCK
+chmod +x "$TMP/mockbin/vctl"
+export VCTL_TEST_LOG="$TMP/service-menu.log"
+printf '23\\n1\\n\\n2\\n\\n3\\nmock\\n\\n0\\n0\\n' | VAMPIRE_SERVICE_CMD="$TMP/mockbin/vctl" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/service-menu.out"
+grep -qx 'vctl list' "$VCTL_TEST_LOG"
+grep -qx 'vctl status-all' "$VCTL_TEST_LOG"
+grep -qx 'vctl start mock' "$VCTL_TEST_LOG"
+grep -q 'Vampire Service Manager' "$TMP/service-menu.out"
+
+echo "Vampire settings, Desktop preference menu, service/power controls, log/monitor dispatch, Vampire Shell dispatch and monitor tests passed."
