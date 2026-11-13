@@ -86,6 +86,7 @@ feature release-ready.
 
 - [x] Add opt-in firewall helper and service integration.
 - [x] Add signed update-manifest verification and checksum-verified image staging (download only).
+- [x] Add a staged-image re-verification command against the currently signed manifest.
 - [ ] Configure production signing keys, trust rotation and maintained update metadata.
 - [ ] Implement atomic OS/application update application, history and rollback.
 - [ ] Implement Secure Boot signing, disk encryption and application isolation.
