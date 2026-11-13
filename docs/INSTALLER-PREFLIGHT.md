@@ -14,7 +14,7 @@ The current `vinstall` command is a **read-only storage discovery and preflight 
 
 The layout planner runs the same whole-disk preflight and rejects partition paths and invalid firmware modes. The planner is explicitly **read-only**: it does not partition, format, mount, write, or alter data. UEFI is selected automatically when the live system exposes `/sys/firmware/efi`; otherwise BIOS is the default, and either mode can be specified explicitly.
 
-Automated tests cover both layout previews, invalid firmware modes, partition rejection, the 8 GiB minimum, mounted-device checks, read-only devices, and missing mount-table fail-closed behavior. A passing preflight is not a guarantee that a disk is safe to erase or compatible with a future installer. Removable-media status is reported but never treated as permission to modify a device.
+The console launcher's installer menu offers the preview only after a successful preflight. Automated tests cover both layout previews, invalid firmware modes, partition rejection, menu dispatch, the 8 GiB minimum, mounted-device checks, read-only devices, and missing mount-table fail-closed behavior. A passing preflight is not a guarantee that a disk is safe to erase or compatible with a future installer. Removable-media status is reported but never treated as permission to modify a device.
 
 ## Safety boundary and next work
 

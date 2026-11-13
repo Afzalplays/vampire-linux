@@ -19,6 +19,9 @@ feature release-ready.
 - [x] Add memory/thermal telemetry, live monitor refresh and private support-report export.
 - [x] Add bounded log viewing and follow mode for local diagnostics.
 - [x] Add DHCP lease application, DNS configuration and network start/stop lifecycle.
+- [x] Add initial Wi-Fi discovery, WPA2 connection, disconnect and credential-file permission checks (hardware validation and persistent profiles remain pending).
+- [x] Add firmware-specific read-only UEFI/GPT and BIOS/GPT installation-layout preview to the console installer menu.
+- [x] Enforce private permissions on support snapshot directories and report files, including pre-existing directories.
 - [x] Build Desktop and Server ISO images in CI.
 - [x] Pass legacy BIOS QEMU live-init and serial-login smoke test.
 - [x] Pass UEFI QEMU live-init and serial-login test with OVMF (Desktop and Server, CI run 43246672356 / 43246672369).
