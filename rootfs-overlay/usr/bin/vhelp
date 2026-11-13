@@ -45,6 +45,7 @@ FILES AND ADMINISTRATION
   vfiles                         Open the console file manager
   vinstall list                  List available installation disks
   vinstall preflight /dev/DISK   Check a target without writing to it
+  vinstall plan /dev/DISK [uefi|bios]  Preview a read-only disk layout
   vssh status                    Inspect the optional SSH service
   vssh start                     Start key-only SSH after installing a trusted key
   vguard status|apply|clear      Inspect or manage the firewall rules

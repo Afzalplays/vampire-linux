@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
+set -x
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 grep -qx 'BR2_PACKAGE_WESTON=y' "$ROOT/build/vampire_defconfig"
 grep -qx 'BR2_PACKAGE_DROPBEAR=y' "$ROOT/build/vampire_server_defconfig"

@@ -18,6 +18,23 @@ if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" list | grep -q 'vda1'; then
   echo "partition was incorrectly listed as a whole disk" >&2; exit 1
 fi
 sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" | grep -q 'basic checks passed'
+# Layout planning must remain read-only and cover both firmware modes.
+sh "$ROOT/rootfs-overlay/usr/bin/vinstall" plan "$DEV/vda" uefi >"$TMP/plan"
+grep -q 'Partition table: GPT' "$TMP/plan"
+grep -q '512 MiB  EFI System Partition (FAT32)' "$TMP/plan"
+grep -q 'Remaining space  Linux filesystem (ext4)' "$TMP/plan"
+grep -q 'No partition table was written' "$TMP/plan"
+sh "$ROOT/rootfs-overlay/usr/bin/vinstall" plan "$DEV/vda" bios >"$TMP/plan"
+grep -q '2 MiB  BIOS boot partition' "$TMP/plan"
+grep -q 'Remaining space  Linux filesystem (ext4)' "$TMP/plan"
+if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" plan "$DEV/vda" legacy >"$TMP/out" 2>&1; then
+  echo "invalid firmware mode unexpectedly accepted" >&2; exit 1
+fi
+grep -q 'firmware mode must be uefi or bios' "$TMP/out"
+if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" plan "$DEV/vda1" uefi >"$TMP/out" 2>&1; then
+  echo "partition unexpectedly accepted by layout planner" >&2; exit 1
+fi
+grep -q 'whole disk' "$TMP/out"
 if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda1" >"$TMP/out" 2>&1; then
   echo "partition unexpectedly accepted as whole disk" >&2; exit 1
 fi
