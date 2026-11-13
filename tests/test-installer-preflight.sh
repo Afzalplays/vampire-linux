@@ -34,6 +34,18 @@ if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2
   echo "mounted aliased partition unexpectedly passed preflight" >&2; exit 1
 fi
 grep -q 'mounted at /' "$TMP/out"
+# Enforce the minimum target capacity and make removable-media status visible.
+printf '8388608\n' > "$SYS/vda/size"
+if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2>&1; then
+  echo "undersized target unexpectedly passed preflight" >&2; exit 1
+fi
+grep -q 'smaller than the 8 GiB minimum' "$TMP/out"
+printf '41943040\n' > "$SYS/vda/size"
+printf '1\n' > "$SYS/vda/removable"
+sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out"
+grep -q 'marked as removable media' "$TMP/out"
+grep -q 'basic checks passed' "$TMP/out"
+printf '0\n' > "$SYS/vda/removable"
 printf '1\n' > "$SYS/vda/ro"; : > "$MOUNTS"
 if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2>&1; then
   echo "read-only device unexpectedly passed preflight" >&2; exit 1
