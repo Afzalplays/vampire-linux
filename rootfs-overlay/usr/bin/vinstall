@@ -1,5 +1,5 @@
 #!/bin/sh
-# Vampire OS installer discovery/preflight. This command is intentionally read-only.
+# Vampire OS installer discovery/preflight. Intentionally read-only.
 set -eu
 SYS_BLOCK=${VAMPIRE_SYS_BLOCK:-/sys/block}
 DEV_ROOT=${VAMPIRE_DEV_ROOT:-/dev}
@@ -7,13 +7,13 @@ MOUNTS_FILE=${VAMPIRE_MOUNTS_FILE:-/proc/mounts}
 MIN_SECTORS=16777216 # 8 GiB using 512-byte sectors
 usage() {
   cat <<'EOF'
-Vampire Installer — safe storage preflight
+Vampire Installer — read-only readiness and storage checks
 Usage:
+  vinstall system-check
   vinstall list
   vinstall preflight /dev/DEVICE
   vinstall help
-This build only discovers disks and checks installation readiness.
-It does NOT partition, format, mount, or write to any disk.
+This developer build does NOT partition, format, mount, or write to disks.
 EOF
 }
 disk_name() {
@@ -26,12 +26,33 @@ read_attr() {
   if [ -r "$file" ]; then IFS= read -r value < "$file" || value=; printf '%s' "$value"
   else printf '?'; fi
 }
+is_partition() { [ -r "$1/partition" ]; }
+system_check() {
+  printf 'Vampire OS installation environment check\n'
+  arch=$(uname -m 2>/dev/null || echo unknown)
+  printf 'Architecture: %s\n' "$arch"
+  case "$arch" in x86_64|amd64) ;; *) echo 'BLOCKER: this image targets x86_64/AMD64.'; return 1 ;; esac
+  if [ -d /sys/firmware/efi ]; then firmware=UEFI
+  else firmware=Legacy-BIOS-or-unknown; fi
+  printf 'Firmware: %s\n' "$firmware"
+  mem_kib=$(awk '/^MemTotal:/ {print $2; exit}' /proc/meminfo 2>/dev/null || true)
+  case "$mem_kib" in ''|*[!0-9]*) echo 'WARNING: system memory could not be detected.' ;;
+    *) mem_mib=$((mem_kib / 1024)); printf 'Memory: %s MiB\n' "$mem_mib"
+       [ "$mem_mib" -ge 1024 ] || echo 'WARNING: less than 1 GiB RAM; installation/live use may be unreliable.' ;;
+  esac
+  for tool in sh awk mount; do
+    if command -v "$tool" >/dev/null 2>&1; then printf 'Tool %-8s available\n' "$tool"
+    else printf 'WARNING: required diagnostic tool missing: %s\n' "$tool"; fi
+  done
+  echo 'This command is diagnostic only; it has not changed storage.'
+}
 list_disks() {
   [ -d "$SYS_BLOCK" ] || { printf 'Block-device inventory unavailable.\n' >&2; return 1; }
-  printf '%-14s %10s %-5s %-5s %s\n' DEVICE SIZE_MiB RO REMOVABLE MODEL
+  printf '%-18s %10s %-5s %-5s %s\n' DEVICE SIZE_MiB RO REMOVABLE MODEL
   found=0
   for path in "$SYS_BLOCK"/*; do
     [ -d "$path" ] || continue
+    is_partition "$path" && continue
     name=${path##*/}
     case "$name" in loop*|ram*|zram*) continue ;; esac
     sectors=$(read_attr "$path/size")
@@ -39,10 +60,10 @@ list_disks() {
     mib=$((sectors / 2048))
     ro=$(read_attr "$path/ro"); removable=$(read_attr "$path/removable")
     model=$(read_attr "$path/device/model")
-    printf '%-14s %10s %-5s %-5s %s\n' "$DEV_ROOT/$name" "$mib" "$ro" "$removable" "$model"
+    printf '%-18s %10s %-5s %-5s %s\n' "$DEV_ROOT/$name" "$mib" "$ro" "$removable" "$model"
     found=1
   done
-  [ "$found" -eq 1 ] || printf 'No eligible block devices detected.\n'
+  [ "$found" -eq 1 ] || printf 'No whole-disk devices detected.\n'
 }
 preflight() {
   device=$1
@@ -50,6 +71,7 @@ preflight() {
   sys="$SYS_BLOCK/$name"
   [ -e "$DEV_ROOT/$name" ] || { printf 'ERROR: device does not exist: %s\n' "$device" >&2; return 2; }
   [ -d "$sys" ] || { printf 'ERROR: no sysfs block-device record for %s.\n' "$device" >&2; return 2; }
+  is_partition "$sys" && { printf 'ERROR: select the whole disk, not a partition: %s\n' "$device" >&2; return 2; }
   sectors=$(read_attr "$sys/size")
   case "$sectors" in ''|*[!0-9]*) printf 'ERROR: cannot read device capacity.\n' >&2; return 2 ;; esac
   ro=$(read_attr "$sys/ro"); removable=$(read_attr "$sys/removable")
@@ -59,6 +81,7 @@ preflight() {
   ready=1
   if [ "$sectors" -lt "$MIN_SECTORS" ]; then printf 'BLOCKER: disk is smaller than the 8 GiB minimum target.\n'; ready=0; fi
   if [ "$ro" = 1 ]; then printf 'BLOCKER: kernel reports this device as read-only.\n'; ready=0; fi
+  if [ "$removable" = 1 ]; then printf 'WARNING: this is marked as removable media; verify the target carefully.\n'; fi
   if [ -r "$MOUNTS_FILE" ]; then
     while IFS=' ' read -r source target rest; do
       case "$source" in "$device"|"$device"[0-9]*|"$device"p[0-9]*)
@@ -75,6 +98,7 @@ preflight() {
   fi
 }
 case "${1:-help}" in
+  system-check) [ "$#" -eq 1 ] || { usage >&2; exit 2; }; system_check ;;
   list) [ "$#" -eq 1 ] || { usage >&2; exit 2; }; list_disks ;;
   preflight) [ "$#" -eq 2 ] || { usage >&2; exit 2; }; preflight "$2" ;;
   help|-h|--help) usage ;;
