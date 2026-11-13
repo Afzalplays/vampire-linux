@@ -135,7 +135,8 @@ while :; do
     18) run_and_pause vhelp ;;
     19) run_and_pause vlogs --lines 100 ;;
     20) run_and_pause vlogs --follow ;;
-    21) run_and_pause vmonitor --watch 2 ;;\n    22) printf '1) Status  2) Reboot  3) Power off  0) Back\\nSelect: '; IFS= read -r pc || exit 0; case "$pc" in 1) run_and_pause vpower status ;; 2) printf 'Type REBOOT to confirm: '; IFS= read -r confirm; if [ "$confirm" = REBOOT ]; then run_tool vpower reboot --yes; else echo 'Reboot cancelled.'; fi ;; 3) printf 'Type POWER OFF to confirm: '; IFS= read -r confirm; if [ "$confirm" = 'POWER OFF' ]; then run_tool vpower poweroff --yes; else echo 'Power off cancelled.'; fi ;; 0) : ;; *) echo 'Invalid choice.' ;; esac; pause ;;
+    21) run_and_pause vmonitor --watch 2 ;;
+    22) printf '1) Status  2) Reboot  3) Power off  0) Back\nSelect: '; IFS= read -r pc || exit 0; case "$pc" in 1) run_and_pause vpower status ;; 2) printf 'Type REBOOT to confirm: '; IFS= read -r confirm; if [ "$confirm" = REBOOT ]; then run_tool vpower reboot --yes; else echo 'Reboot cancelled.'; fi ;; 3) printf 'Type POWER OFF to confirm: '; IFS= read -r confirm; if [ "$confirm" = 'POWER OFF' ]; then run_tool vpower poweroff --yes; else echo 'Power off cancelled.'; fi ;; 0) : ;; *) echo 'Invalid choice.' ;; esac; pause ;;
     0) exit 0 ;;
     *) echo "Invalid choice." ;;
   esac
