@@ -60,6 +60,8 @@ jobs:
           bash tests/test-ssh-tool.sh
           bash tests/test-files-tool.sh
           bash tests/test-diagnostics.sh
+          bash -n tests/test-monitor.sh
+          bash tests/test-monitor.sh
           bash tests/test-editions.sh
       - name: Check Buildroot configuration
         run: |
