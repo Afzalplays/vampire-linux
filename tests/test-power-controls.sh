@@ -29,4 +29,24 @@ diff -u "$TMP/expected" "$VPOWER_CALLS"
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vpower" poweroff --yes
 printf 'sync\npoweroff\n' > "$TMP/expected"
 diff -u "$TMP/expected" "$VPOWER_CALLS"
+
+: > "$VPOWER_CALLS"
+PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vpower" halt --yes
+printf 'sync\\nhalt\\n' > "$TMP/expected"
+diff -u "$TMP/expected" "$VPOWER_CALLS"
+# A non-root caller is rejected before sync or the power command runs.
+cat > "$TMP/bin/id" <<'MOCK'
+#!/bin/sh
+[ "$1" = -u ] && { echo 1000; exit 0; }
+exit 1
+MOCK
+: > "$VPOWER_CALLS"
+if PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vpower" reboot --yes > "$TMP/out" 2>&1; then
+  echo "non-root reboot unexpectedly succeeded" >&2; exit 1
+fi
+grep -q 'requires root' "$TMP/out"
+test ! -s "$VPOWER_CALLS"
+if PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vpower" status extra >/dev/null 2>&1; then
+  echo "status accepted unexpected arguments" >&2; exit 1
+fi
 echo 'Vampire power-control tests passed.'
