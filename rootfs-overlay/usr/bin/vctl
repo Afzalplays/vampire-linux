@@ -2,34 +2,35 @@
 set -u
 DIR=${VAMPIRE_SERVICE_DIR:-/etc/vampire/services.d}
 ENABLED=${VAMPIRE_ENABLED_FILE:-/etc/vampire/services.enabled}
-usage() { echo "Usage: vctl {list|start|stop|restart|status|enable|disable} SERVICE | {start-all|stop-all}" >&2; exit 2; }
+usage() { echo "Usage: vctl {list|start|stop|restart|status|status-all|enable|disable} SERVICE | {start-all|stop-all}" >&2; exit 2; }
 valid_name() { case "$1" in ''|[!A-Za-z0-9_]*|*[!A-Za-z0-9_.-]*) return 1 ;; *) return 0 ;; esac; }
-run_service() {
-  svc_name=$1 svc_action=$2
-  valid_name "$svc_name" || { echo "vctl: invalid service name: $svc_name" >&2; return 2; }
-  service="$DIR/$svc_name"
-  [ -x "$service" ] || { echo "vctl: service not found: $svc_name" >&2; return 1; }
-  "$service" "$svc_action"
+service_path() {
+  valid_name "$1" || { echo "vctl: invalid service name: $1" >&2; return 2; }
+  [ -f "$DIR/$1" ] && [ -x "$DIR/$1" ] || { echo "vctl: service not found: $1" >&2; return 1; }
 }
+run_service() { svc_name=$1 svc_action=$2; service_path "$svc_name" || return $?; "$DIR/$svc_name" "$svc_action"; }
 is_enabled() { [ -f "$ENABLED" ] && grep -Fxq "$1" "$ENABLED"; }
 set_enabled() {
   name=$1 mode=$2
-  valid_name "$name" || { echo "vctl: invalid service name" >&2; return 2; }
-  [ -x "$DIR/$name" ] || { echo "vctl: service not found: $name" >&2; return 1; }
-  mkdir -p "${ENABLED%/*}" || return 1
+  service_path "$name" || return $?
+  parent=${ENABLED%/*}; [ "$parent" = "$ENABLED" ] && parent=.
+  mkdir -p "$parent" || return 1
+  old_umask=$(umask); umask 077
   tmp="$ENABLED.tmp.$$"
-  : > "$tmp" || return 1
+  if ! : > "$tmp"; then umask "$old_umask"; return 1; fi
   if [ -f "$ENABLED" ]; then
-    while IFS= read -r item; do
+    while IFS= read -r item || [ -n "$item" ]; do
       [ -n "$item" ] || continue
+      valid_name "$item" || { echo "vctl: refusing malformed enabled entry" >&2; rm -f "$tmp"; umask "$old_umask"; return 1; }
       [ "$item" = "$name" ] && continue
-      grep -Fxq "$item" "$tmp" || printf '%s\n' "$item" >> "$tmp"
+      grep -Fxq "$item" "$tmp" || printf '%s\n' "$item" >> "$tmp" || { rm -f "$tmp"; umask "$old_umask"; return 1; }
     done < "$ENABLED"
   fi
   if [ "$mode" = enable ]; then
-    grep -Fxq "$name" "$tmp" || printf '%s\n' "$name" >> "$tmp"
+    grep -Fxq "$name" "$tmp" || printf '%s\n' "$name" >> "$tmp" || { rm -f "$tmp"; umask "$old_umask"; return 1; }
   fi
-  mv -f "$tmp" "$ENABLED"
+  if ! mv -f "$tmp" "$ENABLED"; then rm -f "$tmp"; umask "$old_umask"; return 1; fi
+  umask "$old_umask"
   printf 'vctl: %s %s at boot\n' "$name" "${mode}d"
 }
 [ "$#" -ge 1 ] || usage
@@ -37,39 +38,50 @@ action=$1
 case "$action" in
   list)
     [ "$#" -eq 1 ] || usage
+    found=0
     for service in "$DIR"/*; do
-      [ -x "$service" ] || continue
-      name=${service##*/}
+      [ -f "$service" ] && [ -x "$service" ] || continue
+      found=1; name=${service##*/}
       if is_enabled "$name"; then printf '* %s (enabled)\n' "$name"; else printf '  %s (disabled)\n' "$name"; fi
     done
+    [ "$found" -eq 1 ] || echo "vctl: no services installed"
     exit 0 ;;
-  start-all|stop-all)
+  status-all)
     [ "$#" -eq 1 ] || usage
     [ -f "$ENABLED" ] || exit 0
     result=0
-    order_file=$ENABLED
+    while IFS= read -r name || [ -n "$name" ]; do
+      [ -n "$name" ] || continue
+      run_service "$name" status || result=1
+    done < "$ENABLED"
+    exit "$result" ;;
+  start-all|stop-all)
+    [ "$#" -eq 1 ] || usage
+    [ -f "$ENABLED" ] || exit 0
+    result=0; order_file=$ENABLED
+    seen_file=$(mktemp "${TMPDIR:-/tmp}/vctl-seen.XXXXXX") || exit 1
     if [ "$action" = stop-all ]; then
-      # Shutdown must unwind startup order. Keep the list as data, never source it.
-      order_file=$(mktemp "${TMPDIR:-/tmp}/vctl-stop-order.XXXXXX") || exit 1
-      trap 'rm -f "$order_file"' EXIT
-      sed '1!G;h;$!d' "$ENABLED" > "$order_file" || exit 1
+      order_file=$(mktemp "${TMPDIR:-/tmp}/vctl-stop-order.XXXXXX") || { rm -f "$seen_file"; exit 1; }
+      sed '1!G;h;$!d' "$ENABLED" > "$order_file" || { rm -f "$seen_file" "$order_file"; exit 1; }
     fi
-    while IFS= read -r name; do
+    while IFS= read -r name || [ -n "$name" ]; do
       [ -n "$name" ] || continue
       valid_name "$name" || { echo "vctl: ignoring invalid service entry" >&2; result=1; continue; }
+      if grep -Fxq "$name" "$seen_file"; then echo "vctl: ignoring duplicate service entry: $name" >&2; continue; fi
+      printf '%s\n' "$name" >> "$seen_file"
       if [ "$action" = start-all ]; then run_service "$name" start || result=1
       else run_service "$name" stop || result=1
       fi
     done < "$order_file"
-    if [ "$action" = stop-all ]; then rm -f "$order_file"; fi
+    rm -f "$seen_file"
+    [ "$order_file" = "$ENABLED" ] || rm -f "$order_file"
     exit "$result" ;;
-  enable|disable)
-    [ "$#" -eq 2 ] || usage
-    set_enabled "$2" "$action"
-    exit $? ;;
+  enable|disable) [ "$#" -eq 2 ] || usage; set_enabled "$2" "$action"; exit $? ;;
   start|stop|restart|status)
     [ "$#" -eq 2 ] || usage
-    if [ "$action" = restart ]; then run_service "$2" stop || true; run_service "$2" start
+    if [ "$action" = restart ]; then
+      run_service "$2" stop || { echo "vctl: restart aborted because stop failed" >&2; exit 1; }
+      run_service "$2" start
     else run_service "$2" "$action"
     fi
     exit $? ;;

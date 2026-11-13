@@ -12,16 +12,20 @@ per line in `/etc/vampire/services.enabled`.
 
 - `vctl list` — list installed services and boot state.
 - `vctl status network` — query one service.
+- `vctl status-all` — query every boot-enabled service.
 - `vctl start network`, `vctl stop network`, `vctl restart network`.
 - `vctl enable network` / `vctl disable network` — persist boot enablement.
 - `vctl start-all` / `vctl stop-all` — operate on enabled services.
 
 The live image enables DHCP networking by default. The enabled-file order is
 the startup order; shutdown walks that list in reverse so dependent services
-are stopped before the services they rely on. Boot startup continues if an
-optional service fails. Service names are restricted to alphanumeric
-characters, underscore, dot and hyphen; the enabled list is never evaluated
-as shell code.
+are stopped before the services they rely on. Duplicate entries are ignored
+during bulk start/stop. Restart is fail-closed: if stopping a service fails,
+the dispatcher does not start another instance. The enablement file is
+rewritten atomically with owner-only permissions, and malformed entries are
+rejected rather than copied forward. Boot startup continues if an optional
+service fails. Service names are restricted to alphanumeric characters,
+underscore, dot and hyphen; the enabled list is never evaluated as shell code.
 
 ## Current limitations
 

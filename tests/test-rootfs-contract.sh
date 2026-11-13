@@ -5,6 +5,7 @@ for file in rootfs-overlay/usr/bin/vctl rootfs-overlay/usr/bin/vnetwork rootfs-o
   test -s "$ROOT/$file"
 done
 sh -n "$ROOT/rootfs-overlay/usr/bin/vctl"
+grep -q "status-all" "$ROOT/rootfs-overlay/usr/bin/vctl"
 sh -n "$ROOT/rootfs-overlay/etc/init.d/rcS"
 "$ROOT/tests/test-service-manager.sh"
 bash -n "$ROOT/rootfs-overlay/usr/bin/vnetwork"
