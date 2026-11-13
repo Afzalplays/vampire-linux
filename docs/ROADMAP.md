@@ -16,6 +16,7 @@ feature release-ready.
 - [x] Add tests for settings validation, desktop launcher and core console tools.
 - [x] Add read-only installer disk discovery and target preflight checks.
 - [x] Add hardware, storage, health, log and support diagnostics.
+- [x] Add memory/thermal telemetry, live monitor refresh and private support-report export.
 - [x] Add DHCP lease application, DNS configuration and network start/stop lifecycle.
 - [x] Build Desktop and Server ISO images in CI.
 - [x] Pass legacy BIOS QEMU live-init and serial-login smoke test.
