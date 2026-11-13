@@ -124,7 +124,10 @@ preflight() {
         fi ;;
       esac
     done < "$MOUNTS_FILE"
-  else printf 'WARNING: mount table unavailable; mounted-partition check skipped.\n'; fi
+  else
+    printf 'BLOCKER: mount table unavailable; refusing to approve a disk without mounted-volume checks.\n'
+    ready=0
+  fi
   if [ "$ready" -eq 1 ]; then
     printf 'PREFLIGHT: basic checks passed. No disk changes were made.\n'
   else
