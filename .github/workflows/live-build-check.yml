@@ -62,6 +62,8 @@ jobs:
           bash tests/test-diagnostics.sh
           bash -n tests/test-monitor.sh
           bash tests/test-monitor.sh
+          bash -n tests/test-diagnose-save.sh
+          bash tests/test-diagnose-save.sh
           bash tests/test-editions.sh
       - name: Check Buildroot configuration
         run: |
