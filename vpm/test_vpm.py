@@ -15,6 +15,23 @@ vpm = importlib.util.module_from_spec(SPEC)
 LOADER.exec_module(vpm)
 
 class ArchiveSafetyTests(unittest.TestCase):
+    def test_reject_https_downgrade_redirect(self):
+        from unittest.mock import patch
+
+        class RedirectedResponse:
+            status = 200
+            def __enter__(self): return self
+            def __exit__(self, *args): return False
+            def geturl(self): return "http://mirror.example.invalid/package.tar.gz"
+            def read(self, size=-1): return b"package"
+
+        with tempfile.TemporaryDirectory() as tmp:
+            destination = pathlib.Path(tmp) / "package.tar.gz"
+            with patch.object(vpm.urllib.request, "urlopen", return_value=RedirectedResponse()):
+                with self.assertRaises(SystemExit):
+                    vpm.fetch("https://repo.example.invalid/package.tar.gz", destination, 1024)
+            self.assertFalse(destination.exists())
+
     def test_install_accepts_yes_flag(self):
         result = subprocess.run(
             [sys.executable, str(VPM_PATH), "install", "--help"],
