@@ -10,6 +10,7 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import shutil
 import subprocess
 import sys
@@ -33,6 +34,31 @@ def fail(message):
 def is_https_url(value):
     parsed = urllib.parse.urlparse(value if isinstance(value, str) else "")
     return parsed.scheme == "https" and bool(parsed.netloc) and not parsed.username and not parsed.password
+
+def validate_package_entry(pkg, repo_base):
+    if not isinstance(pkg, dict):
+        raise ValueError("package entry must be an object")
+    name = pkg.get("name")
+    version = pkg.get("version")
+    digest = pkg.get("sha256")
+    url = pkg.get("url")
+    depends = pkg.get("depends", [])
+    if not isinstance(name, str) or not re.fullmatch(r"[a-z0-9][a-z0-9+._-]{0,127}", name):
+        raise ValueError("invalid package name")
+    if not isinstance(version, str) or not re.fullmatch(r"[0-9A-Za-z][0-9A-Za-z.+~_-]{0,63}", version):
+        raise ValueError("invalid package version for " + name)
+    if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-fA-F]{64}", digest):
+        raise ValueError("invalid SHA-256 for " + name)
+    if not isinstance(url, str) or not is_https_url(urllib.parse.urljoin(repo_base, url)):
+        raise ValueError("invalid HTTPS package URL for " + name)
+    if not isinstance(depends, list) or any(
+            not isinstance(dep, str) or not re.fullmatch(r"[a-z0-9][a-z0-9+._-]{0,127}", dep)
+            for dep in depends):
+        raise ValueError("invalid dependency list for " + name)
+    architecture = pkg.get("architecture", "any")
+    if not isinstance(architecture, str) or not re.fullmatch(r"[A-Za-z0-9_+-]{1,32}", architecture):
+        raise ValueError("invalid architecture for " + name)
+    return pkg
 
 def load_config():
     if not CONFIG.is_file():
@@ -84,10 +110,17 @@ def load_index(refresh=False):
     CACHE.mkdir(parents=True, exist_ok=True)
     merged = {}
     for repo in cfg["repositories"]:
+        if not isinstance(repo, dict):
+            fail("repository configuration entries must be objects")
         name = repo.get("name", "unnamed")
-        base = repo.get("url", "").rstrip("/") + "/"
+        if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,63}", name):
+            fail("invalid repository name")
+        base_url = repo.get("url", "")
+        if not is_https_url(base_url):
+            fail(f"repository {name} URL must use HTTPS")
+        base = base_url.rstrip("/") + "/"
         key = repo.get("minisign_public_key", "")
-        if not key:
+        if not isinstance(key, str) or not key.strip():
             fail(f"repository {name} has no minisign public key")
         index_file = CACHE / (name + "-index.json")
         sig_file = CACHE / (name + "-index.json.minisig")
@@ -102,9 +135,10 @@ def load_index(refresh=False):
         if data.get("format") != 1 or not isinstance(data.get("packages"), list):
             fail(f"unsupported index format from {name}")
         for pkg in data["packages"]:
-            if not isinstance(pkg, dict) or not all(k in pkg for k in
-                    ("name", "version", "url", "sha256")):
-                fail(f"malformed package entry in {name}")
+            try:
+                validate_package_entry(pkg, base)
+            except ValueError as exc:
+                fail(f"invalid package entry in {name}: {exc}")
             if pkg["name"] in merged:
                 fail(f"duplicate package name: {pkg['name']}")
             pkg["_repo_base"] = base
