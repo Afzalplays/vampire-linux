@@ -16,7 +16,7 @@ Partition device paths are rejected as targets. Linux sysfs partition records ar
 
 The script reads sysfs and the mount table only. It does not invoke partitioning,
 formatting, mounting, bootloader installation, or filesystem-writing utilities.
-A passing preflight is not a guarantee that a disk is safe to erase or compatible
+The automated preflight test also verifies that `system-check` rejects a non-x86_64 image and accepts the x86_64 target architecture.\n\nA passing preflight is not a guarantee that a disk is safe to erase or compatible
 with a future installer. USB/removable status is reported but never treated as
 permission to modify a device.
 
