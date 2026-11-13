@@ -19,9 +19,9 @@ feature release-ready.
 - [x] Add DHCP lease application, DNS configuration and network start/stop lifecycle.
 - [x] Build Desktop and Server ISO images in CI.
 - [x] Pass legacy BIOS QEMU live-init and serial-login smoke test.
-- [ ] Pass UEFI QEMU live-init and serial-login test with OVMF.
+- [x] Pass UEFI QEMU live-init and serial-login test with OVMF (Desktop and Server, CI run 43246672356 / 43246672369).
 - [ ] Verify VFetch, DHCP, reboot and shutdown inside both images.
-- [ ] Publish checksum-verified developer ISO artifacts after BIOS and UEFI tests pass.
+- [x] Publish checksum-verified developer ISO workflow artifacts after BIOS and UEFI tests pass (Desktop and Server artifacts uploaded).
 
 ## Core operating system
 
