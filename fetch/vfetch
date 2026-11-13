@@ -43,9 +43,24 @@ if command -v xrandr >/dev/null 2>&1 && [ -n "${DISPLAY:-}" ]; then
   RES=$(xrandr 2>/dev/null | awk '/\*/ {print $1; exit}')
   [ -n "$RES" ] && DISPLAY_INFO="$RES"
 fi
-DE_NAME=${XDG_CURRENT_DESKTOP:-Vampire Desktop}
-WM_NAME=${XDG_SESSION_DESKTOP:-Unknown}
-[ -n "$WM_NAME" ] || WM_NAME=Unknown
+EDITION=${VAMPIRE_EDITION:-}
+OS_CONF=${VAMPIRE_OS_CONF:-/etc/vampire/os.conf}
+if [ -z "$EDITION" ] && [ -r "$OS_CONF" ]; then
+  EDITION=$(sed -n 's/^EDITION="\([^"]*\)"$/\1/p' "$OS_CONF" | head -n 1)
+fi
+case "$EDITION" in
+  server)
+    HOST_NAME='Vampire Server'
+    DE_NAME=${XDG_CURRENT_DESKTOP:-None (headless)}
+    WM_NAME=${XDG_SESSION_DESKTOP:-None}
+    ;;
+  *)
+    HOST_NAME='Vampire Desktop'
+    DE_NAME=${XDG_CURRENT_DESKTOP:-Vampire Desktop}
+    WM_NAME=${XDG_SESSION_DESKTOP:-Unknown}
+    [ -n "$WM_NAME" ] || WM_NAME=Unknown
+    ;;
+esac
 if [ -n "${XDG_SESSION_TYPE:-}" ]; then
   WM_NAME="$WM_NAME (${XDG_SESSION_TYPE})"
 fi
@@ -62,7 +77,6 @@ MEMORY=$(awk '/MemTotal:/ {t=$2} /MemAvailable:/ {a=$2} END {if(t>0) printf "%.1
 IP=$(hostname -I 2>/dev/null | awk '{print $1}')
 [ -n "$IP" ] || IP='Not detected'
 LOCALE=${LC_ALL:-${LC_CTYPE:-${LANG:-Unknown}}}
-EDITION=${VAMPIRE_EDITION:-Desktop}
 VERSION=${VAMPIRE_VERSION:-0.1.0-dev}
 case "$OS" in
   *Vampire*) OS="Vampire OS x86_64" ;;
@@ -86,7 +100,7 @@ INFO=$(printf '%s\n' \
   "$RED$WHO@vampire-os$RESET" \
   "$DIM────────────────────────────────────────$RESET" \
   "$WHITE OS:$RESET        $OS" \
-  "Host:       Vampire Desktop" \
+  "Host:       $HOST_NAME" \
   "Kernel:     $KERNEL" \
   "Uptime:     $UPTIME" \
   "Packages:   $PACKAGES" \
