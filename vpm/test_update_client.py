@@ -6,6 +6,21 @@ class UpdateManifestTests(unittest.TestCase):
     def manifest(self):
         return {"format":1,"channel":"stable","architecture":"x86_64","version":"0.2.0",
                 "artifact":{"url":"https://updates.example.invalid/vampire.iso","sha256":"a"*64,"size":1024}}
+    def test_reject_https_downgrade_redirect(self):
+        import tempfile
+        from unittest.mock import patch
+
+        class RedirectedResponse:
+            status = 200
+            def __enter__(self): return self
+            def __exit__(self, *args): return False
+            def geturl(self): return "http://mirror.example.invalid/manifest.json"
+            def read(self, size=-1): return b"{}"
+
+        with patch.object(vupdate.urllib.request, "urlopen", return_value=RedirectedResponse()):
+            with self.assertRaises(SystemExit):
+                vupdate.fetch_bytes("https://updates.example.invalid/manifest.json", 1024)
+
     def test_valid_manifest(self):
         self.assertEqual(vupdate.validate_manifest(self.manifest())["version"],"0.2.0")
     def test_reject_http_artifact(self):
