@@ -20,6 +20,7 @@ output=$(PATH="$TMP/bin:/usr/bin:/bin" sh "$ROOT/rootfs-overlay/usr/bin/vdiagnos
 grep -q 'Support snapshot saved with mode 600' <<< "$output"
 files=("$TMP"/support/vampire-support-*.txt)
 test "${#files[@]}" -eq 1
+test "$(stat -c '%a' "$TMP/support")" = 700
 test "$(stat -c '%a' "${files[0]}")" = 600
 grep -q 'VAMPIRE SUPPORT SNAPSHOT' "${files[0]}"
 grep -q 'vhardware diagnostic output' "${files[0]}"
