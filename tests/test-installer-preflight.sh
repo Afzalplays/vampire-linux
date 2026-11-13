@@ -41,6 +41,7 @@ if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2
 fi
 grep -q 'smaller than the 8 GiB minimum' "$TMP/out"
 printf '41943040\n' > "$SYS/vda/size"
+: > "$MOUNTS"
 printf '1\n' > "$SYS/vda/removable"
 sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out"
 grep -q 'marked as removable media' "$TMP/out"
