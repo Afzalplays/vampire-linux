@@ -60,7 +60,7 @@ cat > "$TMP/bin/cpio" <<'FAKE_CPIO'
 set -eu
 [[ "$1" == "-it" ]]
 cat >/dev/null
-cat <<'LIST'
+cat <<'COMMON'
 ./usr/bin/vfetch
 ./usr/bin/vdesktop
 ./usr/bin/vnetwork
@@ -69,10 +69,14 @@ cat <<'LIST'
 ./usr/bin/vctl
 ./etc/vampire/os.conf
 ./etc/os-release
+COMMON
+if [[ "${VAMPIRE_EDITION:-desktop}" == "desktop" ]]; then
+  cat <<'DESKTOP'
 ./usr/bin/weston
 ./usr/bin/foot
 ./usr/bin/vampire-terminal
-LIST
+DESKTOP
+fi
 FAKE_CPIO
 chmod +x "$TMP/bin/xorriso" "$TMP/bin/gzip" "$TMP/bin/cpio"
 export PATH="$TMP/bin:$PATH"
@@ -88,4 +92,15 @@ mapfile -t counts < "$TMP/drive-counts"
 grep -q "readonly=on,file=$TMP/ovmf/OVMF_CODE_4M.fd" "$TMP/drives"
 grep -q "file=$TMP/logs/OVMF_VARS." "$TMP/drives"
 if compgen -G "$TMP/logs/OVMF_VARS.*.fd" >/dev/null; then echo "temporary OVMF vars image was not cleaned up" >&2; exit 1; fi
-echo "UEFI OVMF pflash test passed."
+
+# Exercise the headless Server image contract as well: common runtime tools
+# must be present and the graphical Weston stack must be absent.
+mkdir -p "$TMP/server-logs"
+export VAMPIRE_QEMU_LOG_DIR="$TMP/server-logs"
+export VAMPIRE_FAKE_DRIVE_COUNTS="$TMP/server-drive-counts"
+export VAMPIRE_FAKE_DRIVES="$TMP/server-drives"
+VAMPIRE_EDITION=server bash "$ROOT/scripts/test-live-iso.sh" "$TMP/live.iso"
+mapfile -t server_counts < "$TMP/server-drive-counts"
+[[ "${server_counts[0]}" == 0 ]]
+[[ "${server_counts[1]}" == 2 ]]
+echo "UEFI OVMF pflash and Desktop/Server initramfs contract tests passed."
