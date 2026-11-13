@@ -67,7 +67,7 @@ feature release-ready.
 
 ## Installer and recovery
 
-- [x] Read-only disk inventory and installation preflight.
+- [x] Read-only disk inventory and installation preflight.\n- [x] Firmware-specific GPT installation layout proposal (read-only; no disk writes).
 - [ ] Build guided text installer for Server and graphical installer for Desktop.
 - [ ] Implement safe partitioning, filesystems, UEFI/BIOS bootloader installation and confirmation gates.
 - [ ] Add encrypted installation, recovery media, boot repair and tested restore workflow.

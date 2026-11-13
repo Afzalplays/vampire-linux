@@ -12,8 +12,10 @@ Usage:
   vinstall system-check
   vinstall list
   vinstall preflight /dev/DEVICE
+  vinstall plan /dev/DEVICE [uefi|bios]
   vinstall help
 This developer build does NOT partition, format, mount, or write to disks.
+The plan command only prints a proposed layout; it never executes it.
 EOF
 }
 disk_name() {
@@ -135,10 +137,36 @@ preflight() {
     return 1
   fi
 }
-case "${1:-help}" in
+
+installation_plan() {
+  device=$1
+  mode=${2:-}
+  case "$mode" in
+    "") if [ -d /sys/firmware/efi ]; then mode=uefi; else mode=bios; fi ;;
+    uefi|bios) ;;
+    *) printf 'ERROR: firmware mode must be uefi or bios.\\n' >&2; return 2 ;;
+  esac
+  preflight "$device" || return $?
+  sectors=$(read_attr "$(resolve_sys_block "${device#"$DEV_ROOT"/}")/size")
+  mib=$((sectors / 2048))
+  printf '\\nVampire OS proposed installation layout (READ-ONLY PLAN)\\n'
+  printf 'Target: %s\\nFirmware: %s\\nDisk capacity: %s MiB\\n' "$device" "$mode" "$mib"
+  if [ "$mode" = uefi ]; then
+    printf 'Partition table: GPT\\n'
+    printf '1) 512 MiB  EFI System Partition (FAT32), mount at /boot/efi\\n'
+    printf '2) Remaining space  Linux filesystem (ext4), mount at /\\n'
+  else
+    printf 'Partition table: GPT\\n'
+    printf '1) 2 MiB  BIOS boot partition (unformatted, GRUB bios_grub flag)\\n'
+    printf '2) Remaining space  Linux filesystem (ext4), mount at /\\n'
+  fi
+  printf '\\nNo partition table was written. No filesystem was created. No data was changed.\\n'
+  printf 'This is a proposal only; installer execution and user confirmation are not implemented.\\n'
+}
+\ncase "${1:-help}" in
   system-check) [ "$#" -eq 1 ] || { usage >&2; exit 2; }; system_check ;;
   list) [ "$#" -eq 1 ] || { usage >&2; exit 2; }; list_disks ;;
-  preflight) [ "$#" -eq 2 ] || { usage >&2; exit 2; }; preflight "$2" ;;
+  preflight) [ "$#" -eq 2 ] || { usage >&2; exit 2; }; preflight "$2" ;;\n  plan) [ "$#" -ge 2 ] && [ "$#" -le 3 ] || { usage >&2; exit 2; }; installation_plan "$2" "${3:-}" ;;
   help|-h|--help) usage ;;
   *) usage >&2; exit 2 ;;
 esac
