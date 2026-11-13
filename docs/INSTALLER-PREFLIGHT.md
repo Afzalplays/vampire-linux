@@ -9,6 +9,7 @@ The current `vinstall` command is a **read-only storage discovery and preflight 
 - `vinstall preflight /dev/sda` checks that the target exists, has at least 8 GiB, is not marked read-only, and has no mounted whole-disk or partition source in the current mount table. If the mount table is missing or unreadable, preflight fails closed.
 - `vinstall plan /dev/sda uefi` previews a GPT layout with a 512 MiB EFI System Partition and ext4 root partition.
 - `vinstall plan /dev/sda bios` previews a GPT layout with a 2 MiB unformatted GRUB BIOS boot partition and ext4 root partition.
+- The console launcher's installer menu can invoke this preview after a successful preflight; the preview still does not modify storage.
 - `vinstall help` prints usage.
 
 The layout planner runs the same whole-disk preflight and rejects partition paths and invalid firmware modes. The planner is explicitly **read-only**: it does not partition, format, mount, write, or alter data. UEFI is selected automatically when the live system exposes `/sys/firmware/efi`; otherwise BIOS is the default, and either mode can be specified explicitly.

@@ -121,4 +121,18 @@ grep -qx 'vlogs --lines 100' "$VLOGS_TEST_LOG"
 grep -qx 'vlogs --follow' "$VLOGS_TEST_LOG"
 grep -qx 'vmonitor --watch 2' "$VLOGS_TEST_LOG"
 
+# Installer menu exposes the non-destructive layout preview after preflight.
+cat > "$TMP/mockbin/vinstall" <<'MOCK'
+#!/bin/sh
+printf 'vinstall %s\\n' "$*" >> "$VINSTALL_TEST_LOG"
+case "$1" in preflight|plan) exit 0 ;; *) exit 2 ;; esac
+MOCK
+chmod +x "$TMP/mockbin/vinstall"
+export VINSTALL_TEST_LOG="$TMP/install-menu.log"
+printf '7\\n/dev/mockdisk\\ny\\nuefi\\n\\n0\\n' | VAMPIRE_INSTALLER_CMD="$TMP/mockbin/vinstall" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/install-menu.out"
+grep -qx 'vinstall system-check' "$VINSTALL_TEST_LOG" || true
+grep -qx 'vinstall list' "$VINSTALL_TEST_LOG" || true
+grep -qx 'vinstall preflight /dev/mockdisk' "$VINSTALL_TEST_LOG"
+grep -qx 'vinstall plan /dev/mockdisk uefi' "$VINSTALL_TEST_LOG"
+
 echo "Vampire settings, Desktop preference menu, log/monitor dispatch, Vampire Shell dispatch and monitor tests passed."

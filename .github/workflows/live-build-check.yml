@@ -34,6 +34,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check shell syntax and contracts
         run: |
+          set -euxo pipefail
           bash -n build/build-live-iso.sh
           bash -n scripts/test-live-iso.sh
           bash -n tests/test-vampire-shell.sh
@@ -47,15 +48,20 @@ jobs:
           bash -n tests/test-rootfs-contract.sh
           bash tests/test-rootfs-contract.sh
           python3 tests/test-kernel-fragment.py
+          echo '=== command tools ==='
           bash -x tests/test-command-tools.sh
+          echo '=== network lifecycle ==='
           bash -x tests/test-network-lifecycle.sh
-          bash tests/test-wifi-network.sh
+          echo '=== Wi-Fi network ==='
+          bash -x tests/test-wifi-network.sh
           bash tests/test-wayland-terminal.sh
           bash tests/test-weston-launchers.sh
           bash tests/test-settings-launcher.sh
           bash tests/test-vhelp.sh
-          bash tests/test-settings-desktop.sh
-          bash tests/test-installer-preflight.sh
+          echo '=== desktop settings ==='
+          bash -x tests/test-settings-desktop.sh
+          echo '=== installer preflight ==='
+          bash -x tests/test-installer-preflight.sh
           bash tests/test-software-center.sh
           bash tests/test-ssh-tool.sh
           bash tests/test-files-tool.sh

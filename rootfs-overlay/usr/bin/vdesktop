@@ -52,7 +52,18 @@ installer_menu() {
   run_tool "$INSTALLER" list
   printf "\nDevice path to preflight (blank to return, e.g. /dev/sda): "
   IFS= read -r target || return
-  [ -n "$target" ] && "$INSTALLER" preflight "$target" || true
+  if [ -n "$target" ] && "$INSTALLER" preflight "$target"; then
+    printf "Preview proposed disk layout? [y/N]: "
+    IFS= read -r preview || preview=n
+    case "$preview" in
+      y|Y|yes|YES)
+        printf "Firmware layout (uefi/bios, blank = auto-detect): "
+        IFS= read -r firmware || firmware=
+        if [ -n "$firmware" ]; then run_tool "$INSTALLER" plan "$target" "$firmware"
+        else run_tool "$INSTALLER" plan "$target"; fi
+        ;;
+    esac
+  fi
   pause
 }
 appearance_menu() {

@@ -64,6 +64,9 @@ chmod +x "$TMP/bin/"*
 export NETWORK_LOG="$TMP/network-log"
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi list | grep -q wlan0
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi scan wlan0 | grep -q 'Test Network'
+scan_output=$(PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi scan wlan0)
+! printf '%s' "$scan_output" | grep -Fq '\\n'
+printf 'correcthorsebatterystaple\\n' | VAMPIRE_WIFI_CONNECT_TIMEOUT=0 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi connect wlan0 'Test Network' >/dev/null 2>&1 && { echo "Wi-Fi accepted a zero connection timeout" >&2; exit 1; }
 if FAIL_SCAN=1 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi scan wlan0 >/dev/null 2>&1; then
   echo "Wi-Fi scan failure was hidden" >&2; exit 1
 fi

@@ -82,7 +82,7 @@ wifi_scan() {
   elif command -v ifconfig >/dev/null 2>&1; then ifconfig "$iface" up || true; fi
   echo "Scanning Wi-Fi networks on $iface..."
   scan_output=$(iw dev "$iface" scan) || { echo "vnetwork: Wi-Fi scan failed on $iface" >&2; return 1; }
-  printf '%s\\n' "$scan_output" | awk '
+  printf '%s\n' "$scan_output" | awk '
     /^BSS / { if (ssid != "") printf "%-32s %s\n", ssid, signal; ssid=""; signal="signal unknown" }
     /signal:/ { signal=$2 " dBm" }
     /SSID: / { sub(/^[[:space:]]*SSID: /, ""); ssid=$0 }
@@ -147,11 +147,11 @@ wifi_connect() {
     stop_wpa
     sleep 1
   fi
-  echo "vnetwork: connecting to '$ssid' on $iface..."
-  wpa_supplicant -B -i "$iface" -c "$config" -P "$WIFI_RUN_DIR/$iface.pid"
   connect_timeout=${VAMPIRE_WIFI_CONNECT_TIMEOUT:-20}
   case "$connect_timeout" in ""|*[!0-9]*) echo "vnetwork: invalid Wi-Fi timeout" >&2; stop_wpa; return 2 ;; esac
   [ "$connect_timeout" -ge 1 ] && [ "$connect_timeout" -le 120 ] || { echo "vnetwork: Wi-Fi timeout must be 1–120 seconds" >&2; stop_wpa; return 2; }
+  echo "vnetwork: connecting to '$ssid' on $iface..."
+  wpa_supplicant -B -i "$iface" -c "$config" -P "$WIFI_RUN_DIR/$iface.pid"
   count=0
   connected=false
   while [ "$count" -lt "$connect_timeout" ]; do
