@@ -27,6 +27,16 @@ read_attr() {
   else printf '?'; fi
 }
 is_partition() { [ -r "$1/partition" ]; }
+resolve_sys_block() {
+  candidate="$SYS_BLOCK/$1"
+  if [ -d "$candidate" ]; then printf '%s\\n' "$candidate"; return 0; fi
+  for child in "$SYS_BLOCK"/*/"$1"; do
+    [ -d "$child" ] || continue
+    printf '%s\\n' "$child"
+    return 0
+  done
+  return 1
+}
 system_check() {
   printf 'Vampire OS installation environment check\n'
   arch=$(uname -m 2>/dev/null || echo unknown)
