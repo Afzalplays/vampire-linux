@@ -72,6 +72,7 @@ CONFIG="$TMP/etc/vampire/wpa_supplicant-wlan0.conf"
 test -s "$CONFIG"
 test "$(stat -c '%a' "$CONFIG")" = 600
 grep -q 'ssid="Test Network"' "$CONFIG"
+grep -Fq "ctrl_interface=DIR=$VAMPIRE_WPA_CTRL_DIR GROUP=0" "$CONFIG"
 grep -q '^[[:space:]]*psk=0123456789abcdef' "$CONFIG"
 ! grep -q 'correcthorsebatterystaple' "$CONFIG"
 ! grep -q '#psk=' "$CONFIG"
