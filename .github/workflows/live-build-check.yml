@@ -50,7 +50,7 @@ jobs:
           bash -x tests/test-rootfs-contract.sh
           python3 tests/test-kernel-fragment.py
           echo '=== command tools ==='
-          bash -x tests/test-command-tools.sh
+          bash -x tests/test-command-tools.sh\n          bash -n tests/test-power-controls.sh\n          bash -x tests/test-power-controls.sh
           echo '=== network lifecycle ==='
           bash -x tests/test-network-lifecycle.sh
           echo '=== Wi-Fi network ==='

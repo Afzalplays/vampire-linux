@@ -112,7 +112,7 @@ case "${1:-}" in
 esac
 while :; do
   printf '\n  V A M P I R E  O S\n  Vampire Desktop — Console Preview\n  -------------------------------\n'
-  printf '  1) System information\n  2) Appearance and desktop settings\n  3) Network settings\n  4) System monitor\n  5) Open Vampire Shell\n  6) Show all settings\n  7) Installer storage preflight\n  8) Graphical session (Weston preview)\n  9) VPM package manager diagnostics\n  10) Signed OS update check\n  11) Vampire Software Center (console)\n  12) SSH service status (opt-in)\n  13) Vampire Files (console)\n  14) Hardware inventory\n  15) System health check\n  16) Generate support snapshot\n  17) Firewall status (read-only)\n  18) Command reference\n  19) Recent system logs\n  20) Follow live logs\n  21) Live system monitor (Ctrl+C to return)\n  0) Exit launcher\n  Select: '
+  printf '  1) System information\n  2) Appearance and desktop settings\n  3) Network settings\n  4) System monitor\n  5) Open Vampire Shell\n  6) Show all settings\n  7) Installer storage preflight\n  8) Graphical session (Weston preview)\n  9) VPM package manager diagnostics\n  10) Signed OS update check\n  11) Vampire Software Center (console)\n  12) SSH service status (opt-in)\n  13) Vampire Files (console)\n  14) Hardware inventory\n  15) System health check\n  16) Generate support snapshot\n  17) Firewall status (read-only)\n  18) Command reference\n  19) Recent system logs\n  20) Follow live logs\n  21) Live system monitor (Ctrl+C to return)\n  22) Power controls\n  0) Exit launcher\n  Select: '
   IFS= read -r choice || exit 0
   case "$choice" in
     1) run_and_pause "$FETCH" ;;
@@ -135,7 +135,7 @@ while :; do
     18) run_and_pause vhelp ;;
     19) run_and_pause vlogs --lines 100 ;;
     20) run_and_pause vlogs --follow ;;
-    21) run_and_pause vmonitor --watch 2 ;;
+    21) run_and_pause vmonitor --watch 2 ;;\n    22) printf '1) Status  2) Reboot  3) Power off  0) Back\\nSelect: '; IFS= read -r pc || exit 0; case "$pc" in 1) run_and_pause vpower status ;; 2) printf 'Type REBOOT to confirm: '; IFS= read -r confirm; if [ "$confirm" = REBOOT ]; then run_tool vpower reboot --yes; else echo 'Reboot cancelled.'; fi ;; 3) printf 'Type POWER OFF to confirm: '; IFS= read -r confirm; if [ "$confirm" = 'POWER OFF' ]; then run_tool vpower poweroff --yes; else echo 'Power off cancelled.'; fi ;; 0) : ;; *) echo 'Invalid choice.' ;; esac; pause ;;
     0) exit 0 ;;
     *) echo "Invalid choice." ;;
   esac

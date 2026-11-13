@@ -15,7 +15,7 @@ feature release-ready.
 - [x] Add validated settings storage and interactive console launcher MVP.
 - [x] Add tests for settings validation, desktop launcher and core console tools.
 - [x] Add read-only installer disk discovery and target preflight checks.
-- [x] Add hardware, storage, health, log and support diagnostics.
+- [x] Add hardware, storage, health, log and support diagnostics.\n- [x] Add explicit-confirmation reboot, poweroff and halt controls with root checks and isolated command tests.
 - [x] Add memory/thermal telemetry, live monitor refresh and private support-report export.
 - [x] Add bounded log viewing and follow mode for local diagnostics.
 - [x] Add DHCP lease application, DNS configuration and network start/stop lifecycle.

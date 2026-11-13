@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+usage() { echo 'Usage: vpower status | reboot --yes | poweroff --yes | halt --yes' >&2; exit 2; }
+status() {
+ echo 'Vampire OS power status'
+ if [ -r /proc/uptime ]; then IFS=' ' read -r uptime _ < /proc/uptime || uptime=unknown; printf 'Uptime (seconds): %s\n' "${uptime%%.*}"; else echo 'Uptime: unavailable'; fi
+ for action in reboot poweroff halt; do command -v "$action" >/dev/null 2>&1 && echo "$action: available" || echo "$action: unavailable"; done
+}
+[ "$#" -ge 1 ] || usage
+case "$1" in
+ status) [ "$#" -eq 1 ] || usage; status ;;
+ reboot|poweroff|halt) action=$1; [ "$#" -eq 2 ] && [ "$2" = '--yes' ] || { echo "vpower: refusing $action without the explicit --yes flag" >&2; usage; }; [ "$(id -u)" -eq 0 ] || { echo "vpower: $action requires root" >&2; exit 1; }; command -v "$action" >/dev/null 2>&1 || { echo "vpower: $action command is unavailable" >&2; exit 127; }; sync; echo "vpower: executing $action"; exec "$action" ;;
+ *) usage ;;
+esac
