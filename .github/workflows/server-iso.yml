@@ -2,9 +2,8 @@ name: Vampire OS Server ISO
 
 # Preserve active image builds; do not discard them on a newer push.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.sha }}
   cancel-in-progress: false
-
 on:
   workflow_dispatch:
   push:
