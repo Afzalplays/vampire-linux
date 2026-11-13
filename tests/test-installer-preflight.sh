@@ -47,7 +47,14 @@ sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out"
 grep -q 'marked as removable media' "$TMP/out"
 grep -q 'basic checks passed' "$TMP/out"
 printf '0\n' > "$SYS/vda/removable"
-printf '1\n' > "$SYS/vda/ro"; : > "$MOUNTS"
+# If mount information is unavailable, the installer must fail closed.
+rm -f "$MOUNTS"
+if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2>&1; then
+  echo "preflight unexpectedly passed without a mount table" >&2; exit 1
+fi
+grep -q 'mount table unavailable' "$TMP/out"
+: > "$MOUNTS"
+printf '1\n' > "$SYS/vda/ro"
 if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2>&1; then
   echo "read-only device unexpectedly passed preflight" >&2; exit 1
 fi
