@@ -17,7 +17,8 @@ on:
       - "fetch/vfetch"
       - "vpm/**"
       - "scripts/test-live-iso.sh"
-      - "scripts/test-rootfs-artifact.sh"\n      - "scripts/test-installed-disk.sh"
+      - "scripts/test-rootfs-artifact.sh"
+      - "scripts/test-installed-disk.sh"
       - "scripts/post-build-vampire.py"
       - "scripts/stage-rootfs.py"
       - "scripts/test_post_build_vampire.py"
@@ -54,7 +55,10 @@ jobs:
       - name: Validate installer rootfs archive
         run: bash scripts/test-rootfs-artifact.sh
 
-      - name: Install rootfs to disposable disk and boot BIOS/UEFI\n        run: sudo -E bash scripts/test-installed-disk.sh\n\n      - name: Boot-test ISO in BIOS and UEFI
+      - name: Install rootfs to disposable disk and boot BIOS/UEFI
+        run: sudo -E bash scripts/test-installed-disk.sh
+
+      - name: Boot-test ISO in BIOS and UEFI
         run: bash scripts/test-live-iso.sh
 
       - name: Upload ISO and checksum

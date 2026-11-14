@@ -15,7 +15,8 @@ on:
       - "fetch/vfetch"
       - "vpm/**"
       - "scripts/test-live-iso.sh"
-      - "scripts/test-rootfs-artifact.sh"\n      - "scripts/test-installed-disk.sh"
+      - "scripts/test-rootfs-artifact.sh"
+      - "scripts/test-installed-disk.sh"
       - "scripts/post-build-vampire.py"
       - "scripts/stage-rootfs.py"
       - "scripts/test_post_build_vampire.py"
@@ -50,6 +51,11 @@ jobs:
         env:
           VAMPIRE_EDITION: server
         run: bash scripts/test-rootfs-artifact.sh
+      - name: Install rootfs to disposable disk and boot BIOS/UEFI
+        env:
+          VAMPIRE_EDITION: server
+        run: sudo -E bash scripts/test-installed-disk.sh
+
       - name: Boot-test server ISO in BIOS and UEFI
         env:
           VAMPIRE_EDITION: server

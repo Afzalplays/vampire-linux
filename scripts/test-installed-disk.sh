@@ -8,7 +8,7 @@ WORK="${VAMPIRE_INSTALL_TEST_DIR:-$ROOT_DIR/out/installed-disk-tests}"
 TIMEOUT_SECONDS="${VAMPIRE_INSTALLED_BOOT_TIMEOUT:-60}"
 LOOPS=()
 MOUNT_ROOT=""
-die() { printf 'ERROR: %s\\n' "$*" >&2; exit 1; }
+die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 need() { command -v "$1" >/dev/null 2>&1 || die "Missing test tool: $1"; }
 for tool in sudo losetup sfdisk partprobe udevadm mkfs.ext4 mkfs.fat mount umount blkid grub-install qemu-system-x86_64 timeout tar sha256sum; do need "$tool"; done
 [[ -s "$ROOTFS_TAR" ]] || die "Missing rootfs archive: $ROOTFS_TAR"
@@ -32,7 +32,7 @@ find_ovmf() {
     for candidate in OVMF_CODE_4M.fd OVMF_CODE.fd; do
       if [[ "$candidate" == *_4M.fd ]]; then vars=OVMF_VARS_4M.fd; else vars=OVMF_VARS.fd; fi
       if [[ -s "$dir/$candidate" && -s "$dir/$vars" ]]; then
-        printf '%s|%s\\n' "$dir/$candidate" "$dir/$vars"
+        printf '%s|%s\n' "$dir/$candidate" "$dir/$vars"
         return 0
       fi
     done
@@ -49,13 +49,13 @@ run_boot() {
   loop="$(sudo losetup --find --show --partscan "$image")"
   LOOPS+=("$loop")
   if [[ "$mode" == "bios" ]]; then
-    printf 'label: gpt\\n, size=2M, type=21686148-6449-6e6f-744e-656564454649\\n, type=linux\\n' | sudo sfdisk "$loop"
+    printf 'label: gpt\n, size=2M, type=21686148-6449-6e6f-744e-656564454649\n, type=linux\n' | sudo sfdisk "$loop"
     rootpart="${loop}p2"
     sudo partprobe "$loop"
     sudo udevadm settle
     sudo mkfs.ext4 -F "$rootpart"
   else
-    printf 'label: gpt\\n, size=512M, type=U\\n, type=linux\\n' | sudo sfdisk "$loop"
+    printf 'label: gpt\n, size=512M, type=U\n, type=linux\n' | sudo sfdisk "$loop"
     esppart="${loop}p1"
     rootpart="${loop}p2"
     sudo partprobe "$loop"
@@ -121,9 +121,9 @@ run_boot() {
     die "$mode installed disk did not reach Vampire init"
   }
   grep -Eqi 'login:|Password:' "$log" || die "$mode installed disk did not reach serial login"
-  printf 'PASS: %s installed disk reached Vampire OS init and serial login\\n' "$mode"
+  printf 'PASS: %s installed disk reached Vampire OS init and serial login\n' "$mode"
 }
 
 run_boot bios
 run_boot uefi
-printf 'Installed-disk BIOS and UEFI boot tests passed. Images: %s\\n' "$WORK"
+printf 'Installed-disk BIOS and UEFI boot tests passed. Images: %s\n' "$WORK"
