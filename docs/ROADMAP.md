@@ -74,6 +74,9 @@ feature release-ready.
 ## Installer and recovery
 
 - [x] Read-only disk inventory and installation preflight.
+- [x] Add checksum-verified rootfs validation and guarded staging into an existing target directory.
+- [x] Generate deterministic fstab and GRUB configuration for a staged target root (bootloader installation remains pending).
+- [x] Report required disk-installation tools without performing destructive actions.
 - [ ] Build guided text installer for Server and graphical installer for Desktop.
 - [ ] Implement safe partitioning, filesystems, UEFI/BIOS bootloader installation and confirmation gates.
 - [ ] Add encrypted installation, recovery media, boot repair and tested restore workflow.
