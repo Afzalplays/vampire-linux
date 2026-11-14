@@ -56,6 +56,7 @@ fi
 grep -q 'major:minor 8:1' "$TMP/out"
 : > "$MOUNTINFO"
 # Active swap is not visible in the mount table and must block the target.
+: > "$MOUNTS"
 printf '%s partition 1024 0 -2\n' "$DEV/vda1" >> "$SWAPS"
 if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2>&1; then
   echo "active swap partition unexpectedly passed preflight" >&2; exit 1
