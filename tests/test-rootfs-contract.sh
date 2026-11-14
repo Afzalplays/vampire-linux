@@ -7,7 +7,7 @@ done
 sh -n "$ROOT/rootfs-overlay/usr/bin/vctl"
 grep -q "status-all" "$ROOT/rootfs-overlay/usr/bin/vctl"
 sh -n "$ROOT/rootfs-overlay/etc/init.d/rcS"
-"$ROOT/tests/test-service-manager.sh"
+bash -x "$ROOT/tests/test-service-manager.sh"
 bash -n "$ROOT/rootfs-overlay/usr/bin/vnetwork"
 bash -n "$ROOT/rootfs-overlay/usr/bin/vguard"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vsettings"
