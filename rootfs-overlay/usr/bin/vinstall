@@ -17,6 +17,7 @@ Usage:
   vinstall plan /dev/DEVICE [uefi|bios]
   vinstall install ROOTFS.tar /dev/DEVICE [uefi|bios]
   vinstall requirements
+  vinstall media
   vinstall validate ROOTFS.tar
   vinstall stage ROOTFS.tar EMPTY_MOUNTPOINT
   vinstall configure ROOTDIR ROOT_UUID uefi|bios [ESP_UUID]
@@ -274,6 +275,32 @@ stage_rootfs() {
   [ -r "$stage_script" ] || { printf 'ERROR: rootfs staging validator missing: %s\n' "$stage_script" >&2; return 1; }
   exec python3 "$stage_script" "$archive" "$destination"
 }
+find_install_media() {
+  mountpoint=/run/vampire-install-media
+  mkdir -p "$mountpoint"
+  if grep -q " $mountpoint " /proc/mounts 2>/dev/null; then
+    if [ -s "$mountpoint/install/rootfs.tar" ] && [ -s "$mountpoint/install/rootfs.tar.sha256" ]; then
+      printf '%s\n' "$mountpoint/install/rootfs.tar"
+      return 0
+    fi
+    umount "$mountpoint" || return 1
+  fi
+  for candidate in /dev/sr* /dev/sd* /dev/nvme* /dev/mmcblk*; do
+    [ -b "$candidate" ] || continue
+    fstype=$(blkid -s TYPE -o value "$candidate" 2>/dev/null || true)
+    [ "$fstype" = iso9660 ] || continue
+    if mount -t iso9660 -o ro "$candidate" "$mountpoint" 2>/dev/null; then
+      if [ -s "$mountpoint/install/rootfs.tar" ] && [ -s "$mountpoint/install/rootfs.tar.sha256" ]; then
+        printf '%s\n' "$mountpoint/install/rootfs.tar"
+        return 0
+      fi
+      umount "$mountpoint" || return 1
+    fi
+  done
+  echo "ERROR: no Vampire OS installation ISO with /install/rootfs.tar was found." >&2
+  return 1
+}
+
 install_system() {
   archive=$1
   device=$2
