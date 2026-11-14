@@ -1,14 +1,64 @@
 #!/bin/sh
-# Launch the configured Weston DRM desktop preview.
+# Launch and diagnose the configured Weston DRM desktop session.
 set -eu
-command -v weston >/dev/null 2>&1 || { echo "Weston is not installed." >&2; exit 127; }
-if command -v modprobe >/dev/null 2>&1; then modprobe i915 2>/dev/null || true; fi
-[ -e /dev/dri/card0 ] || { echo "No DRM graphics device at /dev/dri/card0." >&2; exit 1; }
-[ "$(id -u)" -eq 0 ] || { echo "This early preview requires root/seat access." >&2; exit 1; }
+
+CONFIG=${VAMPIRE_WESTON_RUNTIME_CONFIG:-/run/vampire/weston.ini}
+BASE_CONFIG=${VAMPIRE_WESTON_BASE:-/etc/xdg/weston/weston.ini}
+FOOT_CONFIG=${VAMPIRE_FOOT_BASE:-/etc/xdg/foot/foot.ini}
+
+error() { printf 'Vampire Desktop: %s\n' "$*" >&2; }
+require_file() {
+  [ -r "$1" ] || { error "required configuration is missing: $1"; return 1; }
+}
+check() {
+  command -v weston >/dev/null 2>&1 || { error "Weston is not installed."; return 1; }
+  command -v foot >/dev/null 2>&1 || { error "Foot terminal is not installed."; return 1; }
+  require_file "$BASE_CONFIG" || return 1
+  require_file "$FOOT_CONFIG" || return 1
+  [ -d /dev/dri ] || { error "no /dev/dri directory; enable a kernel DRM/KMS driver and firmware."; return 1; }
+  found=
+  for card in /dev/dri/card*; do
+    [ -c "$card" ] || continue
+    found=$card
+    break
+  done
+  [ -n "$found" ] || { error "no DRM card device found under /dev/dri."; return 1; }
+  [ -r "$found" ] && [ -w "$found" ] || {
+    error "DRM device $found is not accessible; check seat permissions."; return 1;
+  }
+  printf 'Vampire Desktop preflight passed.\n'
+  printf '  Weston: %s\n  DRM device: %s\n  Base config: %s\n  Terminal config: %s\n' \
+    "$(command -v weston)" "$found" "$BASE_CONFIG" "$FOOT_CONFIG"
+}
+
+case "${1:-}" in
+  --check)
+    [ "$#" -eq 1 ] || { error 'usage: vgraphical [--check]'; exit 2; }
+    check
+    exit
+    ;;
+  --help|-h)
+    echo "Usage: vgraphical [--check]"
+    echo "  --check  Validate Weston, Foot, configuration and DRM availability."
+    exit 0
+    ;;
+  "") ;;
+  *) error 'usage: vgraphical [--check]'; exit 2 ;;
+esac
+
+check
+[ "$(id -u)" -eq 0 ] || {
+  error "this early preview requires root/seat access; non-root sessions are not implemented yet."
+  exit 1
+}
+if command -v modprobe >/dev/null 2>&1; then
+  # Probe common in-tree DRM modules; unavailable modules are harmless.
+  for module in i915 amdgpu nouveau virtio_gpu; do modprobe "$module" 2>/dev/null || true; done
+fi
 export XDG_RUNTIME_DIR=/run/user/0
 export XDG_CONFIG_HOME=/run/vampire
 mkdir -p "$XDG_RUNTIME_DIR" "$XDG_CONFIG_HOME"
 chmod 0700 "$XDG_RUNTIME_DIR" "$XDG_CONFIG_HOME"
 vsettings apply
-WESTON_CONFIG=${VAMPIRE_WESTON_RUNTIME_CONFIG:-/run/vampire/weston.ini}
-exec weston --config="$WESTON_CONFIG" --backend=drm-backend.so --shell=desktop-shell.so --tty=2 "$@"
+[ -r "$CONFIG" ] || { error "generated Weston configuration is missing: $CONFIG"; exit 1; }
+exec weston --config="$CONFIG" --backend=drm-backend.so --shell=desktop-shell.so --tty=2 "$@"
