@@ -57,7 +57,12 @@ def build_index(repository: str, architecture: str, metadata_paths: list[Path], 
         raise ValueError("invalid repository name")
     if architecture not in ("x86_64", "aarch64", "any"):
         raise ValueError("unsupported repository architecture")
+    if output.exists() and output.is_symlink():
+        raise ValueError("repository output directory must not be a symlink")
+    output.mkdir(parents=True, exist_ok=True)
     packages_dir = output / "packages"
+    if packages_dir.exists() and packages_dir.is_symlink():
+        raise ValueError("repository packages directory must not be a symlink")
     packages_dir.mkdir(parents=True, exist_ok=True)
     packages: list[dict[str, Any]] = []
     seen: set[str] = set()
@@ -72,8 +77,17 @@ def build_index(repository: str, architecture: str, metadata_paths: list[Path], 
         source = Path(item["archive"]).resolve(strict=True)
         filename = f'{item["name"]}-{item["version"]}.tar.gz'
         destination = packages_dir / filename
+        if destination.exists() and destination.is_symlink():
+            raise ValueError(f"{key}: refusing to overwrite a symlinked package destination")
         if source != destination.resolve(strict=False):
-            shutil.copyfile(source, destination)
+            fd, temporary_name = tempfile.mkstemp(prefix=".vpm-package-", dir=packages_dir)
+            os.close(fd)
+            temporary = Path(temporary_name)
+            try:
+                shutil.copyfile(source, temporary)
+                os.replace(temporary, destination)
+            finally:
+                temporary.unlink(missing_ok=True)
         package = {key: item[key] for key in (
             "name", "version", "description", "architecture", "license", "depends"
         )}

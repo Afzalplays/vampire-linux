@@ -38,6 +38,7 @@ grep -Fxq 'second:start' "$VAMPIRE_TEST_LOG"
 [ "$(head -n 2 "$VAMPIRE_TEST_LOG" | tr '\n' ' ')" = "mock:start second:start " ]
 "$VCTL" status mock
 grep -Fxq 'mock:status' "$VAMPIRE_TEST_LOG"
+: > "$VAMPIRE_TEST_LOG"
 "$VCTL" status-all
 grep -Fxq 'second:status' "$VAMPIRE_TEST_LOG"
 [ "$(grep -Fc ':status' "$VAMPIRE_TEST_LOG")" -eq 2 ]
