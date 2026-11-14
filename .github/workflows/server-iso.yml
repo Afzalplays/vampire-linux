@@ -2,7 +2,7 @@ name: Vampire OS Server ISO
 
 # Preserve one active image build and keep only the newest pending revision.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.run_id }}
   cancel-in-progress: false
 on:
   workflow_dispatch:
