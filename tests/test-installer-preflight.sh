@@ -4,7 +4,7 @@ ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 SYS="$TMP/sys/block"; DEV="$TMP/dev"; MOUNTS="$TMP/mounts"
-mkdir -p "$SYS/vda/device" "$SYS/vda/vda1" "$DEV"
+mkdir -p "$SYS/vda/device" "$SYS/vda/vda1" "$SYS/vda/holders" "$SYS/vda/vda1/holders" "$DEV"
 : > "$DEV/vda"; : > "$DEV/vda1"
 printf '41943040\n' > "$SYS/vda/size"
 printf '0\n' > "$SYS/vda/ro"
@@ -44,6 +44,28 @@ if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2
   echo "mounted device unexpectedly passed preflight" >&2; exit 1
 fi
 grep -q 'mounted at /' "$TMP/out"
+# Mountinfo major:minor catches aliases and bind-mounted block sources even
+# when /proc/mounts uses a different device path.
+printf '42 1 8:1 / /mnt/alias rw - ext4 /dev/disk/by-id/alias rw\\n' > "$MOUNTINFO"
+if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2>&1; then
+  echo "mounted major:minor alias unexpectedly passed preflight" >&2; exit 1
+fi
+grep -q 'major:minor 8:1' "$TMP/out"
+: > "$MOUNTINFO"
+# Active swap is not visible in the mount table and must block the target.
+printf '%s partition 1024 0 -2\\n' "$DEV/vda1" >> "$SWAPS"
+if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2>&1; then
+  echo "active swap partition unexpectedly passed preflight" >&2; exit 1
+fi
+grep -q 'active swap' "$TMP/out"
+: > "$SWAPS"; printf 'Filename Type Size Used Priority\\n' > "$SWAPS"
+# A disk already backing LVM/RAID/device-mapper must not be overwritten.
+: > "$SYS/vda/holders/dm-0"
+if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2>&1; then
+  echo "stacked block device unexpectedly passed preflight" >&2; exit 1
+fi
+grep -q 'stacked block device' "$TMP/out"
+rm -f "$SYS/vda/holders/dm-0"
 # A whole-disk source must also block preflight, not only child partitions.
 printf '%s %s ext4 rw 0 0\n' "$DEV/vda" "/mnt/whole-disk" > "$MOUNTS"
 if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2>&1; then
@@ -75,7 +97,8 @@ rm -f "$MOUNTS"
 if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2>&1; then
   echo "preflight unexpectedly passed without a mount table" >&2; exit 1
 fi
-grep -q 'mount table unavailable' "$TMP/out"
+grep -q 'mount, mountinfo or swap table unavailable' "$TMP/out"
+: > "$MOUNTS"; : > "$MOUNTINFO"; : > "$SWAPS"
 : > "$MOUNTS"
 printf '1\n' > "$SYS/vda/ro"
 if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2>&1; then

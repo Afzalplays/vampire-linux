@@ -4,6 +4,8 @@ set -eu
 SYS_BLOCK=${VAMPIRE_SYS_BLOCK:-/sys/block}
 DEV_ROOT=${VAMPIRE_DEV_ROOT:-/dev}
 MOUNTS_FILE=${VAMPIRE_MOUNTS_FILE:-/proc/mounts}
+MOUNTINFO_FILE=${VAMPIRE_MOUNTINFO_FILE:-/proc/self/mountinfo}
+SWAPS_FILE=${VAMPIRE_SWAPS_FILE:-/proc/swaps}
 MIN_SECTORS=16777216 # 8 GiB using 512-byte sectors
 usage() {
   cat <<'EOF'
@@ -100,8 +102,58 @@ preflight() {
   if [ "$sectors" -lt "$MIN_SECTORS" ]; then printf 'BLOCKER: disk is smaller than the 8 GiB minimum target.\n'; ready=0; fi
   if [ "$ro" = 1 ]; then printf 'BLOCKER: kernel reports this device as read-only.\n'; ready=0; fi
   if [ "$removable" = 1 ]; then printf 'WARNING: this is marked as removable media; verify the target carefully.\n'; fi
-  if [ -r "$MOUNTS_FILE" ]; then
+  if [ -r "$MOUNTS_FILE" ] && [ -r "$MOUNTINFO_FILE" ] && [ -r "$SWAPS_FILE" ]; then
     target_real=$(canonical_device "$device")
+    # Refuse stacked devices (LVM, RAID, dm-crypt, multipath) rather than
+    # guessing whether modifying their backing disk is safe.
+    for node in "$sys" "$sys"/*; do
+      [ -d "$node" ] || continue
+      [ "$node" = "$sys" ] || is_partition "$node" || continue
+      holders="$node/holders"
+      if [ -d "$holders" ]; then
+        for holder in "$holders"/*; do
+          [ -e "$holder" ] || continue
+          printf 'BLOCKER: device is backing an active stacked block device (%s).\\n' "${holder##*/}"
+          ready=0
+        done
+      fi
+      node_dev=$(read_attr "$node/dev")
+      case "$node_dev" in ''|\?|*[!0-9:]*) node_dev= ;; esac
+      if [ -n "$node_dev" ]; then
+        mounted_points=$(awk -v dev="$node_dev" '$3 == dev {print $5}' "$MOUNTINFO_FILE")
+        if [ -n "$mounted_points" ]; then
+          while IFS= read -r mountpoint; do
+            [ -n "$mountpoint" ] || continue
+            printf 'BLOCKER: device or partition is mounted at %s (major:minor %s).\\n' "$mountpoint" "$node_dev"
+            ready=0
+          done <<EOF_MOUNTED
+$mounted_points
+EOF_MOUNTED
+        fi
+      fi
+    done
+    # Swap is not listed in mount tables; check its source explicitly.
+    while IFS=' ' read -r swap_source rest; do
+      [ -n "$swap_source" ] || continue
+      [ "$swap_source" = Filename ] && continue
+      case "$swap_source" in "$DEV_ROOT"/*)
+        swap_real=$(canonical_device "$swap_source")
+        if [ "$swap_real" = "$target_real" ]; then
+          printf 'BLOCKER: target disk is active swap: %s\\n' "$swap_source"
+          ready=0
+        else
+          for part in "$sys"/*; do
+            [ -d "$part" ] && is_partition "$part" || continue
+            part_name=${part##*/}
+            part_real=$(canonical_device "$DEV_ROOT/$part_name")
+            if [ "$swap_real" = "$part_real" ]; then
+              printf 'BLOCKER: target partition is active swap: %s\\n' "$swap_source"
+              ready=0
+            fi
+          done
+        fi ;;
+      esac
+    done < "$SWAPS_FILE"
     for part in "$sys"/*; do
       [ -d "$part" ] && is_partition "$part" || continue
       part_name=${part##*/}
