@@ -61,7 +61,7 @@ case "$action" in
         echo "vctl: ignoring duplicate service entry: $name" >&2
         continue
       fi
-      printf '%s\\n' "$name" >> "$seen_file"
+      printf '%s\n' "$name" >> "$seen_file"
       run_service "$name" status || result=1
     done < "$ENABLED"
     rm -f "$seen_file"
