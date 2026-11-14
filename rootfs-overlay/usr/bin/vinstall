@@ -244,11 +244,31 @@ installation_plan() {
 }
 
 case "${1:-help}" in
-  system-check) [ "$#" -eq 1 ] || { usage >&2; exit 2; }; system_check ;;
-  list) [ "$#" -eq 1 ] || { usage >&2; exit 2; }; list_disks ;;
-  preflight) [ "$#" -eq 2 ] || { usage >&2; exit 2; }; preflight "$2" ;;
-  requirements) [ "$#" -eq 1 ] || { usage >&2; exit 2; }; installer_requirements ;;
-  plan) [ "$#" -ge 2 ] && [ "$#" -le 3 ] || { usage >&2; exit 2; }; installation_plan "$2" "${3:-}" ;;
-  help|-h|--help) usage ;;
-  *) usage >&2; exit 2 ;;
+  system-check)
+    [ "$#" -eq 1 ] || { usage >&2; exit 2; }
+    system_check
+    ;;
+  list)
+    [ "$#" -eq 1 ] || { usage >&2; exit 2; }
+    list_disks
+    ;;
+  preflight)
+    [ "$#" -eq 2 ] || { usage >&2; exit 2; }
+    preflight "$2"
+    ;;
+  requirements)
+    [ "$#" -eq 1 ] || { usage >&2; exit 2; }
+    installer_requirements
+    ;;
+  plan)
+    [ "$#" -ge 2 ] && [ "$#" -le 3 ] || { usage >&2; exit 2; }
+    installation_plan "$2" "${3:-}"
+    ;;
+  help|-h|--help)
+    usage
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
 esac
