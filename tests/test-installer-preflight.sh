@@ -55,6 +55,14 @@ if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2
 fi
 grep -q 'major:minor 8:1' "$TMP/out"
 : > "$MOUNTINFO"
+# Missing sysfs major:minor metadata must fail closed rather than skip
+# mount verification for a partition.
+mv "$SYS/vda/vda1/dev" "$TMP/partition.dev"
+if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2>&1; then
+  echo "preflight unexpectedly passed without partition major:minor metadata" >&2; exit 1
+fi
+grep -q 'sysfs major:minor is unavailable' "$TMP/out"
+mv "$TMP/partition.dev" "$SYS/vda/vda1/dev"
 # Active swap is not visible in the mount table and must block the target.
 : > "$MOUNTS"
 printf '%s partition 1024 0 -2\n' "$DEV/vda1" >> "$SWAPS"

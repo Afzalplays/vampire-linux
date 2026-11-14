@@ -6,7 +6,7 @@ The current `vinstall` command is a **read-only storage discovery and preflight 
 
 - `vinstall system-check` reports architecture, firmware mode, detected RAM and basic diagnostic-tool availability.
 - `vinstall list` lists whole-disk devices found in sysfs, excluding partitions, loop, RAM and zram devices.
-- `vinstall preflight /dev/sda` checks that the target exists, has at least 8 GiB, is not marked read-only, and has no mounted whole-disk or partition source in the current mount table. If the mount, mountinfo or swap table is missing or unreadable, preflight fails closed. It also checks kernel major:minor mount records, active swap sources, and sysfs holders so mounted aliases and disks backing LVM/RAID/device-mapper stacks are rejected.
+- `vinstall preflight /dev/sda` checks that the target exists, has at least 8 GiB, is not marked read-only, and has no mounted whole-disk or partition source in the current mount table. If the mount, mountinfo or swap table is missing or unreadable, preflight fails closed. It also checks kernel major:minor mount records, active swap sources, required sysfs major:minor metadata, and sysfs holders so mounted aliases and disks backing LVM/RAID/device-mapper stacks are rejected.
 - `vinstall plan /dev/sda uefi` previews a GPT layout with a 512 MiB EFI System Partition and ext4 root partition.
 - `vinstall plan /dev/sda bios` previews a GPT layout with a 2 MiB unformatted GRUB BIOS boot partition and ext4 root partition.
 - The console launcher's installer menu can invoke this preview after a successful preflight; the preview still does not modify storage.

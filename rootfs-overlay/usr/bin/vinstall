@@ -118,7 +118,12 @@ preflight() {
         done
       fi
       node_dev=$(read_attr "$node/dev")
-      case "$node_dev" in ''|\?|*[!0-9:]*) node_dev= ;; esac
+      case "$node_dev" in
+        ''|\?|*[!0-9:]*|:*|*:)
+          printf 'BLOCKER: cannot verify active mounts for %s; sysfs major:minor is unavailable.\\n' "${node##*/}"
+          ready=0
+          node_dev= ;;
+      esac
       if [ -n "$node_dev" ]; then
         mounted_points=$(awk -v dev="$node_dev" '$3 == dev {print $5}' "$MOUNTINFO_FILE")
         if [ -n "$mounted_points" ]; then
