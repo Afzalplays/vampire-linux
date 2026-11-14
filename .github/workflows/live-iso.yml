@@ -17,6 +17,7 @@ on:
       - "fetch/vfetch"
       - "vpm/**"
       - "scripts/test-live-iso.sh"
+      - "scripts/test-rootfs-artifact.sh"
       - "scripts/configure-build-output.py"
       - ".github/workflows/live-iso.yml"
 
@@ -45,7 +46,10 @@ jobs:
           JOBS: "2"
         run: bash build/build-live-iso.sh
 
-      - name: Validate installer rootfs archive\n        run: bash scripts/test-rootfs-artifact.sh\n\n      - name: Boot-test ISO in BIOS and UEFI
+      - name: Validate installer rootfs archive
+        run: bash scripts/test-rootfs-artifact.sh
+
+      - name: Boot-test ISO in BIOS and UEFI
         run: bash scripts/test-live-iso.sh
 
       - name: Upload ISO and checksum

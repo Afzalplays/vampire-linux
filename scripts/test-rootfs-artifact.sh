@@ -9,7 +9,7 @@ ROOTFS_SUM="$ROOTFS_TAR.sha256"
 (cd "$(dirname "$ROOTFS_TAR")" && sha256sum -c "$(basename "$ROOTFS_SUM")")
 rootfs_listing="$(tar -tf "$ROOTFS_TAR")"
 for required in etc/os-release sbin/init bin/busybox; do
-  grep -Eq "(^|/)\${required}$" <<<"$rootfs_listing" || {
+  grep -Eq "(^|/)${required}$" <<<"$rootfs_listing" || {
     echo "ERROR: installer rootfs is missing required path: $required" >&2
     exit 1
   }

@@ -15,6 +15,7 @@ on:
       - "fetch/vfetch"
       - "vpm/**"
       - "scripts/test-live-iso.sh"
+      - "scripts/test-rootfs-artifact.sh"
       - "scripts/configure-build-output.py"
       - ".github/workflows/server-iso.yml"
 
@@ -40,7 +41,11 @@ jobs:
           VAMPIRE_EDITION: server
           JOBS: "2"
         run: bash build/build-live-iso.sh
-      - name: Validate installer rootfs archive\n        env:\n          VAMPIRE_EDITION: server\n        run: bash scripts/test-rootfs-artifact.sh\n      - name: Boot-test server ISO in BIOS and UEFI
+      - name: Validate installer rootfs archive
+        env:
+          VAMPIRE_EDITION: server
+        run: bash scripts/test-rootfs-artifact.sh
+      - name: Boot-test server ISO in BIOS and UEFI
         env:
           VAMPIRE_EDITION: server
         run: bash scripts/test-live-iso.sh
