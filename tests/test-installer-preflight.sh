@@ -3,7 +3,7 @@ set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
-SYS="$TMP/sys/block"; DEV="$TMP/dev"; MOUNTS="$TMP/mounts"
+SYS="$TMP/sys/block"; DEV="$TMP/dev"; MOUNTS="$TMP/mounts"; MOUNTINFO="$TMP/mountinfo"; SWAPS="$TMP/swaps"
 mkdir -p "$SYS/vda/device" "$SYS/vda/vda1" "$SYS/vda/holders" "$SYS/vda/vda1/holders" "$DEV"
 : > "$DEV/vda"; : > "$DEV/vda1"
 printf '41943040\n' > "$SYS/vda/size"
@@ -11,8 +11,11 @@ printf '0\n' > "$SYS/vda/ro"
 printf '0\n' > "$SYS/vda/removable"
 printf 'Vampire Test Disk\n' > "$SYS/vda/device/model"
 printf '1\n' > "$SYS/vda/vda1/partition"
-: > "$MOUNTS"
-export VAMPIRE_SYS_BLOCK="$SYS" VAMPIRE_DEV_ROOT="$DEV" VAMPIRE_MOUNTS_FILE="$MOUNTS"
+printf '8:0\n' > "$SYS/vda/dev"
+printf '8:1\n' > "$SYS/vda/vda1/dev"
+: > "$MOUNTS"; : > "$MOUNTINFO"
+printf 'Filename Type Size Used Priority\n' > "$SWAPS"
+export VAMPIRE_SYS_BLOCK="$SYS" VAMPIRE_DEV_ROOT="$DEV" VAMPIRE_MOUNTS_FILE="$MOUNTS" VAMPIRE_MOUNTINFO_FILE="$MOUNTINFO" VAMPIRE_SWAPS_FILE="$SWAPS"
 sh "$ROOT/rootfs-overlay/usr/bin/vinstall" list | grep -q 'Vampire Test Disk'
 if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" list | grep -q 'vda1'; then
   echo "partition was incorrectly listed as a whole disk" >&2; exit 1
