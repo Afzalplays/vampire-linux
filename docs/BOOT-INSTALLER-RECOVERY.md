@@ -1,6 +1,6 @@
 # Vampire OS Boot, Installer and Recovery Design
 
-**Target:** x86_64 / AMD64. Vampire OS currently has Desktop and Server developer live ISOs with virtual BIOS/UEFI smoke-test coverage. This document defines the remaining boot, installation and recovery requirements; a destructive disk installer is not yet implemented.
+**Target:** x86_64 / AMD64. Vampire OS currently has Desktop and Server developer live ISOs with virtual BIOS/UEFI smoke-test coverage. This document defines the remaining boot, installation and recovery requirements. A text-mode, confirmation-gated erase-and-install path is implemented; virtual-disk installation and installed-disk reboot validation remain release blockers.
 
 ## Firmware and boot modes
 - UEFI boot is the primary target, with Secure Boot support designed around signed boot components and documented key enrollment.
@@ -17,13 +17,13 @@
 - Firmware setup entry when supported by firmware.
 
 ## Installer
-- Branded graphical installer for Desktop; guided text installer for Server.
+- [x] Guided text-mode erase-and-install path exposed from the Vampire Desktop console launcher (graphical installer still pending).
 - Hardware preflight: CPU architecture, RAM, storage, firmware mode and network.
 - Language, keyboard, timezone, hostname and user creation.
-- Guided erase-and-install alongside manual partitioning.
+- [x] GPT erase-and-install layout for UEFI (FAT32 ESP + ext4 root) and BIOS (GRUB BIOS boot partition + ext4 root). Manual partitioning remains pending.
 - UEFI EFI System Partition and legacy BIOS-compatible layout.
 - Optional full-disk encryption with recovery-key handling.
-- Bootloader target selection and warning before disk changes.
+- [x] Firmware-specific GRUB target selection and exact typed destructive confirmation before disk changes.
 - Network/repository selection, edition and optional software groups.
 - Installation log, error recovery and post-install validation.
 - Never format, repartition or overwrite a disk without clear user confirmation.
@@ -48,7 +48,4 @@ A release candidate must boot on UEFI and legacy BIOS VMs, install to a blank vi
 
 ## Implemented developer-stage preflight
 
-The live root filesystem now includes vinstall list and
-vinstall preflight /dev/DEVICE. This is a read-only inventory and basic
-safety check, not an installer. See [INSTALLER-PREFLIGHT.md](INSTALLER-PREFLIGHT.md)
-for its exact scope and limitations.
+The live root filesystem includes vinstall list, preflight, plan, media and install commands. The installer validates its rootfs archive and checksum, discovers the ISO payload read-only, requires a whole-disk preflight and exact typed confirmation, stages the OS, writes UUID-based configuration and installs GRUB. It is an experimental erase-and-install implementation, not yet a release-ready installer. See [INSTALLER-PREFLIGHT.md](INSTALLER-PREFLIGHT.md) for its exact scope and limitations.
