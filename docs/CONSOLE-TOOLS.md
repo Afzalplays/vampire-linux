@@ -9,7 +9,7 @@ bring-up tools; they do not claim to be the finished graphical Vampire Desktop.
 vdesktop
 ```
 
-The console launcher opens system information, appearance preferences, network status, a system monitor, Vampire Shell, installer preflight, the Weston preview, VPM diagnostics, update checks, Software Center, SSH status, Files, hardware inventory, health checks, support snapshots, firewall status and the command reference. It is keyboard-driven and exits without modifying disks.
+The console launcher opens system information, appearance preferences, network status, a system monitor, Vampire Shell, the guided disk installer, the Weston preview, VPM diagnostics, update checks, Software Center, SSH status, Files, hardware inventory, health checks, support snapshots, firewall status and the command reference. It is keyboard-driven; disk changes occur only after the installer’s explicit typed confirmation.
 
 ## Manage preferences
 
@@ -82,13 +82,16 @@ Review the firewall rules and verify remote access before applying them on a
 remote machine.
 
 
-## Installer storage preflight
+## Installer and storage preflight
 
 From the console launcher choose option 7, or run:
 
 ```sh
 vinstall list
 vinstall preflight /dev/sda
+vinstall plan /dev/sda uefi
+vinstall media
+vinstall install /install/rootfs.tar /dev/sda uefi
 ```
 
 This only inspects sysfs and mounted partitions. It never partitions, formats or
@@ -130,3 +133,5 @@ can disconnect you; verify the SSH port and recovery access first. See
 Run `vhelp` from Vampire Shell or choose option 18 in `vdesktop` for the complete command list and safety notes.
 
 Wi-Fi uses `iw` and `wpa_supplicant`. The connection command prompts for a WPA passphrase without echoing it and stores only the derived PSK in a mode-0600 configuration file. The Desktop image includes common Intel iwlwifi firmware; other adapters still depend on their kernel driver and firmware being available.
+
+The installer command erases the selected whole disk only after rootfs checksum verification, whole-disk preflight and the exact typed confirmation `ERASE /dev/sda`. It creates a GPT layout, formats the EFI/root filesystems as appropriate, stages the OS, writes UUID-based boot configuration and installs GRUB. This is experimental erase-and-install functionality; use disposable disks until BIOS/UEFI installed-disk tests and recovery validation pass.
