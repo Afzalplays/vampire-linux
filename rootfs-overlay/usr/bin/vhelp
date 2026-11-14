@@ -72,7 +72,7 @@ DIAGNOSTICS
 
 SAFETY NOTES
   - vinstall stage only extracts a validated rootfs into an existing empty directory; it does not partition, format, or install a bootloader.
-  - The current installer does not yet perform a complete disk installation.
+  - The current installer supports read-only preflight and rootfs staging only; full disk installation is not implemented.
   - VPM and OS updates are experimental; a production package repository and
     transactional rollback are not yet available.
   - SSH is opt-in and refuses to start without a supported public key.
