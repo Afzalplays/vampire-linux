@@ -45,7 +45,7 @@ run_boot() {
   local log="$WORK/$mode.serial.log" stderr="$WORK/$mode.qemu.stderr" status
   MOUNT_ROOT="$WORK/mnt-$mode"
   mkdir -p "$MOUNT_ROOT"
-  truncate -s 4G "$image"
+  truncate -s 8G "$image"
   loop="$(sudo losetup --find --show --partscan "$image")"
   LOOPS+=("$loop")
   if [[ "$mode" == "bios" ]]; then
@@ -53,6 +53,7 @@ run_boot() {
     rootpart="${loop}p2"
     sudo partprobe "$loop"
     sudo udevadm settle
+    "$ROOT_DIR/rootfs-overlay/usr/bin/vinstall" preflight "$loop"
     sudo mkfs.ext4 -F "$rootpart"
   else
     printf 'label: gpt\n, size=512M, type=U\n, type=linux\n' | sudo sfdisk "$loop"
