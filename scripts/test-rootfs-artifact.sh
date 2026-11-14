@@ -8,7 +8,7 @@ ROOTFS_SUM="$ROOTFS_TAR.sha256"
 [[ -s "$ROOTFS_SUM" ]] || { echo "ERROR: installer rootfs checksum not found: $ROOTFS_SUM" >&2; exit 1; }
 (cd "$(dirname "$ROOTFS_TAR")" && sha256sum -c "$(basename "$ROOTFS_SUM")")
 rootfs_listing="$(tar -tf "$ROOTFS_TAR")"
-for required in etc/os-release sbin/init bin/busybox boot/vmlinuz usr/lib/vampire/stage-rootfs.py; do
+for required in etc/os-release sbin/init bin/busybox boot/vmlinuz usr/lib/vampire/stage-rootfs.py usr/lib/vampire/configure-installed-root.py; do
   grep -Eq "(^|/)${required}$" <<<"$rootfs_listing" || {
     echo "ERROR: installer rootfs is missing required path: $required" >&2
     exit 1
