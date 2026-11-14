@@ -21,6 +21,8 @@ class KernelFragmentTests(unittest.TestCase):
             (repo / "build").mkdir()
             (repo / "scripts").mkdir()
             (repo / "scripts/post-build-vampire.py").write_text("# fixture\\n", encoding="utf-8")
+            installer_fragment = repo / "build/vampire-installer-kernel.fragment"
+            installer_fragment.write_text("CONFIG_EXT4_FS=y\n", encoding="utf-8")
             fragment = repo / "build/vampire-desktop-kernel.fragment"
             fragment.write_text("CONFIG_IWLWIFI=m\n", encoding="utf-8")
             (overlay / "etc/vampire/os.conf").write_text("EDITION=desktop\n", encoding="utf-8")
@@ -29,6 +31,7 @@ class KernelFragmentTests(unittest.TestCase):
             config.write_text('BR2_ROOTFS_OVERLAY=""\n', encoding="utf-8")
             configure(config, overlay, "desktop")
             output = config.read_text(encoding="utf-8")
+            self.assertIn(str(installer_fragment.resolve()), output)
             self.assertIn(str(fragment.resolve()), output)
             self.assertIn(str((repo / "scripts/post-build-vampire.py").resolve()), output)
             self.assertIn('EDITION="desktop"', (overlay / "etc/vampire/os.conf").read_text())
@@ -47,8 +50,12 @@ class KernelFragmentTests(unittest.TestCase):
             (overlay / "etc/os-release").write_text('PRETTY_NAME="Vampire OS"\n', encoding="utf-8")
             config = repo / ".config"
             config.write_text('BR2_ROOTFS_OVERLAY=""\n', encoding="utf-8")
+            installer_fragment = repo / "build/vampire-installer-kernel.fragment"
+            installer_fragment.write_text("CONFIG_EXT4_FS=y\n", encoding="utf-8")
             configure(config, overlay, "server")
-            self.assertNotIn("BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES", config.read_text())
+            output = config.read_text()
+            self.assertIn(str(installer_fragment.resolve()), output)
+            self.assertNotIn("vampire-desktop-kernel.fragment", output)
 
 if __name__ == "__main__":
     unittest.main()
