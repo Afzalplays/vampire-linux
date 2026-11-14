@@ -34,10 +34,7 @@ with GRUB into a hybrid ISO and writes a SHA-256 checksum.
 qemu-system-x86_64 -m 2G -smp 2 -cdrom out/vampire-os-0.1.0-dev-desktop-x86_64.iso -boot d
 ```
 
-Use `-enable-kvm` when KVM is available. The first image is a console-only
-live bring-up image. It is not the graphical Desktop edition, does not install
-to disk, and is not a production release. BIOS/UEFI boot must be validated on
-real firmware and virtual machines before release.
+Use `-enable-kvm` when KVM is available. The live image is a console-first developer environment with an experimental text-mode disk installer. The installer can discover its rootfs payload on the boot ISO and perform a confirmation-gated erase-and-install to a whole disk for BIOS or UEFI. It is not a graphical installer or production release; BIOS/UEFI installation to disposable virtual disks and installed-disk reboot must pass before release.
 
 The image includes the Vampire OS identity and BusyBox console. The build
 script stages the repository's `vfetch` utility into the target filesystem
