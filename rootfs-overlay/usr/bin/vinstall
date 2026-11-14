@@ -58,7 +58,7 @@ resolve_sys_block() {
 installer_requirements() {
   printf 'Vampire OS installer tool readiness (diagnostic only)\n'
   missing=0
-  for tool in parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum readlink mktemp; do
+  for tool in parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum readlink mktemp grep; do
     if command -v "$tool" >/dev/null 2>&1; then
       printf 'AVAILABLE  %s\n' "$tool"
     else
@@ -67,7 +67,7 @@ installer_requirements() {
     fi
   done
   if [ "$missing" -eq 0 ]; then
-    printf 'All disk-installation prerequisites are present; this does not authorize or perform installation.\n'
+    printf 'All installer commands are available. A destructive installation still requires a separate exact disk confirmation.\n'
   else
     printf 'Installer execution is unavailable until every prerequisite is installed.\n'
     return 1
@@ -316,12 +316,14 @@ install_system() {
   [ -f "$archive" ] || { echo "ERROR: rootfs archive not found: $archive" >&2; return 2; }
   [ -s "$archive.sha256" ] || { echo "ERROR: rootfs checksum is missing." >&2; return 2; }
   [ -s "${VAMPIRE_KERNEL_IMAGE:-/boot/vmlinuz}" ] || { echo "ERROR: live kernel image is missing at ${VAMPIRE_KERNEL_IMAGE:-/boot/vmlinuz}." >&2; return 1; }
-  for tool in parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum mktemp; do
+  for tool in parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum mktemp grep; do
     command -v "$tool" >/dev/null 2>&1 || { echo "ERROR: required installer tool is missing: $tool" >&2; return 1; }
   done
   (cd "$(dirname "$archive")" && sha256sum -c "$(basename "$archive").sha256") || { echo "ERROR: rootfs checksum verification failed." >&2; return 1; }
   stage_script=${VAMPIRE_ROOTFS_STAGE:-/usr/lib/vampire/stage-rootfs.py}
   [ -r "$stage_script" ] || { echo "ERROR: rootfs staging validator missing: $stage_script" >&2; return 1; }
+  configure_script=${VAMPIRE_INSTALL_CONFIGURER:-/usr/lib/vampire/configure-installed-root.py}
+  [ -r "$configure_script" ] || { echo "ERROR: installed-root configurator missing: $configure_script" >&2; return 1; }
   python3 "$stage_script" --validate-only "$archive" || return 1
   preflight "$device" || return $?
 
