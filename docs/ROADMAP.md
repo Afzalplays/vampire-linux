@@ -77,8 +77,10 @@ feature release-ready.
 - [x] Add checksum-verified rootfs validation and guarded staging into an existing target directory.
 - [x] Generate deterministic fstab and GRUB configuration for a staged target root (bootloader installation remains pending).
 - [x] Report required disk-installation tools without performing destructive actions.
-- [ ] Build guided text installer for Server and graphical installer for Desktop.
-- [ ] Implement safe partitioning, filesystems, UEFI/BIOS bootloader installation and confirmation gates.
+- [x] Implement guided text-mode erase-and-install flow in the console launcher (graphical installer remains pending).
+- [x] Implement GPT partitioning, FAT32/ext4 formatting, rootfs staging, UUID configuration, BIOS/UEFI GRUB installation and exact typed destructive confirmation.
+- [x] Discover and mount the installation ISO payload read-only for offline installation.
+- [ ] Validate installer end-to-end on disposable BIOS and UEFI QEMU disks, including installed-disk reboot and failure cleanup.
 - [ ] Add encrypted installation, recovery media, boot repair and tested restore workflow.
 
 ## Server edition
