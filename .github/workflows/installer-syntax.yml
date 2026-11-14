@@ -1,0 +1,32 @@
+name: Installer syntax checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "rootfs-overlay/usr/bin/vinstall"
+      - "rootfs-overlay/usr/bin/vdesktop"
+      - "scripts/stage-rootfs.py"
+      - "scripts/configure-installed-root.py"
+      - ".github/workflows/installer-syntax.yml"
+  pull_request:
+    paths:
+      - "rootfs-overlay/usr/bin/vinstall"
+      - "rootfs-overlay/usr/bin/vdesktop"
+      - "scripts/stage-rootfs.py"
+      - "scripts/configure-installed-root.py"
+      - ".github/workflows/installer-syntax.yml"
+
+jobs:
+  syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check POSIX shell syntax
+        run: |
+          sh -n rootfs-overlay/usr/bin/vinstall
+          sh -n rootfs-overlay/usr/bin/vdesktop
+      - name: Compile installer Python helpers
+        run: |
+          python3 -m py_compile scripts/stage-rootfs.py
+          python3 -m py_compile scripts/configure-installed-root.py
