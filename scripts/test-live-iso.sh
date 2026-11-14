@@ -16,6 +16,16 @@ need timeout
 need gzip
 need cpio
 [[ -s "$ISO" ]] || die "ISO not found: $ISO"
+ROOTFS_TAR="$ROOT_DIR/out/vampire-os-0.1.0-dev-$EDITION-x86_64-rootfs.tar"
+ROOTFS_SUM="$ROOTFS_TAR.sha256"
+[[ -s "$ROOTFS_TAR" ]] || die "installer rootfs archive not found: $ROOTFS_TAR"
+[[ -s "$ROOTFS_SUM" ]] || die "installer rootfs checksum not found: $ROOTFS_SUM"
+(cd "$(dirname "$ROOTFS_TAR")" && sha256sum -c "$(basename "$ROOTFS_SUM")") || die "installer rootfs checksum failed"
+rootfs_listing="$(tar -tf "$ROOTFS_TAR")" || die "could not list installer rootfs archive"
+for required in etc/os-release sbin/init bin/busybox; do
+  grep -Eq "(^|/)\${required}$" <<<"$rootfs_listing" || die "installer rootfs is missing required path: $required"
+done
+printf 'PASS: %s installer rootfs archive and checksum are valid\\n' "$EDITION"
 mkdir -p "$LOG_DIR"
 
 # Verify the release metadata embedded at ISO root matches this build target.
