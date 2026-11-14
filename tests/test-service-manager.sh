@@ -56,7 +56,7 @@ printf 'mock\nmock\n' > "$VAMPIRE_ENABLED_FILE"
 [ "$(grep -Fc 'mock:status' "$VAMPIRE_TEST_LOG")" -eq 1 ]
 grep -Fq 'ignoring duplicate service entry' "$TMP/status-duplicate.err"
 "$VCTL" start-all 2>"$TMP/duplicate.err"
-[ "$(grep -Fc 'mock:start' "$VAMPIRE_TEST_LOG")" -eq 2 ]
+[ "$(grep -Fc 'mock:start' "$VAMPIRE_TEST_LOG")" -eq 1 ]
 grep -Fq 'ignoring duplicate service entry' "$TMP/duplicate.err"
 printf 'mock\n../escape\n' > "$VAMPIRE_ENABLED_FILE"
 : > "$VAMPIRE_TEST_LOG"
