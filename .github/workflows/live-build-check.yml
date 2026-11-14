@@ -64,6 +64,8 @@ jobs:
           bash tests/test-wayland-terminal.sh
           bash -n tests/test-graphical-preflight.sh
           bash tests/test-graphical-preflight.sh
+          bash -n tests/test-desktop-graphical-menu.sh
+          bash tests/test-desktop-graphical-menu.sh
           bash tests/test-weston-launchers.sh
           bash tests/test-settings-launcher.sh
           bash tests/test-vhelp.sh
