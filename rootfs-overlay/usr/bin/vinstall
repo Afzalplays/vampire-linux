@@ -54,7 +54,7 @@ resolve_sys_block() {
 installer_requirements() {
   printf 'Vampire OS installer tool readiness (diagnostic only)\n'
   missing=0
-  for tool in sfdisk parted mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3; do
+  for tool in sfdisk parted mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum; do
     if command -v "$tool" >/dev/null 2>&1; then
       printf 'AVAILABLE  %s\n' "$tool"
     else

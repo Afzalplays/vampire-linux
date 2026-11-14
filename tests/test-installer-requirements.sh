@@ -4,7 +4,7 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT HUP INT TERM
 mkdir -p "$TMP/bin"
-for tool in sfdisk parted mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3; do
+for tool in sfdisk parted mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum; do
   printf '#!/bin/sh\nexit 0\n' > "$TMP/bin/$tool"
   chmod 0755 "$TMP/bin/$tool"
 done
