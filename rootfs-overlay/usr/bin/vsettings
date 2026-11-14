@@ -102,8 +102,15 @@ case "$1" in
     [ -r "$DEFAULTS" ] || { echo "vsettings: defaults file missing" >&2; exit 1; }
     dir=${CONFIG%/*}; [ "$dir" = "$CONFIG" ] && dir=.
     mkdir -p "$dir"
-    tmp="$CONFIG.tmp.$$"
-    cp "$DEFAULTS" "$tmp"
+    tmp="$CONFIG.tmp.$"
+    (set -C; : > "$tmp") 2>/dev/null || {
+      echo "vsettings: temporary file already exists" >&2; exit 1;
+    }
+    if ! cat "$DEFAULTS" > "$tmp"; then
+      rm -f "$tmp"
+      echo "vsettings: cannot copy defaults" >&2
+      exit 1
+    fi
     if ! validate_file "$tmp" >/dev/null; then
       rm -f "$tmp"
       echo "vsettings: refusing to reset from invalid defaults" >&2
