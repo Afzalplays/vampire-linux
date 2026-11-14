@@ -40,4 +40,12 @@ if "$ROOT/rootfs-overlay/usr/bin/vinstall" stage "$ARCHIVE" "$TMP/missing" >/dev
   echo "vinstall stage unexpectedly accepted a missing destination" >&2
   exit 1
 fi
+printf '#!/bin/sh\\necho 1000\\n' > "$TMP/bin/id"
+chmod +x "$TMP/bin/id"
+if "$ROOT/rootfs-overlay/usr/bin/vinstall" stage "$ARCHIVE" "$TMP/nonroot" >/dev/null 2>&1; then
+  echo "installer unexpectedly allowed non-root operation" >&2
+  exit 1
+fi
+printf '#!/bin/sh\\necho 0\\n' > "$TMP/bin/id"
+chmod +x "$TMP/bin/id"
 echo "vinstall rootfs stage command tests: PASS"

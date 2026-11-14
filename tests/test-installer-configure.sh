@@ -29,4 +29,12 @@ if VAMPIRE_INSTALL_CONFIGURER="$ROOT/scripts/configure-installed-root.py" \
   echo "configure unexpectedly accepted invalid firmware" >&2
   exit 1
 fi
+printf '#!/bin/sh\\necho 1000\\n' > "$TMP/bin/id"
+chmod +x "$TMP/bin/id"
+if "$ROOT/rootfs-overlay/usr/bin/vinstall" configure "$TARGET" "$ROOT_UUID" bios >/dev/null 2>&1; then
+  echo "installer unexpectedly allowed non-root operation" >&2
+  exit 1
+fi
+printf '#!/bin/sh\\necho 0\\n' > "$TMP/bin/id"
+chmod +x "$TMP/bin/id"
 echo "vinstall target configuration command tests: PASS"
