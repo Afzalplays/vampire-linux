@@ -113,7 +113,7 @@ preflight() {
       if [ -d "$holders" ]; then
         for holder in "$holders"/*; do
           [ -e "$holder" ] || continue
-          printf 'BLOCKER: device is backing an active stacked block device (%s).\\n' "${holder##*/}"
+          printf 'BLOCKER: device is backing an active stacked block device (%s).\n' "${holder##*/}"
           ready=0
         done
       fi
@@ -124,7 +124,7 @@ preflight() {
         if [ -n "$mounted_points" ]; then
           while IFS= read -r mountpoint; do
             [ -n "$mountpoint" ] || continue
-            printf 'BLOCKER: device or partition is mounted at %s (major:minor %s).\\n' "$mountpoint" "$node_dev"
+            printf 'BLOCKER: device or partition is mounted at %s (major:minor %s).\n' "$mountpoint" "$node_dev"
             ready=0
           done <<EOF_MOUNTED
 $mounted_points
@@ -139,7 +139,7 @@ EOF_MOUNTED
       case "$swap_source" in "$DEV_ROOT"/*)
         swap_real=$(canonical_device "$swap_source")
         if [ "$swap_real" = "$target_real" ]; then
-          printf 'BLOCKER: target disk is active swap: %s\\n' "$swap_source"
+          printf 'BLOCKER: target disk is active swap: %s\n' "$swap_source"
           ready=0
         else
           for part in "$sys"/*; do
@@ -147,7 +147,7 @@ EOF_MOUNTED
             part_name=${part##*/}
             part_real=$(canonical_device "$DEV_ROOT/$part_name")
             if [ "$swap_real" = "$part_real" ]; then
-              printf 'BLOCKER: target partition is active swap: %s\\n' "$swap_source"
+              printf 'BLOCKER: target partition is active swap: %s\n' "$swap_source"
               ready=0
             fi
           done
@@ -179,7 +179,7 @@ EOF_MOUNTED
       esac
     done < "$MOUNTS_FILE"
   else
-    printf 'BLOCKER: mount table unavailable; refusing to approve a disk without mounted-volume checks.\n'
+    printf 'BLOCKER: mount, mountinfo or swap table unavailable; refusing to approve a disk without complete active-use checks.\n'
     ready=0
   fi
   if [ "$ready" -eq 1 ]; then

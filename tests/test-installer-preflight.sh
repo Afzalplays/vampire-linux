@@ -46,19 +46,19 @@ fi
 grep -q 'mounted at /' "$TMP/out"
 # Mountinfo major:minor catches aliases and bind-mounted block sources even
 # when /proc/mounts uses a different device path.
-printf '42 1 8:1 / /mnt/alias rw - ext4 /dev/disk/by-id/alias rw\\n' > "$MOUNTINFO"
+printf '42 1 8:1 / /mnt/alias rw - ext4 /dev/disk/by-id/alias rw\n' > "$MOUNTINFO"
 if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2>&1; then
   echo "mounted major:minor alias unexpectedly passed preflight" >&2; exit 1
 fi
 grep -q 'major:minor 8:1' "$TMP/out"
 : > "$MOUNTINFO"
 # Active swap is not visible in the mount table and must block the target.
-printf '%s partition 1024 0 -2\\n' "$DEV/vda1" >> "$SWAPS"
+printf '%s partition 1024 0 -2\n' "$DEV/vda1" >> "$SWAPS"
 if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2>&1; then
   echo "active swap partition unexpectedly passed preflight" >&2; exit 1
 fi
 grep -q 'active swap' "$TMP/out"
-: > "$SWAPS"; printf 'Filename Type Size Used Priority\\n' > "$SWAPS"
+: > "$SWAPS"; printf 'Filename Type Size Used Priority\n' > "$SWAPS"
 # A disk already backing LVM/RAID/device-mapper must not be overwritten.
 : > "$SYS/vda/holders/dm-0"
 if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" preflight "$DEV/vda" >"$TMP/out" 2>&1; then
