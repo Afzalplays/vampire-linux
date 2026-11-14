@@ -8,6 +8,7 @@ done
 grep -q 'read-only preflight' <<< "$OUT"
 grep -q 'vinstall plan /dev/DISK' <<< "$OUT"
 grep -q 'vinstall requirements' <<< "$OUT"
+grep -q 'vinstall validate ROOTFS.tar' <<< "$OUT"
 grep -q 'vinstall stage ROOTFS.tar DIR' <<< "$OUT"
 grep -q 'vinstall configure ROOT UUID MODE' <<< "$OUT"
 grep -q 'requirements' "$ROOT/rootfs-overlay/usr/bin/vdesktop"
