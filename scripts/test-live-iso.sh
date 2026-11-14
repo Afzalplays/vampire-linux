@@ -32,6 +32,22 @@ if ! grep -Fqx "$expected_pretty_name" "$metadata_file"; then
 fi
 rm -f "$metadata_file"
 
+# Verify the installer payload is physically embedded in the bootable ISO.
+install_tmp="$(mktemp -d "$LOG_DIR/installer-payload.XXXXXX")"
+trap 'rm -rf "$install_tmp"' EXIT
+xorriso -osirrox on -indev "$ISO" -extract /install/rootfs.tar "$install_tmp/rootfs.tar" >/dev/null 2>&1 \
+  || die "could not extract installer rootfs from ISO"
+xorriso -osirrox on -indev "$ISO" -extract /install/rootfs.tar.sha256 "$install_tmp/rootfs.tar.sha256" >/dev/null 2>&1 \
+  || die "could not extract installer rootfs checksum from ISO"
+(cd "$install_tmp" && sha256sum -c rootfs.tar.sha256) || die "embedded installer rootfs checksum failed"
+embedded_listing="$(tar -tf "$install_tmp/rootfs.tar")"
+for required in etc/os-release sbin/init bin/busybox boot/vmlinuz usr/lib/vampire/stage-rootfs.py; do
+  grep -Eq "(^|/)\${required}$" <<<"$embedded_listing" || die "embedded rootfs is missing required path: $required"
+done
+printf 'PASS: %s ISO contains a checksummed installer rootfs and kernel\\n' "$EDITION"
+rm -rf "$install_tmp"
+trap - EXIT
+
 # Inspect the actual initramfs payload, not only the ISO's outer metadata.
 initramfs_file="$(mktemp "$LOG_DIR/initramfs.XXXXXX.gz")"
 xorriso -osirrox on -indev "$ISO" -extract /boot/initramfs.cpio.gz "$initramfs_file" >/dev/null 2>&1 \

@@ -51,7 +51,7 @@ install -m 0644 "$IMAGES/rootfs.cpio.gz" "$ISO_ROOT/boot/initramfs.cpio.gz"
 install -m 0644 "$BUILD_OUTPUT/target/etc/os-release" "$ISO_ROOT/os-release"
 mkdir -p "$ISO_ROOT/install"
 install -m 0644 "$IMAGES/rootfs.tar" "$ISO_ROOT/install/rootfs.tar"
-install -m 0644 "$OUTPUT_DIR/vampire-os-0.1.0-dev-$EDITION-x86_64-rootfs.tar.sha256" "$ISO_ROOT/install/rootfs.tar.sha256"
+(cd "$ISO_ROOT/install" && sha256sum rootfs.tar > rootfs.tar.sha256)
 install -m 0644 "$ROOT_DIR/build/grub.cfg" "$ISO_ROOT/boot/grub/grub.cfg"
 ISO="$OUTPUT_DIR/vampire-os-0.1.0-dev-$EDITION-x86_64.iso"
 grub-mkrescue -o "$ISO" "$ISO_ROOT"
