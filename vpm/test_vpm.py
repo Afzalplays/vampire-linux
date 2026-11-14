@@ -148,6 +148,24 @@ class ArchiveSafetyTests(unittest.TestCase):
                 tf.addfile(info, io.BytesIO(data))
             self.assertEqual(vpm.safe_extract(archive, root), ["usr/share/owned.txt"])
 
+    def test_multi_package_rollback_removes_only_extracted_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp) / "root"
+            root.mkdir()
+            owned = root / "usr/share/new-package.txt"
+            owned.parent.mkdir(parents=True)
+            owned.write_text("new package")
+            keep = root / "usr/share/keep.txt"
+            keep.write_text("keep")
+            link = root / "usr/share/link.txt"
+            link.symlink_to(keep)
+            failures = vpm.rollback_extracted(
+                root, [["usr/share/new-package.txt", "usr/share/link.txt"]])
+            self.assertEqual(failures, ["usr/share/link.txt"])
+            self.assertFalse(owned.exists())
+            self.assertEqual(keep.read_text(), "keep")
+            self.assertTrue(link.is_symlink())
+
     def test_remove_deletes_only_recorded_package_files(self):
         from types import SimpleNamespace
         with tempfile.TemporaryDirectory() as tmp:
