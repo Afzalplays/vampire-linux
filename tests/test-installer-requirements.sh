@@ -4,12 +4,12 @@ ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT HUP INT TERM
 mkdir -p "$TMP/bin"
-for tool in sfdisk parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum; do
+for tool in parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum readlink mktemp grep; do
   printf '#!/bin/sh\nexit 0\n' > "$TMP/bin/$tool"
   chmod 0755 "$TMP/bin/$tool"
 done
 PATH="$TMP/bin" "$ROOT/rootfs-overlay/usr/bin/vinstall" requirements > "$TMP/ok"
-grep -q 'All disk-installation prerequisites are present' "$TMP/ok"
+grep -q 'All installer commands are available' "$TMP/ok"
 rm "$TMP/bin/partprobe"
 if PATH="$TMP/bin" "$ROOT/rootfs-overlay/usr/bin/vinstall" requirements > "$TMP/missing"; then
   echo 'requirements unexpectedly passed without grub-install' >&2
