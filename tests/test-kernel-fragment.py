@@ -19,6 +19,8 @@ class KernelFragmentTests(unittest.TestCase):
             (overlay / "etc/vampire").mkdir(parents=True)
             (overlay / "etc").mkdir(exist_ok=True)
             (repo / "build").mkdir()
+            (repo / "scripts").mkdir()
+            (repo / "scripts/post-build-vampire.py").write_text("# fixture\\n", encoding="utf-8")
             fragment = repo / "build/vampire-desktop-kernel.fragment"
             fragment.write_text("CONFIG_IWLWIFI=m\n", encoding="utf-8")
             (overlay / "etc/vampire/os.conf").write_text("EDITION=desktop\n", encoding="utf-8")
@@ -28,6 +30,7 @@ class KernelFragmentTests(unittest.TestCase):
             configure(config, overlay, "desktop")
             output = config.read_text(encoding="utf-8")
             self.assertIn(str(fragment.resolve()), output)
+            self.assertIn(str((repo / "scripts/post-build-vampire.py").resolve()), output)
             self.assertIn('EDITION="desktop"', (overlay / "etc/vampire/os.conf").read_text())
             self.assertIn("Vampire OS 0.1.0-dev (desktop)", (overlay / "etc/os-release").read_text())
 
@@ -38,6 +41,8 @@ class KernelFragmentTests(unittest.TestCase):
             (overlay / "etc/vampire").mkdir(parents=True)
             (overlay / "etc").mkdir(exist_ok=True)
             (repo / "build").mkdir()
+            (repo / "scripts").mkdir()
+            (repo / "scripts/post-build-vampire.py").write_text("# fixture\\n", encoding="utf-8")
             (overlay / "etc/vampire/os.conf").write_text("EDITION=desktop\n", encoding="utf-8")
             (overlay / "etc/os-release").write_text('PRETTY_NAME="Vampire OS"\n', encoding="utf-8")
             config = repo / ".config"
