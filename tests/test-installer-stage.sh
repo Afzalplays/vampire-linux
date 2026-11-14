@@ -20,6 +20,8 @@ with tarfile.open(sys.argv[1], "w") as archive:
         archive.addfile(info, io.BytesIO(data))
 PY
 (cd "$TMP" && sha256sum rootfs.tar > rootfs.tar.sha256)
+VAMPIRE_ROOTFS_STAGE="$ROOT/scripts/stage-rootfs.py" "$ROOT/rootfs-overlay/usr/bin/vinstall" validate "$ARCHIVE" > "$TMP/validated"
+grep -q "No files were extracted" "$TMP/validated"
 VAMPIRE_ROOTFS_STAGE="$ROOT/scripts/stage-rootfs.py" "$ROOT/rootfs-overlay/usr/bin/vinstall" stage "$ARCHIVE" "$DEST" > "$TMP/result"
 test -s "$DEST/etc/os-release"
 test -s "$DEST/sbin/init"
@@ -32,6 +34,10 @@ if VAMPIRE_ROOTFS_STAGE="$ROOT/scripts/stage-rootfs.py" "$ROOT/rootfs-overlay/us
 fi
 test -e "$TMP/not-empty/keep"
 printf "invalid  " > "$ARCHIVE.sha256"
+if VAMPIRE_ROOTFS_STAGE="$ROOT/scripts/stage-rootfs.py" "$ROOT/rootfs-overlay/usr/bin/vinstall" validate "$ARCHIVE" >/dev/null 2>&1; then
+  echo "vinstall validate unexpectedly accepted a bad checksum" >&2
+  exit 1
+fi
 if VAMPIRE_ROOTFS_STAGE="$ROOT/scripts/stage-rootfs.py" "$ROOT/rootfs-overlay/usr/bin/vinstall" stage "$ARCHIVE" "$TMP/bad-checksum" >/dev/null 2>&1; then
   echo "vinstall stage unexpectedly accepted a bad checksum" >&2
   exit 1
