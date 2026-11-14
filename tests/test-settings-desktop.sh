@@ -20,6 +20,14 @@ cp "$ROOT/rootfs-overlay/usr/bin/vsettings" "$TMP/vsettings"
 chmod +x "$TMP/vsettings"
 "$TMP/vsettings" reset
 test "$("$TMP/vsettings" get theme)" = dark
+cp "$VAMPIRE_SETTINGS_DEFAULTS" "$TMP/defaults.good"
+printf 'theme=invalid\\n' > "$VAMPIRE_SETTINGS_DEFAULTS"
+if "$TMP/vsettings" reset >/dev/null 2>&1; then
+  echo "settings reset accepted invalid defaults" >&2; exit 1
+fi
+cmp -s "$CONFIG" "$TMP/defaults.good" && { echo "invalid reset overwrote user settings" >&2; exit 1; } || true
+cp "$TMP/defaults.good" "$VAMPIRE_SETTINGS_DEFAULTS"
+"$TMP/vsettings" reset
 printf "0\n" | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" "$ROOT/rootfs-overlay/usr/bin/vdesktop" --settings > "$TMP/settings-menu.out"
 grep -q "Vampire Settings" "$TMP/settings-menu.out"
 test "$("$TMP/vsettings" get accent)" = crimson
