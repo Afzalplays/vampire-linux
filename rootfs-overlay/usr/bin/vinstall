@@ -16,6 +16,7 @@ Usage:
   vinstall preflight /dev/DEVICE
   vinstall plan /dev/DEVICE [uefi|bios]
   vinstall requirements
+  vinstall validate ROOTFS.tar
   vinstall stage ROOTFS.tar EMPTY_MOUNTPOINT
   vinstall configure ROOTDIR ROOT_UUID uefi|bios [ESP_UUID]
   vinstall help
@@ -245,6 +246,18 @@ installation_plan() {
   printf 'This is a proposal only; installer execution and user confirmation are not implemented.\n'
 }
 
+validate_rootfs() {
+  archive=$1
+  [ -f "$archive" ] || { printf "ERROR: rootfs archive not found: %s\n" "$archive" >&2; return 2; }
+  checksum_file="$archive.sha256"
+  [ -s "$checksum_file" ] || { printf "ERROR: matching rootfs checksum is required: %s\n" "$checksum_file" >&2; return 2; }
+  command -v sha256sum >/dev/null 2>&1 || { printf "ERROR: sha256sum is required\n" >&2; return 1; }
+  (cd "$(dirname "$archive")" && sha256sum -c "$(basename "$checksum_file")") || { printf "ERROR: rootfs checksum verification failed\n" >&2; return 1; }
+  stage_script=${VAMPIRE_ROOTFS_STAGE:-/usr/lib/vampire/stage-rootfs.py}
+  [ -r "$stage_script" ] || { printf "ERROR: rootfs staging validator missing: %s\n" "$stage_script" >&2; return 1; }
+  exec python3 "$stage_script" --validate-only "$archive"
+}
+
 stage_rootfs() {
   [ "$(id -u)" -eq 0 ] || { printf "ERROR: root privileges are required to stage an OS rootfs\\n" >&2; return 1; }
   archive=$1
@@ -289,6 +302,10 @@ case "${1:-help}" in
   preflight)
     [ "$#" -eq 2 ] || { usage >&2; exit 2; }
     preflight "$2"
+    ;;
+  validate)
+    [ "$#" -eq 2 ] || { usage >&2; exit 2; }
+    validate_rootfs "$2"
     ;;
   requirements)
     [ "$#" -eq 1 ] || { usage >&2; exit 2; }
