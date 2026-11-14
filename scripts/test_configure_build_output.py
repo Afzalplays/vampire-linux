@@ -33,6 +33,7 @@ class BuildOutputConfigurationTests(unittest.TestCase):
             self.assertIn(
                 "BR2_ROOTFS_OVERLAY=" + json.dumps(str(overlay.resolve())),
                 config.read_text())
+            self.assertIn("BR2_ROOTFS_POST_BUILD_SCRIPT=", config.read_text())
             self.assertIn('EDITION="server"',
                           (overlay / "etc/vampire/os.conf").read_text())
             self.assertIn(
@@ -44,6 +45,7 @@ class BuildOutputConfigurationTests(unittest.TestCase):
             root = pathlib.Path(tmp)
             config, overlay = self.make_fixture(root)
             module.configure(config, overlay, "desktop")
+            self.assertIn("BR2_ROOTFS_POST_BUILD_SCRIPT=", config.read_text())
             self.assertIn('EDITION="desktop"',
                           (overlay / "etc/vampire/os.conf").read_text())
 

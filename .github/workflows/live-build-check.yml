@@ -50,6 +50,7 @@ jobs:
           bash -x tests/test-rootfs-contract.sh
           python3 tests/test-kernel-fragment.py
           python3 scripts/test-stage-rootfs.py
+          python3 scripts/test_post_build_vampire.py
           echo '=== command tools ==='
           bash -x tests/test-command-tools.sh
           bash -n tests/test-power-controls.sh
@@ -92,6 +93,8 @@ jobs:
           grep -qx 'BR2_TARGET_ROOTFS_TAR=y' build/vampire_server_defconfig
           for config in build/vampire_defconfig build/vampire_server_defconfig; do
             grep -qx 'BR2_PACKAGE_UTIL_LINUX_BINARIES=y' "$config"
+            grep -qx 'BR2_PACKAGE_UTIL_LINUX_SFDISK=y' "$config"
+            grep -qx 'BR2_PACKAGE_UTIL_LINUX_BLKID=y' "$config"
             grep -qx 'BR2_PACKAGE_PARTED=y' "$config"
             grep -qx 'BR2_PACKAGE_DOSFSTOOLS_MKFS_FAT=y' "$config"
             grep -qx 'BR2_PACKAGE_E2FSPROGS=y' "$config"
@@ -115,6 +118,7 @@ jobs:
           grep -qx 'BR2_PACKAGE_DROPBEAR=y' build/vampire_defconfig
           grep -qx 'BR2_PACKAGE_NFTABLES=y' build/vampire_defconfig
           grep -qx 'BR2_PACKAGE_NFTABLES=y' build/vampire_server_defconfig
+          test -s scripts/post-build-vampire.py
           test -s build/grub.cfg
           test -s rootfs-overlay/etc/inittab
           test -s rootfs-overlay/etc/os-release

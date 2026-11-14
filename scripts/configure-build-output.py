@@ -28,6 +28,11 @@ def configure(config_path, overlay_path, edition):
     overlay = pathlib.Path(overlay_path).resolve()
     replace_assignment(config_path, "BR2_ROOTFS_OVERLAY", str(overlay),
                        allow_missing=True)
+    post_build = overlay.parent / "scripts/post-build-vampire.py"
+    if not post_build.is_file():
+        raise ValueError(f"missing Vampire post-build script: {post_build}")
+    replace_assignment(config_path, "BR2_ROOTFS_POST_BUILD_SCRIPT",
+                       str(post_build.resolve()), allow_missing=True)
     if edition == "desktop":
         fragment = overlay.parent / "build/vampire-desktop-kernel.fragment"
         if not fragment.is_file():
