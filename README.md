@@ -91,10 +91,7 @@ and hardware compatibility remain unverified. See
 [the live ISO build guide](build/README.md) and
 [the QEMU boot-test guide](docs/QEMU-BOOT-TESTS.md).
 
-The custom graphical desktop, disk-writing installer, production package
-repository and transactional package manager, update application/rollback
-service, and supported hardware matrix remain incomplete. This is a developer
-live environment, not a finished or production-ready operating system.
+The custom graphical desktop, graphical installer, production package repository and transactional package manager, update application/rollback service, and supported hardware matrix remain incomplete. A confirmation-gated text-mode BIOS/UEFI erase-and-install path is implemented, but it still needs disposable-disk QEMU installation and installed-disk reboot validation. This is a developer live environment, not a finished or production-ready operating system.
 
 ## Independence and upstream sources
 
