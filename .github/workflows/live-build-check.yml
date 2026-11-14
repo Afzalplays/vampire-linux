@@ -67,7 +67,8 @@ jobs:
           bash -x tests/test-installer-preflight.sh
           echo '=== service manager ==='
           bash -n tests/test-service-manager.sh
-          bash -x tests/test-service-manager.sh\n          bash tests/test-software-center.sh
+          bash -x tests/test-service-manager.sh
+          bash tests/test-software-center.sh
           bash tests/test-ssh-tool.sh
           bash tests/test-files-tool.sh
           bash tests/test-diagnostics.sh
