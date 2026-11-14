@@ -327,21 +327,25 @@ def command_install(args):
     if ROOT.exists() is False:
         fail(f"target root does not exist: {ROOT}")
     extracted_manifests = []
+    tmp = DB.with_suffix(".tmp")
     try:
         for pkg, archive in downloads:
             installed_files = safe_extract(archive, ROOT)
             extracted_manifests.append(installed_files)
             db[pkg["name"]] = {"version": pkg["version"], "files": installed_files}
+        DB.parent.mkdir(parents=True, exist_ok=True)
+        tmp.write_text(json.dumps(db, indent=2) + "\n")
+        tmp.replace(DB)
     except BaseException:
+        try:
+            tmp.unlink()
+        except OSError:
+            pass
         rollback_failures = rollback_extracted(ROOT, extracted_manifests)
         if rollback_failures:
             print("vpm: warning: rollback could not remove: " +
                   ", ".join(rollback_failures), file=sys.stderr)
         raise
-    DB.parent.mkdir(parents=True, exist_ok=True)
-    tmp = DB.with_suffix(".tmp")
-    tmp.write_text(json.dumps(db, indent=2) + "\n")
-    tmp.replace(DB)
     print("Installed (experimental): " + ", ".join(p["name"] for p, _ in downloads))
 
 def command_remove(args):
