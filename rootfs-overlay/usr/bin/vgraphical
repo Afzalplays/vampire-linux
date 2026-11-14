@@ -5,6 +5,7 @@ set -eu
 CONFIG=${VAMPIRE_WESTON_RUNTIME_CONFIG:-/run/vampire/weston.ini}
 BASE_CONFIG=${VAMPIRE_WESTON_BASE:-/etc/xdg/weston/weston.ini}
 FOOT_CONFIG=${VAMPIRE_FOOT_BASE:-/etc/xdg/foot/foot.ini}
+DRM_DIR=${VAMPIRE_DRM_DIR:-/dev/dri}
 
 error() { printf 'Vampire Desktop: %s\n' "$*" >&2; }
 require_file() {
@@ -15,14 +16,14 @@ check() {
   command -v foot >/dev/null 2>&1 || { error "Foot terminal is not installed."; return 1; }
   require_file "$BASE_CONFIG" || return 1
   require_file "$FOOT_CONFIG" || return 1
-  [ -d /dev/dri ] || { error "no /dev/dri directory; enable a kernel DRM/KMS driver and firmware."; return 1; }
+  [ -d "$DRM_DIR" ] || { error "no $DRM_DIR directory; enable a kernel DRM/KMS driver and firmware."; return 1; }
   found=
-  for card in /dev/dri/card*; do
+  for card in "$DRM_DIR"/card*; do
     [ -c "$card" ] || continue
     found=$card
     break
   done
-  [ -n "$found" ] || { error "no DRM card device found under /dev/dri."; return 1; }
+  [ -n "$found" ] || { error "no DRM card device found under $DRM_DIR."; return 1; }
   [ -r "$found" ] && [ -w "$found" ] || {
     error "DRM device $found is not accessible; check seat permissions."; return 1;
   }
