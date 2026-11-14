@@ -185,13 +185,10 @@ def command_list(_args):
         print(f"{name:<24} {info.get('version', 'unknown')}")
 
 def safe_extract(archive, destination):
-    """Extract regular files only and return installed relative file paths.
-
-    Experimental only: a production package manager needs staging, atomic
-    transactions, ownership metadata and protection against concurrent changes.
-    """
+    """Extract regular files only; roll back files created if extraction fails."""
     destination = destination.resolve()
     written = []
+    created_dirs = []
     with tarfile.open(archive, "r:gz") as tf:
         members = tf.getmembers()
         if len(members) > 10000:
@@ -213,23 +210,47 @@ def safe_extract(archive, destination):
                 fail(f"unsupported special archive entry: {member.name}")
             if not (member.isfile() or member.isdir()):
                 fail(f"unsupported archive entry: {member.name}")
-        for member in members:
-            target = (destination / member.name).resolve()
-            if member.isdir():
-                target.mkdir(parents=True, exist_ok=True)
-                continue
-            target.parent.mkdir(parents=True, exist_ok=True)
-            target = (destination / member.name).resolve()
-            if target != destination and destination not in target.parents:
-                fail(f"unsafe destination path: {member.name}")
-            source = tf.extractfile(member)
-            if source is None:
-                fail(f"cannot read archive entry: {member.name}")
-            with source, target.open("xb") as out:
-                shutil.copyfileobj(source, out)
-            target.chmod(member.mode & 0o755)
-            written.append(target.relative_to(destination).as_posix())
-    return written
+        try:
+            for member in members:
+                target = (destination / member.name).resolve()
+                if member.isdir():
+                    if not target.exists():
+                        target.mkdir(parents=True, exist_ok=True)
+                        created_dirs.append(target)
+                    continue
+                missing = []
+                parent = target.parent
+                while parent != destination and not parent.exists():
+                    missing.append(parent)
+                    parent = parent.parent
+                target.parent.mkdir(parents=True, exist_ok=True)
+                for directory in reversed(missing):
+                    if directory not in created_dirs:
+                        created_dirs.append(directory)
+                target = (destination / member.name).resolve()
+                if target != destination and destination not in target.parents:
+                    fail(f"unsafe destination path: {member.name}")
+                source = tf.extractfile(member)
+                if source is None:
+                    fail(f"cannot read archive entry: {member.name}")
+                with source, target.open("xb") as out:
+                    written.append(target)
+                    shutil.copyfileobj(source, out)
+                target.chmod(member.mode & 0o755)
+        except BaseException:
+            for path in reversed(written):
+                try:
+                    path.unlink()
+                except OSError:
+                    pass
+            for path in sorted(set(created_dirs), key=lambda item: len(item.parts), reverse=True):
+                try:
+                    path.rmdir()
+                except OSError:
+                    pass
+            raise
+    return [path.relative_to(destination).as_posix() for path in written]
+
 def command_install(args):
     if os.geteuid() != 0 and ROOT == pathlib.Path("/"):
         fail("installation to / requires root; use sudo vpm install PACKAGE")
