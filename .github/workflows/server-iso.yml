@@ -11,6 +11,7 @@ on:
     paths:
       - "build/vampire_server_defconfig"
       - "build/build-live-iso.sh"
+      - "build/vampire-installer-kernel.fragment"
       - "rootfs-overlay/**"
       - "fetch/vfetch"
       - "vpm/**"
