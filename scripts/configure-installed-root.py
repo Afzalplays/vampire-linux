@@ -70,7 +70,7 @@ def configure(root, root_uuid, mode, esp_uuid=None):
         "insmod ext2",
         "search --no-floppy --fs-uuid --set=root " + root_uuid,
         "menuentry 'Vampire OS' {",
-        "    linux /boot/vmlinuz root=UUID=" + root_uuid + " rootwait ro console=tty0 console=ttyS0,115200n8 loglevel=4",
+        "    linux /boot/vmlinuz root=UUID=" + root_uuid + " rootwait rw console=tty0 console=ttyS0,115200n8 loglevel=4",
         "}",
         "",
     ]
