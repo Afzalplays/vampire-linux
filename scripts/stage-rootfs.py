@@ -6,6 +6,7 @@ mounts, partitions, formats, or writes to block devices.
 """
 import argparse
 import pathlib
+import posixpath
 import shutil
 import sys
 import tarfile
@@ -28,16 +29,16 @@ def sanitize_member(member):
         if pathlib.PurePosixPath(member.name).parts[:1] == ("dev",):
             return None
         raise ValueError(f"unsupported special file outside /dev: {member.name}")
+    if member.issym():
         target = pathlib.PurePosixPath(member.linkname)
         if target.is_absolute():
-            # Absolute symlinks are normal in Linux rootfs archives. Convert
-            # them to equivalent relative links so extraction never writes
-            # through a link into the host filesystem.
+            # Convert absolute rootfs symlinks to equivalent relative links.
             if ".." in target.parts:
                 raise ValueError(f"unsafe absolute link target: {member.name}")
             root_target = pathlib.PurePosixPath(*target.parts[1:])
-            member.linkname = __import__("posixpath").relpath(
-                root_target.as_posix() or ".", pathlib.PurePosixPath(member.name).parent.as_posix()
+            member.linkname = posixpath.relpath(
+                root_target.as_posix() or ".",
+                pathlib.PurePosixPath(member.name).parent.as_posix(),
             )
         combined = pathlib.PurePosixPath(member.name).parent / pathlib.PurePosixPath(member.linkname)
         depth = 0
