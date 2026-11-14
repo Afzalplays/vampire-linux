@@ -1,5 +1,6 @@
 import pathlib
 import subprocess
+import shutil
 import sys
 import tempfile
 
@@ -37,7 +38,7 @@ def main():
         result = run(root, "legacy")
         assert result.returncode != 0
 
-        (root / "boot/grub").rmdir()
+        shutil.rmtree(root / "boot/grub")
         (root / "boot/grub").symlink_to(root / "etc")
         result = run(root, "bios")
         assert result.returncode != 0
