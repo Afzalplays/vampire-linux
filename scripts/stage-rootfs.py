@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+"""Validate and safely stage a Vampire OS Buildroot rootfs tarball.
+
+This is a host-side, non-destructive preparation step. It never discovers,
+mounts, partitions, formats, or writes to block devices.
+"""
+import argparse
+import pathlib
+import shutil
+import sys
+import tarfile
+
+
+REQUIRED = ("etc/os-release", "sbin/init", "bin/busybox")
+
+
+def safe_member_name(name):
+    path = pathlib.PurePosixPath(name)
+    return not path.is_absolute() and all(part not in ("..", "") for part in path.parts)
+
+
+def validate(archive):
+    with tarfile.open(archive, "r:*") as tar:
+        names = set()
+        for member in tar.getmembers():
+            if not safe_member_name(member.name):
+                raise ValueError(f"unsafe archive path: {member.name}")
+            if member.isdev() or member.isfifo():
+                raise ValueError(f"unsupported special file: {member.name}")
+            if member.issym() or member.islnk():
+                target = pathlib.PurePosixPath(member.linkname)
+                if target.is_absolute():
+                    raise ValueError(f"absolute link target: {member.name}")
+                combined = (pathlib.PurePosixPath(member.name).parent / target)
+                depth = 0
+                for part in combined.parts:
+                    if part == "..":
+                        depth -= 1
+                    elif part not in ("", "."):
+                        depth += 1
+                    if depth < 0:
+                        raise ValueError(f"link escapes rootfs: {member.name}")
+            names.add(pathlib.PurePosixPath(member.name).as_posix().lstrip("./"))
+        missing = [name for name in REQUIRED if name not in names]
+        if missing:
+            raise ValueError("rootfs archive missing required paths: " + ", ".join(missing))
+        return len(names)
+
+
+def stage(archive, destination):
+    destination = pathlib.Path(destination)
+    if destination.exists():
+        if not destination.is_dir() or any(destination.iterdir()):
+            raise ValueError("destination must be a new or empty directory")
+    else:
+        destination.mkdir(parents=True, mode=0o700)
+    validate(archive)
+    with tarfile.open(archive, "r:*") as tar:
+        tar.extractall(destination, filter="data")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("archive", help="Buildroot rootfs.tar")
+    parser.add_argument("destination", help="empty staging directory")
+    args = parser.parse_args()
+    try:
+        count = validate(args.archive)
+        stage(args.archive, args.destination)
+    except (OSError, tarfile.TarError, ValueError) as exc:
+        print(f"vrootfs-stage: error: {exc}", file=sys.stderr)
+        return 1
+    print(f"Validated and staged {count} rootfs entries in {args.destination}")
+    print("No disk partitioning, formatting, or bootloader installation was performed.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -49,6 +49,7 @@ jobs:
           echo '=== rootfs contract ==='
           bash -x tests/test-rootfs-contract.sh
           python3 tests/test-kernel-fragment.py
+          python3 scripts/test-stage-rootfs.py
           echo '=== command tools ==='
           bash -x tests/test-command-tools.sh
           bash -n tests/test-power-controls.sh
@@ -86,6 +87,8 @@ jobs:
           grep -qx 'BR2_TOOLCHAIN_BUILDROOT_MUSL=y' build/vampire_defconfig
           grep -qx 'BR2_LINUX_KERNEL=y' build/vampire_defconfig
           grep -qx 'BR2_TARGET_ROOTFS_CPIO=y' build/vampire_defconfig
+          grep -qx 'BR2_TARGET_ROOTFS_TAR=y' build/vampire_defconfig
+          grep -qx 'BR2_TARGET_ROOTFS_TAR=y' build/vampire_server_defconfig
           grep -qx 'BR2_PACKAGE_BASH=y' build/vampire_defconfig
           grep -qx 'BR2_PACKAGE_BASH=y' build/vampire_server_defconfig
           grep -qx 'BR2_PACKAGE_WESTON=y' build/vampire_defconfig
