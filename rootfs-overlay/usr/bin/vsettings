@@ -106,18 +106,18 @@ case "$1" in
     (set -C; : > "$tmp") 2>/dev/null || {
       echo "vsettings: temporary file already exists" >&2; exit 1;
     }
+    trap 'rm -f "$tmp"' 0 HUP INT TERM
     if ! cat "$DEFAULTS" > "$tmp"; then
-      rm -f "$tmp"
       echo "vsettings: cannot copy defaults" >&2
       exit 1
     fi
     if ! validate_file "$tmp" >/dev/null; then
-      rm -f "$tmp"
       echo "vsettings: refusing to reset from invalid defaults" >&2
       exit 1
     fi
     chmod 600 "$tmp"
     mv -f "$tmp" "$CONFIG"
+    trap - 0 HUP INT TERM
     echo "Vampire settings reset to defaults."
     ;;
   *) usage ;;
