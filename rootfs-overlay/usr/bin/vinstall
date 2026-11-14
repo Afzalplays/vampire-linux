@@ -289,7 +289,7 @@ install_system() {
   [ -f "$archive" ] || { echo "ERROR: rootfs archive not found: $archive" >&2; return 2; }
   [ -s "$archive.sha256" ] || { echo "ERROR: rootfs checksum is missing." >&2; return 2; }
   [ -s "${VAMPIRE_KERNEL_IMAGE:-/boot/vmlinuz}" ] || { echo "ERROR: live kernel image is missing at ${VAMPIRE_KERNEL_IMAGE:-/boot/vmlinuz}." >&2; return 1; }
-  for tool in parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum mktemp install; do
+  for tool in parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum mktemp; do
     command -v "$tool" >/dev/null 2>&1 || { echo "ERROR: required installer tool is missing: $tool" >&2; return 1; }
   done
   (cd "$(dirname "$archive")" && sha256sum -c "$(basename "$archive").sha256") || { echo "ERROR: rootfs checksum verification failed." >&2; return 1; }
@@ -322,7 +322,8 @@ install_system() {
     if [ "$mounted_root" -eq 1 ]; then umount "$work/target" || echo "WARNING: could not unmount target root." >&2; fi
     rm -rf "$work"
   }
-  trap cleanup_install EXIT HUP INT TERM
+  trap cleanup_install EXIT
+  trap 'exit 1' HUP INT TERM
 
   echo "Writing GPT partition table to $device ..."
   parted -s "$device" mklabel gpt
@@ -347,7 +348,8 @@ install_system() {
   mounted_root=1
   python3 "$stage_script" "$archive" "$work/target"
   mkdir -p "$work/target/boot"
-  install -m 0644 "${VAMPIRE_KERNEL_IMAGE:-/boot/vmlinuz}" "$work/target/boot/vmlinuz"
+  cp "${VAMPIRE_KERNEL_IMAGE:-/boot/vmlinuz}" "$work/target/boot/vmlinuz"
+  chmod 0644 "$work/target/boot/vmlinuz"
   root_uuid=$(blkid -s UUID -o value "$part2")
   [ -n "$root_uuid" ] || { echo "ERROR: unable to read root filesystem UUID." >&2; return 1; }
 
