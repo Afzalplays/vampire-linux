@@ -1,6 +1,6 @@
 # Vampire OS Boot, Installer and Recovery Design
 
-**Target:** x86_64 / AMD64. This document defines requirements; it does not claim a working installer or bootable ISO exists.
+**Target:** x86_64 / AMD64. Vampire OS currently has Desktop and Server developer live ISOs with virtual BIOS/UEFI smoke-test coverage. This document defines the remaining boot, installation and recovery requirements; a destructive disk installer is not yet implemented.
 
 ## Firmware and boot modes
 - UEFI boot is the primary target, with Secure Boot support designed around signed boot components and documented key enrollment.
