@@ -205,7 +205,8 @@ while :; do
     22) power_menu ;;
     23) services_menu ;;
 
-    24) run_and_pause vgraphical --check ;;\n    0) exit 0 ;;
+    24) run_and_pause vgraphical --check ;;
+    0) exit 0 ;;
     *) echo "Invalid choice." ;;
   esac
 done
