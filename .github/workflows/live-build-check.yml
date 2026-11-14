@@ -70,6 +70,8 @@ jobs:
           echo '=== installer preflight ==='
           bash -x tests/test-installer-preflight.sh
           bash -x tests/test-installer-requirements.sh
+          bash -n tests/test-installer-confirmation.sh
+          bash -x tests/test-installer-confirmation.sh
           bash -x tests/test-installer-stage.sh
           bash -x tests/test-installer-configure.sh
           echo '=== service manager ==='
