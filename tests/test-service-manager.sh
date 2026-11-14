@@ -40,6 +40,7 @@ grep -Fxq 'second:start' "$VAMPIRE_TEST_LOG"
 grep -Fxq 'mock:status' "$VAMPIRE_TEST_LOG"
 "$VCTL" status-all
 grep -Fxq 'second:status' "$VAMPIRE_TEST_LOG"
+[ "$(grep -Fc ':status' "$VAMPIRE_TEST_LOG")" -eq 2 ]
 "$VCTL" stop-all
 [ "$(tail -n 2 "$VAMPIRE_TEST_LOG" | tr '\n' ' ')" = "second:stop mock:stop " ]
 "$VCTL" disable mock
@@ -49,10 +50,21 @@ grep -Fq 'mock (disabled)' "$TMP/list"
 if "$VCTL" restart broken-stop 2>/dev/null; then echo "restart unexpectedly succeeded after stop failure" >&2; exit 1; fi
 [ "$(grep -Fc 'broken-stop:start' "$VAMPIRE_TEST_LOG" || true)" -eq 0 ]
 printf 'mock\nmock\n' > "$VAMPIRE_ENABLED_FILE"
+: > "$VAMPIRE_TEST_LOG"
+"$VCTL" status-all 2>"$TMP/status-duplicate.err"
+[ "$(grep -Fc 'mock:status' "$VAMPIRE_TEST_LOG")" -eq 1 ]
+grep -Fq 'ignoring duplicate service entry' "$TMP/status-duplicate.err"
 "$VCTL" start-all 2>"$TMP/duplicate.err"
 [ "$(grep -Fc 'mock:start' "$VAMPIRE_TEST_LOG")" -eq 2 ]
 grep -Fq 'ignoring duplicate service entry' "$TMP/duplicate.err"
 printf 'mock\n../escape\n' > "$VAMPIRE_ENABLED_FILE"
+: > "$VAMPIRE_TEST_LOG"
+if "$VCTL" status-all 2>"$TMP/status-invalid.err"; then
+  echo "status-all accepted malformed enabled entry" >&2
+  exit 1
+fi
+[ "$(grep -Fc 'mock:status' "$VAMPIRE_TEST_LOG")" -eq 1 ]
+grep -Fq 'ignoring invalid service entry' "$TMP/status-invalid.err"
 if "$VCTL" enable second 2>/dev/null; then echo "malformed enabled list accepted" >&2; exit 1; fi
 for unsafe in '../escape' '-leading-dash' '..' '.hidden'; do
   if "$VCTL" enable "$unsafe" 2>/dev/null; then echo "unsafe service name accepted: $unsafe" >&2; exit 1; fi

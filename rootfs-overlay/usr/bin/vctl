@@ -16,8 +16,7 @@ set_enabled() {
   parent=${ENABLED%/*}; [ "$parent" = "$ENABLED" ] && parent=.
   mkdir -p "$parent" || return 1
   old_umask=$(umask); umask 077
-  tmp="$ENABLED.tmp.$$"
-  if ! : > "$tmp"; then umask "$old_umask"; return 1; fi
+  tmp=$(mktemp "$ENABLED.tmp.XXXXXX") || { umask "$old_umask"; return 1; }
   if [ -f "$ENABLED" ]; then
     while IFS= read -r item || [ -n "$item" ]; do
       [ -n "$item" ] || continue
@@ -50,10 +49,22 @@ case "$action" in
     [ "$#" -eq 1 ] || usage
     [ -f "$ENABLED" ] || exit 0
     result=0
+    seen_file=$(mktemp "${TMPDIR:-/tmp}/vctl-status-seen.XXXXXX") || exit 1
     while IFS= read -r name || [ -n "$name" ]; do
       [ -n "$name" ] || continue
+      if ! valid_name "$name"; then
+        echo "vctl: ignoring invalid service entry" >&2
+        result=1
+        continue
+      fi
+      if grep -Fxq "$name" "$seen_file"; then
+        echo "vctl: ignoring duplicate service entry: $name" >&2
+        continue
+      fi
+      printf '%s\\n' "$name" >> "$seen_file"
       run_service "$name" status || result=1
     done < "$ENABLED"
+    rm -f "$seen_file"
     exit "$result" ;;
   start-all|stop-all)
     [ "$#" -eq 1 ] || usage
