@@ -15,6 +15,7 @@ Usage:
   vinstall list
   vinstall preflight /dev/DEVICE
   vinstall plan /dev/DEVICE [uefi|bios]
+  vinstall requirements
   vinstall help
 This developer build does NOT partition, format, mount, or write to disks.
 The plan command only prints a proposed layout; it never executes it.
@@ -48,6 +49,25 @@ resolve_sys_block() {
   done
   return 1
 }
+installer_requirements() {
+  printf 'Vampire OS installer tool readiness (diagnostic only)\\n'
+  missing=0
+  for tool in sfdisk parted mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3; do
+    if command -v "$tool" >/dev/null 2>&1; then
+      printf 'AVAILABLE  %s\\n' "$tool"
+    else
+      printf 'MISSING    %s\\n' "$tool"
+      missing=1
+    fi
+  done
+  if [ "$missing" -eq 0 ]; then
+    printf 'All disk-installation prerequisites are present; this does not authorize or perform installation.\\n'
+  else
+    printf 'Installer execution is unavailable until every prerequisite is installed.\\n'
+    return 1
+  fi
+}
+
 system_check() {
   printf 'Vampire OS installation environment check\n'
   arch=$(uname -m 2>/dev/null || echo unknown)
@@ -227,7 +247,7 @@ case "${1:-help}" in
   system-check) [ "$#" -eq 1 ] || { usage >&2; exit 2; }; system_check ;;
   list) [ "$#" -eq 1 ] || { usage >&2; exit 2; }; list_disks ;;
   preflight) [ "$#" -eq 2 ] || { usage >&2; exit 2; }; preflight "$2" ;;
-  plan) [ "$#" -ge 2 ] && [ "$#" -le 3 ] || { usage >&2; exit 2; }; installation_plan "$2" "${3:-}" ;;
+  requirements) [ "$#" -eq 1 ] || { usage >&2; exit 2; }; installer_requirements ;;\n  plan) [ "$#" -ge 2 ] && [ "$#" -le 3 ] || { usage >&2; exit 2; }; installation_plan "$2" "${3:-}" ;;
   help|-h|--help) usage ;;
   *) usage >&2; exit 2 ;;
 esac

@@ -66,6 +66,7 @@ jobs:
           bash -x tests/test-settings-desktop.sh
           echo '=== installer preflight ==='
           bash -x tests/test-installer-preflight.sh
+          bash -x tests/test-installer-requirements.sh
           echo '=== service manager ==='
           bash -n tests/test-service-manager.sh
           bash -x tests/test-service-manager.sh
@@ -89,6 +90,16 @@ jobs:
           grep -qx 'BR2_TARGET_ROOTFS_CPIO=y' build/vampire_defconfig
           grep -qx 'BR2_TARGET_ROOTFS_TAR=y' build/vampire_defconfig
           grep -qx 'BR2_TARGET_ROOTFS_TAR=y' build/vampire_server_defconfig
+          for config in build/vampire_defconfig build/vampire_server_defconfig; do
+            grep -qx 'BR2_PACKAGE_UTIL_LINUX_BINARIES=y' "$config"
+            grep -qx 'BR2_PACKAGE_PARTED=y' "$config"
+            grep -qx 'BR2_PACKAGE_DOSFSTOOLS_MKFS_FAT=y' "$config"
+            grep -qx 'BR2_PACKAGE_E2FSPROGS=y' "$config"
+            grep -qx 'BR2_TARGET_GRUB2=y' "$config"
+            grep -qx 'BR2_TARGET_GRUB2_I386_PC=y' "$config"
+            grep -qx 'BR2_TARGET_GRUB2_X86_64_EFI=y' "$config"
+            grep -qx 'BR2_TARGET_GRUB2_INSTALL_TOOLS=y' "$config"
+          done
           grep -qx 'BR2_PACKAGE_BASH=y' build/vampire_defconfig
           grep -qx 'BR2_PACKAGE_BASH=y' build/vampire_server_defconfig
           grep -qx 'BR2_PACKAGE_WESTON=y' build/vampire_defconfig
