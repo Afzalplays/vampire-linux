@@ -51,6 +51,7 @@ jobs:
           python3 tests/test-kernel-fragment.py
           python3 scripts/test-stage-rootfs.py
           python3 scripts/test_post_build_vampire.py
+          python3 scripts/test_configure_installed_root.py
           echo '=== command tools ==='
           bash -x tests/test-command-tools.sh
           bash -n tests/test-power-controls.sh
@@ -118,6 +119,7 @@ jobs:
           grep -qx 'BR2_PACKAGE_NFTABLES=y' build/vampire_defconfig
           grep -qx 'BR2_PACKAGE_NFTABLES=y' build/vampire_server_defconfig
           test -s scripts/post-build-vampire.py
+          test -s scripts/configure-installed-root.py
           test -s build/grub.cfg
           test -s rootfs-overlay/etc/inittab
           test -s rootfs-overlay/etc/os-release

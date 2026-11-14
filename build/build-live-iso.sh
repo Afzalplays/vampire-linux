@@ -24,6 +24,7 @@ install -m 0644 "$ROOT_DIR/vpm/doctor.py" "$OVERLAY/usr/lib/vampire/doctor.py"
 install -m 0644 "$ROOT_DIR/vpm/update_client.py" "$OVERLAY/usr/lib/vampire/update_client.py"
 install -m 0644 "$ROOT_DIR/vpm/vpm.example.json" "$OVERLAY/etc/vpm/vpm.example.json"
 install -m 0755 "$ROOT_DIR/scripts/stage-rootfs.py" "$OVERLAY/usr/lib/vampire/stage-rootfs.py"
+install -m 0755 "$ROOT_DIR/scripts/configure-installed-root.py" "$OVERLAY/usr/lib/vampire/configure-installed-root.py"
 chmod 0755 "$OVERLAY/usr/bin/vctl" "$OVERLAY/usr/bin/vnetwork" "$OVERLAY/usr/bin/vguard" \
   "$OVERLAY/usr/bin/vsettings" "$OVERLAY/usr/bin/vdesktop" "$OVERLAY/usr/bin/vmonitor" \
   "$OVERLAY/usr/bin/vinstall" "$OVERLAY/usr/bin/vpm" "$OVERLAY/usr/bin/vgraphical" "$OVERLAY/usr/bin/vupdate" "$OVERLAY/usr/bin/vsoftware" "$OVERLAY/usr/bin/vssh" "$OVERLAY/usr/bin/vfiles" "$OVERLAY/usr/bin/vsh" \

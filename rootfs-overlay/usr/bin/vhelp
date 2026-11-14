@@ -50,6 +50,7 @@ FILES AND ADMINISTRATION
   vfiles                         Open the console file manager
   vinstall requirements         Check disk installer tool availability
   vinstall stage ROOTFS.tar DIR  Validate and stage into an empty mounted directory
+  vinstall configure ROOT UUID MODE [ESP_UUID]  Write target fstab and GRUB config
   vinstall list                  List available installation disks
   vinstall preflight /dev/DISK   Check a target without writing to it
   vinstall plan /dev/DISK [uefi|bios]  Preview a read-only disk layout
@@ -72,7 +73,8 @@ DIAGNOSTICS
 
 SAFETY NOTES
   - vinstall stage only extracts a validated rootfs into an existing empty directory; it does not partition, format, or install a bootloader.
-  - The current installer supports read-only preflight and rootfs staging only; full disk installation is not implemented.
+  - vinstall configure writes fstab and GRUB configuration into a staged root; it does not install GRUB to a disk.
+  - The current installer supports read-only preflight, rootfs staging and target configuration only; full disk installation is not implemented.
   - VPM and OS updates are experimental; a production package repository and
     transactional rollback are not yet available.
   - SSH is opt-in and refuses to start without a supported public key.

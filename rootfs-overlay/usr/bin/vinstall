@@ -17,6 +17,7 @@ Usage:
   vinstall plan /dev/DEVICE [uefi|bios]
   vinstall requirements
   vinstall stage ROOTFS.tar EMPTY_MOUNTPOINT
+  vinstall configure ROOTDIR ROOT_UUID uefi|bios [ESP_UUID]
   vinstall help
 This developer build does NOT partition, format, mount, or write to disks.
 The plan command only prints a proposed layout; it never executes it.
@@ -253,6 +254,23 @@ stage_rootfs() {
   [ -r "$stage_script" ] || { printf 'ERROR: rootfs staging validator missing: %s\n' "$stage_script" >&2; return 1; }
   exec python3 "$stage_script" "$archive" "$destination"
 }
+configure_installed_root() {
+  target_root=$1
+  root_uuid=$2
+  firmware=$3
+  esp_uuid=${4:-}
+  configure_script=${VAMPIRE_INSTALL_CONFIGURER:-/usr/lib/vampire/configure-installed-root.py}
+  [ -d "$target_root" ] || { printf 'ERROR: target root directory does not exist: %s\n' "$target_root" >&2; return 2; }
+  [ -r "$configure_script" ] || { printf 'ERROR: installed-root configurator missing: %s\n' "$configure_script" >&2; return 1; }
+  case "$firmware" in uefi|bios) ;; *) printf 'ERROR: firmware mode must be uefi or bios\n' >&2; return 2 ;; esac
+  if [ "$firmware" = uefi ]; then
+    [ -n "$esp_uuid" ] || { printf 'ERROR: UEFI requires ESP UUID\n' >&2; return 2; }
+    exec python3 "$configure_script" "$target_root" "$root_uuid" "$firmware" --esp-uuid "$esp_uuid"
+  fi
+  [ -z "$esp_uuid" ] || { printf 'ERROR: BIOS mode does not accept ESP UUID\n' >&2; return 2; }
+  exec python3 "$configure_script" "$target_root" "$root_uuid" "$firmware"
+}
+
 case "${1:-help}" in
   system-check)
     [ "$#" -eq 1 ] || { usage >&2; exit 2; }
@@ -273,6 +291,10 @@ case "${1:-help}" in
   stage)
     [ "$#" -eq 3 ] || { usage >&2; exit 2; }
     stage_rootfs "$2" "$3"
+    ;;
+  configure)
+    [ "$#" -ge 4 ] && [ "$#" -le 5 ] || { usage >&2; exit 2; }
+    configure_installed_root "$2" "$3" "$4" "${5:-}"
     ;;
   plan)
     [ "$#" -ge 2 ] && [ "$#" -le 3 ] || { usage >&2; exit 2; }
