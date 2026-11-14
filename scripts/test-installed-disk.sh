@@ -14,6 +14,7 @@ for tool in sudo losetup sfdisk partprobe udevadm mkfs.ext4 mkfs.fat mount umoun
 [[ -s "$ROOTFS_TAR" ]] || die "Missing rootfs archive: $ROOTFS_TAR"
 [[ -s "$ROOTFS_TAR.sha256" ]] || die "Missing rootfs checksum: $ROOTFS_TAR.sha256"
 mkdir -p "$WORK"
+VAMPIRE_ROOTFS_STAGE="$ROOT_DIR/scripts/stage-rootfs.py" "$ROOT_DIR/rootfs-overlay/usr/bin/vinstall" validate "$ROOTFS_TAR"
 cleanup() {
   set +e
   if [[ -n "$MOUNT_ROOT" ]]; then

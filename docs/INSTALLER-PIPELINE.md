@@ -8,14 +8,15 @@ staging validator, and the installed-root configuration helper.
 ## Current supported operations
 
 1. `vinstall requirements` checks the disk, filesystem and GRUB utilities.
-2. `vinstall list`, `preflight` and `plan` inspect disks and show the proposed
+2. `vinstall validate ROOTFS.tar` verifies the adjacent checksum and inspects the archive before any disk changes.
+3. `vinstall list`, `preflight` and `plan` inspect disks and show the proposed
    UEFI or BIOS partition layout without writing to storage.
-3. `vinstall stage ROOTFS.tar EMPTY_MOUNTPOINT` validates the archive and
+4. `vinstall stage ROOTFS.tar EMPTY_MOUNTPOINT` validates the archive and
    verifies the adjacent `.sha256` sidecar, then extracts it only into an existing empty directory. The destination should
    be the root of a filesystem that an administrator has already mounted.
-4. `vinstall configure ROOTDIR ROOT_UUID bios` writes the root fstab and GRUB
+5. `vinstall configure ROOTDIR ROOT_UUID bios` writes the root fstab and GRUB
    configuration for a staged BIOS installation.
-5. For UEFI, pass the EFI System Partition FAT UUID:
+6. For UEFI, pass the EFI System Partition FAT UUID:
    `vinstall configure ROOTDIR ROOT_UUID uefi ESP_UUID`.
 
 The configuration helper requires a canonical root UUID, an EFI FAT UUID for

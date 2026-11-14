@@ -49,6 +49,7 @@ SOFTWARE AND UPDATES
 FILES AND ADMINISTRATION
   vfiles                         Open the console file manager
   vinstall requirements         Check disk installer tool availability
+  vinstall validate ROOTFS.tar  Verify checksum and inspect rootfs before disk changes
   vinstall stage ROOTFS.tar DIR  Verify checksum, then stage into an empty mounted directory
   vinstall configure ROOT UUID MODE [ESP_UUID]  Write target fstab and GRUB config
   vinstall list                  List available installation disks
