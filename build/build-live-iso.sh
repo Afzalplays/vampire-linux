@@ -23,6 +23,7 @@ install -m 0644 "$ROOT_DIR/vpm/vpm" "$OVERLAY/usr/lib/vampire/vpm"
 install -m 0644 "$ROOT_DIR/vpm/doctor.py" "$OVERLAY/usr/lib/vampire/doctor.py"
 install -m 0644 "$ROOT_DIR/vpm/update_client.py" "$OVERLAY/usr/lib/vampire/update_client.py"
 install -m 0644 "$ROOT_DIR/vpm/vpm.example.json" "$OVERLAY/etc/vpm/vpm.example.json"
+install -m 0755 "$ROOT_DIR/scripts/stage-rootfs.py" "$OVERLAY/usr/lib/vampire/stage-rootfs.py"
 chmod 0755 "$OVERLAY/usr/bin/vctl" "$OVERLAY/usr/bin/vnetwork" "$OVERLAY/usr/bin/vguard" \
   "$OVERLAY/usr/bin/vsettings" "$OVERLAY/usr/bin/vdesktop" "$OVERLAY/usr/bin/vmonitor" \
   "$OVERLAY/usr/bin/vinstall" "$OVERLAY/usr/bin/vpm" "$OVERLAY/usr/bin/vgraphical" "$OVERLAY/usr/bin/vupdate" "$OVERLAY/usr/bin/vsoftware" "$OVERLAY/usr/bin/vssh" "$OVERLAY/usr/bin/vfiles" "$OVERLAY/usr/bin/vsh" \
@@ -52,7 +53,6 @@ mkdir -p "$ISO_ROOT/install"
 install -m 0644 "$IMAGES/rootfs.tar" "$ISO_ROOT/install/rootfs.tar"
 install -m 0644 "$OUTPUT_DIR/vampire-os-0.1.0-dev-$EDITION-x86_64-rootfs.tar.sha256" "$ISO_ROOT/install/rootfs.tar.sha256"
 install -m 0644 "$ROOT_DIR/build/grub.cfg" "$ISO_ROOT/boot/grub/grub.cfg"
-install -m 0755 "$ROOT_DIR/scripts/stage-rootfs.py" "$OVERLAY/usr/lib/vampire/stage-rootfs.py"
 ISO="$OUTPUT_DIR/vampire-os-0.1.0-dev-$EDITION-x86_64.iso"
 grub-mkrescue -o "$ISO" "$ISO_ROOT"
 (cd "$OUTPUT_DIR" && sha256sum "$(basename "$ISO")" > "$(basename "$ISO").sha256")

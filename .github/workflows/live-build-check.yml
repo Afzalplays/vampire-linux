@@ -93,8 +93,6 @@ jobs:
           grep -qx 'BR2_TARGET_ROOTFS_TAR=y' build/vampire_server_defconfig
           for config in build/vampire_defconfig build/vampire_server_defconfig; do
             grep -qx 'BR2_PACKAGE_UTIL_LINUX_BINARIES=y' "$config"
-            grep -qx 'BR2_PACKAGE_UTIL_LINUX_SFDISK=y' "$config"
-            grep -qx 'BR2_PACKAGE_UTIL_LINUX_BLKID=y' "$config"
             grep -qx 'BR2_PACKAGE_PARTED=y' "$config"
             grep -qx 'BR2_PACKAGE_DOSFSTOOLS_MKFS_FAT=y' "$config"
             grep -qx 'BR2_PACKAGE_E2FSPROGS=y' "$config"

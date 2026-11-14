@@ -14,6 +14,9 @@ class BuildOutputConfigurationTests(unittest.TestCase):
     def make_fixture(self, root):
         build = root / "build"
         build.mkdir()
+        scripts = root / "scripts"
+        scripts.mkdir()
+        (scripts / "post-build-vampire.py").write_text("# test hook\\n")
         (build / "vampire-desktop-kernel.fragment").write_text("CONFIG_IWLWIFI=m\\n")
         overlay = root / 'rootfs & overlay | "special"'
         (overlay / "etc/vampire").mkdir(parents=True)
