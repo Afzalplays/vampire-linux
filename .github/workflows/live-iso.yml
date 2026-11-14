@@ -18,6 +18,11 @@ on:
       - "vpm/**"
       - "scripts/test-live-iso.sh"
       - "scripts/test-rootfs-artifact.sh"
+      - "scripts/post-build-vampire.py"
+      - "scripts/stage-rootfs.py"
+      - "scripts/test_post_build_vampire.py"
+      - "tests/test-uefi-boot-script.sh"
+      - "tests/test-installer-stage.sh"
       - "scripts/configure-build-output.py"
       - ".github/workflows/live-iso.yml"
 
