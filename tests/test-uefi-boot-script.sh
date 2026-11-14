@@ -10,6 +10,7 @@ printf 'init' > "$TMP/payload/sbin/init"
 printf 'busybox' > "$TMP/payload/bin/busybox"
 printf 'kernel' > "$TMP/payload/boot/vmlinuz"
 printf 'stage' > "$TMP/payload/usr/lib/vampire/stage-rootfs.py"
+printf 'configure' > "$TMP/payload/usr/lib/vampire/configure-installed-root.py"
 tar -cf "$TMP/rootfs.tar" -C "$TMP/payload" .
 (cd "$TMP" && sha256sum rootfs.tar > rootfs.tar.sha256)
 printf "firmware-code" > "$TMP/ovmf/OVMF_CODE_4M.fd"
