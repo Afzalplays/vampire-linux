@@ -347,8 +347,21 @@ install_system() {
   mounted_root=0
   mounted_esp=0
   cleanup_install() {
-    if [ "$mounted_esp" -eq 1 ]; then umount "$work/target/boot/efi" || echo "WARNING: could not unmount EFI partition." >&2; fi
-    if [ "$mounted_root" -eq 1 ]; then umount "$work/target" || echo "WARNING: could not unmount target root." >&2; fi
+    cleanup_failed=0
+    if [ "$mounted_esp" -eq 1 ]; then
+      if umount "$work/target/boot/efi"; then mounted_esp=0
+      else echo "ERROR: could not unmount EFI partition; preserving installer mount directory." >&2; cleanup_failed=1
+      fi
+    fi
+    if [ "$mounted_root" -eq 1 ]; then
+      if umount "$work/target"; then mounted_root=0
+      else echo "ERROR: could not unmount target root; preserving installer mount directory." >&2; cleanup_failed=1
+      fi
+    fi
+    if [ "$cleanup_failed" -eq 1 ]; then
+      echo "ERROR: installation cleanup is incomplete. Inspect mounts under $work before retrying." >&2
+      return 1
+    fi
     rm -rf "$work"
   }
   trap cleanup_install EXIT
@@ -396,9 +409,7 @@ install_system() {
   fi
   sync
   echo "Vampire OS files and GRUB were installed. Unmounting target..."
-  cleanup_install
-  mounted_root=0
-  mounted_esp=0
+  cleanup_install || return 1
   trap - EXIT HUP INT TERM
   echo "Installation stage completed. Remove the live medium and reboot."
   echo "Physical hardware and installed-disk boot still require validation."
