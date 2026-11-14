@@ -15,6 +15,7 @@ with tarfile.open(sys.argv[1], "w") as archive:
         info.size = len(data)
         archive.addfile(info, io.BytesIO(data))
 PY
+(cd "$TMP" && sha256sum rootfs.tar > rootfs.tar.sha256)
 VAMPIRE_ROOTFS_STAGE="$ROOT/scripts/stage-rootfs.py" "$ROOT/rootfs-overlay/usr/bin/vinstall" stage "$ARCHIVE" "$DEST" > "$TMP/result"
 test -s "$DEST/etc/os-release"
 test -s "$DEST/sbin/init"
