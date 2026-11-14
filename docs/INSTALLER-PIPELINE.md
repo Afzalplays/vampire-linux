@@ -11,7 +11,7 @@ staging validator, and the installed-root configuration helper.
 2. `vinstall list`, `preflight` and `plan` inspect disks and show the proposed
    UEFI or BIOS partition layout without writing to storage.
 3. `vinstall stage ROOTFS.tar EMPTY_MOUNTPOINT` validates the archive and
-   extracts it only into an existing empty directory. The destination should
+   verifies the adjacent `.sha256` sidecar, then extracts it only into an existing empty directory. The destination should
    be the root of a filesystem that an administrator has already mounted.
 4. `vinstall configure ROOTDIR ROOT_UUID bios` writes the root fstab and GRUB
    configuration for a staged BIOS installation.

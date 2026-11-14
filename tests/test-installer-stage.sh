@@ -26,6 +26,11 @@ if VAMPIRE_ROOTFS_STAGE="$ROOT/scripts/stage-rootfs.py" "$ROOT/rootfs-overlay/us
   exit 1
 fi
 test -e "$TMP/not-empty/keep"
+printf "invalid  " > "$ARCHIVE.sha256"
+if VAMPIRE_ROOTFS_STAGE="$ROOT/scripts/stage-rootfs.py" "$ROOT/rootfs-overlay/usr/bin/vinstall" stage "$ARCHIVE" "$TMP/bad-checksum" >/dev/null 2>&1; then
+  echo "vinstall stage unexpectedly accepted a bad checksum" >&2
+  exit 1
+fi
 if "$ROOT/rootfs-overlay/usr/bin/vinstall" stage "$ARCHIVE" "$TMP/missing" >/dev/null 2>&1; then
   echo "vinstall stage unexpectedly accepted a missing destination" >&2
   exit 1
