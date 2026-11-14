@@ -289,7 +289,7 @@ install_system() {
   [ -f "$archive" ] || { echo "ERROR: rootfs archive not found: $archive" >&2; return 2; }
   [ -s "$archive.sha256" ] || { echo "ERROR: rootfs checksum is missing." >&2; return 2; }
   [ -s "${VAMPIRE_KERNEL_IMAGE:-/boot/vmlinuz}" ] || { echo "ERROR: live kernel image is missing at ${VAMPIRE_KERNEL_IMAGE:-/boot/vmlinuz}." >&2; return 1; }
-  for tool in parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum mktemp; do
+  for tool in parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum mktemp install; do
     command -v "$tool" >/dev/null 2>&1 || { echo "ERROR: required installer tool is missing: $tool" >&2; return 1; }
   done
   (cd "$(dirname "$archive")" && sha256sum -c "$(basename "$archive").sha256") || { echo "ERROR: rootfs checksum verification failed." >&2; return 1; }
@@ -384,10 +384,12 @@ configure_installed_root() {
   case "$firmware" in uefi|bios) ;; *) printf 'ERROR: firmware mode must be uefi or bios\n' >&2; return 2 ;; esac
   if [ "$firmware" = uefi ]; then
     [ -n "$esp_uuid" ] || { printf 'ERROR: UEFI requires ESP UUID\n' >&2; return 2; }
-    exec python3 "$configure_script" "$target_root" "$root_uuid" "$firmware" --esp-uuid "$esp_uuid"
+    python3 "$configure_script" "$target_root" "$root_uuid" "$firmware" --esp-uuid "$esp_uuid"
+    return $?
   fi
   [ -z "$esp_uuid" ] || { printf 'ERROR: BIOS mode does not accept ESP UUID\n' >&2; return 2; }
-  exec python3 "$configure_script" "$target_root" "$root_uuid" "$firmware"
+  python3 "$configure_script" "$target_root" "$root_uuid" "$firmware"
+  return $?
 }
 
 case "${1:-help}" in
