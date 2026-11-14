@@ -86,10 +86,17 @@ def stage(archive, destination):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("archive", help="Buildroot rootfs.tar")
-    parser.add_argument("destination", help="empty staging directory")
+    parser.add_argument("--validate-only", action="store_true", help="validate archive without extracting it")
+    parser.add_argument("destination", nargs="?", help="empty staging directory")
     args = parser.parse_args()
     try:
         count = validate(args.archive)
+        if args.validate_only:
+            print(f"Validated {count} rootfs entries in {args.archive}")
+            print("No files were extracted and no disk operations were performed.")
+            return 0
+        if not args.destination:
+            parser.error("destination is required unless --validate-only is used")
         stage(args.archive, args.destination)
     except (OSError, tarfile.TarError, ValueError) as exc:
         print(f"vrootfs-stage: error: {exc}", file=sys.stderr)
