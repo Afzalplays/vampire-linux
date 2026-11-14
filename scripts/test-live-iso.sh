@@ -23,9 +23,9 @@ ROOTFS_SUM="$ROOTFS_TAR.sha256"
 (cd "$(dirname "$ROOTFS_TAR")" && sha256sum -c "$(basename "$ROOTFS_SUM")") || die "installer rootfs checksum failed"
 rootfs_listing="$(tar -tf "$ROOTFS_TAR")" || die "could not list installer rootfs archive"
 for required in etc/os-release sbin/init bin/busybox; do
-  grep -Eq "(^|/)\${required}$" <<<"$rootfs_listing" || die "installer rootfs is missing required path: $required"
+  grep -Eq "(^|/)${required}$" <<<"$rootfs_listing" || die "installer rootfs is missing required path: $required"
 done
-printf 'PASS: %s installer rootfs archive and checksum are valid\\n' "$EDITION"
+printf 'PASS: %s installer rootfs archive and checksum are valid\n' "$EDITION"
 mkdir -p "$LOG_DIR"
 
 # Verify the release metadata embedded at ISO root matches this build target.
