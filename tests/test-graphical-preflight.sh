@@ -18,6 +18,7 @@ chmod +x "$TMP/bin/weston" "$TMP/bin/foot"
 # A regular file is intentionally not accepted as a DRM character device.
 if VAMPIRE_WESTON_BASE="$TMP/etc/xdg/weston/weston.ini" \
    VAMPIRE_FOOT_BASE="$TMP/etc/xdg/foot/foot.ini" \
+   VAMPIRE_DRM_DIR="$TMP/dev/dri" \\
    PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vgraphical" --check >/dev/null 2>&1; then
   echo "vgraphical accepted a missing DRM device" >&2
   exit 1
