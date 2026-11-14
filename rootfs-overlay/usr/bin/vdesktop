@@ -48,6 +48,7 @@ network_menu() {
 installer_menu() {
   printf "\nVampire Installer — read-only storage checks\n"
   printf "No partitioning or formatting is available in this build.\n\n"
+  run_tool "$INSTALLER" requirements
   run_tool "$INSTALLER" system-check
   printf "\nDetected storage devices:\n"
   run_tool "$INSTALLER" list

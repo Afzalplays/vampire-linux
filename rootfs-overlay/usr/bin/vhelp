@@ -48,6 +48,7 @@ SOFTWARE AND UPDATES
 
 FILES AND ADMINISTRATION
   vfiles                         Open the console file manager
+  vinstall requirements         Check disk installer tool availability
   vinstall list                  List available installation disks
   vinstall preflight /dev/DISK   Check a target without writing to it
   vinstall plan /dev/DISK [uefi|bios]  Preview a read-only disk layout
