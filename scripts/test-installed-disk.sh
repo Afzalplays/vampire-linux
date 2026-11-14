@@ -61,6 +61,7 @@ run_boot() {
     rootpart="${loop}p2"
     sudo partprobe "$loop"
     sudo udevadm settle
+    "$ROOT_DIR/rootfs-overlay/usr/bin/vinstall" preflight "$loop"
     sudo mkfs.fat -F 32 "$esppart"
     sudo mkfs.ext4 -F "$rootpart"
   fi
