@@ -3,7 +3,14 @@ set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
-mkdir -p "$TMP/bin" "$TMP/ovmf" "$TMP/logs"
+mkdir -p "$TMP/bin" "$TMP/ovmf" "$TMP/logs" "$TMP/payload/etc" "$TMP/payload/sbin" "$TMP/payload/bin" "$TMP/payload/boot" "$TMP/payload/usr/lib/vampire"
+printf 'NAME="Vampire OS"\\n' > "$TMP/payload/etc/os-release"
+printf 'init' > "$TMP/payload/sbin/init"
+printf 'busybox' > "$TMP/payload/bin/busybox"
+printf 'kernel' > "$TMP/payload/boot/vmlinuz"
+printf 'stage' > "$TMP/payload/usr/lib/vampire/stage-rootfs.py"
+tar -cf "$TMP/rootfs.tar" -C "$TMP/payload" .
+(cd "$TMP" && sha256sum rootfs.tar > rootfs.tar.sha256)
 printf "firmware-code" > "$TMP/ovmf/OVMF_CODE_4M.fd"
 printf "firmware-vars" > "$TMP/ovmf/OVMF_VARS_4M.fd"
 printf "test iso placeholder\n" > "$TMP/live.iso"
