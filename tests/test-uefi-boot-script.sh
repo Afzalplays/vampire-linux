@@ -53,6 +53,12 @@ case "$extract_path" in
   /boot/initramfs.cpio.gz)
     printf 'fake initramfs payload\n' > "$destination"
     ;;
+  /install/rootfs.tar)
+    cp "$TMP/rootfs.tar" "$destination"
+    ;;
+  /install/rootfs.tar.sha256)
+    cp "$TMP/rootfs.tar.sha256" "$destination"
+    ;;
   *) echo "unexpected xorriso extraction: $extract_path" >&2; exit 1 ;;
 esac
 FAKE_XORRISO
