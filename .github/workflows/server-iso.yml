@@ -15,7 +15,7 @@ on:
       - "fetch/vfetch"
       - "vpm/**"
       - "scripts/test-live-iso.sh"
-      - "scripts/test-rootfs-artifact.sh"
+      - "scripts/test-rootfs-artifact.sh"\n      - "scripts/test-installed-disk.sh"
       - "scripts/post-build-vampire.py"
       - "scripts/stage-rootfs.py"
       - "scripts/test_post_build_vampire.py"
@@ -37,7 +37,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            bc bison build-essential cpio file flex g++ gcc git \
+            bc bison build-essential cpio dosfstools e2fsprogs file flex g++ gcc git parted util-linux \
             grub-common grub-pc-bin grub-efi-amd64-bin libelf-dev \
             libncurses-dev libssl-dev mtools patch perl python3 rsync \
             xorriso unzip wget xz-utils qemu-system-x86 ovmf
