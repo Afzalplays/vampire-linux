@@ -36,11 +36,17 @@ def main():
             info.mode = 0o4755
             import io
             tar.addfile(info, io.BytesIO(b"test"))
+            link = tarfile.TarInfo("etc/mtab")
+            link.type = tarfile.SYMTYPE
+            link.linkname = "/proc/mounts"
+            tar.addfile(link)
         dest = root / "stage"
         result = run(good, dest)
         assert result.returncode == 0, result.stderr
         assert (dest / "etc/os-release").is_file()
         assert stat.S_IMODE((dest / "usr/bin/vampire-test-suid").stat().st_mode) == 0o4755
+        assert (dest / "etc/mtab").is_symlink()
+        assert pathlib.Path(dest / "etc/mtab").readlink().as_posix() == "../proc/mounts"
         assert "No disk partitioning" in result.stdout
 
         nonempty = root / "not-empty"

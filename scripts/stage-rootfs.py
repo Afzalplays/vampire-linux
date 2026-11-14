@@ -19,27 +19,44 @@ def safe_member_name(name):
     return not path.is_absolute() and all(part not in ("..", "") for part in path.parts)
 
 
+def sanitize_member(member):
+    if not safe_member_name(member.name):
+        raise ValueError(f"unsafe archive path: {member.name}")
+    if member.isdev() or member.isfifo():
+        raise ValueError(f"unsupported special file: {member.name}")
+    if member.issym():
+        target = pathlib.PurePosixPath(member.linkname)
+        if target.is_absolute():
+            # Absolute symlinks are normal in Linux rootfs archives. Convert
+            # them to equivalent relative links so extraction never writes
+            # through a link into the host filesystem.
+            if ".." in target.parts:
+                raise ValueError(f"unsafe absolute link target: {member.name}")
+            root_target = pathlib.PurePosixPath(*target.parts[1:])
+            member.linkname = __import__("posixpath").relpath(
+                root_target.as_posix() or ".", pathlib.PurePosixPath(member.name).parent.as_posix()
+            )
+        combined = pathlib.PurePosixPath(member.name).parent / pathlib.PurePosixPath(member.linkname)
+        depth = 0
+        for part in combined.parts:
+            if part == "..":
+                depth -= 1
+            elif part not in ("", "."):
+                depth += 1
+            if depth < 0:
+                raise ValueError(f"link escapes rootfs: {member.name}")
+    elif member.islnk():
+        target = pathlib.PurePosixPath(member.linkname)
+        if target.is_absolute() or not safe_member_name(member.linkname):
+            raise ValueError(f"unsafe hard-link target: {member.name}")
+    return member
+
+
 def validate(archive):
     with tarfile.open(archive, "r:*") as tar:
         names = set()
         for member in tar.getmembers():
-            if not safe_member_name(member.name):
-                raise ValueError(f"unsafe archive path: {member.name}")
-            if member.isdev() or member.isfifo():
-                raise ValueError(f"unsupported special file: {member.name}")
-            if member.issym() or member.islnk():
-                target = pathlib.PurePosixPath(member.linkname)
-                if target.is_absolute():
-                    raise ValueError(f"absolute link target: {member.name}")
-                combined = (pathlib.PurePosixPath(member.name).parent / target)
-                depth = 0
-                for part in combined.parts:
-                    if part == "..":
-                        depth -= 1
-                    elif part not in ("", "."):
-                        depth += 1
-                    if depth < 0:
-                        raise ValueError(f"link escapes rootfs: {member.name}")
+            sanitize_member(member)
             names.add(pathlib.PurePosixPath(member.name).as_posix().lstrip("./"))
         missing = [name for name in REQUIRED if name not in names]
         if missing:
@@ -59,7 +76,7 @@ def stage(archive, destination):
         # Preserve OS ownership and mode bits (including setuid) after explicit
         # path, file-type and link-target validation above. The "data" filter
         # deliberately strips these metadata bits and would break an OS rootfs.
-        tar.extractall(destination, filter=lambda member, _path: member)
+        tar.extractall(destination, filter=lambda member, _path: sanitize_member(member))
 
 
 def main():
