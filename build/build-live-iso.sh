@@ -42,6 +42,7 @@ IMAGES="$BUILD_OUTPUT/images"
 [[ -s "$IMAGES/rootfs.cpio.gz" ]] || die "Buildroot did not produce rootfs.cpio.gz"
 [[ -s "$IMAGES/rootfs.tar" ]] || die "Buildroot did not produce rootfs.tar (installer staging payload)"
 install -m 0644 "$IMAGES/rootfs.tar" "$OUTPUT_DIR/vampire-os-0.1.0-dev-$EDITION-x86_64-rootfs.tar"
+(cd "$OUTPUT_DIR" && sha256sum "vampire-os-0.1.0-dev-$EDITION-x86_64-rootfs.tar" > "vampire-os-0.1.0-dev-$EDITION-x86_64-rootfs.tar.sha256")
 rm -rf "$ISO_ROOT"
 mkdir -p "$ISO_ROOT/boot/grub"
 install -m 0644 "$IMAGES/bzImage" "$ISO_ROOT/boot/vmlinuz"

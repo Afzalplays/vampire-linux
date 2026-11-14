@@ -51,5 +51,7 @@ jobs:
           path: |
             out/vampire-os-0.1.0-dev-server-x86_64.iso
             out/vampire-os-0.1.0-dev-server-x86_64.iso.sha256
+            out/vampire-os-0.1.0-dev-server-x86_64-rootfs.tar
+            out/vampire-os-0.1.0-dev-server-x86_64-rootfs.tar.sha256
           if-no-files-found: error
           retention-days: 14
