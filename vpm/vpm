@@ -197,7 +197,7 @@ def safe_extract(archive, destination):
             fail("archive expanded size exceeds safety limit")
         seen = set()
         for member in members:
-            if not member.name or member.name.startswith("/") or "\\\\" in member.name:
+            if not member.name or member.name.startswith("/") or "\\" in member.name:
                 fail(f"unsafe archive path: {member.name!r}")
             target = (destination / member.name).resolve()
             if target != destination and destination not in target.parents:
