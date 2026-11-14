@@ -87,6 +87,27 @@ class ArchiveSafetyTests(unittest.TestCase):
             vpm.safe_extract(archive, root)
             self.assertEqual((root / "usr/share/hello.txt").read_bytes(), b"hello vampire")
 
+    def test_partial_extraction_rolls_back_created_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = pathlib.Path(tmp)
+            archive = base / "partial.tar.gz"
+            root = base / "root"
+            root.mkdir()
+            (root / "already.txt").write_text("keep existing")
+            with tarfile.open(archive, "w:gz") as tf:
+                first = b"new file"
+                info = tarfile.TarInfo("new.txt")
+                info.size = len(first)
+                tf.addfile(info, io.BytesIO(first))
+                second = b"must not overwrite"
+                info = tarfile.TarInfo("already.txt")
+                info.size = len(second)
+                tf.addfile(info, io.BytesIO(second))
+            with self.assertRaises(FileExistsError):
+                vpm.safe_extract(archive, root)
+            self.assertFalse((root / "new.txt").exists())
+            self.assertEqual((root / "already.txt").read_text(), "keep existing")
+
     def test_reject_parent_traversal(self):
         with tempfile.TemporaryDirectory() as tmp:
             archive = pathlib.Path(tmp) / "bad.tar.gz"
