@@ -47,15 +47,15 @@ case "${1:-}" in
   *) error 'usage: vgraphical [--check]'; exit 2 ;;
 esac
 
+if command -v modprobe >/dev/null 2>&1; then
+  # Probe common in-tree DRM modules before checking for a DRM card.
+  for module in i915 amdgpu nouveau virtio_gpu; do modprobe "$module" 2>/dev/null || true; done
+fi
 check
 [ "$(id -u)" -eq 0 ] || {
   error "this early preview requires root/seat access; non-root sessions are not implemented yet."
   exit 1
 }
-if command -v modprobe >/dev/null 2>&1; then
-  # Probe common in-tree DRM modules; unavailable modules are harmless.
-  for module in i915 amdgpu nouveau virtio_gpu; do modprobe "$module" 2>/dev/null || true; done
-fi
 export XDG_RUNTIME_DIR=/run/user/0
 export XDG_CONFIG_HOME=/run/vampire
 mkdir -p "$XDG_RUNTIME_DIR" "$XDG_CONFIG_HOME"
