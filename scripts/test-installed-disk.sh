@@ -51,14 +51,14 @@ run_boot() {
   loop="$(sudo losetup --find --show --partscan "$image")"
   LOOPS+=("$loop")
   if [[ "$mode" == "bios" ]]; then
-    printf 'label: gpt\n, size=2M, type=21686148-6449-6e6f-744e-656564454649\n, type=linux\n' | sudo sfdisk "$loop"
+    printf 'label: gpt\nsize=2M, type=21686148-6449-6e6f-744e-656564454649\ntype=linux\n' | sudo sfdisk "$loop"
     rootpart="${loop}p2"
     sudo partprobe "$loop"
     sudo udevadm settle
     "$ROOT_DIR/rootfs-overlay/usr/bin/vinstall" preflight "$loop"
     sudo mkfs.ext4 -F "$rootpart"
   else
-    printf 'label: gpt\n, size=512M, type=U\n, type=linux\n' | sudo sfdisk "$loop"
+    printf 'label: gpt\nsize=512M, type=U\ntype=linux\n' | sudo sfdisk "$loop"
     esppart="${loop}p1"
     rootpart="${loop}p2"
     sudo partprobe "$loop"
