@@ -42,7 +42,8 @@ find_ovmf() {
 }
 
 run_boot() {
-  local mode="$1" image="$WORK/$mode.img" loop rootpart esppart root_uuid esp_uuid
+  local mode="$1" image loop rootpart esppart root_uuid esp_uuid
+  image="$WORK/$mode.img"
   local log="$WORK/$mode.serial.log" stderr="$WORK/$mode.qemu.stderr" status
   MOUNT_ROOT="$WORK/mnt-$mode"
   mkdir -p "$MOUNT_ROOT"
