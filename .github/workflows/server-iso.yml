@@ -23,6 +23,8 @@ on:
       - "tests/test-uefi-boot-script.sh"
       - "tests/test-installer-stage.sh"
       - "scripts/configure-build-output.py"
+      - "scripts/configure-installed-root.py"
+      - "scripts/test_configure_installed_root.py"
       - ".github/workflows/server-iso.yml"
 
 permissions:
