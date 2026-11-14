@@ -1,5 +1,5 @@
 #!/bin/sh
-# Vampire OS installer discovery/preflight. Intentionally read-only.
+# Vampire OS installer: guarded disk deployment plus read-only preflight.
 set -eu
 SYS_BLOCK=${VAMPIRE_SYS_BLOCK:-/sys/block}
 DEV_ROOT=${VAMPIRE_DEV_ROOT:-/dev}
@@ -15,14 +15,15 @@ Usage:
   vinstall list
   vinstall preflight /dev/DEVICE
   vinstall plan /dev/DEVICE [uefi|bios]
+  vinstall install ROOTFS.tar /dev/DEVICE [uefi|bios]
   vinstall requirements
   vinstall validate ROOTFS.tar
   vinstall stage ROOTFS.tar EMPTY_MOUNTPOINT
   vinstall configure ROOTDIR ROOT_UUID uefi|bios [ESP_UUID]
   vinstall help
-This developer build does NOT partition, format, mount, or install GRUB.
-Stage/configure only write inside an existing mounted target directory.
-The plan command only prints a proposed layout; it never executes it.
+install is destructive: it erases the selected whole disk after a typed confirmation.
+It requires a verified rootfs archive, live kernel at /boot/vmlinuz and root access.
+The plan command is read-only. Stage/configure only write inside an existing target.
 EOF
 }
 disk_name() {
@@ -56,7 +57,7 @@ resolve_sys_block() {
 installer_requirements() {
   printf 'Vampire OS installer tool readiness (diagnostic only)\n'
   missing=0
-  for tool in sfdisk parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum; do
+  for tool in parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum readlink mktemp; do
     if command -v "$tool" >/dev/null 2>&1; then
       printf 'AVAILABLE  %s\n' "$tool"
     else
@@ -244,7 +245,7 @@ installation_plan() {
     printf '2) Remaining space  Linux filesystem (ext4), mount at /\n'
   fi
   printf '\nNo partition table was written. No filesystem was created. No data was changed.\n'
-  printf 'This is a proposal only; installer execution and user confirmation are not implemented.\n'
+  printf 'This is a read-only proposal. No partition table or filesystem was changed.\n'
 }
 
 validate_rootfs() {
@@ -272,6 +273,104 @@ stage_rootfs() {
   stage_script=${VAMPIRE_ROOTFS_STAGE:-/usr/lib/vampire/stage-rootfs.py}
   [ -r "$stage_script" ] || { printf 'ERROR: rootfs staging validator missing: %s\n' "$stage_script" >&2; return 1; }
   exec python3 "$stage_script" "$archive" "$destination"
+}
+install_system() {
+  archive=$1
+  device=$2
+  mode=${3:-}
+  [ "$(id -u)" -eq 0 ] || { echo "ERROR: installation requires root privileges." >&2; return 1; }
+  case "$mode" in
+    "") if [ -d /sys/firmware/efi ]; then mode=uefi; else mode=bios; fi ;;
+    uefi|bios) ;;
+    *) echo "ERROR: firmware mode must be uefi or bios." >&2; return 2 ;;
+  esac
+
+  # Validate every input and prerequisite before the first destructive command.
+  [ -f "$archive" ] || { echo "ERROR: rootfs archive not found: $archive" >&2; return 2; }
+  [ -s "$archive.sha256" ] || { echo "ERROR: rootfs checksum is missing." >&2; return 2; }
+  [ -s "${VAMPIRE_KERNEL_IMAGE:-/boot/vmlinuz}" ] || { echo "ERROR: live kernel image is missing at ${VAMPIRE_KERNEL_IMAGE:-/boot/vmlinuz}." >&2; return 1; }
+  for tool in parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum mktemp; do
+    command -v "$tool" >/dev/null 2>&1 || { echo "ERROR: required installer tool is missing: $tool" >&2; return 1; }
+  done
+  (cd "$(dirname "$archive")" && sha256sum -c "$(basename "$archive").sha256") || { echo "ERROR: rootfs checksum verification failed." >&2; return 1; }
+  stage_script=${VAMPIRE_ROOTFS_STAGE:-/usr/lib/vampire/stage-rootfs.py}
+  [ -r "$stage_script" ] || { echo "ERROR: rootfs staging validator missing: $stage_script" >&2; return 1; }
+  python3 "$stage_script" --validate-only "$archive" || return 1
+  preflight "$device" || return $?
+
+  printf '\nDESTRUCTIVE INSTALLATION REVIEW\n'
+  printf 'Disk: %s\nFirmware: %s\nRootfs: %s\n' "$device" "$mode" "$archive"
+  if [ "$mode" = uefi ]; then
+    echo "Layout: GPT, 512 MiB EFI System Partition, remaining space ext4 root."
+  else
+    echo "Layout: GPT, 2 MiB BIOS boot partition, remaining space ext4 root."
+  fi
+  printf 'WARNING: ALL DATA AND PARTITIONS ON %s WILL BE PERMANENTLY ERASED.\n' "$device"
+  printf 'Type exactly ERASE %s to continue: ' "$device"
+  IFS= read -r confirmation || return 1
+  [ "$confirmation" = "ERASE $device" ] || { echo "Installation cancelled; disk was not changed."; return 1; }
+
+  name=$(disk_name "$device") || return 2
+  case "$name" in *[0-9]) part1="${device}p1"; part2="${device}p2" ;;
+    *) part1="${device}1"; part2="${device}2" ;;
+  esac
+  work=$(mktemp -d /tmp/vampire-install.XXXXXX) || return 1
+  mounted_root=0
+  mounted_esp=0
+  cleanup_install() {
+    if [ "$mounted_esp" -eq 1 ]; then umount "$work/target/boot/efi" || echo "WARNING: could not unmount EFI partition." >&2; fi
+    if [ "$mounted_root" -eq 1 ]; then umount "$work/target" || echo "WARNING: could not unmount target root." >&2; fi
+    rm -rf "$work"
+  }
+  trap cleanup_install EXIT HUP INT TERM
+
+  echo "Writing GPT partition table to $device ..."
+  parted -s "$device" mklabel gpt
+  if [ "$mode" = uefi ]; then
+    parted -s "$device" mkpart ESP fat32 1MiB 513MiB
+    parted -s "$device" set 1 esp on
+    parted -s "$device" mkpart primary ext4 513MiB 100%
+  else
+    parted -s "$device" mkpart BIOS 1MiB 3MiB
+    parted -s "$device" set 1 bios_grub on
+    parted -s "$device" mkpart primary ext4 3MiB 100%
+  fi
+  partprobe "$device"
+  udevadm settle
+  [ -b "$part2" ] || { echo "ERROR: root partition did not appear: $part2" >&2; return 1; }
+  [ "$mode" != uefi ] || [ -b "$part1" ] || { echo "ERROR: EFI partition did not appear: $part1" >&2; return 1; }
+
+  if [ "$mode" = uefi ]; then mkfs.fat -F 32 -n VAMPIRE_EFI "$part1"; fi
+  mkfs.ext4 -F -L VAMPIRE_ROOT "$part2"
+  mkdir -p "$work/target"
+  mount "$part2" "$work/target"
+  mounted_root=1
+  python3 "$stage_script" "$archive" "$work/target"
+  mkdir -p "$work/target/boot"
+  install -m 0644 "${VAMPIRE_KERNEL_IMAGE:-/boot/vmlinuz}" "$work/target/boot/vmlinuz"
+  root_uuid=$(blkid -s UUID -o value "$part2")
+  [ -n "$root_uuid" ] || { echo "ERROR: unable to read root filesystem UUID." >&2; return 1; }
+
+  if [ "$mode" = uefi ]; then
+    mkdir -p "$work/target/boot/efi"
+    mount "$part1" "$work/target/boot/efi"
+    mounted_esp=1
+    esp_uuid=$(blkid -s UUID -o value "$part1")
+    [ -n "$esp_uuid" ] || { echo "ERROR: unable to read EFI filesystem UUID." >&2; return 1; }
+    configure_installed_root "$work/target" "$root_uuid" uefi "$esp_uuid"
+    grub-install --target=x86_64-efi --efi-directory="$work/target/boot/efi" --boot-directory="$work/target/boot" --bootloader-id=VampireOS --removable --no-nvram "$device"
+  else
+    configure_installed_root "$work/target" "$root_uuid" bios
+    grub-install --target=i386-pc --boot-directory="$work/target/boot" "$device"
+  fi
+  sync
+  echo "Vampire OS files and GRUB were installed. Unmounting target..."
+  cleanup_install
+  mounted_root=0
+  mounted_esp=0
+  trap - EXIT HUP INT TERM
+  echo "Installation stage completed. Remove the live medium and reboot."
+  echo "Physical hardware and installed-disk boot still require validation."
 }
 configure_installed_root() {
   [ "$(id -u)" -eq 0 ] || { printf "ERROR: root privileges are required to configure an installed system\\n" >&2; return 1; }
@@ -323,6 +422,10 @@ case "${1:-help}" in
   plan)
     [ "$#" -ge 2 ] && [ "$#" -le 3 ] || { usage >&2; exit 2; }
     installation_plan "$2" "${3:-}"
+    ;;
+  install)
+    [ "$#" -ge 3 ] && [ "$#" -le 4 ] || { usage >&2; exit 2; }
+    install_system "$2" "$3" "${4:-}"
     ;;
   help|-h|--help)
     usage
