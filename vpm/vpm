@@ -251,6 +251,38 @@ def safe_extract(archive, destination):
             raise
     return [path.relative_to(destination).as_posix() for path in written]
 
+def rollback_extracted(destination, manifests):
+    """Remove only regular files created by earlier package extraction steps."""
+    root = pathlib.Path(destination).resolve()
+    failures = []
+    for files in reversed(manifests):
+        for relative in reversed(files):
+            if (not isinstance(relative, str) or not relative or relative.startswith("/")
+                    or "\\" in relative):
+                failures.append(str(relative))
+                continue
+            parts = pathlib.PurePosixPath(relative).parts
+            if not parts or any(part in ("", ".", "..") for part in parts):
+                failures.append(relative)
+                continue
+            target = root
+            safe = True
+            for part in parts:
+                target = target / part
+                if target.is_symlink():
+                    safe = False
+                    break
+            if not safe:
+                failures.append(relative)
+                continue
+            try:
+                if target.is_file():
+                    target.unlink()
+            except OSError:
+                failures.append(relative)
+    return failures
+
+
 def command_install(args):
     if os.geteuid() != 0 and ROOT == pathlib.Path("/"):
         fail("installation to / requires root; use sudo vpm install PACKAGE")
@@ -294,9 +326,18 @@ def command_install(args):
         downloads.append((pkg, archive))
     if ROOT.exists() is False:
         fail(f"target root does not exist: {ROOT}")
-    for pkg, archive in downloads:
-        installed_files = safe_extract(archive, ROOT)
-        db[pkg["name"]] = {"version": pkg["version"], "files": installed_files}
+    extracted_manifests = []
+    try:
+        for pkg, archive in downloads:
+            installed_files = safe_extract(archive, ROOT)
+            extracted_manifests.append(installed_files)
+            db[pkg["name"]] = {"version": pkg["version"], "files": installed_files}
+    except BaseException:
+        rollback_failures = rollback_extracted(ROOT, extracted_manifests)
+        if rollback_failures:
+            print("vpm: warning: rollback could not remove: " +
+                  ", ".join(rollback_failures), file=sys.stderr)
+        raise
     DB.parent.mkdir(parents=True, exist_ok=True)
     tmp = DB.with_suffix(".tmp")
     tmp.write_text(json.dumps(db, indent=2) + "\n")
