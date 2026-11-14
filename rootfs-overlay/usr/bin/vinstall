@@ -9,7 +9,7 @@ SWAPS_FILE=${VAMPIRE_SWAPS_FILE:-/proc/swaps}
 MIN_SECTORS=16777216 # 8 GiB using 512-byte sectors
 usage() {
   cat <<'EOF'
-Vampire Installer — read-only readiness and storage checks
+Vampire Installer — preflight, rootfs staging and target configuration
 Usage:
   vinstall system-check
   vinstall list
@@ -20,7 +20,8 @@ Usage:
   vinstall stage ROOTFS.tar EMPTY_MOUNTPOINT
   vinstall configure ROOTDIR ROOT_UUID uefi|bios [ESP_UUID]
   vinstall help
-This developer build does NOT partition, format, mount, or write to disks.
+This developer build does NOT partition, format, mount, or install GRUB.
+Stage/configure only write inside an existing mounted target directory.
 The plan command only prints a proposed layout; it never executes it.
 EOF
 }
