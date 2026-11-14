@@ -3,6 +3,7 @@ set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
+export TMP
 mkdir -p "$TMP/bin" "$TMP/ovmf" "$TMP/logs" "$TMP/payload/etc" "$TMP/payload/sbin" "$TMP/payload/bin" "$TMP/payload/boot" "$TMP/payload/usr/lib/vampire"
 printf 'NAME="Vampire OS"\\n' > "$TMP/payload/etc/os-release"
 printf 'init' > "$TMP/payload/sbin/init"
