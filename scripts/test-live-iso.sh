@@ -42,9 +42,9 @@ xorriso -osirrox on -indev "$ISO" -extract /install/rootfs.tar.sha256 "$install_
 (cd "$install_tmp" && sha256sum -c rootfs.tar.sha256) || die "embedded installer rootfs checksum failed"
 embedded_listing="$(tar -tf "$install_tmp/rootfs.tar")"
 for required in etc/os-release sbin/init bin/busybox boot/vmlinuz usr/lib/vampire/stage-rootfs.py; do
-  grep -Eq "(^|/)\${required}$" <<<"$embedded_listing" || die "embedded rootfs is missing required path: $required"
+  grep -Eq "(^|/)${required}$" <<<"$embedded_listing" || die "embedded rootfs is missing required path: $required"
 done
-printf 'PASS: %s ISO contains a checksummed installer rootfs and kernel\\n' "$EDITION"
+printf 'PASS: %s ISO contains a checksummed installer rootfs and kernel\n' "$EDITION"
 rm -rf "$install_tmp"
 trap - EXIT
 
