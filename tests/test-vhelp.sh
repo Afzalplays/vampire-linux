@@ -8,6 +8,7 @@ done
 grep -q 'read-only preflight' <<< "$OUT"
 grep -q 'vinstall plan /dev/DISK' <<< "$OUT"
 grep -q 'vinstall requirements' <<< "$OUT"
+grep -q 'vinstall stage ROOTFS.tar DIR' <<< "$OUT"
 grep -q 'requirements' "$ROOT/rootfs-overlay/usr/bin/vdesktop"
 grep -q 'read-only disk layout' <<< "$OUT"
 grep -q 'transactional rollback' <<< "$OUT"

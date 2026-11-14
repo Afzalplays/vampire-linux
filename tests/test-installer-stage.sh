@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
+ARCHIVE="$TMP/rootfs.tar"
+DEST="$TMP/mounted-root"
+mkdir -p "$DEST"
+python3 - "$ARCHIVE" <<'PY'
+import io, sys, tarfile
+with tarfile.open(sys.argv[1], "w") as archive:
+    for name, data in (("etc/os-release", b"NAME=Vampire OS\\n"),
+                       ("sbin/init", b"init"), ("bin/busybox", b"busybox")):
+        info = tarfile.TarInfo(name)
+        info.size = len(data)
+        archive.addfile(info, io.BytesIO(data))
+PY
+VAMPIRE_ROOTFS_STAGE="$ROOT/scripts/stage-rootfs.py" "$ROOT/rootfs-overlay/usr/bin/vinstall" stage "$ARCHIVE" "$DEST" > "$TMP/result"
+test -s "$DEST/etc/os-release"
+test -s "$DEST/sbin/init"
+grep -q "No disk partitioning" "$TMP/result"
+mkdir -p "$TMP/not-empty"
+touch "$TMP/not-empty/keep"
+if VAMPIRE_ROOTFS_STAGE="$ROOT/scripts/stage-rootfs.py" "$ROOT/rootfs-overlay/usr/bin/vinstall" stage "$ARCHIVE" "$TMP/not-empty" >/dev/null 2>&1; then
+  echo "vinstall stage unexpectedly accepted a non-empty destination" >&2
+  exit 1
+fi
+test -e "$TMP/not-empty/keep"
+if "$ROOT/rootfs-overlay/usr/bin/vinstall" stage "$ARCHIVE" "$TMP/missing" >/dev/null 2>&1; then
+  echo "vinstall stage unexpectedly accepted a missing destination" >&2
+  exit 1
+fi
+echo "vinstall rootfs stage command tests: PASS"

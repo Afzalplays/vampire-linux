@@ -16,6 +16,7 @@ Usage:
   vinstall preflight /dev/DEVICE
   vinstall plan /dev/DEVICE [uefi|bios]
   vinstall requirements
+  vinstall stage ROOTFS.tar EMPTY_MOUNTPOINT
   vinstall help
 This developer build does NOT partition, format, mount, or write to disks.
 The plan command only prints a proposed layout; it never executes it.
@@ -243,6 +244,15 @@ installation_plan() {
   printf 'This is a proposal only; installer execution and user confirmation are not implemented.\n'
 }
 
+stage_rootfs() {
+  archive=$1
+  destination=$2
+  [ -f "$archive" ] || { printf 'ERROR: rootfs archive not found: %s\n' "$archive" >&2; return 2; }
+  [ -d "$destination" ] || { printf 'ERROR: destination must already be a mounted, empty directory: %s\n' "$destination" >&2; return 2; }
+  stage_script=${VAMPIRE_ROOTFS_STAGE:-/usr/lib/vampire/stage-rootfs.py}
+  [ -r "$stage_script" ] || { printf 'ERROR: rootfs staging validator missing: %s\n' "$stage_script" >&2; return 1; }
+  exec python3 "$stage_script" "$archive" "$destination"
+}
 case "${1:-help}" in
   system-check)
     [ "$#" -eq 1 ] || { usage >&2; exit 2; }
@@ -259,6 +269,10 @@ case "${1:-help}" in
   requirements)
     [ "$#" -eq 1 ] || { usage >&2; exit 2; }
     installer_requirements
+    ;;
+  stage)
+    [ "$#" -eq 3 ] || { usage >&2; exit 2; }
+    stage_rootfs "$2" "$3"
     ;;
   plan)
     [ "$#" -ge 2 ] && [ "$#" -le 3 ] || { usage >&2; exit 2; }
