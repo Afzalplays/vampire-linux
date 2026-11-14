@@ -5,10 +5,12 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -57,11 +59,11 @@ def build_index(repository: str, architecture: str, metadata_paths: list[Path], 
         raise ValueError("invalid repository name")
     if architecture not in ("x86_64", "aarch64", "any"):
         raise ValueError("unsupported repository architecture")
-    if output.exists() and output.is_symlink():
+    if output.is_symlink():
         raise ValueError("repository output directory must not be a symlink")
     output.mkdir(parents=True, exist_ok=True)
     packages_dir = output / "packages"
-    if packages_dir.exists() and packages_dir.is_symlink():
+    if packages_dir.is_symlink():
         raise ValueError("repository packages directory must not be a symlink")
     packages_dir.mkdir(parents=True, exist_ok=True)
     packages: list[dict[str, Any]] = []
@@ -77,7 +79,7 @@ def build_index(repository: str, architecture: str, metadata_paths: list[Path], 
         source = Path(item["archive"]).resolve(strict=True)
         filename = f'{item["name"]}-{item["version"]}.tar.gz'
         destination = packages_dir / filename
-        if destination.exists() and destination.is_symlink():
+        if destination.is_symlink():
             raise ValueError(f"{key}: refusing to overwrite a symlinked package destination")
         if source != destination.resolve(strict=False):
             fd, temporary_name = tempfile.mkstemp(prefix=".vpm-package-", dir=packages_dir)
@@ -101,9 +103,19 @@ def build_index(repository: str, architecture: str, metadata_paths: list[Path], 
         "architecture": architecture,
         "packages": packages,
     }
-    output.mkdir(parents=True, exist_ok=True)
     index_path = output / "index.json"
-    index_path.write_text(json.dumps(index, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    if index_path.is_symlink():
+        raise ValueError("refusing to overwrite a symlinked repository index")
+    fd, temporary_name = tempfile.mkstemp(prefix=".vpm-index-", dir=output, text=True)
+    os.close(fd)
+    temporary_index = Path(temporary_name)
+    try:
+        temporary_index.write_text(
+            json.dumps(index, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        os.replace(temporary_index, index_path)
+    finally:
+        temporary_index.unlink(missing_ok=True)
     return index
 
 
