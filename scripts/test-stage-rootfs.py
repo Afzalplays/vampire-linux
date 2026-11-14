@@ -63,6 +63,21 @@ def main():
         assert result.returncode != 0
         assert not (root / "escape").exists()
 
+        bad_link = root / "bad-link.tar"
+        with tarfile.open(bad_link, "w") as tar:
+            for name, data in (("etc/os-release", b"x"), ("sbin/init", b"x"),
+                               ("bin/busybox", b"x")):
+                info = tarfile.TarInfo(name)
+                info.size = len(data)
+                tar.addfile(info, io.BytesIO(data))
+            link = tarfile.TarInfo("etc/escape")
+            link.type = tarfile.SYMTYPE
+            link.linkname = "../../outside"
+            tar.addfile(link)
+        result = run(bad_link, root / "bad-link-stage")
+        assert result.returncode != 0
+        assert not (root / "outside").exists()
+
         incomplete = root / "incomplete.tar"
         make_tar(incomplete, [("etc/os-release", b"x")])
         result = run(incomplete, root / "incomplete-stage")
