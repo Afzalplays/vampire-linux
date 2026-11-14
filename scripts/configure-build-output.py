@@ -33,12 +33,17 @@ def configure(config_path, overlay_path, edition):
         raise ValueError(f"missing Vampire post-build script: {post_build}")
     replace_assignment(config_path, "BR2_ROOTFS_POST_BUILD_SCRIPT",
                        str(post_build.resolve()), allow_missing=True)
+    installer_fragment = overlay.parent / "build/vampire-installer-kernel.fragment"
+    if not installer_fragment.is_file():
+        raise ValueError(f"missing installer kernel fragment: {installer_fragment}")
+    fragments = [str(installer_fragment.resolve())]
     if edition == "desktop":
-        fragment = overlay.parent / "build/vampire-desktop-kernel.fragment"
-        if not fragment.is_file():
-            raise ValueError(f"missing Desktop kernel fragment: {fragment}")
-        replace_assignment(config_path, "BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES",
-                           str(fragment.resolve()), allow_missing=True)
+        desktop_fragment = overlay.parent / "build/vampire-desktop-kernel.fragment"
+        if not desktop_fragment.is_file():
+            raise ValueError(f"missing Desktop kernel fragment: {desktop_fragment}")
+        fragments.append(str(desktop_fragment.resolve()))
+    replace_assignment(config_path, "BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES",
+                       " ".join(fragments), allow_missing=True)
     # These files are part of the rootfs overlay. Update them before Buildroot
     # creates target/ and rootfs.cpio.gz so the booted image gets correct data.
     replace_assignment(overlay / "etc/vampire/os.conf", "EDITION", edition)
