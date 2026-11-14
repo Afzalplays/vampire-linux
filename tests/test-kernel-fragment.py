@@ -12,6 +12,20 @@ configure = module.configure
 
 
 class KernelFragmentTests(unittest.TestCase):
+    def test_installer_fragment_has_builtin_boot_storage(self):
+        fragment = (ROOT / "build/vampire-installer-kernel.fragment").read_text()
+        for symbol in (
+            "CONFIG_EXT4_FS=y",
+            "CONFIG_ISO9660_FS=y",
+            "CONFIG_VFAT_FS=y",
+            "CONFIG_BLK_DEV_NVME=y",
+            "CONFIG_VIRTIO_BLK=y",
+            "CONFIG_SATA_AHCI=y",
+            "CONFIG_USB_STORAGE=y",
+            "CONFIG_USB_XHCI_PCI=y",
+        ):
+            self.assertIn(symbol, fragment)
+
     def test_desktop_configures_kernel_fragment_and_metadata(self):
         with tempfile.TemporaryDirectory() as tmp:
             repo = pathlib.Path(tmp)
