@@ -46,8 +46,10 @@ network_menu() {
 }
 
 installer_menu() {
-  ROOTFS=${VAMPIRE_INSTALL_ROOTFS:-/install/rootfs.tar}
+  ROOTFS=${VAMPIRE_INSTALL_ROOTFS:-}
+  if [ -z "$ROOTFS" ]; then ROOTFS=$("$INSTALLER" media 2>/dev/null || true); fi
   printf "\nVampire Installer — guided disk installation\n"
+  if [ -n "$ROOTFS" ]; then printf "Installation media: %s\n" "$ROOTFS"; fi
   printf "WARNING: installation erases every partition and all data on the selected disk.\n\n"
   run_tool "$INSTALLER" requirements
   run_tool "$INSTALLER" system-check
