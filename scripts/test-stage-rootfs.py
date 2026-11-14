@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import pathlib
+import stat
 import subprocess
 import sys
 import tarfile
@@ -28,10 +29,18 @@ def main():
         good = root / "rootfs.tar"
         make_tar(good, [("etc/os-release", b"NAME=Vampire OS\n"),
                         ("sbin/init", b"init"), ("bin/busybox", b"busybox")])
+        # Verify OS permission metadata survives the staging extraction.
+        with tarfile.open(good, "a") as tar:
+            info = tarfile.TarInfo("usr/bin/vampire-test-suid")
+            info.size = 4
+            info.mode = 0o4755
+            import io
+            tar.addfile(info, io.BytesIO(b"test"))
         dest = root / "stage"
         result = run(good, dest)
         assert result.returncode == 0, result.stderr
         assert (dest / "etc/os-release").is_file()
+        assert stat.S_IMODE((dest / "usr/bin/vampire-test-suid").stat().st_mode) == 0o4755
         assert "No disk partitioning" in result.stdout
 
         nonempty = root / "not-empty"

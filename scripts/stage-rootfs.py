@@ -56,7 +56,10 @@ def stage(archive, destination):
         destination.mkdir(parents=True, mode=0o700)
     validate(archive)
     with tarfile.open(archive, "r:*") as tar:
-        tar.extractall(destination, filter="data")
+        # Preserve OS ownership and mode bits (including setuid) after explicit
+        # path, file-type and link-target validation above. The "data" filter
+        # deliberately strips these metadata bits and would break an OS rootfs.
+        tar.extractall(destination, filter=lambda member, _path: member)
 
 
 def main():
