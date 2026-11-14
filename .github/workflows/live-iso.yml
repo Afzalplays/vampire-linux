@@ -48,7 +48,7 @@ jobs:
 
       - name: Build Vampire OS live ISO
         env:
-          JOBS: "2"
+          JOBS: "4"
         run: bash build/build-live-iso.sh
 
       - name: Validate installer rootfs archive
