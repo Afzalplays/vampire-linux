@@ -40,6 +40,11 @@ def main():
             link.type = tarfile.SYMTYPE
             link.linkname = "/proc/mounts"
             tar.addfile(link)
+            devnull = tarfile.TarInfo("dev/null")
+            devnull.type = tarfile.CHRTYPE
+            devnull.devmajor = 1
+            devnull.devminor = 3
+            tar.addfile(devnull)
         dest = root / "stage"
         result = run(good, dest)
         assert result.returncode == 0, result.stderr
@@ -47,6 +52,7 @@ def main():
         assert stat.S_IMODE((dest / "usr/bin/vampire-test-suid").stat().st_mode) == 0o4755
         assert (dest / "etc/mtab").is_symlink()
         assert pathlib.Path(dest / "etc/mtab").readlink().as_posix() == "../proc/mounts"
+        assert not (dest / "dev/null").exists()
         assert "No disk partitioning" in result.stdout
 
         nonempty = root / "not-empty"

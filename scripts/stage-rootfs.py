@@ -23,8 +23,11 @@ def sanitize_member(member):
     if not safe_member_name(member.name):
         raise ValueError(f"unsafe archive path: {member.name}")
     if member.isdev() or member.isfifo():
-        raise ValueError(f"unsupported special file: {member.name}")
-    if member.issym():
+        # Buildroot may include static /dev nodes even with devtmpfs enabled.
+        # Skip them; the running kernel will populate /dev at boot.
+        if pathlib.PurePosixPath(member.name).parts[:1] == ("dev",):
+            return None
+        raise ValueError(f"unsupported special file outside /dev: {member.name}")
         target = pathlib.PurePosixPath(member.linkname)
         if target.is_absolute():
             # Absolute symlinks are normal in Linux rootfs archives. Convert
