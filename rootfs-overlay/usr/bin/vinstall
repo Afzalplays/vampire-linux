@@ -246,6 +246,7 @@ installation_plan() {
 }
 
 stage_rootfs() {
+  [ "$(id -u)" -eq 0 ] || { printf "ERROR: root privileges are required to stage an OS rootfs\\n" >&2; return 1; }
   archive=$1
   destination=$2
   [ -f "$archive" ] || { printf 'ERROR: rootfs archive not found: %s\n' "$archive" >&2; return 2; }
@@ -259,6 +260,7 @@ stage_rootfs() {
   exec python3 "$stage_script" "$archive" "$destination"
 }
 configure_installed_root() {
+  [ "$(id -u)" -eq 0 ] || { printf "ERROR: root privileges are required to configure an installed system\\n" >&2; return 1; }
   target_root=$1
   root_uuid=$2
   firmware=$3

@@ -2,6 +2,10 @@
 set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP="$(mktemp -d)"
+mkdir -p "$TMP/bin"
+printf "#!/bin/sh\\necho 0\\n" > "$TMP/bin/id"
+chmod +x "$TMP/bin/id"
+export PATH="$TMP/bin:$PATH"
 trap 'rm -rf "$TMP"' EXIT
 TARGET="$TMP/target"
 mkdir -p "$TARGET/boot"
