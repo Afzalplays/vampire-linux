@@ -75,15 +75,22 @@ def fetch(url, destination, limit):
     parsed = urllib.parse.urlparse(url)
     if parsed.scheme != "https" or not parsed.netloc:
         fail("repository and package URLs must use HTTPS")
-    req = urllib.request.Request(url, headers={"User-Agent": "vpm/0.1"})
+    destination = pathlib.Path(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_name = tempfile.mkstemp(
+        prefix="." + destination.name + ".", suffix=".download",
+        dir=destination.parent,
+    )
     try:
+        req = urllib.request.Request(url, headers={"User-Agent": "vpm/0.1"})
         with urllib.request.urlopen(req, timeout=30) as response:
             if response.status != 200:
                 fail(f"download returned HTTP {response.status}")
             if not is_https_url(response.geturl()):
                 fail("refusing HTTPS downgrade redirect")
             total = 0
-            with destination.open("wb") as out:
+            with os.fdopen(fd, "wb") as out:
+                fd = -1
                 while True:
                     block = response.read(1024 * 1024)
                     if not block:
@@ -92,8 +99,22 @@ def fetch(url, destination, limit):
                     if total > limit:
                         fail("download exceeds configured size limit")
                     out.write(block)
+                out.flush()
+                os.fsync(out.fileno())
+        os.replace(temp_name, destination)
     except (OSError, urllib.error.URLError) as exc:
         fail(f"download failed: {exc}")
+    except BaseException:
+        if fd >= 0:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+        try:
+            os.unlink(temp_name)
+        except OSError:
+            pass
+        raise
 
 def verify_signature(index_path, signature_path, public_key):
     if not shutil.which("minisign"):
