@@ -18,6 +18,7 @@ class BuildOutputConfigurationTests(unittest.TestCase):
         scripts.mkdir()
         (scripts / "post-build-vampire.py").write_text("# test hook\\n")
         (build / "vampire-desktop-kernel.fragment").write_text("CONFIG_IWLWIFI=m\\n")
+        (build / "vampire-installer-kernel.fragment").write_text("CONFIG_EXT4_FS=y\\n")
         overlay = root / 'rootfs & overlay | "special"'
         (overlay / "etc/vampire").mkdir(parents=True)
         (overlay / "etc/vampire/os.conf").write_text(
