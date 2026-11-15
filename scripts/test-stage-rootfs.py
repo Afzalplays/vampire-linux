@@ -121,6 +121,20 @@ def main():
         assert result.returncode != 0
         assert not (root / "outside").exists()
 
+        bad_windows_link = root / "bad-windows-link.tar"
+        with tarfile.open(bad_windows_link, "w") as tar:
+            for name, data in (("etc/os-release", b"x"), ("sbin/init", b"x"),
+                               ("bin/busybox", b"x")):
+                info = tarfile.TarInfo(name)
+                info.size = len(data)
+                tar.addfile(info, io.BytesIO(data))
+            link = tarfile.TarInfo("etc/windows-escape")
+            link.type = tarfile.SYMTYPE
+            link.linkname = "..\\outside"
+            tar.addfile(link)
+        result = run(bad_windows_link, root / "bad-windows-link-stage")
+        assert result.returncode != 0
+
         incomplete = root / "incomplete.tar"
         make_tar(incomplete, [("etc/os-release", b"x")])
         result = run(incomplete, root / "incomplete-stage")
