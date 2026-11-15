@@ -102,9 +102,7 @@ def fetch(url, destination, limit):
                 out.flush()
                 os.fsync(out.fileno())
         os.replace(temp_name, destination)
-    except (OSError, urllib.error.URLError) as exc:
-        fail(f"download failed: {exc}")
-    except BaseException:
+    except BaseException as exc:
         if fd >= 0:
             try:
                 os.close(fd)
@@ -114,6 +112,8 @@ def fetch(url, destination, limit):
             os.unlink(temp_name)
         except OSError:
             pass
+        if isinstance(exc, (OSError, urllib.error.URLError)):
+            fail(f"download failed: {exc}")
         raise
 
 def verify_signature(index_path, signature_path, public_key):
