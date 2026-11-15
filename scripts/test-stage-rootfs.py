@@ -86,6 +86,18 @@ def main():
         assert result.returncode != 0
         assert not (root / "escape").exists()
 
+        windows_path = root / "windows-path.tar"
+        make_tar(windows_path, [("etc/os-release", b"x"), ("sbin/init", b"x"),
+                                ("bin/busybox", b"x"), ("..\\escape", b"x")])
+        result = run(windows_path, root / "windows-path-stage")
+        assert result.returncode != 0
+
+        duplicate = root / "duplicate.tar"
+        make_tar(duplicate, [("etc/os-release", b"x"), ("sbin/init", b"x"),
+                             ("bin/busybox", b"x"), ("./etc/os-release", b"overwrite")])
+        result = run(duplicate, root / "duplicate-stage")
+        assert result.returncode != 0
+
         bad_link = root / "bad-link.tar"
         with tarfile.open(bad_link, "w") as tar:
             for name, data in (("etc/os-release", b"x"), ("sbin/init", b"x"),
