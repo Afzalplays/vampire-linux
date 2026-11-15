@@ -15,10 +15,12 @@ REQUIRED = ("etc/os-release", "sbin/init", "bin/busybox")
 
 
 def safe_member_name(name):
-    if "\\" in name or "\x00" in name:
+    if not name or "\\" in name or "\x00" in name:
         return False
     path = pathlib.PurePosixPath(name)
-    return not path.is_absolute() and all(part not in ("..", "") for part in path.parts)
+    return bool(path.parts) and not path.is_absolute() and all(
+        part not in ("..", "") for part in path.parts
+    )
 
 
 def sanitize_member(member):
@@ -31,6 +33,8 @@ def sanitize_member(member):
             return None
         raise ValueError(f"unsupported special file outside /dev: {member.name}")
     if member.issym():
+        if not member.linkname or "\\" in member.linkname or "\x00" in member.linkname:
+            raise ValueError(f"unsafe symbolic-link target: {member.name}")
         target = pathlib.PurePosixPath(member.linkname)
         if target.is_absolute():
             # Convert absolute rootfs symlinks to equivalent relative links.
