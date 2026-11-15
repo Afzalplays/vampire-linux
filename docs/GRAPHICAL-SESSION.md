@@ -25,3 +25,18 @@ to the text console.
 A release desktop still needs a dedicated Vampire shell, non-root session
 management, display manager, audio/network settings, accessibility, window
 management integration and hardware validation.
+
+## Persistent desktop preferences
+
+Desktop preferences live in `/etc/vampire/settings.conf`; validated defaults
+are shipped in `/etc/vampire/settings.defaults`. During boot,
+`/usr/lib/vampire/settings-bootstrap` creates the initial file atomically,
+leaves valid user preferences untouched, and backs up an invalid file under
+`/var/lib/vampire` before attempting recovery. Invalid defaults are rejected,
+and a failed recovery does not overwrite the existing settings file.
+
+Use `vsettings list`, `vsettings set KEY VALUE`, `vsettings validate` and
+`vsettings reset` to manage preferences. Settings that have a corresponding
+Weston or Foot configuration mapping are applied to the next graphical
+session; dock, blur and several panel-item preferences are stored but are not
+yet implemented by this early desktop preview.
