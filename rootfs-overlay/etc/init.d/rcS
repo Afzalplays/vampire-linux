@@ -13,44 +13,8 @@ if command -v udevd >/dev/null 2>&1; then
     udevadm settle --timeout=10 || true
   fi
 fi
-install_settings_defaults() {
-  [ -r /etc/vampire/settings.defaults ] || return 1
-  tmp="/etc/vampire/settings.conf.tmp.$$"
-  (set -C; : > "$tmp") 2>/dev/null || {
-    printf 'Vampire OS: settings staging file already exists; leaving current settings untouched\n' >&2
-    return 1
-  }
-  if ! cat /etc/vampire/settings.defaults > "$tmp"; then
-    rm -f "$tmp"
-    return 1
-  fi
-  if ! VAMPIRE_SETTINGS_FILE="$tmp" /usr/bin/vsettings validate >/dev/null 2>&1; then
-    rm -f "$tmp"
-    printf 'Vampire OS: refusing invalid settings defaults\n' >&2
-    return 1
-  fi
-  chmod 600 "$tmp"
-  if ! mv -f "$tmp" /etc/vampire/settings.conf; then
-    rm -f "$tmp"
-    return 1
-  fi
-}
-if [ ! -f /etc/vampire/settings.conf ] && [ -x /usr/bin/vsettings ]; then
-  install_settings_defaults || true
-fi
-if [ -x /usr/bin/vsettings ] && [ -f /etc/vampire/settings.conf ]; then
-  if ! /usr/bin/vsettings validate >/dev/null 2>&1; then
-    if [ -r /etc/vampire/settings.defaults ]; then
-      cp /etc/vampire/settings.conf "/var/lib/vampire/settings.conf.invalid.$$" 2>/dev/null || true
-      if install_settings_defaults; then
-        printf 'Vampire OS: invalid settings backed up; defaults restored\n' >&2
-      else
-        printf 'Vampire OS: invalid settings retained; defaults could not be safely restored\n' >&2
-      fi
-    else
-      printf 'Vampire OS: invalid settings and defaults unavailable\n' >&2
-    fi
-  fi
+if [ -x /usr/bin/vsettings ] && [ -r /usr/lib/vampire/settings-bootstrap ]; then
+  sh /usr/lib/vampire/settings-bootstrap || printf 'Vampire OS: settings bootstrap needs attention\n' >&2
 fi
 printf '\n  Vampire OS 0.1.0-dev | x86_64 live environment\n'
 printf '  Type vfetch for system information.\n\n'
