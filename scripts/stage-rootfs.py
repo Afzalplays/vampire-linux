@@ -7,7 +7,6 @@ mounts, partitions, formats, or writes to block devices.
 import argparse
 import pathlib
 import posixpath
-import shutil
 import sys
 import tarfile
 
@@ -16,6 +15,8 @@ REQUIRED = ("etc/os-release", "sbin/init", "bin/busybox")
 
 
 def safe_member_name(name):
+    if "\\" in name or "\x00" in name:
+        return False
     path = pathlib.PurePosixPath(name)
     return not path.is_absolute() and all(part not in ("..", "") for part in path.parts)
 
@@ -61,7 +62,10 @@ def validate(archive):
         names = set()
         for member in tar.getmembers():
             sanitize_member(member)
-            names.add(pathlib.PurePosixPath(member.name).as_posix().lstrip("./"))
+            normalized = pathlib.PurePosixPath(member.name).as_posix().lstrip("./")
+            if normalized in names:
+                raise ValueError(f"duplicate archive path: {member.name}")
+            names.add(normalized)
         missing = [name for name in REQUIRED if name not in names]
         if missing:
             raise ValueError("rootfs archive missing required paths: " + ", ".join(missing))
