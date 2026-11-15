@@ -32,6 +32,29 @@ class ArchiveSafetyTests(unittest.TestCase):
                     vpm.fetch("https://repo.example.invalid/package.tar.gz", destination, 1024)
             self.assertFalse(destination.exists())
 
+    def test_failed_download_preserves_existing_cache_file(self):
+        from unittest.mock import patch
+
+        class InterruptedResponse:
+            status = 200
+            def __init__(self): self.calls = 0
+            def __enter__(self): return self
+            def __exit__(self, *args): return False
+            def geturl(self): return "https://repo.example.invalid/package.tar.gz"
+            def read(self, size=-1):
+                self.calls += 1
+                if self.calls == 1: return b"partial"
+                raise OSError("simulated network interruption")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            destination = pathlib.Path(tmp) / "cached.tar.gz"
+            destination.write_bytes(b"previous verified cache")
+            with patch.object(vpm.urllib.request, "urlopen", return_value=InterruptedResponse()):
+                with self.assertRaises(SystemExit):
+                    vpm.fetch("https://repo.example.invalid/package.tar.gz", destination, 1024)
+            self.assertEqual(destination.read_bytes(), b"previous verified cache")
+            self.assertEqual(list(pathlib.Path(tmp).glob(".cached.tar.gz.*.download")), [])
+
     def test_validate_package_index_entry(self):
         valid = {
             "name": "hello-vampire",
