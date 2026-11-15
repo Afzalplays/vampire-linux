@@ -55,12 +55,29 @@ def main():
         assert not (dest / "dev/null").exists()
         assert "No disk partitioning" in result.stdout
 
+        # A newly formatted ext4 target contains an empty lost+found.
+        ext4_target = root / "ext4-target"
+        ext4_target.mkdir()
+        (ext4_target / "lost+found").mkdir()
+        result = run(good, ext4_target)
+        assert result.returncode == 0, result.stderr
+        assert (ext4_target / "lost+found").is_dir()
+        assert (ext4_target / "etc/os-release").is_file()
+
         nonempty = root / "not-empty"
         nonempty.mkdir()
         (nonempty / "keep").write_text("safe")
         result = run(good, nonempty)
         assert result.returncode != 0
         assert (nonempty / "keep").read_text() == "safe"
+
+        occupied_lost_found = root / "occupied-lost-found"
+        occupied_lost_found.mkdir()
+        (occupied_lost_found / "lost+found").mkdir()
+        (occupied_lost_found / "lost+found" / "keep").write_text("safe")
+        result = run(good, occupied_lost_found)
+        assert result.returncode != 0
+        assert (occupied_lost_found / "lost+found" / "keep").read_text() == "safe"
 
         bad = root / "bad.tar"
         make_tar(bad, [("../escape", b"x"), ("etc/os-release", b"x"),
