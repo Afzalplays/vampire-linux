@@ -239,9 +239,15 @@ def safe_extract(archive, destination):
             for member in members:
                 target = (destination / member.name).resolve()
                 if member.isdir():
-                    if not target.exists():
-                        target.mkdir(parents=True, exist_ok=True)
-                        created_dirs.append(target)
+                    missing = []
+                    parent = target
+                    while parent != destination and not parent.exists():
+                        missing.append(parent)
+                        parent = parent.parent
+                    target.mkdir(parents=True, exist_ok=True)
+                    for directory in reversed(missing):
+                        if directory not in created_dirs:
+                            created_dirs.append(directory)
                     continue
                 missing = []
                 parent = target.parent
