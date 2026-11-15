@@ -166,6 +166,53 @@ class ArchiveSafetyTests(unittest.TestCase):
             self.assertEqual(keep.read_text(), "keep")
             self.assertTrue(link.is_symlink())
 
+    def test_installed_database_write_ignores_predictable_temp_symlink(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = pathlib.Path(tmp)
+            db_path = base / "installed.json"
+            outside = base / "outside.txt"
+            outside.write_text("must remain")
+            db_path.with_suffix(".tmp").symlink_to(outside)
+            old_db = vpm.DB
+            try:
+                vpm.DB = db_path
+                vpm.write_installed_db({"sample": {"version": "1.0", "files": []}})
+            finally:
+                vpm.DB = old_db
+            self.assertEqual(outside.read_text(), "must remain")
+            self.assertTrue(db_path.with_suffix(".tmp").is_symlink())
+            self.assertEqual(__import__("json").loads(db_path.read_text())["sample"]["version"], "1.0")
+            self.assertEqual(db_path.stat().st_mode & 0o777, 0o600)
+
+    def test_remove_restores_files_if_database_commit_fails(self):
+        from types import SimpleNamespace
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as tmp:
+            base = pathlib.Path(tmp)
+            root = base / "root"
+            root.mkdir()
+            owned = root / "usr/share/owned.txt"
+            owned.parent.mkdir(parents=True)
+            owned.write_text("owned data")
+            db_path = base / "installed.json"
+            db_path.write_text('{"sample": {"version": "1.0", "files": ["usr/share/owned.txt"]}}')
+            old_root, old_db = vpm.ROOT, vpm.DB
+            original_replace = vpm.os.replace
+            def fail_database_replace(src, dst):
+                if pathlib.Path(dst) == db_path:
+                    raise OSError("simulated database commit failure")
+                return original_replace(src, dst)
+            try:
+                vpm.ROOT, vpm.DB = root, db_path
+                with patch.object(vpm.os, "replace", side_effect=fail_database_replace):
+                    with self.assertRaises(OSError):
+                        vpm.command_remove(SimpleNamespace(name="sample"))
+            finally:
+                vpm.ROOT, vpm.DB = old_root, old_db
+            self.assertEqual(owned.read_text(), "owned data")
+            self.assertIn("sample", __import__("json").loads(db_path.read_text()))
+            self.assertEqual(list(owned.parent.glob(".vpm-remove-*")), [])
+
     def test_remove_deletes_only_recorded_package_files(self):
         from types import SimpleNamespace
         with tempfile.TemporaryDirectory() as tmp:
