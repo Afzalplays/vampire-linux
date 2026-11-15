@@ -15,7 +15,7 @@ if command -v udevd >/dev/null 2>&1; then
 fi
 install_settings_defaults() {
   [ -r /etc/vampire/settings.defaults ] || return 1
-  tmp="/etc/vampire/settings.conf.tmp.$"
+  tmp="/etc/vampire/settings.conf.tmp.$$"
   (set -C; : > "$tmp") 2>/dev/null || {
     printf 'Vampire OS: settings staging file already exists; leaving current settings untouched\n' >&2
     return 1
@@ -41,7 +41,7 @@ fi
 if [ -x /usr/bin/vsettings ] && [ -f /etc/vampire/settings.conf ]; then
   if ! /usr/bin/vsettings validate >/dev/null 2>&1; then
     if [ -r /etc/vampire/settings.defaults ]; then
-      cp /etc/vampire/settings.conf "/var/lib/vampire/settings.conf.invalid.$" 2>/dev/null || true
+      cp /etc/vampire/settings.conf "/var/lib/vampire/settings.conf.invalid.$$" 2>/dev/null || true
       if install_settings_defaults; then
         printf 'Vampire OS: invalid settings backed up; defaults restored\n' >&2
       else
