@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-for file in rootfs-overlay/usr/bin/vctl rootfs-overlay/usr/bin/vnetwork rootfs-overlay/usr/bin/vguard rootfs-overlay/usr/bin/vsettings rootfs-overlay/usr/bin/vdesktop rootfs-overlay/usr/bin/vmonitor rootfs-overlay/usr/bin/vinstall rootfs-overlay/usr/bin/vpm rootfs-overlay/usr/bin/vgraphical rootfs-overlay/usr/bin/vupdate rootfs-overlay/usr/bin/vsoftware rootfs-overlay/usr/bin/vssh rootfs-overlay/usr/bin/vfiles rootfs-overlay/usr/bin/vhardware rootfs-overlay/usr/bin/vstorage rootfs-overlay/usr/bin/vhealth rootfs-overlay/usr/bin/vlogs rootfs-overlay/usr/bin/vdiagnose rootfs-overlay/usr/bin/vfirewall rootfs-overlay/usr/bin/vpower rootfs-overlay/usr/bin/vsh rootfs-overlay/etc/vampire/shellrc rootfs-overlay/etc/vampire/services.d/firewall rootfs-overlay/etc/vpm/vpm.json rootfs-overlay/etc/vampire/update.json rootfs-overlay/etc/vampire/settings.defaults rootfs-overlay/etc/vampire/services.d/network rootfs-overlay/etc/profile.d/vampire.sh; do
+for file in rootfs-overlay/usr/bin/vctl rootfs-overlay/usr/bin/vnetwork rootfs-overlay/usr/bin/vguard rootfs-overlay/usr/bin/vsettings rootfs-overlay/usr/bin/vdesktop rootfs-overlay/usr/bin/vmonitor rootfs-overlay/usr/bin/vinstall rootfs-overlay/usr/bin/vpm rootfs-overlay/usr/bin/vgraphical rootfs-overlay/usr/bin/vupdate rootfs-overlay/usr/bin/vsoftware rootfs-overlay/usr/bin/vssh rootfs-overlay/usr/bin/vfiles rootfs-overlay/usr/bin/vhardware rootfs-overlay/usr/bin/vstorage rootfs-overlay/usr/bin/vhealth rootfs-overlay/usr/bin/vlogs rootfs-overlay/usr/bin/vdiagnose rootfs-overlay/usr/bin/vfirewall rootfs-overlay/usr/bin/vpower rootfs-overlay/usr/lib/vampire/settings-bootstrap rootfs-overlay/usr/bin/vsh rootfs-overlay/etc/vampire/shellrc rootfs-overlay/etc/vampire/services.d/firewall rootfs-overlay/etc/vpm/vpm.json rootfs-overlay/etc/vampire/update.json rootfs-overlay/etc/vampire/settings.defaults rootfs-overlay/etc/vampire/services.d/network rootfs-overlay/etc/profile.d/vampire.sh; do
   test -s "$ROOT/$file"
 done
 sh -n "$ROOT/rootfs-overlay/usr/bin/vctl"
@@ -48,11 +48,9 @@ grep -q "usr/bin/vampire-terminal" "$ROOT/build/build-live-iso.sh"
 grep -q "usr/bin/vampire-app" "$ROOT/build/build-live-iso.sh"
 grep -q "usr/bin/vhelp" "$ROOT/build/build-live-iso.sh"
 grep -q "settings_apply.py" "$ROOT/build/build-live-iso.sh"
-grep -q 'settings.conf' "$ROOT/rootfs-overlay/etc/init.d/rcS"
-grep -q 'vsettings validate' "$ROOT/rootfs-overlay/etc/init.d/rcS"
-grep -q 'install_settings_defaults' "$ROOT/rootfs-overlay/etc/init.d/rcS"
-grep -q 'VAMPIRE_SETTINGS_FILE="$tmp" /usr/bin/vsettings validate' "$ROOT/rootfs-overlay/etc/init.d/rcS"
-grep -q 'settings staging file already exists' "$ROOT/rootfs-overlay/etc/init.d/rcS"
+grep -q 'settings-bootstrap' "$ROOT/rootfs-overlay/etc/init.d/rcS"
+grep -q 'VAMPIRE_SETTINGS_FILE' "$ROOT/rootfs-overlay/usr/lib/vampire/settings-bootstrap"
+grep -q 'settings staging file already exists' "$ROOT/rootfs-overlay/usr/lib/vampire/settings-bootstrap"
 grep -q '^BR2_PACKAGE_BASH=y$' "$ROOT/build/vampire_defconfig"
 grep -q '^BR2_PACKAGE_BASH=y$' "$ROOT/build/vampire_server_defconfig"
 grep -q '^BR2_PACKAGE_WESTON=y$' "$ROOT/build/vampire_defconfig"
