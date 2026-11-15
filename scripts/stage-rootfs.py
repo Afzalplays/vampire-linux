@@ -62,7 +62,7 @@ def validate(archive):
         names = set()
         for member in tar.getmembers():
             sanitize_member(member)
-            normalized = pathlib.PurePosixPath(member.name).as_posix().lstrip("./")
+            normalized = pathlib.PurePosixPath(member.name).as_posix()
             if normalized in names:
                 raise ValueError(f"duplicate archive path: {member.name}")
             names.add(normalized)
