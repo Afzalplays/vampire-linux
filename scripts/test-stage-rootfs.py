@@ -55,6 +55,22 @@ def main():
         assert not (dest / "dev/null").exists()
         assert "No disk partitioning" in result.stdout
 
+        # GNU tar emits a root "." directory when archiving with -C ROOT .
+        root_marker_tar = root / "root-marker.tar"
+        with tarfile.open(root_marker_tar, "w") as tar:
+            root_entry = tarfile.TarInfo(".")
+            root_entry.type = tarfile.DIRTYPE
+            tar.addfile(root_entry)
+            for name, data in (("etc/os-release", b"NAME=Vampire OS\n"),
+                               ("sbin/init", b"init"), ("bin/busybox", b"busybox")):
+                info = tarfile.TarInfo(name)
+                info.size = len(data)
+                tar.addfile(info, io.BytesIO(data))
+        root_marker_dest = root / "root-marker-stage"
+        result = run(root_marker_tar, root_marker_dest)
+        assert result.returncode == 0, result.stderr
+        assert (root_marker_dest / "etc/os-release").is_file()
+
         # A newly formatted ext4 target contains an empty lost+found.
         ext4_target = root / "ext4-target"
         ext4_target.mkdir()
