@@ -1,0 +1,62 @@
+#!/bin/sh
+# Safely initialize or recover the persistent desktop settings file.
+set -eu
+umask 077
+
+CONFIG=${VAMPIRE_SETTINGS_FILE:-/etc/vampire/settings.conf}
+DEFAULTS=${VAMPIRE_SETTINGS_DEFAULTS:-/etc/vampire/settings.defaults}
+VALIDATOR=${VAMPIRE_SETTINGS_VALIDATOR:-/usr/bin/vsettings}
+BACKUP_DIR=${VAMPIRE_SETTINGS_BACKUP_DIR:-/var/lib/vampire}
+
+log() { printf 'Vampire OS: %s\n' "$*" >&2; }
+
+install_defaults() {
+  [ -r "$DEFAULTS" ] || { log "settings defaults are unavailable"; return 1; }
+  dir=${CONFIG%/*}
+  [ "$dir" != "$CONFIG" ] || dir=.
+  mkdir -p "$dir" "$BACKUP_DIR"
+  tmp="$CONFIG.tmp.$$"
+  (set -C; : > "$tmp") 2>/dev/null || {
+    log "settings staging file already exists; current settings left untouched"
+    return 1
+  }
+  trap 'rm -f "$tmp"' 0 HUP INT TERM
+  if ! cat "$DEFAULTS" > "$tmp"; then
+    log "could not stage settings defaults"
+    return 1
+  fi
+  if ! VAMPIRE_SETTINGS_FILE="$tmp" VAMPIRE_SETTINGS_DEFAULTS="$DEFAULTS" "$VALIDATOR" validate >/dev/null 2>&1; then
+    log "refusing invalid settings defaults"
+    return 1
+  fi
+  chmod 600 "$tmp"
+  if ! mv -f "$tmp" "$CONFIG"; then
+    log "could not atomically install settings defaults"
+    return 1
+  fi
+  trap - 0 HUP INT TERM
+}
+
+if [ ! -e "$CONFIG" ]; then
+  install_defaults || exit 1
+  exit 0
+fi
+
+if "$VALIDATOR" validate >/dev/null 2>&1; then
+  exit 0
+fi
+
+mkdir -p "$BACKUP_DIR"
+backup="$BACKUP_DIR/settings.conf.invalid.$$"
+if cp -p "$CONFIG" "$backup"; then
+  log "invalid settings backed up to $backup"
+else
+  log "could not back up invalid settings; leaving them untouched"
+  exit 1
+fi
+if install_defaults; then
+  log "invalid settings replaced with validated defaults"
+else
+  log "invalid settings retained because defaults could not be installed safely"
+  exit 1
+fi
