@@ -49,3 +49,14 @@ A release candidate must boot on UEFI and legacy BIOS VMs, install to a blank vi
 ## Implemented developer-stage preflight
 
 The live root filesystem includes vinstall list, preflight, plan, media and install commands. The installer validates its rootfs archive and checksum, discovers the ISO payload read-only, requires a whole-disk preflight and exact typed confirmation, stages the OS, writes UUID-based configuration and installs GRUB. It is an experimental erase-and-install implementation, not yet a release-ready installer. See [INSTALLER-PREFLIGHT.md](INSTALLER-PREFLIGHT.md) for its exact scope and limitations.
+
+## Root filesystem staging constraints
+
+The rootfs staging helper validates archive paths, rejects duplicate normalized
+entries, special files outside `/dev`, unsafe symbolic/hard links and
+Windows-style separators before extraction. It preserves ownership and mode
+metadata required by the installed system. A formatted ext4 target may contain
+its standard empty `lost+found` directory; staging preserves that directory
+but rejects any other pre-existing content, a non-empty `lost+found`, or a
+symlink destination. These checks prevent installation from silently merging
+an existing filesystem into the new operating system.
