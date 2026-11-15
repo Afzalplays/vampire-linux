@@ -26,9 +26,9 @@ strict package name/version/digest/dependency metadata validation, SHA-256 paylo
 verification, dependency resolution, architecture checks, guarded archive
 extraction, and basic installed-file ownership records.
 
-Not implemented: upgrade, transactions, atomic rollback, conflict resolution,
-shared-directory ownership, package triggers, repository key rotation, or a
-production-grade sandbox.
+Not implemented: upgrade, crash-safe multi-package transactions, conflict
+resolution, shared-directory ownership, package triggers, repository key
+rotation, or a production-grade sandbox.
 
 ## Prototype prerequisites
 
@@ -67,12 +67,17 @@ archive paths and special files, and does not execute package scripts. Removal
 only deletes recorded regular files and refuses legacy records without a
 trustworthy file manifest.
 
-Installation is not transactional: a failure partway through a multi-package
-install can leave files behind. The prototype does not track shared directories,
-configuration-file modifications, hard links, package triggers, or concurrent
-filesystem changes. Do not use it to manage a production machine or host root
-filesystem. A native implementation and security review are required before
-system integration.
+Package extraction rolls back files and directories created by a failed
+extraction; a later package or installed-database failure also rolls back files
+from earlier packages. The installed database is replaced atomically using a
+private temporary file. Removal quarantines owned files beside their originals
+and restores them if the database commit fails. These are bounded failure
+recovery measures, not a crash-safe transaction journal: power loss during a
+multi-package operation can still require manual recovery. The prototype does
+not track shared-directory ownership, configuration-file modifications,
+package triggers, or concurrent filesystem changes. Do not use it to manage a
+production machine or host root filesystem. A native implementation and
+security review are required before system integration.
 
 Run `python3 vpm/doctor.py` to check local prerequisites. A warning is expected
 until a real signed repository is configured.
