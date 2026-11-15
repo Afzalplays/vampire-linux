@@ -24,6 +24,10 @@ def safe_member_name(name):
 
 
 def sanitize_member(member):
+    # GNU tar commonly emits the archive root as "." when packaging with
+    # "tar -C ROOT .". Keep that directory marker out of the target tree.
+    if member.name in (".", "./") and member.isdir():
+        return None
     if not safe_member_name(member.name):
         raise ValueError(f"unsafe archive path: {member.name}")
     if member.isdev() or member.isfifo():
