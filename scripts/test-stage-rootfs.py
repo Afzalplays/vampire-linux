@@ -79,6 +79,14 @@ def main():
         assert result.returncode != 0
         assert (occupied_lost_found / "lost+found" / "keep").read_text() == "safe"
 
+        linked_target = root / "linked-target"
+        linked_target.mkdir()
+        linked_destination = root / "linked-destination"
+        linked_destination.symlink_to(linked_target, target_is_directory=True)
+        result = run(good, linked_destination)
+        assert result.returncode != 0
+        assert list(linked_target.iterdir()) == []
+
         bad = root / "bad.tar"
         make_tar(bad, [("../escape", b"x"), ("etc/os-release", b"x"),
                        ("sbin/init", b"x"), ("bin/busybox", b"x")])
