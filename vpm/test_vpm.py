@@ -108,6 +108,26 @@ class ArchiveSafetyTests(unittest.TestCase):
             self.assertFalse((root / "new.txt").exists())
             self.assertEqual((root / "already.txt").read_text(), "keep existing")
 
+    def test_partial_extraction_rolls_back_explicit_nested_directories(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = pathlib.Path(tmp)
+            archive = base / "partial-directory.tar.gz"
+            root = base / "root"
+            root.mkdir()
+            (root / "already.txt").write_text("keep")
+            with tarfile.open(archive, "w:gz") as tf:
+                directory = tarfile.TarInfo("new-parent/new-child")
+                directory.type = tarfile.DIRTYPE
+                tf.addfile(directory)
+                data = b"collision"
+                info = tarfile.TarInfo("already.txt")
+                info.size = len(data)
+                tf.addfile(info, io.BytesIO(data))
+            with self.assertRaises(FileExistsError):
+                vpm.safe_extract(archive, root)
+            self.assertFalse((root / "new-parent").exists())
+            self.assertEqual((root / "already.txt").read_text(), "keep")
+
     def test_reject_parent_traversal(self):
         with tempfile.TemporaryDirectory() as tmp:
             archive = pathlib.Path(tmp) / "bad.tar.gz"
