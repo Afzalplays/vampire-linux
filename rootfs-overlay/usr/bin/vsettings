@@ -102,7 +102,7 @@ case "$1" in
     [ -r "$DEFAULTS" ] || { echo "vsettings: defaults file missing" >&2; exit 1; }
     dir=${CONFIG%/*}; [ "$dir" = "$CONFIG" ] && dir=.
     mkdir -p "$dir"
-    tmp="$CONFIG.tmp.$"
+    tmp="$CONFIG.tmp.$$"
     (set -C; : > "$tmp") 2>/dev/null || {
       echo "vsettings: temporary file already exists" >&2; exit 1;
     }
