@@ -71,6 +71,8 @@ jobs:
           bash tests/test-vhelp.sh
           echo '=== desktop settings ==='
           bash -x tests/test-settings-desktop.sh
+          bash -n tests/test-settings-bootstrap.sh
+          bash -x tests/test-settings-bootstrap.sh
           echo '=== installer preflight ==='
           bash -x tests/test-installer-preflight.sh
           bash -x tests/test-installer-requirements.sh
