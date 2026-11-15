@@ -154,6 +154,31 @@ def installed_db():
     except (OSError, json.JSONDecodeError) as exc:
         fail(f"installed database is unreadable: {exc}")
 
+def write_installed_db(value):
+    """Atomically replace the package database using a private unique temp file."""
+    DB.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_name = tempfile.mkstemp(
+        prefix="." + DB.name + ".", suffix=".tmp", dir=DB.parent
+    )
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as stream:
+            json.dump(value, stream, indent=2)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.chmod(temp_name, 0o600)
+        os.replace(temp_name, DB)
+    except BaseException:
+        try:
+            os.close(fd)
+        except OSError:
+            pass
+        try:
+            os.unlink(temp_name)
+        except OSError:
+            pass
+        raise
+
 def command_update(_args):
     index = load_index(refresh=True)
     print(f"Updated package metadata: {len(index)} packages available.")
@@ -327,20 +352,13 @@ def command_install(args):
     if ROOT.exists() is False:
         fail(f"target root does not exist: {ROOT}")
     extracted_manifests = []
-    tmp = DB.with_suffix(".tmp")
     try:
         for pkg, archive in downloads:
             installed_files = safe_extract(archive, ROOT)
             extracted_manifests.append(installed_files)
             db[pkg["name"]] = {"version": pkg["version"], "files": installed_files}
-        DB.parent.mkdir(parents=True, exist_ok=True)
-        tmp.write_text(json.dumps(db, indent=2) + "\n")
-        tmp.replace(DB)
+        write_installed_db(db)
     except BaseException:
-        try:
-            tmp.unlink()
-        except OSError:
-            pass
         rollback_failures = rollback_extracted(ROOT, extracted_manifests)
         if rollback_failures:
             print("vpm: warning: rollback could not remove: " +
@@ -360,6 +378,7 @@ def command_remove(args):
         fail("package has no trustworthy file ownership record; refusing removal")
     root = ROOT.resolve()
     targets = []
+    seen_paths = set()
     # Validate the entire manifest before deleting anything. Check each path
     # component with lstat semantics (Path.is_symlink) before resolving it:
     # resolving first would hide a final-component symlink and could unlink
@@ -371,6 +390,10 @@ def command_remove(args):
         parts = pathlib.PurePosixPath(relative).parts
         if not parts or any(part in ("", ".", "..") for part in parts):
             fail(f"invalid installed-file path: {relative}")
+        normalized = pathlib.PurePosixPath(relative).as_posix()
+        if normalized in seen_paths:
+            fail(f"duplicate installed-file path: {relative}")
+        seen_paths.add(normalized)
         candidate = root
         for part in parts:
             candidate = candidate / part
@@ -383,15 +406,40 @@ def command_remove(args):
             fail(f"refusing to remove non-file package path: {relative}")
         targets.append(target)
 
-    # Only mutate the filesystem after every manifest entry has passed checks.
-    for target in targets:
-        if target.is_file():
-            target.unlink()
-    del db[args.name]
-    DB.parent.mkdir(parents=True, exist_ok=True)
-    tmp = DB.with_suffix(".tmp")
-    tmp.write_text(json.dumps(db, indent=2) + "\n")
-    tmp.replace(DB)
+    # Quarantine each file beside its original so a database-write failure
+    # can restore files even when package paths span different filesystems.
+    quarantined = []
+    try:
+        for target in targets:
+            if not target.is_file():
+                continue
+            fd, backup_name = tempfile.mkstemp(
+                prefix=".vpm-remove-", dir=target.parent
+            )
+            os.close(fd)
+            os.unlink(backup_name)
+            backup = pathlib.Path(backup_name)
+            target.replace(backup)
+            quarantined.append((backup, target))
+        del db[args.name]
+        write_installed_db(db)
+    except BaseException:
+        for backup, original in reversed(quarantined):
+            try:
+                backup.replace(original)
+            except OSError as exc:
+                print(f"vpm: warning: could not restore {original}: {exc}", file=sys.stderr)
+        raise
+
+    cleanup_failures = []
+    for backup, _original in quarantined:
+        try:
+            backup.unlink()
+        except OSError as exc:
+            cleanup_failures.append(f"{backup}: {exc}")
+    if cleanup_failures:
+        print("vpm: warning: removed files remain in quarantine: " +
+              "; ".join(cleanup_failures), file=sys.stderr)
     print(f"Removed recorded package files: {args.name}")
 
 def main():
