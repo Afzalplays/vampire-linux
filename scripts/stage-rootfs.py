@@ -71,8 +71,19 @@ def validate(archive):
 def stage(archive, destination):
     destination = pathlib.Path(destination)
     if destination.exists():
-        if not destination.is_dir() or any(destination.iterdir()):
-            raise ValueError("destination must be a new or empty directory")
+        if not destination.is_dir() or destination.is_symlink():
+            raise ValueError("destination must be a real directory")
+        existing = list(destination.iterdir())
+        # A freshly formatted ext filesystem creates lost+found. It is safe
+        # to preserve only that directory when it is empty; never merge an
+        # arbitrary pre-populated destination into an installed rootfs.
+        unexpected = [entry for entry in existing if entry.name != "lost+found"]
+        lost_found = destination / "lost+found"
+        if unexpected:
+            raise ValueError("destination must be new or contain only an empty lost+found directory")
+        if lost_found.exists():
+            if not lost_found.is_dir() or lost_found.is_symlink() or any(lost_found.iterdir()):
+                raise ValueError("destination lost+found must be an empty real directory")
     else:
         destination.mkdir(parents=True, mode=0o700)
     validate(archive)
