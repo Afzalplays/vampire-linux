@@ -78,6 +78,7 @@ SAFETY NOTES
   - vinstall stage only extracts a validated rootfs into an existing empty directory; it does not partition, format, or install a bootloader.
   - vinstall configure writes fstab and GRUB configuration into a staged root; the install command also installs the BIOS/UEFI GRUB bootloader.
   - vinstall plan and preflight are read-only. vinstall media mounts a matching ISO read-only.
+  - vinstall preflight is a read-only preflight: it inspects the target and reports blockers without changing disk contents.
   - vinstall install erases the selected whole disk only after rootfs checksum validation, storage preflight and the exact typed confirmation ERASE /dev/DISK.
   - The installer is experimental: use disposable disks until BIOS/UEFI installation, reboot and recovery tests pass.
   - VPM and OS updates are experimental; a production package repository and
