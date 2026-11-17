@@ -7,6 +7,7 @@ ROOTFS_TAR="$ROOT_DIR/out/vampire-os-0.1.0-dev-$EDITION-x86_64-rootfs.tar"
 WORK="${VAMPIRE_INSTALL_TEST_DIR:-$ROOT_DIR/out/installed-disk-tests}"
 TIMEOUT_SECONDS="${VAMPIRE_INSTALLED_BOOT_TIMEOUT:-60}"
 LOOPS=()
+VARS_FILES=()
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 need() { command -v "$1" >/dev/null 2>&1 || die "Missing test tool: $1"; }
 for tool in sudo losetup parted partprobe udevadm mkfs.ext4 mkfs.fat mount umount blkid grub-install qemu-system-x86_64 timeout tar sha256sum python3 truncate cp rm grep; do need "$tool"; done
@@ -21,7 +22,7 @@ VAMPIRE_ROOTFS_STAGE="$ROOT_DIR/scripts/stage-rootfs.py" "$ROOT_DIR/rootfs-overl
 cleanup() {
   set +e
   for loop in "${LOOPS[@]}"; do sudo losetup -d "$loop" >/dev/null 2>&1 || true; done
-  rm -f "$WORK"/OVMF_VARS.*.fd
+  for vars_file in "${VARS_FILES[@]}"; do rm -f -- "$vars_file"; done
 }
 trap cleanup EXIT HUP INT TERM
 
@@ -69,6 +70,7 @@ run_boot() {
     pair="$(find_ovmf)" || die "OVMF firmware pair not found"
     code="${pair%%|*}"
     vars_copy="$(mktemp "$WORK/OVMF_VARS.XXXXXX.fd")"
+    VARS_FILES+=("$vars_copy")
     cp "${pair#*|}" "$vars_copy"
     firmware=(-drive "if=pflash,format=raw,unit=0,readonly=on,file=$code"
               -drive "if=pflash,format=raw,unit=1,file=$vars_copy")
@@ -80,7 +82,9 @@ run_boot() {
     "${firmware[@]}" >/dev/null 2>"$stderr"
   status=$?
   set -e
-  [[ "$mode" != "uefi" ]] || rm -f "$vars_copy"
+  if [[ "$mode" == "uefi" ]]; then
+    rm -f -- "$vars_copy"
+  fi
   if [[ "$status" -ne 124 && "$status" -ne 143 ]]; then
     cat "$stderr" >&2 || true
     cat "$log" >&2 || true
