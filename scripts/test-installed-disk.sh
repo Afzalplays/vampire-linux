@@ -50,7 +50,6 @@ run_boot() {
     VAMPIRE_ROOTFS_STAGE="$ROOT_DIR/scripts/stage-rootfs.py" \
     VAMPIRE_INSTALL_CONFIGURER="$ROOT_DIR/scripts/configure-installed-root.py" \
     VAMPIRE_KERNEL_IMAGE="$ROOT_DIR/.build/output-$EDITION/images/bzImage" \
-    VAMPIRE_INITRAMFS_IMAGE="$ROOT_DIR/.build/output-$EDITION/images/rootfs.cpio.gz" \
     "$ROOT_DIR/rootfs-overlay/usr/bin/vinstall" install "$ROOTFS_TAR" "$loop" "$mode"
 
   rm -f "$log" "$stderr"
