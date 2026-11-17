@@ -63,6 +63,12 @@ jobs:
         env:
           VAMPIRE_EDITION: server
         run: bash scripts/test-live-iso.sh
+      - name: Verify ISO and installer rootfs checksums
+        run: |
+          cd out
+          sha256sum -c "vampire-os-0.1.0-dev-server-x86_64.iso.sha256"
+          sha256sum -c "vampire-os-0.1.0-dev-server-x86_64-rootfs.tar.sha256"
+
       - name: Upload server ISO and checksum
         uses: actions/upload-artifact@v4
         with:
