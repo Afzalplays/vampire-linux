@@ -13,8 +13,8 @@ valid_key() {
   esac
 }
 valid_value() {
-  key=$1 value=$2
-  case "$key:$value" in
+  _valid_key=$1 _valid_value=$2
+  case "$_valid_key:$_valid_value" in
     theme:dark|theme:light|theme:system) return 0 ;;
     accent:crimson|accent:rose|accent:ice|accent:violet) return 0 ;;
     surface_transparency:0|surface_transparency:10|surface_transparency:20|surface_transparency:30|surface_transparency:40|surface_transparency:50|surface_transparency:60) return 0 ;;
