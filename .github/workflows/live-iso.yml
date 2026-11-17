@@ -63,6 +63,17 @@ jobs:
       - name: Boot-test ISO in BIOS and UEFI
         run: bash scripts/test-live-iso.sh
 
+      - name: Preserve BIOS/UEFI installation and boot diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vampire-os-desktop-install-boot-logs
+          path: |
+            out/installed-disk-tests/
+            out/qemu-logs/
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: Verify ISO and installer rootfs checksums
         run: |
           cd out
