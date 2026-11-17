@@ -22,6 +22,19 @@ def main():
         (root / "boot/vmlinuz").write_bytes(b"kernel")
         result = run(root, "uefi", "--esp-uuid", ESP_UUID)
         assert result.returncode == 0, result.stderr
+
+        # The installed kernel must be a regular file, not a symlink that
+        # could resolve outside the target root during boot configuration.
+        kernel = root / "boot/vmlinuz"
+        kernel.unlink()
+        outside_kernel = pathlib.Path(tmp) / "outside-kernel"
+        outside_kernel.write_bytes(b"external kernel")
+        kernel.symlink_to(outside_kernel)
+        result = run(root, "bios")
+        assert result.returncode != 0
+        assert "symlinked target kernel" in result.stderr
+        kernel.unlink()
+        kernel.write_bytes(b"kernel")
         fstab = (root / "etc/fstab").read_text()
         grub = (root / "boot/grub/grub.cfg").read_text()
         assert f"UUID={ROOT_UUID} / ext4" in fstab
