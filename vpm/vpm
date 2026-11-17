@@ -73,6 +73,8 @@ def load_config():
         fail(f"configuration not found: {CONFIG} (see vpm/vpm.example.json)")
     try:
         cfg = json.loads(CONFIG.read_text())
+        if not isinstance(cfg, dict):
+            fail("configuration must be a JSON object")
         if not isinstance(cfg.get("repositories"), list) or not cfg["repositories"]:
             fail("no repositories configured")
         return cfg
@@ -165,7 +167,7 @@ def load_index(refresh=False):
             data = json.loads(index_file.read_text())
         except (OSError, json.JSONDecodeError) as exc:
             fail(f"invalid index from {name}: {exc}")
-        if data.get("format") != 1 or not isinstance(data.get("packages"), list):
+        if not isinstance(data, dict) or data.get("format") != 1 or not isinstance(data.get("packages"), list):
             fail(f"unsupported index format from {name}")
         for pkg in data["packages"]:
             try:
