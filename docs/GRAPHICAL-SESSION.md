@@ -33,7 +33,7 @@ are shipped in `/etc/vampire/settings.defaults`. During boot,
 `/usr/lib/vampire/settings-bootstrap` creates the initial file atomically,
 leaves valid user preferences untouched, and backs up an invalid file under
 `/var/lib/vampire` before attempting recovery. Invalid defaults are rejected,
-and a failed recovery does not overwrite the existing settings file.
+and a failed recovery does not overwrite the existing settings file. The appearance applier also rejects symlinked preference inputs, base configurations and output directories before writing runtime configuration.
 
 Use `vsettings list`, `vsettings set KEY VALUE`, `vsettings validate` and
 `vsettings reset` to manage preferences. Settings that have a corresponding
