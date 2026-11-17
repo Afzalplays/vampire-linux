@@ -45,9 +45,15 @@ def configure(root, root_uuid, mode, esp_uuid=None):
 
     etc = root / "etc"
     boot_grub = root / "boot" / "grub"
-    for directory in (etc, root / "boot", boot_grub):
-        if directory.exists() and directory.is_symlink():
+    vampire_etc = etc / "vampire"
+    for directory in (etc, root / "boot", boot_grub, vampire_etc):
+        if directory.is_symlink():
             raise ValueError(f"refusing symlinked target directory: {directory}")
+        if directory.exists() and not directory.is_dir():
+            raise ValueError(f"target configuration path is not a directory: {directory}")
+    for config_file in (etc / "fstab", boot_grub / "grub.cfg", vampire_etc / "install.conf"):
+        if config_file.is_symlink():
+            raise ValueError(f"refusing symlinked configuration file: {config_file}")
     if not (root / "boot" / "vmlinuz").is_file():
         raise ValueError("target root is missing /boot/vmlinuz")
 
