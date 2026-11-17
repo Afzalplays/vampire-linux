@@ -83,7 +83,7 @@ fi
 exec "$REAL_AWK" "\$@"
 EOF
 chmod 0755 "$TMP/bin/awk"
-if printf 'ERASE %s\\n' "$TMP/dev/vda" | "$ROOT/rootfs-overlay/usr/bin/vinstall" install "$TMP/rootfs.tar" "$TMP/dev/vda" bios > "$TMP/recheck-output" 2>&1; then
+if printf 'ERASE %s\n' "$TMP/dev/vda" | "$ROOT/rootfs-overlay/usr/bin/vinstall" install "$TMP/rootfs.tar" "$TMP/dev/vda" bios > "$TMP/recheck-output" 2>&1; then
   echo 'installer ignored a disk mounted after confirmation' >&2
   exit 1
 fi
