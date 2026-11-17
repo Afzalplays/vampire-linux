@@ -40,6 +40,9 @@ def main():
         assert result.returncode != 0
         result = run(root, "legacy")
         assert result.returncode != 0
+        invalid_partuuid = subprocess.run([sys.executable, str(SCRIPT), str(root), ROOT_UUID, "bios", "--root-partuuid", "not-a-guid"], text=True, capture_output=True)
+        assert invalid_partuuid.returncode != 0
+        assert "PARTUUID" in invalid_partuuid.stderr
 
         shutil.rmtree(root / "boot/grub")
         (root / "boot/grub").symlink_to(root / "etc")
