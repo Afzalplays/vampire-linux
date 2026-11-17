@@ -91,6 +91,14 @@ and hardware compatibility remain unverified. See
 [the live ISO build guide](build/README.md) and
 [the QEMU boot-test guide](docs/QEMU-BOOT-TESTS.md).
 
+The installed-root configuration contract now has focused Python regression
+tests for BIOS PARTUUID boot arguments, UEFI ESP mounting, malformed or missing
+identifiers, and symlink refusal. Run them from the repository root with:
+
+```sh
+python3 -m unittest discover -s tests -p 'test_*.py' -v
+```
+
 The custom graphical desktop, graphical installer, production package repository and transactional package manager, update application/rollback service, and supported hardware matrix remain incomplete. A confirmation-gated text-mode BIOS/UEFI erase-and-install path is implemented, but it still needs disposable-disk QEMU installation and installed-disk reboot validation. This is a developer live environment, not a finished or production-ready operating system.
 
 ## Independence and upstream sources
