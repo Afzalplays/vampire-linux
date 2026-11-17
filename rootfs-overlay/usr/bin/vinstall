@@ -447,11 +447,11 @@ configure_installed_root() {
   case "$firmware" in uefi|bios) ;; *) printf 'ERROR: firmware mode must be uefi or bios\n' >&2; return 2 ;; esac
   if [ "$firmware" = uefi ]; then
     [ -n "$esp_uuid" ] || { printf 'ERROR: UEFI requires ESP UUID\n' >&2; return 2; }
-    python3 "$configure_script" "$target_root" "$root_uuid" "$firmware" --root-partuuid "${VAMPIRE_ROOT_PARTUUID:?missing root PARTUUID}" --esp-uuid "$esp_uuid" --root-partuuid "${VAMPIRE_ROOT_PARTUUID:?missing root PARTUUID}"
+    python3 "$configure_script" "$target_root" "$root_uuid" "$firmware" --esp-uuid "$esp_uuid" --root-partuuid "${VAMPIRE_ROOT_PARTUUID:?missing root PARTUUID}"
     return $?
   fi
   [ -z "$esp_uuid" ] || { printf 'ERROR: BIOS mode does not accept ESP UUID\n' >&2; return 2; }
-  python3 "$configure_script" "$target_root" "$root_uuid" "$firmware"
+  python3 "$configure_script" "$target_root" "$root_uuid" "$firmware" --root-partuuid "${VAMPIRE_ROOT_PARTUUID:?missing root PARTUUID}"
   return $?
 }
 
