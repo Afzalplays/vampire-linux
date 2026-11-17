@@ -16,7 +16,11 @@ fi
 if [ -x /usr/bin/vsettings ] && [ -r /usr/lib/vampire/settings-bootstrap ]; then
   sh /usr/lib/vampire/settings-bootstrap || printf 'Vampire OS: settings bootstrap needs attention\n' >&2
 fi
-printf '\n  Vampire OS 0.1.0-dev | x86_64 live environment\n'
+if [ -r /etc/vampire/install.conf ]; then
+  printf '\n  Vampire OS 0.1.0-dev | x86_64 installed system\n'
+else
+  printf '\n  Vampire OS 0.1.0-dev | x86_64 live environment\n'
+fi
 printf '  Type vfetch for system information.\n\n'
 if [ -x /usr/bin/vctl ]; then
   /usr/bin/vctl start-all || printf 'Vampire OS: one or more services failed to start\n' >&2
