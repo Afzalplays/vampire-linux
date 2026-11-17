@@ -67,6 +67,20 @@ def main():
         result = run(root, "bios")
         assert result.returncode != 0
         assert not (outside / "fstab").exists()
+
+        # Reject a symlink anywhere in the target-root ancestry, not just
+        # symlinks at the final configuration directory.
+        real_parent = pathlib.Path(tmp) / "real-parent"
+        real_parent.mkdir()
+        linked_parent = pathlib.Path(tmp) / "linked-parent"
+        linked_parent.symlink_to(real_parent, target_is_directory=True)
+        linked_root = linked_parent / "target"
+        linked_root.mkdir()
+        (linked_root / "boot").mkdir()
+        (linked_root / "boot/vmlinuz").write_bytes(b"kernel")
+        result = run(linked_root, "bios")
+        assert result.returncode != 0
+        assert not (real_parent / "target/etc/fstab").exists()
     print("installed root configuration tests: PASS")
 
 
