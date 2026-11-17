@@ -56,8 +56,6 @@ def configure(root, root_uuid, mode, esp_uuid=None):
             raise ValueError(f"refusing symlinked configuration file: {config_file}")
     if not (root / "boot" / "vmlinuz").is_file():
         raise ValueError("target root is missing /boot/vmlinuz")
-    if not (root / "boot" / "initramfs.cpio.gz").is_file():
-        raise ValueError("target root is missing /boot/initramfs.cpio.gz")
 
     fstab = [
         f"UUID={root_uuid} / ext4 defaults,noatime 0 1",
@@ -79,7 +77,6 @@ def configure(root, root_uuid, mode, esp_uuid=None):
         "search --no-floppy --fs-uuid --set=root " + root_uuid,
         "menuentry 'Vampire OS' {",
         "    linux /boot/vmlinuz root=UUID=" + root_uuid + " rootwait rw console=tty0 console=ttyS0,115200n8 loglevel=4",
-        "    initrd /boot/initramfs.cpio.gz",
         "}",
         "",
     ]
