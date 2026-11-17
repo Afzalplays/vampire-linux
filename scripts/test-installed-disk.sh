@@ -12,7 +12,12 @@ LOOPS=()
 VARS_FILES=()
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 need() { command -v "$1" >/dev/null 2>&1 || die "Missing test tool: $1"; }
-if [[ -L "$WORK" ]]; then die "Refusing a symlinked test directory: $WORK"; fi
+WORK_ABS="$(python3 -c 'import os,sys; print(os.path.abspath(sys.argv[1]))' "$WORK")"
+check_path="$WORK_ABS"
+while [[ "$check_path" != / ]]; do
+  [[ ! -L "$check_path" ]] || die "Refusing a symlinked test path component: $check_path"
+  check_path="$(dirname -- "$check_path")"
+done
 mkdir -p "$WORK"
 WORK="$(cd -- "$WORK" && pwd -P)"
 [[ "$WORK" != / && "$WORK" != "$ROOT_DIR" ]] || die "Refusing an unsafe test directory: $WORK"
