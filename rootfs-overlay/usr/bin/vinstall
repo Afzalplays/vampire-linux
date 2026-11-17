@@ -58,7 +58,7 @@ resolve_sys_block() {
 installer_requirements() {
   printf 'Vampire OS installer tool readiness (diagnostic only)\n'
   missing=0
-  for tool in parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum readlink mktemp grep; do
+  for tool in parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum readlink mktemp grep awk id cp chmod sync mkdir rm dirname basename; do
     if command -v "$tool" >/dev/null 2>&1; then
       printf 'AVAILABLE  %s\n' "$tool"
     else
@@ -320,7 +320,7 @@ install_system() {
     echo "ERROR: live kernel must be a non-symlink regular file with content: $kernel_image." >&2
     return 1
   }
-  for tool in parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum mktemp grep; do
+  for tool in parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum mktemp grep awk id cp chmod sync mkdir rm dirname basename; do
     command -v "$tool" >/dev/null 2>&1 || { echo "ERROR: required installer tool is missing: $tool" >&2; return 1; }
   done
   (cd "$(dirname "$archive")" && sha256sum -c "$(basename "$archive").sha256") || { echo "ERROR: rootfs checksum verification failed." >&2; return 1; }
