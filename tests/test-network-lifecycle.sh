@@ -3,9 +3,10 @@ set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
-mkdir -p "$TMP/bin" "$TMP/sys/class/net/test0" "$TMP/run"
+mkdir -p "$TMP/bin" "$TMP/sys/class/net/test0" "$TMP/run" "$TMP/proc"
 export VAMPIRE_SYS_NET="$TMP/sys/class/net"
 export VAMPIRE_NETWORK_RUN_DIR="$TMP/run"
+export VAMPIRE_PROC_ROOT="$TMP/proc"
 export VAMPIRE_DHCP_HOOK="$ROOT/rootfs-overlay/usr/lib/vampire/udhcpc.script"
 export VAMPIRE_RESOLV_CONF="$TMP/resolv.conf"
 cat > "$TMP/bin/udhcpc" <<'MOCK'
@@ -35,6 +36,9 @@ chmod +x "$TMP/bin/"*
 export DHCP_CALLS="$TMP/dhcp-calls" NETWORK_CALLS="$TMP/network-calls"
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" start test0
 grep -q -- '-R -b -i test0' "$DHCP_CALLS"
+dhcp_pid="$(cat "$TMP/run/test0.pid")"
+mkdir -p "$TMP/proc/$dhcp_pid"
+printf 'udhcpc\\0-b\\0-i\\0test0\\0' > "$TMP/proc/$dhcp_pid/cmdline"
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" status test0 | grep -q 'DHCP client: running'
 PATH="$TMP/bin:$PATH" interface=test0 ip=192.0.2.25 subnet=255.255.255.0 router='192.0.2.1' dns='1.1.1.1 8.8.8.8' domain=example.test sh "$VAMPIRE_DHCP_HOOK" bound
 grep -q '192.0.2.25' "$NETWORK_CALLS"
