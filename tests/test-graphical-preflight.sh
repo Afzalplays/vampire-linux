@@ -29,4 +29,16 @@ if "$ROOT/rootfs-overlay/usr/bin/vgraphical" --unknown >/dev/null 2>&1; then
 fi
 "$ROOT/rootfs-overlay/usr/bin/vgraphical" --help | grep -q -- '--check'
 grep -q 'modprobe "$module"' "$ROOT/rootfs-overlay/usr/bin/vgraphical"
+# Configuration symlinks must not be followed.
+ln -s "$TMP/etc/xdg/weston/weston.ini" "$TMP/weston-link.ini"
+if VAMPIRE_WESTON_BASE="$TMP/weston-link.ini" VAMPIRE_FOOT_BASE="$TMP/etc/xdg/foot/foot.ini" VAMPIRE_DRM_DIR="$TMP/dev/dri" PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vgraphical" --check >/dev/null 2>&1; then
+  echo "vgraphical accepted a symlinked Weston configuration" >&2
+  exit 1
+fi
+# A symlink to a character device is not a valid DRM card node.
+ln -s /dev/null "$TMP/dev/dri/card0"
+if VAMPIRE_WESTON_BASE="$TMP/etc/xdg/weston/weston.ini" VAMPIRE_FOOT_BASE="$TMP/etc/xdg/foot/foot.ini" VAMPIRE_DRM_DIR="$TMP/dev/dri" PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vgraphical" --check >/dev/null 2>&1; then
+  echo "vgraphical accepted a symlinked DRM device" >&2
+  exit 1
+fi
 echo "Vampire graphical-session preflight tests passed."
