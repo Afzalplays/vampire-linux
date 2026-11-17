@@ -12,7 +12,11 @@ need() { command -v "$1" >/dev/null 2>&1 || die "Missing test tool: $1"; }
 for tool in sudo losetup parted partprobe udevadm mkfs.ext4 mkfs.fat mount umount blkid grub-install qemu-system-x86_64 timeout tar sha256sum python3 truncate cp rm grep; do need "$tool"; done
 [[ -s "$ROOTFS_TAR" ]] || die "Missing rootfs archive: $ROOTFS_TAR"
 [[ -s "$ROOTFS_TAR.sha256" ]] || die "Missing rootfs checksum: $ROOTFS_TAR.sha256"
+if [[ -L "$WORK" ]]; then die "Refusing a symlinked test directory: $WORK"; fi
 mkdir -p "$WORK"
+for mode in bios uefi; do
+  [[ ! -e "$WORK/$mode.img" ]] || die "Refusing to overwrite an existing test disk image: $WORK/$mode.img"
+done
 VAMPIRE_ROOTFS_STAGE="$ROOT_DIR/scripts/stage-rootfs.py" "$ROOT_DIR/rootfs-overlay/usr/bin/vinstall" validate "$ROOTFS_TAR"
 cleanup() {
   set +e
