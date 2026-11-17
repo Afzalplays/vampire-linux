@@ -67,4 +67,26 @@ if printf 'NO\n' | "$ROOT/rootfs-overlay/usr/bin/vinstall" install "$TMP/rootfs.
 fi
 grep -q 'Installation cancelled; disk was not changed' "$TMP/output"
 [ ! -e "$TMP/parted-called" ]
-echo 'installer destructive-confirmation test: PASS'
+
+# A disk can become mounted after the user confirms. Inject a mount on the
+# second preflight and prove the installer aborts before calling parted.
+REAL_AWK=$(command -v awk)
+cat > "$TMP/bin/awk" <<EOF
+#!/bin/sh
+count=0
+[ ! -f "$TMP/awk-count" ] || count=\$(cat "$TMP/awk-count")
+count=\$((count + 1))
+printf '%s\\n' "\$count" > "$TMP/awk-count"
+if [ "\$count" -eq 2 ]; then
+  printf '42 1 252:0 / /late-mount rw - ext4 /dev/vda rw\\n' > "$TMP/mountinfo"
+fi
+exec "$REAL_AWK" "\$@"
+EOF
+chmod 0755 "$TMP/bin/awk"
+if printf 'ERASE %s\\n' "$TMP/dev/vda" | "$ROOT/rootfs-overlay/usr/bin/vinstall" install "$TMP/rootfs.tar" "$TMP/dev/vda" bios > "$TMP/recheck-output" 2>&1; then
+  echo 'installer ignored a disk mounted after confirmation' >&2
+  exit 1
+fi
+grep -q 'mounted at /late-mount' "$TMP/recheck-output"
+[ ! -e "$TMP/parted-called" ]
+echo 'installer destructive-confirmation and immediate-recheck tests: PASS'
