@@ -7,7 +7,9 @@ case "$EDITION" in desktop|server) ;; *) printf 'ERROR: unsupported edition: %s\
 ROOTFS_TAR="$ROOT_DIR/out/vampire-os-0.1.0-dev-$EDITION-x86_64-rootfs.tar"
 WORK="${VAMPIRE_INSTALL_TEST_DIR:-$ROOT_DIR/out/installed-disk-tests}"
 TIMEOUT_SECONDS="${VAMPIRE_INSTALLED_BOOT_TIMEOUT:-60}"
-case "$TIMEOUT_SECONDS" in ""|*[!0-9]*|0) printf 'ERROR: VAMPIRE_INSTALLED_BOOT_TIMEOUT must be a positive integer.\\n' >&2; exit 2 ;; esac
+case "$TIMEOUT_SECONDS" in ""|*[!0-9]*) printf 'ERROR: VAMPIRE_INSTALLED_BOOT_TIMEOUT must be a positive integer.\\n' >&2; exit 2 ;; esac
+TIMEOUT_SECONDS=$((10#$TIMEOUT_SECONDS))
+(( TIMEOUT_SECONDS > 0 && TIMEOUT_SECONDS <= 86400 )) || { printf 'ERROR: VAMPIRE_INSTALLED_BOOT_TIMEOUT must be between 1 and 86400 seconds.\\n' >&2; exit 2; }
 LOOPS=()
 VARS_FILES=()
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
