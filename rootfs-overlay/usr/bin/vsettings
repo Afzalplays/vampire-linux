@@ -40,16 +40,16 @@ validate_file() {
   while IFS= read -r line || [ -n "$line" ]; do
     case "$line" in ''|'#'*) continue ;; esac
     case "$line" in
-      *=*) key=${line%%=*}; value=${line#*=} ;;
+      *=*) _file_key=${line%%=*}; _file_value=${line#*=} ;;
       *) echo "vsettings: malformed settings line" >&2; return 1 ;;
     esac
-    valid_key "$key" && valid_value "$key" "$value" || {
-      echo "vsettings: invalid setting: $key" >&2; return 1;
+    valid_key "$_file_key" && valid_value "$_file_key" "$_file_value" || {
+      echo "vsettings: invalid setting: $_file_key" >&2; return 1;
     }
     case "$seen" in
-      *" $key "*) echo "vsettings: duplicate setting: $key" >&2; return 1 ;;
+      *" $_file_key "*) echo "vsettings: duplicate setting: $_file_key" >&2; return 1 ;;
     esac
-    seen="$seen$key "
+    seen="$seen$_file_key "
   done < "$settings_file"
   echo "Vampire settings are valid."
 }
