@@ -38,6 +38,9 @@ jobs:
           bash -n build/build-live-iso.sh
           bash -n scripts/test-live-iso.sh
           bash -n scripts/test-installed-disk.sh
+          bash -n scripts/test-rootfs-artifact.sh
+          sh -n rootfs-overlay/usr/bin/vinstall
+          sh -n rootfs-overlay/usr/bin/vdesktop
           bash -n tests/test-vampire-shell.sh
           bash tests/test-vampire-shell.sh
           bash -n tests/test-uefi-boot-script.sh
@@ -77,6 +80,7 @@ jobs:
           bash -x tests/test-installer-preflight.sh
           bash -x tests/test-installer-requirements.sh
           bash -n tests/test-installer-confirmation.sh
+          bash -n tests/test-installer-preflight.sh
           bash -x tests/test-installer-confirmation.sh
           bash -x tests/test-installer-stage.sh
           bash -x tests/test-installer-configure.sh
