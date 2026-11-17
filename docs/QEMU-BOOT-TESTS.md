@@ -37,4 +37,4 @@ sudo -E bash scripts/test-installed-disk.sh
 sudo -E env VAMPIRE_EDITION=server bash scripts/test-installed-disk.sh
 ```
 
-The harness requires loop-device access, `sudo`, partitioning and filesystem tools, GRUB BIOS/UEFI utilities, QEMU, OVMF, and the matching Buildroot output under `.build/output-<edition>/images/`. Set `VAMPIRE_INSTALLED_BOOT_TIMEOUT` to change the boot window. Logs and disk images are retained in `out/installed-disk-tests/`; choose another fresh location with `VAMPIRE_INSTALL_TEST_DIR`.
+The harness requires loop-device access, `sudo`, partitioning and filesystem tools, GRUB BIOS/UEFI utilities, QEMU, OVMF, and the matching Buildroot output under `.build/output-<edition>/images/`. Set `VAMPIRE_INSTALLED_BOOT_TIMEOUT` to change the boot window (1–86400 seconds). Logs and disk images are retained in `out/installed-disk-tests/`; choose another fresh location with `VAMPIRE_INSTALL_TEST_DIR`.
