@@ -445,5 +445,39 @@ class ArchiveSafetyTests(unittest.TestCase):
                 vpm.CACHE = old_cache
             self.assertEqual(list(real.iterdir()), [])
 
+
+    def test_config_rejects_non_object_json(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            config = pathlib.Path(tmp) / "vpm.json"
+            config.write_text("[]")
+            old_config = vpm.CONFIG
+            try:
+                vpm.CONFIG = config
+                with self.assertRaises(SystemExit):
+                    vpm.load_config()
+            finally:
+                vpm.CONFIG = old_config
+
+    def test_index_rejects_non_object_json(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as tmp:
+            cache = pathlib.Path(tmp)
+            (cache / "stable-index.json").write_text("[]")
+            (cache / "stable-index.json.minisig").write_text("signature")
+            old_cache = vpm.CACHE
+            try:
+                vpm.CACHE = cache
+                config = {"repositories": [{
+                    "name": "stable",
+                    "url": "https://repo.example.invalid",
+                    "minisign_public_key": "trusted-key"
+                }]}
+                with patch.object(vpm, "load_config", return_value=config), patch.object(
+                        vpm, "verify_signature"):
+                    with self.assertRaises(SystemExit):
+                        vpm.load_index()
+            finally:
+                vpm.CACHE = old_cache
+
 if __name__ == "__main__":
     unittest.main()
