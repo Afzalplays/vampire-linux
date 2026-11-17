@@ -19,6 +19,7 @@ def main():
         root = pathlib.Path(tmp) / "target"
         (root / "boot").mkdir(parents=True)
         (root / "boot/vmlinuz").write_bytes(b"kernel")
+        (root / "boot/initramfs.cpio.gz").write_bytes(b"initramfs")
         result = run(root, "uefi", "--esp-uuid", ESP_UUID)
         assert result.returncode == 0, result.stderr
         fstab = (root / "etc/fstab").read_text()
@@ -27,6 +28,7 @@ def main():
         assert f"UUID={ESP_UUID} /boot/efi vfat" in fstab
         assert f"root=UUID={ROOT_UUID}" in grub
         assert "rootwait rw" in grub
+        assert "initrd /boot/initramfs.cpio.gz" in grub
         assert (root / "etc/vampire/install.conf").read_text().find("FIRMWARE=uefi") >= 0
 
         result = run(root, "bios")
