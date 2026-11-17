@@ -31,6 +31,13 @@ def fail(message):
     print("vpm: error:", message, file=sys.stderr)
     raise SystemExit(1)
 
+def reject_symlink_components(path, label):
+    """Reject symlinks in existing path components before privileged I/O."""
+    absolute = pathlib.Path(os.path.abspath(os.fspath(path)))
+    for component in reversed((absolute, *absolute.parents)):
+        if component.is_symlink():
+            fail(f"refusing symlinked {label} path component: {component}")
+
 def is_https_url(value):
     parsed = urllib.parse.urlparse(value if isinstance(value, str) else "")
     return parsed.scheme == "https" and bool(parsed.netloc) and not parsed.username and not parsed.password
@@ -61,6 +68,7 @@ def validate_package_entry(pkg, repo_base):
     return pkg
 
 def load_config():
+    reject_symlink_components(CONFIG, "configuration")
     if not CONFIG.is_file():
         fail(f"configuration not found: {CONFIG} (see vpm/vpm.example.json)")
     try:
@@ -177,7 +185,9 @@ def installed_db():
 
 def write_installed_db(value):
     """Atomically replace the package database using a private unique temp file."""
+    reject_symlink_components(DB, "installed database")
     DB.parent.mkdir(parents=True, exist_ok=True)
+    reject_symlink_components(DB, "installed database")
     fd, temp_name = tempfile.mkstemp(
         prefix="." + DB.name + ".", suffix=".tmp", dir=DB.parent
     )
@@ -232,7 +242,9 @@ def command_list(_args):
 
 def safe_extract(archive, destination):
     """Extract regular files only; roll back files created if extraction fails."""
+    reject_symlink_components(destination, "package extraction destination")
     destination = destination.resolve()
+    reject_symlink_components(destination, "package extraction destination")
     written = []
     created_dirs = []
     with tarfile.open(archive, "r:gz") as tf:
