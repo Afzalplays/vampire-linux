@@ -83,8 +83,10 @@ def fetch(url, destination, limit):
     parsed = urllib.parse.urlparse(url)
     if parsed.scheme != "https" or not parsed.netloc:
         fail("repository and package URLs must use HTTPS")
-    destination = pathlib.Path(destination)
+    destination = pathlib.Path(os.path.abspath(os.fspath(destination)))
+    reject_symlink_components(destination.parent, "download destination")
     destination.parent.mkdir(parents=True, exist_ok=True)
+    reject_symlink_components(destination.parent, "download destination")
     fd, temp_name = tempfile.mkstemp(
         prefix="." + destination.name + ".", suffix=".download",
         dir=destination.parent,
@@ -136,7 +138,9 @@ def verify_signature(index_path, signature_path, public_key):
 
 def load_index(refresh=False):
     cfg = load_config()
+    reject_symlink_components(CACHE, "package cache")
     CACHE.mkdir(parents=True, exist_ok=True)
+    reject_symlink_components(CACHE, "package cache")
     merged = {}
     for repo in cfg["repositories"]:
         if not isinstance(repo, dict):
@@ -175,6 +179,7 @@ def load_index(refresh=False):
     return merged
 
 def installed_db():
+    reject_symlink_components(DB, "installed database")
     try:
         value = json.loads(DB.read_text())
         return value if isinstance(value, dict) else {}
@@ -374,7 +379,10 @@ def command_install(args):
     if not pending:
         print(f"{args.name} is already recorded as installed.")
         return
+    reject_symlink_components(CACHE, "package cache")
     CACHE.mkdir(parents=True, exist_ok=True)
+    reject_symlink_components(CACHE, "package cache")
+    reject_symlink_components(ROOT, "installation root")
     downloads = []
     for pkg in pending:
         url = urllib.parse.urljoin(pkg["_repo_base"], pkg["url"])
