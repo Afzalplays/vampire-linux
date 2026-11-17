@@ -65,8 +65,11 @@ def configure(root, root_uuid, mode, esp_uuid=None, root_partuuid=None):
     for config_file in (etc / "fstab", boot_grub / "grub.cfg", vampire_etc / "install.conf"):
         if config_file.is_symlink():
             raise ValueError(f"refusing symlinked configuration file: {config_file}")
-    if not (root / "boot" / "vmlinuz").is_file():
-        raise ValueError("target root is missing /boot/vmlinuz")
+    kernel = root / "boot" / "vmlinuz"
+    if kernel.is_symlink():
+        raise ValueError("refusing symlinked target kernel: /boot/vmlinuz")
+    if not kernel.is_file():
+        raise ValueError("target root is missing a regular /boot/vmlinuz file")
 
     fstab = [
         f"UUID={root_uuid} / ext4 defaults,noatime 0 1",
