@@ -68,6 +68,11 @@ printf 'unknown_key=bad\n' > "$CONFIG"
 if "$TMP/vsettings" validate >/dev/null 2>&1; then
   echo "settings validation accepted an unknown key" >&2; exit 1
 fi
+cp "$CONFIG" "$TMP/settings.invalid"
+if "$TMP/vsettings" set theme light >/dev/null 2>&1; then
+  echo "settings update modified an invalid settings file" >&2; exit 1
+fi
+cmp -s "$CONFIG" "$TMP/settings.invalid" || { echo "invalid settings file changed after refused update" >&2; exit 1; }
 cp "$TMP/settings.good" "$CONFIG"
 printf 'theme=dark\ntheme=light\n' > "$CONFIG"
 if "$TMP/vsettings" validate >/dev/null 2>&1; then
