@@ -74,9 +74,15 @@ case "$1" in
     key=$2 value=$3
     valid_key "$key" || { echo "vsettings: unknown setting: $key" >&2; exit 1; }
     valid_value "$key" "$value" || { echo "vsettings: invalid value for $key: $value" >&2; exit 1; }
+    if [ -e "$CONFIG" ]; then
+      validate_file >/dev/null || {
+        echo "vsettings: refusing to modify an invalid settings file" >&2
+        exit 1
+      }
+    fi
     dir=${CONFIG%/*}; [ "$dir" = "$CONFIG" ] && dir=.
     mkdir -p "$dir"
-    tmp="$CONFIG.tmp.$$"
+    tmp="$CONFIG.tmp.$"
     (set -C; : > "$tmp") 2>/dev/null || { echo "vsettings: temporary file already exists" >&2; exit 1; }
     trap 'rm -f "$tmp"' 0
   trap 'exit 1' HUP INT TERM
