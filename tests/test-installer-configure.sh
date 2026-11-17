@@ -20,6 +20,16 @@ grep -q "UUID=$ESP_UUID /boot/efi vfat" "$TARGET/etc/fstab"
 VAMPIRE_ROOT_PARTUUID="$ROOT_PARTUUID" VAMPIRE_INSTALL_CONFIGURER="$ROOT/scripts/configure-installed-root.py" \
   "$ROOT/rootfs-overlay/usr/bin/vinstall" configure "$TARGET" "$ROOT_UUID" bios
 ! grep -q '/boot/efi' "$TARGET/etc/fstab"
+if VAMPIRE_ROOT_PARTUUID=not-a-guid VAMPIRE_INSTALL_CONFIGURER="$ROOT/scripts/configure-installed-root.py" \\
+  "$ROOT/rootfs-overlay/usr/bin/vinstall" configure "$TARGET" "$ROOT_UUID" bios >/dev/null 2>&1; then
+  echo "configure unexpectedly accepted malformed root PARTUUID" >&2
+  exit 1
+fi
+if env -u VAMPIRE_ROOT_PARTUUID VAMPIRE_INSTALL_CONFIGURER="$ROOT/scripts/configure-installed-root.py" \\
+  "$ROOT/rootfs-overlay/usr/bin/vinstall" configure "$TARGET" "$ROOT_UUID" bios >/dev/null 2>&1; then
+  echo "configure unexpectedly accepted missing root PARTUUID" >&2
+  exit 1
+fi
 if VAMPIRE_INSTALL_CONFIGURER="$ROOT/scripts/configure-installed-root.py" \
   "$ROOT/rootfs-overlay/usr/bin/vinstall" configure "$TARGET" "$ROOT_UUID" uefi >/dev/null 2>&1; then
   echo "UEFI configure unexpectedly accepted missing ESP UUID" >&2
