@@ -9,7 +9,7 @@ DRM_DIR=${VAMPIRE_DRM_DIR:-/dev/dri}
 
 error() { printf 'Vampire Desktop: %s\n' "$*" >&2; }
 require_file() {
-  [ -r "$1" ] || { error "required configuration is missing: $1"; return 1; }
+  [ ! -L "$1" ] && [ -f "$1" ] && [ -r "$1" ] || { error "required configuration is missing or unsafe: $1"; return 1; }
 }
 check() {
   command -v weston >/dev/null 2>&1 || { error "Weston is not installed."; return 1; }
@@ -19,6 +19,7 @@ check() {
   [ -d "$DRM_DIR" ] || { error "no $DRM_DIR directory; enable a kernel DRM/KMS driver and firmware."; return 1; }
   found=
   for card in "$DRM_DIR"/card*; do
+    [ -L "$card" ] && continue
     [ -c "$card" ] || continue
     found=$card
     break
