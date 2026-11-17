@@ -10,10 +10,18 @@ UUID = re.compile(r"^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}
 FAT_UUID = re.compile(r"^[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}$")
 
 
+def reject_symlink_components(path):
+    """Reject symlinks in every existing component without resolving through them."""
+    absolute = pathlib.Path(os.path.abspath(os.fspath(path)))
+    for component in reversed((absolute, *absolute.parents)):
+        if component.is_symlink():
+            raise ValueError(f"refusing symlinked target path component: {component}")
+
+
 def atomic_write(path, content):
+    reject_symlink_components(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    if path.is_symlink() or path.parent.is_symlink():
-        raise ValueError(f"refusing symlinked configuration path: {path}")
+    reject_symlink_components(path)
     fd, temp_name = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as stream:
@@ -30,7 +38,8 @@ def atomic_write(path, content):
 
 
 def configure(root, root_uuid, mode, esp_uuid=None, root_partuuid=None):
-    root = pathlib.Path(root).resolve()
+    root = pathlib.Path(os.path.abspath(os.fspath(root)))
+    reject_symlink_components(root)
     if not root.is_dir():
         raise ValueError("target root must be an existing directory")
     if not UUID.fullmatch(root_uuid):
