@@ -110,6 +110,17 @@ test "$("$TMP/vsettings" get voice_access)" = true
 test "$("$TMP/vsettings" get theme)" = dark
 grep -q "^background-color=0xff08080c$" "$TMP/weston.ini"
 
+# Applying preferences must reject symlinked settings inputs and output roots.
+ln -s "$CONFIG" "$TMP/settings-link.conf"
+if VAMPIRE_SETTINGS_FILE="$TMP/settings-link.conf" "$TMP/vsettings" apply >/dev/null 2>&1; then
+  echo "settings apply accepted a symlinked preferences file" >&2; exit 1
+fi
+mkdir -p "$TMP/real-xdg"
+ln -s "$TMP/real-xdg" "$TMP/xdg-link"
+if XDG_CONFIG_HOME="$TMP/xdg-link" "$TMP/vsettings" apply >/dev/null 2>&1; then
+  echo "settings apply accepted a symlinked output directory" >&2; exit 1
+fi
+
 cat > "$TMP/mockbin/vpm" <<'MOCK'
 #!/bin/sh
 exit 1
