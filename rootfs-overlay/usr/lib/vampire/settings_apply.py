@@ -21,6 +21,7 @@ def fail(message: str) -> None:
 
 def load_settings() -> dict[str, str]:
     path = pathlib.Path(os.environ.get("VAMPIRE_SETTINGS_FILE", "/etc/vampire/settings.conf"))
+    reject_symlink_path(path)
     if not path.is_file():
         fail("settings file is missing; run vsettings reset first")
     values: dict[str, str] = {}
