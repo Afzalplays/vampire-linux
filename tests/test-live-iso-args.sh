@@ -10,7 +10,7 @@ for value in invalid "../server" Desktop; do
   fi
   grep -q 'unsupported edition' "$TMP/edition.out"
 done
-for value in 0 abc -1; do
+for value in 0 00 abc -1 86401; do
   if VAMPIRE_QEMU_TIMEOUT="$value" bash "$ROOT/scripts/test-live-iso.sh" >"$TMP/timeout.out" 2>&1; then
     echo "live ISO harness accepted invalid timeout: $value" >&2
     exit 1
