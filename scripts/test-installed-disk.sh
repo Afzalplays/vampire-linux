@@ -3,9 +3,11 @@
 set -Eeuo pipefail
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 EDITION="${VAMPIRE_EDITION:-desktop}"
+case "$EDITION" in desktop|server) ;; *) printf 'ERROR: unsupported edition: %s\\n' "$EDITION" >&2; exit 2 ;; esac
 ROOTFS_TAR="$ROOT_DIR/out/vampire-os-0.1.0-dev-$EDITION-x86_64-rootfs.tar"
 WORK="${VAMPIRE_INSTALL_TEST_DIR:-$ROOT_DIR/out/installed-disk-tests}"
 TIMEOUT_SECONDS="${VAMPIRE_INSTALLED_BOOT_TIMEOUT:-60}"
+case "$TIMEOUT_SECONDS" in ""|*[!0-9]*|0) printf 'ERROR: VAMPIRE_INSTALLED_BOOT_TIMEOUT must be a positive integer.\\n' >&2; exit 2 ;; esac
 LOOPS=()
 VARS_FILES=()
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
@@ -15,6 +17,8 @@ for tool in sudo losetup parted partprobe udevadm mkfs.ext4 mkfs.fat mount umoun
 [[ -s "$ROOTFS_TAR.sha256" ]] || die "Missing rootfs checksum: $ROOTFS_TAR.sha256"
 if [[ -L "$WORK" ]]; then die "Refusing a symlinked test directory: $WORK"; fi
 mkdir -p "$WORK"
+WORK="$(cd -- "$WORK" && pwd -P)"
+[[ "$WORK" != / && "$WORK" != "$ROOT_DIR" ]] || die "Refusing an unsafe test directory: $WORK"
 for mode in bios uefi; do
   [[ ! -e "$WORK/$mode.img" && ! -L "$WORK/$mode.img" ]] || die "Refusing to overwrite an existing test disk image: $WORK/$mode.img"
 done
