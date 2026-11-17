@@ -24,3 +24,17 @@ test. Set `VAMPIRE_INSTALL_TEST_DIR` to retain test images and serial/QEMU logs
 outside the default `out/installed-disk-tests/` directory; the harness refuses
 to overwrite existing BIOS or UEFI disk images. Set `VAMPIRE_QEMU_TIMEOUT` to adjust the per-mode
 boot window and `VAMPIRE_QEMU_LOG_DIR` to change the log directory.
+
+
+## Installed-disk BIOS and UEFI tests
+
+The installed-disk harness creates fresh 8 GiB disposable images, attaches loop devices, and invokes the same `vinstall install` path shipped in the live ISO. It then boots each installed image under SeaBIOS and OVMF and requires both the installed-system init banner and a serial getty prompt. Kernel panic, missing root filesystem, missing init, unexpected QEMU exit, or failure to reach login fails the test. It never reuses or overwrites existing disk images.
+
+Run after the edition rootfs archive and kernel have been built:
+
+```sh
+sudo -E bash scripts/test-installed-disk.sh
+sudo -E env VAMPIRE_EDITION=server bash scripts/test-installed-disk.sh
+```
+
+The harness requires loop-device access, `sudo`, partitioning and filesystem tools, GRUB BIOS/UEFI utilities, QEMU, OVMF, and the matching Buildroot output under `.build/output-<edition>/images/`. Set `VAMPIRE_INSTALLED_BOOT_TIMEOUT` to change the boot window. Logs and disk images are retained in `out/installed-disk-tests/`; choose another fresh location with `VAMPIRE_INSTALL_TEST_DIR`.
