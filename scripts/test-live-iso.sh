@@ -15,6 +15,8 @@ need xorriso
 need timeout
 need gzip
 need cpio
+need tar
+need sha256sum
 [[ -s "$ISO" ]] || die "ISO not found: $ISO"
 mkdir -p "$LOG_DIR"
 
