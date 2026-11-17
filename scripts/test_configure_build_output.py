@@ -38,6 +38,10 @@ class BuildOutputConfigurationTests(unittest.TestCase):
                 "BR2_ROOTFS_OVERLAY=" + json.dumps(str(overlay.resolve())),
                 config.read_text())
             self.assertIn("BR2_ROOTFS_POST_BUILD_SCRIPT=", config.read_text())
+            fragments = next(line for line in config.read_text().splitlines()
+                             if line.startswith("BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="))
+            self.assertIn("vampire-installer-kernel.fragment", fragments)
+            self.assertNotIn("vampire-desktop-kernel.fragment", fragments)
             self.assertIn('EDITION="server"',
                           (overlay / "etc/vampire/os.conf").read_text())
             self.assertIn(
@@ -50,8 +54,20 @@ class BuildOutputConfigurationTests(unittest.TestCase):
             config, overlay = self.make_fixture(root)
             module.configure(config, overlay, "desktop")
             self.assertIn("BR2_ROOTFS_POST_BUILD_SCRIPT=", config.read_text())
+            fragments = next(line for line in config.read_text().splitlines()
+                             if line.startswith("BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="))
+            self.assertIn("vampire-installer-kernel.fragment", fragments)
+            self.assertIn("vampire-desktop-kernel.fragment", fragments)
             self.assertIn('EDITION="desktop"',
                           (overlay / "etc/vampire/os.conf").read_text())
+
+    def test_installer_kernel_fragment_keeps_boot_storage_drivers_builtin(self):
+        fragment = (SCRIPT.parent.parent / "build/vampire-installer-kernel.fragment").read_text()
+        for option in ("CONFIG_DEVTMPFS=y", "CONFIG_EXT4_FS=y", "CONFIG_VFAT_FS=y",
+                       "CONFIG_EFI_PARTITION=y", "CONFIG_MSDOS_PARTITION=y",
+                       "CONFIG_BLK_DEV_NVME=y", "CONFIG_ATA=y", "CONFIG_VIRTIO_BLK=y"):
+            with self.subTest(option=option):
+                self.assertIn(option, fragment)
 
     def test_duplicate_assignment_is_rejected(self):
         with tempfile.TemporaryDirectory() as tmp:
