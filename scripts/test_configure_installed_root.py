@@ -27,7 +27,8 @@ def main():
         assert f"UUID={ROOT_UUID} / ext4" in fstab
         assert f"UUID={ESP_UUID} /boot/efi vfat" in fstab
         assert f"root=PARTUUID={ROOT_PARTUUID}" in grub
-        assert "rootwait rw" in grub\n        assert "initrd " not in grub
+        assert "rootwait rw" in grub
+        assert "initrd " not in grub
         assert (root / "etc/vampire/install.conf").read_text().find("FIRMWARE=uefi") >= 0
 
         result = run(root, "bios")
