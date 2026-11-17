@@ -69,6 +69,20 @@ class VampireMonitorTests(unittest.TestCase):
                 result = self.run_monitor("--watch", interval)
                 self.assertEqual(result.returncode, 2)
 
+    def test_watch_interval_one_starts_refresh_loop(self):
+        env = os.environ.copy()
+        env.update({
+            "VAMPIRE_PROC_ROOT": str(self.proc),
+            "VAMPIRE_SYS_ROOT": str(self.sys),
+            "VAMPIRE_ROOT_MOUNT": str(self.base),
+        })
+        result = subprocess.run(
+            ["timeout", "1", "/bin/sh", str(MONITOR), "--watch", "1"],
+            text=True, capture_output=True, env=env, check=False,
+        )
+        self.assertEqual(result.returncode, 124, result.stderr)
+        self.assertIn("VAMPIRE MONITOR", result.stdout)
+
     def test_unknown_option_is_rejected(self):
         result = self.run_monitor("--unknown")
         self.assertEqual(result.returncode, 2)
