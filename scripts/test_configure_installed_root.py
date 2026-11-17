@@ -47,6 +47,7 @@ def main():
         # Never follow a pre-existing symlink while writing install metadata.
         (root / "boot/grub").unlink()
         (root / "boot/grub").mkdir()
+        (root / "etc/vampire/install.conf").unlink()
         (root / "etc/vampire").rmdir()
         outside = pathlib.Path(tmp) / "outside"
         outside.mkdir()
