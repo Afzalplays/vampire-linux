@@ -80,6 +80,7 @@ feature release-ready.
 - [x] Implement guided text-mode erase-and-install flow in the console launcher (graphical installer remains pending).
 - [x] Implement GPT partitioning, FAT32/ext4 formatting, rootfs staging, UUID configuration, BIOS/UEFI GRUB installation and exact typed destructive confirmation.
 - [x] Verify firmware-specific GRUB boot files and generated configuration exist before reporting installer success.
+- [x] Copy the live initramfs into the installed system and reference it from installed GRUB configuration.
 - [x] Discover and mount the installation ISO payload read-only for offline installation.
 - [ ] Validate installer end-to-end on disposable BIOS and UEFI QEMU disks, including installed-disk reboot and failure cleanup.
 - [ ] Add encrypted installation, recovery media, boot repair and tested restore workflow.
