@@ -345,6 +345,25 @@ class ArchiveSafetyTests(unittest.TestCase):
                 vpm.ROOT, vpm.DB = old_root, old_db
 
 
+    def test_extract_rejects_existing_symlink_inside_destination(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = pathlib.Path(tmp)
+            root = base / "root"
+            outside = base / "outside"
+            root.mkdir()
+            outside.mkdir()
+            (root / "usr").symlink_to(outside, target_is_directory=True)
+            archive = base / "package.tar.gz"
+            with tarfile.open(archive, "w:gz") as tf:
+                payload = b"must not follow an existing directory symlink"
+                info = tarfile.TarInfo("usr/share/payload")
+                info.size = len(payload)
+                tf.addfile(info, io.BytesIO(payload))
+            with self.assertRaises(SystemExit):
+                vpm.safe_extract(archive, root)
+            self.assertEqual(list(outside.iterdir()), [])
+            self.assertTrue((root / "usr").is_symlink())
+
     def test_extract_rejects_symlinked_destination_ancestor(self):
         with tempfile.TemporaryDirectory() as tmp:
             base = pathlib.Path(tmp)
