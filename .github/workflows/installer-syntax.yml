@@ -6,6 +6,8 @@ on:
     paths:
       - "rootfs-overlay/usr/bin/vinstall"
       - "rootfs-overlay/usr/bin/vdesktop"
+      - "rootfs-overlay/usr/bin/vmonitor"
+      - "tests/test_vmonitor.py"
       - "scripts/stage-rootfs.py"
       - "scripts/configure-installed-root.py"
       - "scripts/configure-build-output.py"
@@ -33,6 +35,7 @@ jobs:
         run: |
           sh -n rootfs-overlay/usr/bin/vinstall
           sh -n rootfs-overlay/usr/bin/vdesktop
+          sh -n rootfs-overlay/usr/bin/vmonitor
       - name: Compile installer Python helpers
         run: |
           python3 -m py_compile scripts/stage-rootfs.py
