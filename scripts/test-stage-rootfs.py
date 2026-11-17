@@ -103,6 +103,16 @@ def main():
         assert result.returncode != 0
         assert list(linked_target.iterdir()) == []
 
+        # A real destination below a symlinked parent must also be rejected.
+        real_parent = root / "real-parent"
+        real_parent.mkdir()
+        linked_parent = root / "linked-parent"
+        linked_parent.symlink_to(real_parent, target_is_directory=True)
+        nested_destination = linked_parent / "nested-stage"
+        result = run(good, nested_destination)
+        assert result.returncode != 0
+        assert not (real_parent / "nested-stage").exists()
+
         bad = root / "bad.tar"
         make_tar(bad, [("../escape", b"x"), ("etc/os-release", b"x"),
                        ("sbin/init", b"x"), ("bin/busybox", b"x")])
