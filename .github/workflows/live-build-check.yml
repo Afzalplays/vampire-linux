@@ -137,7 +137,10 @@ jobs:
           grep -qx 'BR2_PACKAGE_NFTABLES=y' build/vampire_server_defconfig
           test -s scripts/post-build-vampire.py
           test -s scripts/configure-installed-root.py
-          for option in CONFIG_EXT4_FS CONFIG_SCSI CONFIG_BLK_DEV_SD CONFIG_SATA_AHCI CONFIG_BLK_DEV_NVME CONFIG_VIRTIO_BLK CONFIG_EFI_PARTITION; do\n            grep -qx \"$option=y\" build/vampire-installer-kernel.fragment\n          done\n          test -s build/grub.cfg
+          for option in CONFIG_EXT4_FS CONFIG_SCSI CONFIG_BLK_DEV_SD CONFIG_SATA_AHCI CONFIG_BLK_DEV_NVME CONFIG_VIRTIO_BLK CONFIG_EFI_PARTITION; do
+            grep -qx "$option=y" build/vampire-installer-kernel.fragment
+          done
+          test -s build/grub.cfg
           test -s rootfs-overlay/etc/inittab
           test -s rootfs-overlay/etc/os-release
           test -x rootfs-overlay/usr/bin/vgraphical
