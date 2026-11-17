@@ -395,5 +395,55 @@ class ArchiveSafetyTests(unittest.TestCase):
                 vpm.CONFIG = old_config
             self.assertFalse((real_parent / "vpm.json").exists())
 
+
+    def test_download_rejects_symlinked_parent_directory(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as tmp:
+            base = pathlib.Path(tmp)
+            real = base / "real"
+            real.mkdir()
+            linked = base / "linked"
+            linked.symlink_to(real, target_is_directory=True)
+            destination = linked / "index.json"
+            with patch.object(vpm.urllib.request, "urlopen") as urlopen:
+                with self.assertRaises(SystemExit):
+                    vpm.fetch("https://repo.example.invalid/index.json", destination, 1024)
+                urlopen.assert_not_called()
+            self.assertFalse((real / "index.json").exists())
+
+    def test_installed_database_read_rejects_symlinked_parent(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = pathlib.Path(tmp)
+            real = base / "real"
+            real.mkdir()
+            linked = base / "linked"
+            linked.symlink_to(real, target_is_directory=True)
+            old_db = vpm.DB
+            try:
+                vpm.DB = linked / "installed.json"
+                with self.assertRaises(SystemExit):
+                    vpm.installed_db()
+            finally:
+                vpm.DB = old_db
+            self.assertFalse((real / "installed.json").exists())
+
+    def test_cache_index_rejects_symlinked_cache_directory(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as tmp:
+            base = pathlib.Path(tmp)
+            real = base / "real"
+            real.mkdir()
+            linked = base / "linked"
+            linked.symlink_to(real, target_is_directory=True)
+            old_cache = vpm.CACHE
+            try:
+                vpm.CACHE = linked
+                with patch.object(vpm, "load_config", return_value={"repositories": []}):
+                    with self.assertRaises(SystemExit):
+                        vpm.load_index()
+            finally:
+                vpm.CACHE = old_cache
+            self.assertEqual(list(real.iterdir()), [])
+
 if __name__ == "__main__":
     unittest.main()
