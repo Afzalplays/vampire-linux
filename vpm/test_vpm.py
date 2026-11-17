@@ -317,6 +317,26 @@ class ArchiveSafetyTests(unittest.TestCase):
             self.assertTrue(unrelated.exists())
             self.assertNotIn("sample", __import__("json").loads(db_path.read_text()))
 
+    def test_remove_rejects_symlinked_installation_root(self):
+        from types import SimpleNamespace
+        with tempfile.TemporaryDirectory() as tmp:
+            base = pathlib.Path(tmp)
+            real_root = base / "real-root"
+            real_root.mkdir()
+            linked_root = base / "linked-root"
+            linked_root.symlink_to(real_root, target_is_directory=True)
+            db_path = base / "installed.json"
+            db_path.write_text('{"sample": {"version": "1.0", "files": ["owned.txt"]}}')
+            old_root, old_db = vpm.ROOT, vpm.DB
+            try:
+                vpm.ROOT, vpm.DB = linked_root, db_path
+                with self.assertRaises(SystemExit):
+                    vpm.command_remove(SimpleNamespace(name="sample"))
+            finally:
+                vpm.ROOT, vpm.DB = old_root, old_db
+            self.assertEqual(list(real_root.iterdir()), [])
+            self.assertIn("sample", __import__("json").loads(db_path.read_text()))
+
     def test_remove_refuses_final_symlink_without_touching_target(self):
         from types import SimpleNamespace
         with tempfile.TemporaryDirectory() as tmp:
