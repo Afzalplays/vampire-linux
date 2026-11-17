@@ -1,4 +1,4 @@
-name: Installer syntax checks
+name: Installer syntax and safety checks
 
 on:
   push:
@@ -9,6 +9,8 @@ on:
       - "scripts/stage-rootfs.py"
       - "scripts/configure-installed-root.py"
       - "scripts/configure-build-output.py"
+      - "tests/test_configure_installed_root.py"
+      - "tests/test_stage_rootfs.py"
       - "build/vampire-installer-kernel.fragment"
       - ".github/workflows/installer-syntax.yml"
   pull_request:
@@ -17,10 +19,13 @@ on:
       - "rootfs-overlay/usr/bin/vdesktop"
       - "scripts/stage-rootfs.py"
       - "scripts/configure-installed-root.py"
+      - "scripts/configure-build-output.py"
+      - "tests/test_configure_installed_root.py"
+      - "tests/test_stage_rootfs.py"
       - ".github/workflows/installer-syntax.yml"
 
 jobs:
-  syntax:
+  syntax-and-safety:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,3 +38,6 @@ jobs:
           python3 -m py_compile scripts/stage-rootfs.py
           python3 -m py_compile scripts/configure-installed-root.py
           python3 -m py_compile scripts/configure-build-output.py
+      - name: Run installer and rootfs safety regression tests
+        run: |
+          python3 -m unittest discover -s tests -p 'test_*.py' -v
