@@ -29,12 +29,14 @@ def atomic_write(path, content):
             pass
 
 
-def configure(root, root_uuid, mode, esp_uuid=None):
+def configure(root, root_uuid, mode, esp_uuid=None, root_partuuid=None):
     root = pathlib.Path(root).resolve()
     if not root.is_dir():
         raise ValueError("target root must be an existing directory")
     if not UUID.fullmatch(root_uuid):
         raise ValueError("root filesystem UUID must be a canonical UUID")
+    if not root_partuuid or not UUID.fullmatch(root_partuuid):
+        raise ValueError("root partition PARTUUID must be a canonical GPT UUID")
     if mode not in ("uefi", "bios"):
         raise ValueError("firmware mode must be uefi or bios")
     if mode == "uefi":
@@ -76,7 +78,7 @@ def configure(root, root_uuid, mode, esp_uuid=None):
         "insmod ext2",
         "search --no-floppy --fs-uuid --set=root " + root_uuid,
         "menuentry 'Vampire OS' {",
-        "    linux /boot/vmlinuz root=UUID=" + root_uuid + " rootwait rw console=tty0 console=ttyS0,115200n8 loglevel=4",
+        "    linux /boot/vmlinuz root=PARTUUID=" + root_partuuid + " rootwait rw console=tty0 console=ttyS0,115200n8 loglevel=4",
         "}",
         "",
     ]
@@ -94,9 +96,10 @@ def main():
     parser.add_argument("root_uuid")
     parser.add_argument("firmware", choices=("uefi", "bios"))
     parser.add_argument("--esp-uuid")
+    parser.add_argument("--root-partuuid", required=True)
     args = parser.parse_args()
     try:
-        configure(args.target_root, args.root_uuid, args.firmware, args.esp_uuid)
+        configure(args.target_root, args.root_uuid, args.firmware, args.esp_uuid, args.root_partuuid)
     except (OSError, ValueError) as exc:
         parser.exit(1, f"vinstall-configure: error: {exc}\n")
     print(f"Configured staged Vampire OS root for {args.firmware.upper()} boot.")
