@@ -316,6 +316,7 @@ install_system() {
   [ -f "$archive" ] || { echo "ERROR: rootfs archive not found: $archive" >&2; return 2; }
   [ -s "$archive.sha256" ] || { echo "ERROR: rootfs checksum is missing." >&2; return 2; }
   [ -s "${VAMPIRE_KERNEL_IMAGE:-/boot/vmlinuz}" ] || { echo "ERROR: live kernel image is missing at ${VAMPIRE_KERNEL_IMAGE:-/boot/vmlinuz}." >&2; return 1; }
+  [ -s "${VAMPIRE_INITRAMFS_IMAGE:-/boot/initramfs.cpio.gz}" ] || { echo "ERROR: live initramfs image is missing at ${VAMPIRE_INITRAMFS_IMAGE:-/boot/initramfs.cpio.gz}." >&2; return 1; }
   for tool in parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum mktemp grep; do
     command -v "$tool" >/dev/null 2>&1 || { echo "ERROR: required installer tool is missing: $tool" >&2; return 1; }
   done
@@ -391,7 +392,8 @@ install_system() {
   python3 "$stage_script" "$archive" "$work/target"
   mkdir -p "$work/target/boot"
   cp "${VAMPIRE_KERNEL_IMAGE:-/boot/vmlinuz}" "$work/target/boot/vmlinuz"
-  chmod 0644 "$work/target/boot/vmlinuz"
+  cp "${VAMPIRE_INITRAMFS_IMAGE:-/boot/initramfs.cpio.gz}" "$work/target/boot/initramfs.cpio.gz"
+  chmod 0644 "$work/target/boot/vmlinuz" "$work/target/boot/initramfs.cpio.gz"
   root_uuid=$(blkid -s UUID -o value "$part2")
   [ -n "$root_uuid" ] || { echo "ERROR: unable to read root filesystem UUID." >&2; return 1; }
 
