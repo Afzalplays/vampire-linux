@@ -91,9 +91,12 @@ and hardware compatibility remain unverified. See
 [the live ISO build guide](build/README.md) and
 [the QEMU boot-test guide](docs/QEMU-BOOT-TESTS.md).
 
-The installed-root configuration contract now has focused Python regression
-tests for BIOS PARTUUID boot arguments, UEFI ESP mounting, malformed or missing
-identifiers, and symlink refusal. Run them from the repository root with:
+The installed-root configuration contract has focused Python regression tests
+for BIOS PARTUUID boot arguments, UEFI ESP mounting, malformed or missing
+identifiers, and symlink refusal. Rootfs staging has separate security tests
+for required system files, traversal paths, duplicate entries, escaping
+symlinks, and refusing to merge into a non-empty destination. Run the suite
+from the repository root with:
 
 ```sh
 python3 -m unittest discover -s tests -p 'test_*.py' -v
