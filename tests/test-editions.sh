@@ -13,6 +13,6 @@ grep -q 'fetch/vfetch' "$ROOT/.github/workflows/server-iso.yml"
 for option in CONFIG_EXT4_FS CONFIG_SCSI CONFIG_BLK_DEV_SD CONFIG_SATA_AHCI CONFIG_BLK_DEV_NVME CONFIG_VIRTIO_BLK CONFIG_EFI_PARTITION; do
   grep -qx "$option=y" "$ROOT/build/vampire-installer-kernel.fragment"
 done
-grep -q 'root=UUID=' "$ROOT/scripts/configure-installed-root.py"
+grep -q 'root=PARTUUID=' "$ROOT/scripts/configure-installed-root.py"
 ! grep -q 'initrd ' "$ROOT/scripts/configure-installed-root.py"
 echo "Vampire Desktop/Server edition configuration tests passed."
