@@ -315,7 +315,11 @@ install_system() {
   # Validate every input and prerequisite before the first destructive command.
   [ -f "$archive" ] || { echo "ERROR: rootfs archive not found: $archive" >&2; return 2; }
   [ -s "$archive.sha256" ] || { echo "ERROR: rootfs checksum is missing." >&2; return 2; }
-  [ -s "${VAMPIRE_KERNEL_IMAGE:-/boot/vmlinuz}" ] || { echo "ERROR: live kernel image is missing at ${VAMPIRE_KERNEL_IMAGE:-/boot/vmlinuz}." >&2; return 1; }
+  kernel_image=${VAMPIRE_KERNEL_IMAGE:-/boot/vmlinuz}
+  [ -f "$kernel_image" ] && [ ! -L "$kernel_image" ] && [ -s "$kernel_image" ] || {
+    echo "ERROR: live kernel must be a non-symlink regular file with content: $kernel_image." >&2
+    return 1
+  }
   for tool in parted partprobe udevadm mkfs.fat mkfs.ext4 mount umount grub-install blkid tar python3 sha256sum mktemp grep; do
     command -v "$tool" >/dev/null 2>&1 || { echo "ERROR: required installer tool is missing: $tool" >&2; return 1; }
   done
