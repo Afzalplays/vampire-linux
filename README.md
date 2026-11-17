@@ -95,8 +95,10 @@ The installed-root configuration contract has focused Python regression tests
 for BIOS PARTUUID boot arguments, UEFI ESP mounting, malformed or missing
 identifiers, and symlink refusal. Rootfs staging has separate security tests
 for required system files, traversal paths, duplicate entries, escaping
-symlinks, and refusing to merge into a non-empty destination. Run the suite
-from the repository root with:
+symlinks, and refusing to merge into a non-empty destination. The read-only
+`vmonitor` utility has isolated procfs/sysfs tests for uptime, load, memory,
+thermal readings, missing telemetry and live refresh argument handling. Run the
+suite from the repository root with:
 
 ```sh
 python3 -m unittest discover -s tests -p 'test_*.py' -v
