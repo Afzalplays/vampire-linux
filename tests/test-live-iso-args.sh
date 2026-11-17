@@ -15,6 +15,6 @@ for value in 0 00 abc -1 86401; do
     echo "live ISO harness accepted invalid timeout: $value" >&2
     exit 1
   fi
-  grep -q 'positive integer' "$TMP/timeout.out"
+  if [[ "$value" =~ ^[0-9]+$ ]]; then grep -q 'between 1 and 86400' "$TMP/timeout.out"; else grep -q 'positive integer' "$TMP/timeout.out"; fi
 done
 echo "live ISO harness argument tests: PASS"
