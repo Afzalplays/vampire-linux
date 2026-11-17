@@ -21,6 +21,11 @@ if VAMPIRE_INSTALLED_BOOT_TIMEOUT=0 bash "$ROOT/scripts/test-installed-disk.sh" 
   exit 1
 fi
 assert_output "$TMP/timeout.out" 'positive integer'
+if VAMPIRE_INSTALLED_BOOT_TIMEOUT=00 bash "$ROOT/scripts/test-installed-disk.sh" >"$TMP/timeout-zero-padded.out" 2>&1; then
+  echo "installed-disk harness accepted a zero-padded zero timeout" >&2
+  exit 1
+fi
+assert_output "$TMP/timeout-zero-padded.out" 'between 1 and 86400'
 if VAMPIRE_INSTALLED_BOOT_TIMEOUT=abc bash "$ROOT/scripts/test-installed-disk.sh" >"$TMP/timeout-text.out" 2>&1; then
   echo "installed-disk harness accepted a nonnumeric timeout" >&2
   exit 1
