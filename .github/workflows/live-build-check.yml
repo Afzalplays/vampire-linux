@@ -36,6 +36,8 @@ jobs:
         run: |
           set -euxo pipefail
           bash -n build/build-live-iso.sh
+          bash -n tests/test-build-live-iso.sh
+          bash tests/test-build-live-iso.sh
           bash -n scripts/test-live-iso.sh
           bash -n scripts/test-installed-disk.sh
           bash -n scripts/test-rootfs-artifact.sh
