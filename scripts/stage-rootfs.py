@@ -5,6 +5,7 @@ This is a host-side, non-destructive preparation step. It never discovers,
 mounts, partitions, formats, or writes to block devices.
 """
 import argparse
+import os
 import pathlib
 import posixpath
 import sys
@@ -80,8 +81,17 @@ def validate(archive):
         return len(names)
 
 
+def reject_symlink_components(path):
+    """Reject symlinked destination ancestors before creating or extracting files."""
+    absolute = pathlib.Path(os.path.abspath(os.fspath(path)))
+    for component in reversed((absolute, *absolute.parents)):
+        if component.is_symlink():
+            raise ValueError(f"destination path contains a symlink: {component}")
+
+
 def stage(archive, destination):
-    destination = pathlib.Path(destination)
+    destination = pathlib.Path(os.path.abspath(os.fspath(destination)))
+    reject_symlink_components(destination)
     if destination.exists():
         if not destination.is_dir() or destination.is_symlink():
             raise ValueError("destination must be a real directory")
