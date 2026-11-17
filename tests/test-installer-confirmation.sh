@@ -49,6 +49,18 @@ export VAMPIRE_ROOTFS_STAGE="$ROOT/scripts/stage-rootfs.py"
 export VAMPIRE_INSTALL_CONFIGURER="$ROOT/scripts/configure-installed-root.py"
 export VAMPIRE_KERNEL_IMAGE="$TMP/vmlinuz"
 
+# A symlinked kernel must be rejected before any destructive disk command.
+mv "$TMP/vmlinuz" "$TMP/vmlinuz.real"
+ln -s "$TMP/vmlinuz.real" "$TMP/vmlinuz"
+if "$ROOT/rootfs-overlay/usr/bin/vinstall" install "$TMP/rootfs.tar" "$TMP/dev/vda" bios > "$TMP/kernel-output" 2>&1; then
+  echo 'installer accepted a symlinked live kernel' >&2
+  exit 1
+fi
+grep -q 'live kernel must be a non-symlink regular file' "$TMP/kernel-output"
+[ ! -e "$TMP/parted-called" ]
+rm "$TMP/vmlinuz"
+mv "$TMP/vmlinuz.real" "$TMP/vmlinuz"
+
 if printf 'NO\n' | "$ROOT/rootfs-overlay/usr/bin/vinstall" install "$TMP/rootfs.tar" "$TMP/dev/vda" bios > "$TMP/output" 2>&1; then
   echo 'installer accepted an incorrect destructive confirmation' >&2
   exit 1
