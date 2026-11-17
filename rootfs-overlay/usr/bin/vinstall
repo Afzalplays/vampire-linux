@@ -407,6 +407,24 @@ install_system() {
     configure_installed_root "$work/target" "$root_uuid" bios
     grub-install --target=i386-pc --boot-directory="$work/target/boot" "$device"
   fi
+
+  # Do not report success merely because grub-install returned zero: verify
+  # that the expected firmware boot files and generated configuration exist.
+  [ -s "$work/target/boot/grub/grub.cfg" ] || {
+    echo "ERROR: installed GRUB configuration is missing." >&2
+    return 1
+  }
+  if [ "$mode" = uefi ]; then
+    [ -s "$work/target/boot/efi/EFI/BOOT/BOOTX64.EFI" ] || {
+      echo "ERROR: removable-media UEFI bootloader was not created." >&2
+      return 1
+    }
+  else
+    [ -s "$work/target/boot/grub/i386-pc/core.img" ] || {
+      echo "ERROR: BIOS GRUB core image was not created." >&2
+      return 1
+    }
+  fi
   sync
   echo "Vampire OS files and GRUB were installed. Unmounting target..."
   cleanup_install || return 1
