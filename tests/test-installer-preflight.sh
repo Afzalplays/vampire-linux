@@ -143,4 +143,14 @@ grep -q 'diagnostic only' "$TMP/out"
 if sh "$ROOT/rootfs-overlay/usr/bin/vinstall" system-check extra >/dev/null 2>&1; then
   echo "system-check unexpectedly accepted extra arguments" >&2; exit 1
 fi
+# The requirements report and destructive install gate must include
+# external utilities used after partitioning, not just partitioning tools.
+sh "$ROOT/rootfs-overlay/usr/bin/vinstall" requirements >"$TMP/requirements"
+for tool in awk id cp chmod sync mkdir rm dirname basename; do
+  grep -q "AVAILABLE  $tool" "$TMP/requirements"
+done
+if PATH="$TMP/fakebin" sh "$ROOT/rootfs-overlay/usr/bin/vinstall" requirements >"$TMP/missing-requirements" 2>&1; then
+  echo "requirements unexpectedly passed with an empty PATH" >&2; exit 1
+fi
+grep -q 'MISSING    cp' "$TMP/missing-requirements"
 echo "Vampire installer preflight tests passed."
