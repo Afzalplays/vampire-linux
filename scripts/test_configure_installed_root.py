@@ -43,6 +43,23 @@ def main():
         (root / "boot/grub").symlink_to(root / "etc")
         result = run(root, "bios")
         assert result.returncode != 0
+
+        # Never follow a pre-existing symlink while writing install metadata.
+        (root / "boot/grub").unlink()
+        (root / "boot/grub").mkdir()
+        (root / "etc/vampire").rmdir()
+        outside = pathlib.Path(tmp) / "outside"
+        outside.mkdir()
+        (root / "etc/vampire").symlink_to(outside, target_is_directory=True)
+        result = run(root, "bios")
+        assert result.returncode != 0
+        assert not (outside / "install.conf").exists()
+        (root / "etc/vampire").unlink()
+        (root / "etc/vampire").mkdir()
+        (root / "etc/fstab").symlink_to(outside / "fstab")
+        result = run(root, "bios")
+        assert result.returncode != 0
+        assert not (outside / "fstab").exists()
     print("installed root configuration tests: PASS")
 
 
