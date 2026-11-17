@@ -7,10 +7,11 @@ import tempfile
 SCRIPT = pathlib.Path(__file__).with_name("configure-installed-root.py")
 ROOT_UUID = "12345678-1234-5678-9abc-123456789abc"
 ESP_UUID = "ABCD-1234"
+ROOT_PARTUUID = "87654321-4321-8765-cba9-9876543210ab"
 
 
 def run(root, mode, *extra):
-    return subprocess.run([sys.executable, str(SCRIPT), str(root), ROOT_UUID, mode, *extra],
+    return subprocess.run([sys.executable, str(SCRIPT), str(root), ROOT_UUID, mode, "--root-partuuid", ROOT_PARTUUID, *extra],
                           text=True, capture_output=True)
 
 
@@ -25,7 +26,7 @@ def main():
         grub = (root / "boot/grub/grub.cfg").read_text()
         assert f"UUID={ROOT_UUID} / ext4" in fstab
         assert f"UUID={ESP_UUID} /boot/efi vfat" in fstab
-        assert f"root=UUID={ROOT_UUID}" in grub
+        assert f"root=PARTUUID={ROOT_PARTUUID}" in grub
         assert "rootwait rw" in grub\n        assert "initrd " not in grub
         assert (root / "etc/vampire/install.conf").read_text().find("FIRMWARE=uefi") >= 0
 
