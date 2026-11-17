@@ -38,6 +38,7 @@ printf 'busybox fixture\n' > "$TMP/rootfs/bin/busybox"
 tar -cf "$TMP/rootfs.tar" -C "$TMP/rootfs" .
 (cd "$TMP" && sha256sum rootfs.tar > rootfs.tar.sha256)
 printf 'kernel fixture\n' > "$TMP/vmlinuz"
+printf 'initramfs fixture\n' > "$TMP/initramfs.cpio.gz"
 
 export PATH="$TMP/bin:$PATH"
 export VAMPIRE_SYS_BLOCK="$TMP/sys/block"
@@ -48,6 +49,7 @@ export VAMPIRE_SWAPS_FILE="$TMP/swaps"
 export VAMPIRE_ROOTFS_STAGE="$ROOT/scripts/stage-rootfs.py"
 export VAMPIRE_INSTALL_CONFIGURER="$ROOT/scripts/configure-installed-root.py"
 export VAMPIRE_KERNEL_IMAGE="$TMP/vmlinuz"
+export VAMPIRE_INITRAMFS_IMAGE="$TMP/initramfs.cpio.gz"
 
 if printf 'NO\n' | "$ROOT/rootfs-overlay/usr/bin/vinstall" install "$TMP/rootfs.tar" "$TMP/dev/vda" bios > "$TMP/output" 2>&1; then
   echo 'installer accepted an incorrect destructive confirmation' >&2
