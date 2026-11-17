@@ -57,6 +57,7 @@ def main():
         assert not (outside / "install.conf").exists()
         (root / "etc/vampire").unlink()
         (root / "etc/vampire").mkdir()
+        (root / "etc/fstab").unlink()
         (root / "etc/fstab").symlink_to(outside / "fstab")
         result = run(root, "bios")
         assert result.returncode != 0
