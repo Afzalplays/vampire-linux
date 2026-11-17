@@ -209,6 +209,44 @@ class ArchiveSafetyTests(unittest.TestCase):
             self.assertEqual(keep.read_text(), "keep")
             self.assertTrue(link.is_symlink())
 
+    def test_installed_database_rejects_malformed_records(self):
+        cases = [
+            '{"sample": null}',
+            '{"sample": {"version": [], "files": []}}',
+            '{"sample": {"version": "1.0", "files": "../outside"}}',
+            '{"sample": {"version": "1.0", "files": ["../outside"]}}',
+            '{"sample": {"version": "1.0", "files": ["usr/file", "usr/file"]}}',
+            '{"../sample": {"version": "1.0", "files": []}}',
+        ]
+        with tempfile.TemporaryDirectory() as tmp:
+            db_path = pathlib.Path(tmp) / "installed.json"
+            old_db = vpm.DB
+            try:
+                vpm.DB = db_path
+                for raw in cases:
+                    with self.subTest(database=raw):
+                        db_path.write_text(raw)
+                        with self.assertRaises(SystemExit):
+                            vpm.installed_db()
+            finally:
+                vpm.DB = old_db
+
+    def test_installed_database_accepts_valid_and_legacy_records(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            db_path = pathlib.Path(tmp) / "installed.json"
+            db_path.write_text(
+                '{"sample": {"version": "1.0", "files": ["usr/share/sample"]},'
+                '"legacy": {"version": "0.9"}}'
+            )
+            old_db = vpm.DB
+            try:
+                vpm.DB = db_path
+                value = vpm.installed_db()
+            finally:
+                vpm.DB = old_db
+            self.assertEqual(value["sample"]["files"], ["usr/share/sample"])
+            self.assertEqual(value["legacy"]["version"], "0.9")
+
     def test_installed_database_write_ignores_predictable_temp_symlink(self):
         with tempfile.TemporaryDirectory() as tmp:
             base = pathlib.Path(tmp)
