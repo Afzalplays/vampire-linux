@@ -264,7 +264,9 @@ def safe_extract(archive, destination):
         for member in members:
             if not member.name or member.name.startswith("/") or "\\" in member.name:
                 fail(f"unsafe archive path: {member.name!r}")
-            target = (destination / member.name).resolve()
+            candidate = destination / member.name
+            reject_symlink_components(candidate, "package extraction path")
+            target = candidate.resolve()
             if target != destination and destination not in target.parents:
                 fail(f"unsafe archive path: {member.name}")
             relative = target.relative_to(destination).as_posix()
@@ -277,7 +279,9 @@ def safe_extract(archive, destination):
                 fail(f"unsupported archive entry: {member.name}")
         try:
             for member in members:
-                target = (destination / member.name).resolve()
+                candidate = destination / member.name
+                reject_symlink_components(candidate, "package extraction path")
+                target = candidate.resolve()
                 if member.isdir():
                     missing = []
                     parent = target
@@ -298,7 +302,9 @@ def safe_extract(archive, destination):
                 for directory in reversed(missing):
                     if directory not in created_dirs:
                         created_dirs.append(directory)
-                target = (destination / member.name).resolve()
+                candidate = destination / member.name
+                reject_symlink_components(candidate, "package extraction path")
+                target = candidate.resolve()
                 if target != destination and destination not in target.parents:
                     fail(f"unsafe destination path: {member.name}")
                 source = tf.extractfile(member)
