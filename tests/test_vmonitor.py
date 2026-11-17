@@ -34,7 +34,7 @@ class VampireMonitorTests(unittest.TestCase):
             "VAMPIRE_ROOT_MOUNT": str(self.base),
         })
         return subprocess.run(
-            [str(MONITOR), *args], text=True, capture_output=True, env=env, check=False
+            ["/bin/sh", str(MONITOR), *args], text=True, capture_output=True, env=env, check=False
         )
 
     def test_once_reports_uptime_load_memory_and_temperature(self):
