@@ -5,6 +5,7 @@ CONFIG=${VAMPIRE_SETTINGS_FILE:-/etc/vampire/settings.conf}
 DEFAULTS=${VAMPIRE_SETTINGS_DEFAULTS:-/etc/vampire/settings.defaults}
 KEYS='theme accent surface_transparency blur terminal_opacity dock_size dock_position dock_auto_hide dock_magnification top_panel show_date show_clock show_network show_power reduced_motion update_channel voice_access'
 usage() { echo "Usage: vsettings {list|keys|get KEY|set KEY VALUE|validate|reset|apply}" >&2; exit 2; }
+help() { echo "Usage: vsettings {list|keys|get KEY|set KEY VALUE|validate|reset|apply}"; }
 valid_key() {
   case "$1" in
     theme|accent|surface_transparency|blur|terminal_opacity|dock_size|dock_position|dock_auto_hide|dock_magnification|top_panel|show_date|show_clock|show_network|show_power|reduced_motion|update_channel|voice_access) return 0 ;;
@@ -54,6 +55,7 @@ validate_file() {
 }
 [ "$#" -ge 1 ] || usage
 case "$1" in
+  --help|-h) [ "$#" -eq 1 ] || usage; help; exit 0 ;;
   keys) [ "$#" -eq 1 ] || usage; printf '%s\n' $KEYS ;;
   list)
     [ "$#" -eq 1 ] || usage
