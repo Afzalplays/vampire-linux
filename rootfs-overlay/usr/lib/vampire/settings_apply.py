@@ -52,7 +52,15 @@ def replace_key(text: str, key: str, value: str) -> str:
         fail("base configuration must contain exactly one " + key + " entry")
     return updated
 
+def reject_symlink_path(path: pathlib.Path) -> None:
+    absolute = path.absolute()
+    for component in reversed((absolute, *absolute.parents)):
+        if component.is_symlink():
+            fail("refusing symlinked configuration path: " + str(component))
+
 def atomic_write(path: pathlib.Path, content: str) -> None:
+    reject_symlink_path(path.parent)
+    reject_symlink_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temp_name = tempfile.mkstemp(prefix="." + path.name + ".", dir=path.parent)
     try:
@@ -95,6 +103,10 @@ def main() -> None:
     base_foot = pathlib.Path(os.environ.get("VAMPIRE_FOOT_BASE", "/etc/xdg/foot/foot.ini"))
     output_weston = pathlib.Path(os.environ.get("VAMPIRE_WESTON_RUNTIME_CONFIG", "/run/vampire/weston.ini"))
     config_home = pathlib.Path(os.environ.get("XDG_CONFIG_HOME", "/run/vampire"))
+    reject_symlink_path(base_weston)
+    reject_symlink_path(base_foot)
+    reject_symlink_path(output_weston.parent)
+    reject_symlink_path(config_home)
     if not base_weston.is_file() or not base_foot.is_file():
         fail("Weston or Foot base configuration is missing")
     try:
