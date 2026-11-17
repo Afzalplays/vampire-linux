@@ -456,7 +456,8 @@ def command_remove(args):
     files = info.get("files")
     if not isinstance(files, list):
         fail("package has no trustworthy file ownership record; refusing removal")
-    root = ROOT.resolve()
+    reject_symlink_components(ROOT, "installation root")
+    root = pathlib.Path(os.path.abspath(os.fspath(ROOT)))
     targets = []
     seen_paths = set()
     # Validate the entire manifest before deleting anything. Check each path
