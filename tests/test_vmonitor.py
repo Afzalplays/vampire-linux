@@ -83,6 +83,11 @@ class VampireMonitorTests(unittest.TestCase):
         self.assertEqual(result.returncode, 124, result.stderr)
         self.assertIn("VAMPIRE MONITOR", result.stdout)
 
+    def test_help_exits_successfully(self):
+        result = self.run_monitor("--help")
+        self.assertEqual(result.returncode, 0)
+        self.assertIn("Usage: vmonitor", result.stdout)
+
     def test_unknown_option_is_rejected(self):
         result = self.run_monitor("--unknown")
         self.assertEqual(result.returncode, 2)
