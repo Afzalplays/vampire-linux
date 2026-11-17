@@ -344,5 +344,56 @@ class ArchiveSafetyTests(unittest.TestCase):
             finally:
                 vpm.ROOT, vpm.DB = old_root, old_db
 
+
+    def test_extract_rejects_symlinked_destination_ancestor(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = pathlib.Path(tmp)
+            real_parent = base / "real"
+            real_parent.mkdir()
+            linked_parent = base / "linked"
+            linked_parent.symlink_to(real_parent, target_is_directory=True)
+            destination = linked_parent / "root"
+            archive = base / "package.tar.gz"
+            with tarfile.open(archive, "w:gz") as tf:
+                payload = b"must not be written"
+                info = tarfile.TarInfo("usr/share/payload")
+                info.size = len(payload)
+                tf.addfile(info, io.BytesIO(payload))
+            with self.assertRaises(SystemExit):
+                vpm.safe_extract(archive, destination)
+            self.assertFalse((real_parent / "root").exists())
+
+    def test_installed_database_rejects_symlinked_parent(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = pathlib.Path(tmp)
+            real_parent = base / "real"
+            real_parent.mkdir()
+            linked_parent = base / "linked"
+            linked_parent.symlink_to(real_parent, target_is_directory=True)
+            old_db = vpm.DB
+            try:
+                vpm.DB = linked_parent / "installed.json"
+                with self.assertRaises(SystemExit):
+                    vpm.write_installed_db({"sample": {"version": "1"}})
+            finally:
+                vpm.DB = old_db
+            self.assertFalse((real_parent / "installed.json").exists())
+
+    def test_config_rejects_symlinked_parent(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = pathlib.Path(tmp)
+            real_parent = base / "real"
+            real_parent.mkdir()
+            linked_parent = base / "linked"
+            linked_parent.symlink_to(real_parent, target_is_directory=True)
+            old_config = vpm.CONFIG
+            try:
+                vpm.CONFIG = linked_parent / "vpm.json"
+                with self.assertRaises(SystemExit):
+                    vpm.load_config()
+            finally:
+                vpm.CONFIG = old_config
+            self.assertFalse((real_parent / "vpm.json").exists())
+
 if __name__ == "__main__":
     unittest.main()
