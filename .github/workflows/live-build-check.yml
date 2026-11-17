@@ -39,6 +39,8 @@ jobs:
           bash -n tests/test-build-live-iso.sh
           bash tests/test-build-live-iso.sh
           bash -n scripts/test-live-iso.sh
+          bash -n tests/test-live-iso-args.sh
+          bash tests/test-live-iso-args.sh
           bash -n scripts/test-installed-disk.sh
           bash -n tests/test-installed-disk-harness.sh
           bash tests/test-installed-disk-harness.sh
