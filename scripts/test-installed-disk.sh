@@ -15,7 +15,7 @@ for tool in sudo losetup parted partprobe udevadm mkfs.ext4 mkfs.fat mount umoun
 if [[ -L "$WORK" ]]; then die "Refusing a symlinked test directory: $WORK"; fi
 mkdir -p "$WORK"
 for mode in bios uefi; do
-  [[ ! -e "$WORK/$mode.img" ]] || die "Refusing to overwrite an existing test disk image: $WORK/$mode.img"
+  [[ ! -e "$WORK/$mode.img" && ! -L "$WORK/$mode.img" ]] || die "Refusing to overwrite an existing test disk image: $WORK/$mode.img"
 done
 VAMPIRE_ROOTFS_STAGE="$ROOT_DIR/scripts/stage-rootfs.py" "$ROOT_DIR/rootfs-overlay/usr/bin/vinstall" validate "$ROOTFS_TAR"
 cleanup() {
@@ -26,8 +26,14 @@ cleanup() {
 trap cleanup EXIT HUP INT TERM
 
 find_ovmf() {
-  local dir candidate code vars
-  for dir in /usr/share/OVMF /usr/share/ovmf; do
+  local dir candidate vars
+  local -a dirs=()
+  if [[ -n "${VAMPIRE_OVMF_DIR:-}" ]]; then
+    dirs+=("$VAMPIRE_OVMF_DIR")
+  else
+    dirs+=(/usr/share/OVMF /usr/share/ovmf)
+  fi
+  for dir in "${dirs[@]}"; do
     [[ -d "$dir" ]] || continue
     for candidate in OVMF_CODE_4M.fd OVMF_CODE.fd; do
       if [[ "$candidate" == *_4M.fd ]]; then vars=OVMF_VARS_4M.fd; else vars=OVMF_VARS.fd; fi
