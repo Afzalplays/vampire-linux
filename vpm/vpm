@@ -184,11 +184,36 @@ def installed_db():
     reject_symlink_components(DB, "installed database")
     try:
         value = json.loads(DB.read_text())
-        return value if isinstance(value, dict) else {}
     except FileNotFoundError:
         return {}
     except (OSError, json.JSONDecodeError) as exc:
         fail(f"installed database is unreadable: {exc}")
+    if not isinstance(value, dict):
+        fail("installed database must be a JSON object")
+    for name, info in value.items():
+        if not isinstance(name, str) or not re.fullmatch(r"[a-z0-9][a-z0-9+._-]{0,127}", name):
+            fail("installed database contains an invalid package name")
+        if not isinstance(info, dict):
+            fail(f"installed database record for {name} must be an object")
+        version = info.get("version", "unknown")
+        if not isinstance(version, str) or not re.fullmatch(r"[0-9A-Za-z][0-9A-Za-z.+~_-]{0,63}", version):
+            fail(f"installed database record for {name} has an invalid version")
+        if "files" in info:
+            files = info["files"]
+            if not isinstance(files, list):
+                fail(f"installed database file manifest for {name} must be a list")
+            seen = set()
+            for relative in files:
+                if (not isinstance(relative, str) or not relative or relative.startswith("/")
+                        or "\\" in relative):
+                    fail(f"installed database file manifest for {name} contains an invalid path")
+                parts = pathlib.PurePosixPath(relative).parts
+                normalized = pathlib.PurePosixPath(relative).as_posix()
+                if (not parts or any(part in ("", ".", "..") for part in parts)
+                        or normalized in seen):
+                    fail(f"installed database file manifest for {name} contains an unsafe or duplicate path")
+                seen.add(normalized)
+    return value
 
 def write_installed_db(value):
     """Atomically replace the package database using a private unique temp file."""
