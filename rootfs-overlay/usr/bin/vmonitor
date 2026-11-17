@@ -17,7 +17,7 @@ case "${1:-}" in
       interval=$2
     fi
     ;;
-  --help|-h) usage ;;
+  --help|-h) printf "Usage: vmonitor [--once|--watch [SECONDS]]\n"; exit 0 ;;
   *) usage ;;
 esac
 render() {
