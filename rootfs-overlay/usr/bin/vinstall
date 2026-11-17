@@ -371,6 +371,12 @@ install_system() {
   trap cleanup_install EXIT
   trap 'exit 1' HUP INT TERM
 
+  # Recheck immediately before the first destructive operation. The target may
+  # have become mounted, read-only, or active swap while the confirmation was
+  # being entered; never rely solely on the earlier preflight snapshot.
+  echo "Rechecking target disk immediately before partitioning ..."
+  preflight "$device" || return $?
+
   echo "Writing GPT partition table to $device ..."
   parted -s "$device" mklabel gpt
   if [ "$mode" = uefi ]; then
