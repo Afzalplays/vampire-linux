@@ -3,7 +3,7 @@ set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
-for value in invalid "../server" ""; do
+for value in invalid "../server" Desktop; do
   if VAMPIRE_EDITION="$value" bash "$ROOT/scripts/test-live-iso.sh" >"$TMP/edition.out" 2>&1; then
     echo "live ISO harness accepted invalid edition: $value" >&2
     exit 1
