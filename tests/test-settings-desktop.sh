@@ -38,6 +38,11 @@ test "$("$TMP/vsettings" get update_channel)" = stable
 test "$("$TMP/vsettings" get voice_access)" = false
 "$TMP/vsettings" set theme light
 test "$("$TMP/vsettings" get theme)" = light
+# Atomic writes must leave no temporary files and keep preferences private.
+if compgen -G "$CONFIG.tmp.*" >/dev/null; then
+  echo "settings update left a temporary file behind" >&2; exit 1
+fi
+test "$(stat -c %a "$CONFIG")" = 600
 "$TMP/vsettings" set blur extreme
 test "$("$TMP/vsettings" get blur)" = extreme
 "$TMP/vsettings" set terminal_opacity 70
