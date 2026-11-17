@@ -76,6 +76,11 @@ run_boot() {
     cat "$log" >&2 || true
     die "$mode installed-disk QEMU exited unexpectedly (status $status)"
   fi
+  if grep -Eqi 'Kernel panic|VFS: Unable to mount root|No working init found|Failed to execute /sbin/init' "$log"; then
+    printf '%s\\n' "---- $mode boot failure signature ----" >&2
+    grep -Ein 'Kernel panic|VFS: Unable to mount root|No working init found|Failed to execute /sbin/init' "$log" >&2 || true
+    die "$mode boot emitted a fatal kernel/init failure"
+  fi
   grep -Fq 'Vampire OS 0.1.0-dev | x86_64 live environment' "$log" || {
     cat "$log" >&2 || true
     die "$mode installed disk did not reach Vampire init"
