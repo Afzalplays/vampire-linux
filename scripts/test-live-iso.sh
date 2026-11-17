@@ -9,6 +9,7 @@ ISO="${1:-$ROOT_DIR/out/vampire-os-0.1.0-dev-$EDITION-x86_64.iso}"
 LOG_DIR="${VAMPIRE_QEMU_LOG_DIR:-$ROOT_DIR/out/qemu-logs}"
 TIMEOUT_SECONDS="${VAMPIRE_QEMU_TIMEOUT:-75}"
 case "$TIMEOUT_SECONDS" in ""|*[!0-9]*) printf 'ERROR: VAMPIRE_QEMU_TIMEOUT must be a positive integer.\\n' >&2; exit 2 ;; esac
+(( ${#TIMEOUT_SECONDS} <= 5 )) || { printf 'ERROR: VAMPIRE_QEMU_TIMEOUT must be between 1 and 86400 seconds.\\n' >&2; exit 2; }
 TIMEOUT_SECONDS=$((10#$TIMEOUT_SECONDS))
 (( TIMEOUT_SECONDS > 0 && TIMEOUT_SECONDS <= 86400 )) || { printf 'ERROR: VAMPIRE_QEMU_TIMEOUT must be between 1 and 86400 seconds.\\n' >&2; exit 2; }
 
