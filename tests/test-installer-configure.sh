@@ -12,11 +12,12 @@ mkdir -p "$TARGET/boot"
 printf kernel > "$TARGET/boot/vmlinuz"
 ROOT_UUID=12345678-1234-5678-9abc-123456789abc
 ESP_UUID=ABCD-1234
-VAMPIRE_INSTALL_CONFIGURER="$ROOT/scripts/configure-installed-root.py" \
+ROOT_PARTUUID=87654321-4321-8765-cba9-9876543210ab
+VAMPIRE_ROOT_PARTUUID="$ROOT_PARTUUID" VAMPIRE_INSTALL_CONFIGURER="$ROOT/scripts/configure-installed-root.py" \
   "$ROOT/rootfs-overlay/usr/bin/vinstall" configure "$TARGET" "$ROOT_UUID" uefi "$ESP_UUID"
 grep -q "UUID=$ROOT_UUID / ext4" "$TARGET/etc/fstab"
 grep -q "UUID=$ESP_UUID /boot/efi vfat" "$TARGET/etc/fstab"
-VAMPIRE_INSTALL_CONFIGURER="$ROOT/scripts/configure-installed-root.py" \
+VAMPIRE_ROOT_PARTUUID="$ROOT_PARTUUID" VAMPIRE_INSTALL_CONFIGURER="$ROOT/scripts/configure-installed-root.py" \
   "$ROOT/rootfs-overlay/usr/bin/vinstall" configure "$TARGET" "$ROOT_UUID" bios
 ! grep -q '/boot/efi' "$TARGET/etc/fstab"
 if VAMPIRE_INSTALL_CONFIGURER="$ROOT/scripts/configure-installed-root.py" \
