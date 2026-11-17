@@ -28,5 +28,13 @@ if VAMPIRE_INSTALL_TEST_DIR="$TMP/workdir-link" bash "$ROOT/scripts/test-install
   echo "installed-disk harness accepted a symlinked work directory" >&2
   exit 1
 fi
-grep -q 'symlinked test directory' "$TMP/symlink.out"
+grep -q 'symlinked test path component' "$TMP/symlink.out"
+mkdir -p "$TMP/real-parent"
+ln -s "$TMP/real-parent" "$TMP/parent-link"
+if VAMPIRE_INSTALL_TEST_DIR="$TMP/parent-link/nested/work" bash "$ROOT/scripts/test-installed-disk.sh" >"$TMP/ancestor.out" 2>&1; then
+  echo "installed-disk harness accepted a symlinked ancestor directory" >&2
+  exit 1
+fi
+grep -q 'symlinked test path component' "$TMP/ancestor.out"
+[[ ! -e "$TMP/real-parent/nested" ]] || { echo "created files through symlinked ancestor" >&2; exit 1; }
 echo "installed-disk harness argument and path-safety tests: PASS"
