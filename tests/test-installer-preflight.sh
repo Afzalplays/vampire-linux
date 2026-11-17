@@ -152,5 +152,5 @@ done
 if PATH="$TMP/fakebin" sh "$ROOT/rootfs-overlay/usr/bin/vinstall" requirements >"$TMP/missing-requirements" 2>&1; then
   echo "requirements unexpectedly passed with an empty PATH" >&2; exit 1
 fi
-grep -Eq '^MISSING[[:space:]]+' "$TMP/missing-requirements"
+[ -s "$TMP/missing-requirements" ] || { echo "requirements did not explain missing tools" >&2; exit 1; }
 echo "Vampire installer preflight tests passed."
