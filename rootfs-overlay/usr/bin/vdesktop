@@ -183,11 +183,11 @@ while :; do
   case "$choice" in
     1) run_and_pause "$FETCH" ;;
     2) appearance_menu ;;
-    3) run_tool network_menu ;;
+    3) network_menu ;;
     4) run_and_pause vmonitor ;;
     5) if command -v vsh >/dev/null 2>&1; then run_tool vsh; else run_tool "${SHELL:-/bin/sh}"; fi ;;
     6) run_and_pause "$SETTINGS" list ;;
-    7) run_tool installer_menu ;;
+    7) installer_menu ;;
     8) run_and_pause vgraphical ;;
     9) run_and_pause vpm doctor ;;
     10) run_and_pause vupdate check ;;
