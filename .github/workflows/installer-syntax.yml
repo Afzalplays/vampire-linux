@@ -8,6 +8,7 @@ on:
       - "rootfs-overlay/usr/bin/vdesktop"
       - "rootfs-overlay/usr/bin/vmonitor"
       - "tests/test_vmonitor.py"
+      - "tests/test_vdesktop_menus.sh"
       - "scripts/stage-rootfs.py"
       - "scripts/configure-installed-root.py"
       - "scripts/configure-build-output.py"
@@ -24,6 +25,7 @@ on:
       - "scripts/configure-build-output.py"
       - "tests/test_configure_installed_root.py"
       - "tests/test_stage_rootfs.py"
+      - "tests/test_vdesktop_menus.sh"
       - ".github/workflows/installer-syntax.yml"
 
 jobs:
@@ -44,3 +46,5 @@ jobs:
       - name: Run installer and rootfs safety regression tests
         run: |
           python3 -m unittest discover -s tests -p 'test_*.py' -v
+      - name: Run Vampire Desktop submenu regression tests
+        run: sh tests/test_vdesktop_menus.sh
