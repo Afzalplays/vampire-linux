@@ -53,11 +53,11 @@ run_case() {
   fi
 }
 # Each submenu is entered, exited with 0, then the main launcher exits with 0.
-run_case 2 '2\n0\n0\n'
+run_case 2 '2\\n1\\ndark\\n0\\n0\\n'
 run_case 3 '3\n0\n0\n'
 run_case 7 '7\n\n\n0\n'
-run_case 22 '22\n0\n0\n'
-run_case 23 '23\n0\n0\n'
+run_case 22 '22\\n1\\n0\\n0\\n'
+run_case 23 '23\\n1\\n0\\n0\\n'
 grep -Fq 'vsettings <set> <theme> <dark>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: appearance setting was not saved' >&2; exit 1; }
 grep -Fq 'vsettings <apply>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: appearance changes were not applied' >&2; exit 1; }
 grep -Fq 'vctl <list>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: service list action was not dispatched' >&2; exit 1; }
