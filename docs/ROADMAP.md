@@ -76,6 +76,7 @@ feature release-ready.
 - [x] Read-only disk inventory and installation preflight.
 - [x] Add checksum-verified rootfs validation and guarded staging into an existing target directory.
 - [x] Generate deterministic fstab and GRUB configuration for a staged target root using kernel-supported GPT PARTUUID root selection (bootloader installation remains pending).
+- [x] Regression-test the UEFI ESP GRUB handoff as exact newline-delimited configuration (firmware boot validation remains pending).
 - [x] Report required disk-installation tools without performing destructive actions.
 - [x] Implement guided text-mode erase-and-install flow in the console launcher (graphical installer remains pending).
 - [x] Implement GPT partitioning, FAT32/ext4 formatting, rootfs staging, UUID configuration, BIOS/UEFI GRUB installation and exact typed destructive confirmation.
