@@ -20,6 +20,7 @@ def main():
         root = pathlib.Path(tmp) / "target"
         (root / "boot").mkdir(parents=True)
         (root / "boot/vmlinuz").write_bytes(b"kernel")
+        (root / "boot/efi").mkdir()
         result = run(root, "uefi", "--esp-uuid", ESP_UUID)
         assert result.returncode == 0, result.stderr
 
@@ -42,6 +43,10 @@ def main():
         assert f"root=PARTUUID={ROOT_PARTUUID}" in grub
         assert "rootwait rw" in grub
         assert "initrd " not in grub
+        esp_grub = (root / "boot/efi/EFI/BOOT/grub.cfg").read_text()
+        assert f"--set=root {ROOT_UUID}" in esp_grub
+        assert "set prefix=($root)/boot/grub" in esp_grub
+        assert "configfile $prefix/grub.cfg" in esp_grub
         assert (root / "etc/vampire/install.conf").read_text().find("FIRMWARE=uefi") >= 0
 
         result = run(root, "bios")
