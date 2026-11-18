@@ -84,8 +84,8 @@ class InstalledRootTests(unittest.TestCase):
                 "configfile $prefix/grub.cfg\n"
             ).encode()
             self.assertEqual(handoff, expected)
-            self.assertNotIn(b"\\\\n", handoff)
-            self.assertTrue(handoff.endswith(b"\\n"))
+            self.assertNotIn(b"\\n", handoff)
+            self.assertTrue(handoff.endswith(b"\n"))
 
 
 if __name__ == "__main__":
