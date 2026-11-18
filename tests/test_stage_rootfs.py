@@ -19,6 +19,7 @@ def make_archive(path, entries):
             info = tarfile.TarInfo(name)
             if kind == "dir":
                 info.type = tarfile.DIRTYPE
+                info.mode = 0o755
                 archive.addfile(info)
             elif kind == "symlink":
                 info.type = tarfile.SYMTYPE
