@@ -26,7 +26,7 @@ run_case() {
   menu_choice=$1
   input=$2
   output="$tmp/output"
-  if ! printf '%s' "$input" | PATH="$tmp:/usr/bin:/bin" sh "$LAUNCHER" >"$output" 2>&1; then
+  if ! printf '%b' "$input" | PATH="$tmp:/usr/bin:/bin" sh "$LAUNCHER" >"$output" 2>&1; then
     cat "$output" >&2
     echo "FAIL: launcher exited while opening submenu $menu_choice" >&2
     exit 1
