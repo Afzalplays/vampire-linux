@@ -73,6 +73,20 @@ class InstalledRootTests(unittest.TestCase):
                 MODULE.configure(root, ROOT_UUID, "bios", root_partuuid=ROOT_PARTUUID)
             self.assertEqual(target.read_text(), "do not overwrite")
 
+    def test_uefi_esp_handoff_is_real_newline_delimited_grub_config(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = self.make_root(temp)
+            MODULE.configure(root, ROOT_UUID, "uefi", ESP_UUID, ROOT_PARTUUID)
+            handoff = (root / "boot/efi/EFI/BOOT/grub.cfg").read_bytes()
+            expected = (
+                f"search --no-floppy --fs-uuid --set=root {ROOT_UUID}\n"
+                "set prefix=($root)/boot/grub\n"
+                "configfile $prefix/grub.cfg\n"
+            ).encode()
+            self.assertEqual(handoff, expected)
+            self.assertNotIn(b"\\\\n", handoff)
+            self.assertTrue(handoff.endswith(b"\\n"))
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
