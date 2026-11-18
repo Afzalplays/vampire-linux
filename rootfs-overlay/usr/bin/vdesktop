@@ -182,7 +182,7 @@ while :; do
   IFS= read -r choice || exit 0
   case "$choice" in
     1) run_and_pause "$FETCH" ;;
-    2) run_tool appearance_menu ;;
+    2) appearance_menu ;;
     3) run_tool network_menu ;;
     4) run_and_pause vmonitor ;;
     5) if command -v vsh >/dev/null 2>&1; then run_tool vsh; else run_tool "${SHELL:-/bin/sh}"; fi ;;
