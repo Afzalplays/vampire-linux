@@ -70,6 +70,55 @@ class RootfsArchiveTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "link escapes rootfs"):
                 MODULE.validate(archive)
 
+    def test_normalizes_safe_absolute_symlink_inside_rootfs(self):
+        with tempfile.TemporaryDirectory() as temp:
+            archive = pathlib.Path(temp) / "rootfs.tar"
+            entries = self.valid_entries() + [("etc/mtab", "symlink", "/proc/mounts")]
+            make_archive(archive, entries)
+            destination = pathlib.Path(temp) / "stage"
+            MODULE.stage(archive, destination)
+            self.assertTrue((destination / "etc/mtab").is_symlink())
+            self.assertEqual((destination / "etc/mtab").readlink().as_posix(), "../proc/mounts")
+
+    def test_rejects_absolute_symlink_with_parent_traversal(self):
+        with tempfile.TemporaryDirectory() as temp:
+            archive = pathlib.Path(temp) / "rootfs.tar"
+            entries = self.valid_entries() + [("etc/escape", "symlink", "/../../outside")]
+            make_archive(archive, entries)
+            with self.assertRaisesRegex(ValueError, "unsafe absolute link target"):
+                MODULE.validate(archive)
+
+    def test_rejects_hardlink_with_parent_traversal(self):
+        with tempfile.TemporaryDirectory() as temp:
+            archive = pathlib.Path(temp) / "rootfs.tar"
+            with tarfile.open(archive, "w") as tar:
+                for name, data in (("etc/os-release", b"NAME=Vampire OS\\n"),
+                                   ("sbin/init", b"init"), ("bin/busybox", b"busybox")):
+                    info = tarfile.TarInfo(name)
+                    info.size = len(data)
+                    tar.addfile(info, io.BytesIO(data))
+                link = tarfile.TarInfo("etc/escape")
+                link.type = tarfile.LNKTYPE
+                link.linkname = "../../outside"
+                tar.addfile(link)
+            with self.assertRaisesRegex(ValueError, "unsafe hard-link target"):
+                MODULE.validate(archive)
+
+    def test_rejects_special_file_outside_dev(self):
+        with tempfile.TemporaryDirectory() as temp:
+            archive = pathlib.Path(temp) / "rootfs.tar"
+            with tarfile.open(archive, "w") as tar:
+                for name, data in (("etc/os-release", b"NAME=Vampire OS\\n"),
+                                   ("sbin/init", b"init"), ("bin/busybox", b"busybox")):
+                    info = tarfile.TarInfo(name)
+                    info.size = len(data)
+                    tar.addfile(info, io.BytesIO(data))
+                fifo = tarfile.TarInfo("etc/unexpected-pipe")
+                fifo.type = tarfile.FIFOTYPE
+                tar.addfile(fifo)
+            with self.assertRaisesRegex(ValueError, "unsupported special file"):
+                MODULE.validate(archive)
+
     def test_rejects_missing_required_init(self):
         with tempfile.TemporaryDirectory() as temp:
             archive = pathlib.Path(temp) / "rootfs.tar"
