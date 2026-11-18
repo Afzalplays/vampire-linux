@@ -7,6 +7,9 @@ tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT HUP INT TERM
 cat > "$tmp/vsettings" <<'STUB'
 #!/bin/sh
+printf 'vsettings' >> "$VAMPIRE_TEST_LOG"
+for arg do printf ' <%s>' "$arg" >> "$VAMPIRE_TEST_LOG"; done
+printf '\\n' >> "$VAMPIRE_TEST_LOG"
 exit 0
 STUB
 cat > "$tmp/vnetwork" <<'STUB'
@@ -19,9 +22,21 @@ exit 0
 STUB
 cat > "$tmp/vctl" <<'STUB'
 #!/bin/sh
+printf 'vctl' >> "$VAMPIRE_TEST_LOG"
+for arg do printf ' <%s>' "$arg" >> "$VAMPIRE_TEST_LOG"; done
+printf '\\n' >> "$VAMPIRE_TEST_LOG"
+exit 0
+STUB
+cat > "$tmp/vpower" <<'STUB'
+#!/bin/sh
+printf 'vpower' >> "$VAMPIRE_TEST_LOG"
+for arg do printf ' <%s>' "$arg" >> "$VAMPIRE_TEST_LOG"; done
+printf '\\n' >> "$VAMPIRE_TEST_LOG"
 exit 0
 STUB
 chmod +x "$tmp/"*
+export VAMPIRE_TEST_LOG="$tmp/commands.log"
+: > "$VAMPIRE_TEST_LOG"
 run_case() {
   menu_choice=$1
   input=$2
@@ -43,4 +58,8 @@ run_case 3 '3\n0\n0\n'
 run_case 7 '7\n\n\n0\n'
 run_case 22 '22\n0\n0\n'
 run_case 23 '23\n0\n0\n'
-echo 'PASS: all Vampire Desktop console submenu entry points dispatch correctly'
+grep -Fq 'vsettings <set> <theme> <dark>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: appearance setting was not saved' >&2; exit 1; }
+grep -Fq 'vsettings <apply>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: appearance changes were not applied' >&2; exit 1; }
+grep -Fq 'vctl <list>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: service list action was not dispatched' >&2; exit 1; }
+grep -Fq 'vpower <status>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: power status action was not dispatched' >&2; exit 1; }
+echo 'PASS: Vampire Desktop submenu navigation and command dispatch regression tests'
