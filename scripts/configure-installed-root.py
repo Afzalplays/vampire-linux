@@ -107,7 +107,7 @@ def configure(root, root_uuid, mode, esp_uuid=None, root_partuuid=None):
             "configfile $prefix/grub.cfg",
             "",
         ]
-        atomic_write(esp_grub, "\\n".join(esp_handoff))
+        atomic_write(esp_grub, "\n".join(esp_handoff))
     metadata = f"FIRMWARE={mode}\nROOT_UUID={root_uuid}\n"
     if esp_uuid:
         metadata += f"ESP_UUID={esp_uuid}\n"
