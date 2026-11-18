@@ -14,10 +14,17 @@ exit 0
 STUB
 cat > "$tmp/vnetwork" <<'STUB'
 #!/bin/sh
+printf 'vnetwork' >> "$VAMPIRE_TEST_LOG"
+for arg do printf ' <%s>' "$arg" >> "$VAMPIRE_TEST_LOG"; done
+printf '\\n' >> "$VAMPIRE_TEST_LOG"
 exit 0
 STUB
 cat > "$tmp/vinstall" <<'STUB'
 #!/bin/sh
+printf 'vinstall' >> "$VAMPIRE_TEST_LOG"
+for arg do printf ' <%s>' "$arg" >> "$VAMPIRE_TEST_LOG"; done
+printf '\\n' >> "$VAMPIRE_TEST_LOG"
+if [ "$1" = media ]; then exit 0; fi
 exit 0
 STUB
 cat > "$tmp/vctl" <<'STUB'
@@ -54,10 +61,14 @@ run_case() {
 }
 # Each submenu is entered, exited with 0, then the main launcher exits with 0.
 run_case 2 '2\n1\ndark\n0\n0\n'
-run_case 3 '3\n0\n0\n'
-run_case 7 '7\n\n\n0\n'
+run_case 3 '3\n1\n0\n0\n'
+run_case 7 '7\n\n0\n0\n'
 run_case 22 '22\n1\n0\n0\n'
 run_case 23 '23\n1\n0\n0\n'
+grep -Fq 'vnetwork <status>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: network status action was not dispatched' >&2; exit 1; }
+grep -Fq 'vinstall <requirements>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: installer requirements action was not dispatched' >&2; exit 1; }
+grep -Fq 'vinstall <system-check>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: installer system check was not dispatched' >&2; exit 1; }
+grep -Fq 'vinstall <list>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: installer disk listing was not dispatched' >&2; exit 1; }
 grep -Fq 'vsettings <set> <theme> <dark>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: appearance setting was not saved' >&2; exit 1; }
 grep -Fq 'vsettings <apply>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: appearance changes were not applied' >&2; exit 1; }
 grep -Fq 'vctl <list>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: service list action was not dispatched' >&2; exit 1; }
