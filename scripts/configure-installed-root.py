@@ -96,6 +96,18 @@ def configure(root, root_uuid, mode, esp_uuid=None, root_partuuid=None):
     ]
     atomic_write(etc / "fstab", "\n".join(fstab) + "\n")
     atomic_write(boot_grub / "grub.cfg", "\n".join(grub))
+    if mode == "uefi":
+        # The removable-media GRUB executable starts from the ESP. Give it a
+        # small hand-off config there so it can locate the real menu on the
+        # ext4 root filesystem instead of looking for /boot on the FAT ESP.
+        esp_grub = root / "boot" / "efi" / "EFI" / "BOOT" / "grub.cfg"
+        esp_handoff = [
+            "search --no-floppy --fs-uuid --set=root " + root_uuid,
+            "set prefix=($root)/boot/grub",
+            "configfile $prefix/grub.cfg",
+            "",
+        ]
+        atomic_write(esp_grub, "\\n".join(esp_handoff))
     metadata = f"FIRMWARE={mode}\nROOT_UUID={root_uuid}\n"
     if esp_uuid:
         metadata += f"ESP_UUID={esp_uuid}\n"
