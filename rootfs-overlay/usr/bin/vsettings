@@ -88,7 +88,7 @@ case "$1" in
     fi
     dir=${CONFIG%/*}; [ "$dir" = "$CONFIG" ] && dir=.
     mkdir -p "$dir"
-    tmp="$CONFIG.tmp.$"
+    tmp="$CONFIG.tmp.$$"
     (set -C; : > "$tmp") 2>/dev/null || { echo "vsettings: temporary file already exists" >&2; exit 1; }
     trap 'rm -f "$tmp"' 0
   trap 'exit 1' HUP INT TERM
