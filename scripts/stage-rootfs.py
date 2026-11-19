@@ -69,14 +69,38 @@ def sanitize_member(member):
 def validate(archive):
     with tarfile.open(archive, "r:*") as tar:
         names = set()
+        path_types = {}
         for member in tar.getmembers():
             sanitized = sanitize_member(member)
             if sanitized is None:
                 continue
-            normalized = pathlib.PurePosixPath(member.name).as_posix()
+            normalized_path = pathlib.PurePosixPath(member.name)
+            normalized = normalized_path.as_posix()
             if normalized in names:
                 raise ValueError(f"duplicate archive path: {member.name}")
+            # Extraction must never follow an archive-created symlink or
+            # non-directory file while writing a later member beneath it.
+            # Checking only the final member name is insufficient: a valid
+            # looking path such as link/payload can escape the staging root
+            # when an earlier member created "link" as a symlink.
+            for parent in normalized_path.parents:
+                parent_name = parent.as_posix()
+                if parent_name == ".":
+                    continue
+                parent_type = path_types.get(parent_name)
+                if parent_type is not None and parent_type != "directory":
+                    raise ValueError(
+                        f"archive path has an ancestor that is not a directory: "
+                        f"{member.name} (ancestor: {parent_name})"
+                    )
+            if member.isdir():
+                kind = "directory"
+            elif member.issym() or member.islnk():
+                kind = "link"
+            else:
+                kind = "file"
             names.add(normalized)
+            path_types[normalized] = kind
         missing = [name for name in REQUIRED if name not in names]
         if missing:
             raise ValueError("rootfs archive missing required paths: " + ", ".join(missing))
