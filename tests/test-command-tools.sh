@@ -7,7 +7,6 @@ trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/bin" "$TMP/services.d" "$TMP/sys/class/net/test0" "$TMP/run"
 
 # Test vctl dispatch without touching the live system's service directory.
-: # vctl uses isolated environment overrides below
 cat > "$TMP/services.d/mocksvc" <<'SERVICE'
 #!/bin/sh
 printf '%s\n' "$1" >> "$VCTL_CALLS"
@@ -30,12 +29,14 @@ fi
 printf 'mocksvc\n' > "$TMP/external-enabled"
 ln -s "$TMP/external-enabled" "$TMP/enabled-link"
 if VAMPIRE_ENABLED_FILE="$TMP/enabled-link" "$ROOT/rootfs-overlay/usr/bin/vctl" enable mocksvc >/dev/null 2>&1; then
-  echo "vctl accepted a symlinked enabled-state file" >&2; exit 1
+  echo "vctl accepted a symlinked enabled-state file" >&2
+  exit 1
 fi
 mkdir "$TMP/state-real"
 ln -s "$TMP/state-real" "$TMP/state-link"
 if VAMPIRE_ENABLED_FILE="$TMP/state-link/enabled" "$ROOT/rootfs-overlay/usr/bin/vctl" enable mocksvc >/dev/null 2>&1; then
-  echo "vctl accepted a symlinked enabled-state directory" >&2; exit 1
+  echo "vctl accepted a symlinked enabled-state directory" >&2
+  exit 1
 fi
 grep -qx mocksvc "$TMP/external-enabled"
 
@@ -44,7 +45,7 @@ cat > "$TMP/bin/nft" <<'NFT'
 #!/bin/sh
 printf '%s\n' "$*" >> "$NFT_CALLS"
 if [ "$1" = "-c" ] && [ "$2" = "-f" ]; then
-  printf 'check\\n' >> "$NFT_CALLS"
+  printf '%s\n' 'validated' >> "$NFT_CALLS"
   test -s "$3"
 elif [ "$1" = "-f" ]; then
   cat "$2" > "$NFT_RULES"
@@ -54,30 +55,11 @@ chmod +x "$TMP/bin/nft"
 export NFT_CALLS="$TMP/nft-calls" NFT_RULES="$TMP/nft-rules"
 PATH="$TMP/bin:$PATH" VAMPIRE_SSH_PORT=2222 VAMPIRE_FIREWALL_RUN_DIR="$TMP/run" sh "$ROOT/rootfs-overlay/usr/bin/vguard" apply
 grep -q 'tcp dport 2222 ct state new accept' "$NFT_RULES"
-grep -q '^check
+grep -q '^-c -f ' "$NFT_CALLS"
 grep -q 'policy drop' "$NFT_RULES"
 PATH="$TMP/bin:$PATH" VAMPIRE_FIREWALL_RUN_DIR="$TMP/run" sh "$ROOT/rootfs-overlay/usr/bin/vguard" clear
 grep -q 'delete table inet vampire_filter' "$NFT_CALLS"
 if PATH="$TMP/bin:$PATH" VAMPIRE_FIREWALL_RUN_DIR="$TMP/run" VAMPIRE_SSH_PORT=70000 sh "$ROOT/rootfs-overlay/usr/bin/vguard" apply >/dev/null 2>&1; then
-  echo "vguard accepted an invalid SSH port" >&2
-  exit 1
-fi
-
-# Mock udhcpc; pass an isolated interface tree so tests never touch host networking.
-cat > "$TMP/bin/udhcpc" <<'DHCP'
-#!/bin/sh
-printf '%s\n' "$*" > "$DHCP_CALLS"
-DHCP
-chmod +x "$TMP/bin/udhcpc"
-export DHCP_CALLS="$TMP/dhcp-calls"
-PATH="$TMP/bin:$PATH" VAMPIRE_NETWORK_RUN_DIR="$TMP/run" VAMPIRE_SYS_NET="$TMP/sys/class/net" VAMPIRE_DHCP_HOOK="$ROOT/rootfs-overlay/usr/lib/vampire/udhcpc.script" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" start test0
-grep -q -- '-R -b -i test0' "$DHCP_CALLS"
-echo "Vampire command integration tests passed."
- "$NFT_CALLS"
-grep -q 'policy drop' "$NFT_RULES"
-PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vguard" clear
-grep -q 'delete table inet vampire_filter' "$NFT_CALLS"
-if PATH="$TMP/bin:$PATH" VAMPIRE_SSH_PORT=70000 sh "$ROOT/rootfs-overlay/usr/bin/vguard" apply >/dev/null 2>&1; then
   echo "vguard accepted an invalid SSH port" >&2
   exit 1
 fi
