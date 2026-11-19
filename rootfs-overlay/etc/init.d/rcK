@@ -1,7 +1,14 @@
 #!/bin/sh
-# BusyBox init shutdown hook: stop enabled services before unmounting filesystems.
+# BusyBox init shutdown hook: stop services and flush storage before unmounting.
+set -u
+shutdown_log() { printf 'Vampire OS shutdown: %s\n' "$*" >&2; }
+
 if [ -x /usr/bin/vctl ]; then
-  /usr/bin/vctl stop-all || echo "Vampire OS: one or more services failed to stop" >&2
+  /usr/bin/vctl stop-all || shutdown_log "one or more services failed to stop"
 fi
-sync
-umount -a -r
+if ! sync; then
+  shutdown_log "sync reported a storage flush failure"
+fi
+if ! umount -a -r; then
+  shutdown_log "one or more filesystems could not be remounted read-only or unmounted"
+fi
