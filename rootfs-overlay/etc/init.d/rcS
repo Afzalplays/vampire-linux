@@ -1,20 +1,46 @@
 #!/bin/sh
-mount -t proc proc /proc 2>/dev/null || true
-mount -t sysfs sysfs /sys 2>/dev/null || true
-mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
-mkdir -p /dev/pts /run /tmp /var/log /var/lib/vampire
-mount -t devpts devpts /dev/pts 2>/dev/null || true
-hostname vampire-os
+# Early userspace bootstrap for the live and installed Vampire OS images.
+set -u
+
+boot_log() { printf 'Vampire OS boot: %s\n' "$*" >&2; }
+mount_pseudo() {
+  fs=$1
+  target=$2
+  source=$3
+  if mountpoint -q "$target" 2>/dev/null; then
+    return 0
+  fi
+  if mount -t "$fs" "$source" "$target" 2>/dev/null; then
+    return 0
+  fi
+  boot_log "WARNING: could not mount $fs on $target; continuing with limited functionality"
+  return 1
+}
+
+mount_pseudo proc /proc proc || true
+mount_pseudo sysfs /sys sysfs || true
+mount_pseudo devtmpfs /dev devtmpfs || true
+if ! mkdir -p /dev/pts /run /tmp /var/log /var/lib/vampire /run/vampire; then
+  boot_log "WARNING: one or more runtime directories could not be created"
+fi
+mount_pseudo devpts /dev/pts devpts || true
+if ! chmod 1777 /tmp; then
+  boot_log "WARNING: could not set the standard sticky permissions on /tmp"
+fi
+
+if command -v hostname >/dev/null 2>&1; then
+  hostname vampire-os || boot_log "WARNING: could not set the system hostname"
+fi
 if command -v udevd >/dev/null 2>&1; then
-  udevd --daemon || true
+  udevd --daemon || boot_log "WARNING: udev daemon did not start"
   if command -v udevadm >/dev/null 2>&1; then
-    udevadm trigger --type=subsystems --action=add || true
-    udevadm trigger --type=devices --action=add || true
-    udevadm settle --timeout=10 || true
+    udevadm trigger --type=subsystems --action=add || boot_log "WARNING: udev subsystem trigger failed"
+    udevadm trigger --type=devices --action=add || boot_log "WARNING: udev device trigger failed"
+    udevadm settle --timeout=10 || boot_log "WARNING: udev did not settle within 10 seconds"
   fi
 fi
 if [ -x /usr/bin/vsettings ] && [ -r /usr/lib/vampire/settings-bootstrap ]; then
-  sh /usr/lib/vampire/settings-bootstrap || printf 'Vampire OS: settings bootstrap needs attention\n' >&2
+  sh /usr/lib/vampire/settings-bootstrap || boot_log "settings bootstrap needs attention"
 fi
 if [ -r /etc/vampire/install.conf ]; then
   printf '\n  Vampire OS 0.1.0-dev | x86_64 installed system\n'
@@ -23,5 +49,5 @@ else
 fi
 printf '  Type vfetch for system information.\n\n'
 if [ -x /usr/bin/vctl ]; then
-  /usr/bin/vctl start-all || printf 'Vampire OS: one or more services failed to start\n' >&2
+  /usr/bin/vctl start-all || boot_log "one or more services failed to start"
 fi
