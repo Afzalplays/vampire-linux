@@ -43,7 +43,7 @@ grep -Fq 'DE:         None (headless)' <<<"$SERVER_OUTPUT" || fail 'Server editi
 # VFetch reports its number of entries instead of looking for a nested field.
 PACKAGE_DB="$(mktemp)"
 trap 'rm -f "$SERVER_CONF" "$PACKAGE_DB"' EXIT
-printf '{"vfetch":{"version":"0.1"},"vpm":{"version":"0.1"},"vsh":{"version":"0.1"}}\\n' > "$PACKAGE_DB"
+printf '{"vfetch":{"version":"0.1"},"vpm":{"version":"0.1"},"vsh":{"version":"0.1"}}\n' > "$PACKAGE_DB"
 PACKAGE_OUTPUT="$(VAMPIRE_VPM_DB="$PACKAGE_DB" bash "$ROOT_DIR/fetch/vfetch")"
 grep -Fq 'Packages:   3' <<<"$PACKAGE_OUTPUT" || fail 'VFetch did not count installed VPM packages'
 
