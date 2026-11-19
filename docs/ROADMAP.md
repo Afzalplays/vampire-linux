@@ -15,6 +15,7 @@ feature release-ready.
 - [x] Add initial service dispatcher, DHCP helper and opt-in nftables helper.
 - [x] Harden service enablement updates, reject malformed state, deduplicate bulk operations, add status-all and fail-closed restart behavior.
 - [x] Add validated settings storage and interactive console launcher MVP.
+- [x] Harden settings writes with process-unique staging files and symlink refusal; add CLI regression tests.
 - [x] Add tests for settings validation, desktop launcher and core console tools.
 - [x] Add read-only installer disk discovery and target preflight checks.
 - [x] Add non-destructive installer CLI and fake-sysfs preflight tests for read-only planning, mounted disks and partitions, active disk/partition swap, stacked devices, unavailable mount tables, read-only media and undersized targets.
