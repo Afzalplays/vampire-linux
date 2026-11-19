@@ -91,7 +91,7 @@ and hardware compatibility remain unverified. See
 [the live ISO build guide](build/README.md) and
 [the QEMU boot-test guide](docs/QEMU-BOOT-TESTS.md).
 
-The installed-root configuration contract has focused Python regression tests
+The `Vampire OS quality gates` GitHub Actions workflow runs Python bytecode compilation, shell syntax validation, and the complete Python regression suite on pushes and pull requests. The installed-root configuration contract has focused Python regression tests
 for BIOS PARTUUID boot arguments, UEFI ESP mounting, malformed or missing
 identifiers, and symlink refusal. Rootfs staging has separate security tests
 for required system files, traversal paths, duplicate entries, escaping
