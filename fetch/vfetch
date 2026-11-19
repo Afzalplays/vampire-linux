@@ -21,7 +21,7 @@ UPTIME=$(uptime -p 2>/dev/null | sed 's/^up //' || true)
 
 PACKAGES=Unknown
 if [ -r /var/lib/vpm/installed.json ] && command -v python3 >/dev/null 2>&1; then
-  PACKAGES=$(python3 -c 'import json; p=json.load(open("/var/lib/vpm/installed.json")); print(len(p.get("packages", {})))' 2>/dev/null || printf 'Unknown')
+  PACKAGES=$(python3 -c 'import json; p=json.load(open("/var/lib/vpm/installed.json")); print(len(p) if isinstance(p, dict) else "Unknown")' 2>/dev/null || printf 'Unknown')
 elif command -v apk >/dev/null 2>&1; then
   PACKAGES=$(apk info 2>/dev/null | wc -l | tr -d ' ')
 elif command -v dpkg-query >/dev/null 2>&1; then
