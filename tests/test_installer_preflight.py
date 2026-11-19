@@ -89,6 +89,23 @@ class InstallerPreflightTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("target disk is active swap", result.stdout)
 
+    def test_preflight_refuses_partition_used_as_swap(self):
+        with tempfile.TemporaryDirectory() as temp:
+            env, device = self.make_environment(temp)
+            sys_disk = pathlib.Path(env["VAMPIRE_SYS_BLOCK"]) / "vda"
+            partition = sys_disk / "vda1"
+            partition.mkdir()
+            (partition / "partition").write_text("1\\n")
+            (partition / "dev").write_text("8:1\\n")
+            partition_device = pathlib.Path(env["VAMPIRE_DEV_ROOT"]) / "vda1"
+            partition_device.write_bytes(b"partition")
+            pathlib.Path(env["VAMPIRE_SWAPS_FILE"]).write_text(
+                f"{partition_device} partition 1024 0 -2\\n"
+            )
+            result = self.run_installer(env, "preflight", str(device))
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("target partition is active swap", result.stdout)
+
     def test_preflight_refuses_backing_disk_with_active_holder(self):
         with tempfile.TemporaryDirectory() as temp:
             env, device = self.make_environment(temp)
