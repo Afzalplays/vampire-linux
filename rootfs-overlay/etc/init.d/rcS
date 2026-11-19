@@ -7,9 +7,6 @@ mount_pseudo() {
   fs=$1
   target=$2
   source=$3
-  if mountpoint -q "$target" 2>/dev/null; then
-    return 0
-  fi
   if mount -t "$fs" "$source" "$target" 2>/dev/null; then
     return 0
   fi
