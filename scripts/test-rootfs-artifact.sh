@@ -14,4 +14,18 @@ for required in etc/os-release sbin/init bin/busybox boot/vmlinuz usr/lib/vampir
     exit 1
   }
 done
+if [[ "$EDITION" == desktop ]]; then
+  for required in \
+    usr/bin/vsettings \
+    usr/lib/vampire/settings_apply.py \
+    usr/lib/vampire/settings-bootstrap \
+    etc/vampire/settings.defaults \
+    etc/xdg/weston/weston.ini \
+    etc/xdg/foot/foot.ini; do
+    grep -Eq "(^|/)\${required}$" <<<"$rootfs_listing" || {
+      echo "ERROR: Desktop installer rootfs is missing required settings path: $required" >&2
+      exit 1
+    }
+  done
+fi
 echo "PASS: $EDITION installer rootfs archive and checksum are valid"
