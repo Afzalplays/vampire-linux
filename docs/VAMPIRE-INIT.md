@@ -24,7 +24,11 @@ during bulk start/stop. Restart is fail-closed: if stopping a service fails,
 the dispatcher does not start another instance. The enablement file is
 rewritten atomically with owner-only permissions, and malformed entries are
 rejected rather than copied forward. Boot startup continues if an optional
-service fails. Service names are restricted to alphanumeric characters,
+service fails, but early-userspace mount, udev, settings-bootstrap, and service
+failures now emit explicit diagnostics instead of being silently discarded.
+The bootstrap also creates the runtime directory layout and enforces the
+standard sticky bit on `/tmp`. Shutdown reports service-stop, storage-flush,
+and filesystem-unmount failures while continuing the remaining shutdown steps. Service names are restricted to alphanumeric characters,
 underscore, dot and hyphen; the enabled list is never evaluated as shell code.
 
 ## Current limitations
