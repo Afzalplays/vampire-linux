@@ -415,7 +415,7 @@ install_system() {
     esp_uuid=$(blkid -s UUID -o value "$part1")
     [ -n "$esp_uuid" ] || { echo "ERROR: unable to read EFI filesystem UUID." >&2; return 1; }
     configure_installed_root "$work/target" "$root_uuid" uefi "$esp_uuid"
-    grub-install --target=x86_64-efi --efi-directory="$work/target/boot/efi" --boot-directory="$work/target/boot" --bootloader-id=VampireOS --removable --no-nvram "$device"
+    grub-install --target=x86_64-efi --efi-directory="$work/target/boot/efi" --boot-directory="$work/target/boot" --bootloader-id=VampireOS --modules="part_gpt ext2 fat search search_fs_uuid configfile" --removable --no-nvram "$device"
   else
     configure_installed_root "$work/target" "$root_uuid" bios
     grub-install --target=i386-pc --boot-directory="$work/target/boot" "$device"
