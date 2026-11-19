@@ -98,6 +98,30 @@ class InstallerPreflightTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("active stacked block device", result.stdout)
 
+    def test_preflight_refuses_mounted_partition(self):
+        with tempfile.TemporaryDirectory() as temp:
+            env, device = self.make_environment(temp)
+            sys_disk = pathlib.Path(env["VAMPIRE_SYS_BLOCK"]) / "vda"
+            partition = sys_disk / "vda1"
+            partition.mkdir()
+            (partition / "partition").write_text("1\\n")
+            (partition / "dev").write_text("8:1\\n")
+            (pathlib.Path(env["VAMPIRE_DEV_ROOT"]) / "vda1").write_bytes(b"partition")
+            pathlib.Path(env["VAMPIRE_MOUNTINFO_FILE"]).write_text(
+                "36 25 8:1 / /mnt/root rw - ext4 /dev/vda1 rw\\n"
+            )
+            result = self.run_installer(env, "preflight", str(device))
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("mounted at /mnt/root", result.stdout)
+
+    def test_preflight_fails_closed_when_mount_tables_are_unavailable(self):
+        with tempfile.TemporaryDirectory() as temp:
+            env, device = self.make_environment(temp)
+            pathlib.Path(env["VAMPIRE_MOUNTINFO_FILE"]).unlink()
+            result = self.run_installer(env, "preflight", str(device))
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("mount, mountinfo or swap table unavailable", result.stdout)
+
     def test_preflight_refuses_disk_with_mounted_partition_or_device(self):
         with tempfile.TemporaryDirectory() as temp:
             mountinfo = "36 25 8:0 / /mnt/target rw - ext4 /dev/vda rw\n"
