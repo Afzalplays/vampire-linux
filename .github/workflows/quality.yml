@@ -27,7 +27,7 @@ jobs:
           python-version: "3.x"
 
       - name: Validate Python syntax
-        run: python -m compileall -q scripts tests vpm fetch
+        run: python -m compileall -q scripts tests vpm fetch rootfs-overlay/usr/lib/vampire
 
       - name: Validate shell syntax
         shell: bash
@@ -38,7 +38,7 @@ jobs:
               *"/bash"*) bash -n "$file" ;;
               *"/sh"*) sh -n "$file" ;;
             esac
-          done < <(find scripts rootfs-overlay/usr/bin build -type f -print0)
+          done < <(find scripts rootfs-overlay/usr/bin rootfs-overlay/usr/lib/vampire build -type f -print0)
 
       - name: Run Python regression suite
         run: python -m unittest discover -s tests -p 'test_*.py' -v
