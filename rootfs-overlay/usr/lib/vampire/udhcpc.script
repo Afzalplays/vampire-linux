@@ -2,6 +2,18 @@
 # BusyBox udhcpc lease hook. Validate DHCP data before changing system state.
 set -eu
 RESOLV_CONF=${VAMPIRE_RESOLV_CONF:-/etc/resolv.conf}
+# Never follow a resolver-file or parent-directory symlink from DHCP input.
+[ ! -L "$RESOLV_CONF" ] || { echo "udhcpc hook: refusing symlinked resolver file" >&2; exit 1; }
+resolver_dir=${RESOLV_CONF%/*}
+[ "$resolver_dir" = "$RESOLV_CONF" ] && resolver_dir=.
+check_dir=$resolver_dir
+while [ "$check_dir" != . ] && [ "$check_dir" != / ]; do
+  [ ! -L "$check_dir" ] || { echo "udhcpc hook: refusing symlinked resolver directory: $check_dir" >&2; exit 1; }
+  parent=${check_dir%/*}
+  [ -n "$parent" ] || parent=/
+  [ "$parent" != "$check_dir" ] || break
+  check_dir=$parent
+done
 valid_iface() {
   case "$1" in ''|*[!A-Za-z0-9_.-]*) return 1 ;; esac
   [ "${#1}" -le 15 ]
@@ -53,7 +65,7 @@ case "$action" in
     dir=${RESOLV_CONF%/*}
     [ "$dir" = "$RESOLV_CONF" ] && dir=.
     mkdir -p "$dir"
-    tmp="$RESOLV_CONF.tmp.$$"
+    tmp=$(mktemp "$RESOLV_CONF.tmp.XXXXXX")
     trap 'rm -f "$tmp"' 0 HUP INT TERM
     printf '%s\n' '# Managed by Vampire OS DHCP' > "$tmp"
     if [ -n "${dns:-}" ]; then
