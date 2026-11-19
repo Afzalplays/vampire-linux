@@ -30,10 +30,16 @@ valid_value() {
   esac
 }
 reject_config_symlink() {
-  [ ! -L "$CONFIG" ] || {
-    echo "vsettings: refusing symlinked settings file: $CONFIG" >&2
-    return 1
-  }
+  _check_path=$CONFIG
+  case "$_check_path" in /*) ;; *) _check_path=$PWD/$_check_path ;; esac
+  while [ -n "$_check_path" ] && [ "$_check_path" != "/" ]; do
+    [ ! -L "$_check_path" ] || {
+      echo "vsettings: refusing symlinked settings path: $_check_path" >&2
+      return 1
+    }
+    _check_path=${_check_path%/*}
+    [ -n "$_check_path" ] || _check_path=/
+  done
 }
 read_value() {
   [ -r "$CONFIG" ] || return 1
