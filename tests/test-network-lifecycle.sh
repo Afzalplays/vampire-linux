@@ -68,4 +68,19 @@ kill "$unrelated_pid"
 printf '%s\n' 'nameserver 9.9.9.9' > "$VAMPIRE_RESOLV_CONF"
 PATH="$TMP/bin:$PATH" interface=test0 sh "$VAMPIRE_DHCP_HOOK" deconfig
 grep -q '^nameserver 9.9.9.9$' "$VAMPIRE_RESOLV_CONF"
+# DHCP must not follow a resolver-file symlink or overwrite its target.
+printf '%s\n' 'nameserver 4.4.4.4' > "$TMP/resolver-target"
+ln -s "$TMP/resolver-target" "$TMP/resolver-link"
+if PATH="$TMP/bin:$PATH" VAMPIRE_RESOLV_CONF="$TMP/resolver-link" interface=test0 ip=192.0.2.25 subnet=255.255.255.0 sh "$VAMPIRE_DHCP_HOOK" bound >/dev/null 2>&1; then
+  echo "DHCP hook followed a symlinked resolver file" >&2; exit 1
+fi
+grep -q '^nameserver 4.4.4.4
+ "$TMP/resolver-target"
+rm -f "$TMP/resolver-link"
+mkdir "$TMP/real-resolver-dir"
+ln -s "$TMP/real-resolver-dir" "$TMP/resolver-dir-link"
+if PATH="$TMP/bin:$PATH" VAMPIRE_RESOLV_CONF="$TMP/resolver-dir-link/resolv.conf" interface=test0 ip=192.0.2.25 subnet=255.255.255.0 sh "$VAMPIRE_DHCP_HOOK" bound >/dev/null 2>&1; then
+  echo "DHCP hook followed a symlinked resolver directory" >&2; exit 1
+fi
+test ! -e "$TMP/real-resolver-dir/resolv.conf"
 echo "Vampire DHCP lifecycle and lease hook tests passed."
