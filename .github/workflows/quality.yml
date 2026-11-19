@@ -1,0 +1,44 @@
+name: Vampire OS quality gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: vampire-os-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-validation:
+    name: Source validation and regression tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Validate Python syntax
+        run: python -m compileall -q scripts tests vpm fetch
+
+      - name: Validate shell syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r -d '' file; do
+            case "$(head -n 1 "$file")" in
+              *"/bash"*) bash -n "$file" ;;
+              *"/sh"*) sh -n "$file" ;;
+            esac
+          done < <(find scripts rootfs-overlay/usr/bin build -type f -print0)
+
+      - name: Run Python regression suite
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
