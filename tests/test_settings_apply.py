@@ -61,6 +61,31 @@ class SettingsApplyTests(unittest.TestCase):
             self.assertFalse(weston.exists())
             self.assertFalse(foot.exists())
 
+    def test_refuses_symlinked_runtime_configuration_directory(self):
+        with tempfile.TemporaryDirectory() as temp:
+            base = pathlib.Path(temp)
+            real_runtime = base / "real-runtime"
+            real_runtime.mkdir()
+            runtime_link = base / "runtime"
+            runtime_link.symlink_to(real_runtime, target_is_directory=True)
+            settings = base / "settings.conf"
+            settings.write_text("theme=dark\\n")
+            env = os.environ.copy()
+            env.update({
+                "VAMPIRE_SETTINGS_FILE": str(settings),
+                "VAMPIRE_WESTON_BASE": str(WESTON),
+                "VAMPIRE_FOOT_BASE": str(FOOT),
+                "VAMPIRE_WESTON_RUNTIME_CONFIG": str(runtime_link / "weston.ini"),
+                "XDG_CONFIG_HOME": str(base / "config"),
+            })
+            result = subprocess.run(
+                ["python3", str(APPLY)], env=env, text=True,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("symlinked configuration path", result.stderr)
+            self.assertEqual(list(real_runtime.iterdir()), [])
+
     def test_refuses_symlinked_settings_file(self):
         with tempfile.TemporaryDirectory() as temp:
             base = pathlib.Path(temp)
