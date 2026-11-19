@@ -67,6 +67,7 @@ feature release-ready.
 - [x] Apply validated theme, accent, panel visibility/transparency, reduced-motion and terminal-opacity settings to the next Weston session.
 - [x] Add Weston panel launchers for Terminal, Files, Settings, Software Center and Monitor.
 - [x] Require the Desktop live-ISO smoke test to verify vsettings, settings bootstrap/apply helpers and Weston/Foot base configurations are present in the initramfs.
+- [x] Require the Desktop installer-rootfs artifact check to verify the same settings runtime and base configuration payload.
 - [x] Add console file manager, hardware inventory and diagnostics.
 - [x] Add an interactive service manager to Vampire Desktop for list, status, start, stop, restart and boot enablement.
 - [ ] Build the branded Vampire Desktop shell: top panel, floating dock, launcher and window integration.
