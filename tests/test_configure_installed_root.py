@@ -79,6 +79,8 @@ class InstalledRootTests(unittest.TestCase):
             MODULE.configure(root, ROOT_UUID, "uefi", ESP_UUID, ROOT_PARTUUID)
             handoff = (root / "boot/efi/EFI/BOOT/grub.cfg").read_bytes()
             expected = (
+                "insmod part_gpt\n"
+                "insmod ext2\n"
                 f"search --no-floppy --fs-uuid --set=root {ROOT_UUID}\n"
                 "set prefix=($root)/boot/grub\n"
                 "configfile $prefix/grub.cfg\n"
