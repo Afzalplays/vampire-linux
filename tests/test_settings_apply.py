@@ -61,6 +61,32 @@ class SettingsApplyTests(unittest.TestCase):
             self.assertFalse(weston.exists())
             self.assertFalse(foot.exists())
 
+    def test_rejects_invalid_stored_preference_even_when_not_applied_by_weston(self):
+        with tempfile.TemporaryDirectory() as temp:
+            result, weston, foot = self.run_apply(temp, "dock_size=giant\\n")
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("invalid value for dock_size", result.stderr)
+            self.assertFalse(weston.exists())
+            self.assertFalse(foot.exists())
+
+    def test_rejects_unknown_preference_instead_of_silently_ignoring_it(self):
+        with tempfile.TemporaryDirectory() as temp:
+            result, weston, foot = self.run_apply(temp, "experimental_switch=true\\n")
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("unknown setting: experimental_switch", result.stderr)
+            self.assertFalse(weston.exists())
+            self.assertFalse(foot.exists())
+
+    def test_rejects_duplicate_preference_not_consumed_by_weston(self):
+        with tempfile.TemporaryDirectory() as temp:
+            result, weston, foot = self.run_apply(
+                temp, "dock_size=small\\ndock_size=large\\n"
+            )
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("duplicate setting: dock_size", result.stderr)
+            self.assertFalse(weston.exists())
+            self.assertFalse(foot.exists())
+
     def test_refuses_symlinked_runtime_configuration_directory(self):
         with tempfile.TemporaryDirectory() as temp:
             base = pathlib.Path(temp)
