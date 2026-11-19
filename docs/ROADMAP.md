@@ -8,7 +8,7 @@ feature release-ready.
 
 - [x] Define an independent x86_64 distribution target.
 - [x] Add musl, BusyBox init, Linux kernel and Buildroot image configuration.
-- [x] Add VFetch, GRUB hybrid ISO builder and SHA-256 generation.
+- [x] Add VFetch, GRUB hybrid ISO builder and SHA-256 generation. Validate the installed VPM package count in VFetch regression tests.
 - [x] Add VPM experimental client, signed-index verification and unit tests.
 - [x] Add shell/configuration CI checks and QEMU BIOS/UEFI smoke-test script.
 - [x] Add push/PR quality workflow for Python compilation (including installed runtime utilities), shell syntax checks (including runtime helpers) and regression tests (GitHub Actions passed on 2026-11-19).
