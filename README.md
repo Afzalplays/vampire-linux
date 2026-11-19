@@ -91,7 +91,7 @@ and hardware compatibility remain unverified. See
 [the live ISO build guide](build/README.md) and
 [the QEMU boot-test guide](docs/QEMU-BOOT-TESTS.md).
 
-The `Vampire OS quality gates` GitHub Actions workflow runs Python bytecode compilation, shell syntax validation, and the complete Python regression suite on pushes and pull requests. The text-mode installer has non-destructive CLI and isolated fake-sysfs preflight tests covering read-only planning, mounted disks and partitions, active disk/partition swap, stacked devices, unavailable mount tables, read-only media and undersized targets. The installed-root configuration contract has focused Python regression tests
+The `Vampire OS quality gates` GitHub Actions workflow runs Python bytecode compilation, shell syntax validation, and the complete Python regression suite on pushes and pull requests. The settings CLI now uses process-unique atomic staging files and refuses symlinked settings targets; its regression tests cover successful writes, invalid values, duplicate settings and symlink refusal. The text-mode installer has non-destructive CLI and isolated fake-sysfs preflight tests covering read-only planning, mounted disks and partitions, active disk/partition swap, stacked devices, unavailable mount tables, read-only media and undersized targets. The installed-root configuration contract has focused Python regression tests
 for BIOS PARTUUID boot arguments, UEFI ESP mounting, malformed or missing
 identifiers, and symlink refusal. Rootfs staging has separate security tests
 for required system files, traversal paths, duplicate entries, escaping
