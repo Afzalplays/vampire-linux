@@ -91,6 +91,7 @@ feature release-ready.
 - [x] Report required disk-installation tools without performing destructive actions.
 - [x] Implement guided text-mode erase-and-install flow in the console launcher (graphical installer remains pending).
 - [x] Implement GPT partitioning, FAT32/ext4 formatting, rootfs staging, UUID configuration, BIOS/UEFI GRUB installation and exact typed destructive confirmation.
+- [x] Repeat disk safety preflight immediately after destructive confirmation to reject target-use changes before the first partition write.
 - [x] Verify firmware-specific GRUB boot files and generated configuration exist before reporting installer success.
 - [x] Discover and mount the installation ISO payload read-only for offline installation.
 - [ ] Validate installer end-to-end on disposable BIOS and UEFI QEMU disks, including installed-disk reboot and failure cleanup.
