@@ -20,8 +20,9 @@ UPTIME=$(uptime -p 2>/dev/null | sed 's/^up //' || true)
 [ -n "$UPTIME" ] || UPTIME=Unknown
 
 PACKAGES=Unknown
-if [ -r /var/lib/vpm/installed.json ] && command -v python3 >/dev/null 2>&1; then
-  PACKAGES=$(python3 -c 'import json; p=json.load(open("/var/lib/vpm/installed.json")); print(len(p) if isinstance(p, dict) else "Unknown")' 2>/dev/null || printf 'Unknown')
+VPM_DB=${VAMPIRE_VPM_DB:-/var/lib/vpm/installed.json}
+if [ -r "$VPM_DB" ] && command -v python3 >/dev/null 2>&1; then
+  PACKAGES=$(VAMPIRE_VPM_DB="$VPM_DB" python3 -c 'import json,os; p=json.load(open(os.environ["VAMPIRE_VPM_DB"])); print(len(p) if isinstance(p, dict) else "Unknown")' 2>/dev/null || printf 'Unknown')
 elif command -v apk >/dev/null 2>&1; then
   PACKAGES=$(apk info 2>/dev/null | wc -l | tr -d ' ')
 elif command -v dpkg-query >/dev/null 2>&1; then
