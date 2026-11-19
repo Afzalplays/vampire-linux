@@ -10,6 +10,19 @@ BACKUP_DIR=${VAMPIRE_SETTINGS_BACKUP_DIR:-/var/lib/vampire}
 
 log() { printf 'Vampire OS: %s\n' "$*" >&2; }
 
+reject_config_path_symlinks() {
+  check_path=$CONFIG
+  case "$check_path" in /*) ;; *) check_path=$PWD/$check_path ;; esac
+  while [ -n "$check_path" ] && [ "$check_path" != "/" ]; do
+    [ ! -L "$check_path" ] || {
+      log "refusing symlinked settings path: $check_path"
+      return 1
+    }
+    check_path=${check_path%/*}
+    [ -n "$check_path" ] || check_path=/
+  done
+}
+
 install_defaults() {
   [ -r "$DEFAULTS" ] || { log "settings defaults are unavailable"; return 1; }
   dir=${CONFIG%/*}
@@ -38,7 +51,7 @@ install_defaults() {
   trap - 0 HUP INT TERM
 }
 
-[ ! -L "$CONFIG" ] || { log "refusing symlinked settings file; current target left untouched"; exit 1; }
+reject_config_path_symlinks || { log "current settings left untouched"; exit 1; }
 
 if [ ! -e "$CONFIG" ]; then
   install_defaults || exit 1
