@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 """Regression tests for safe Vampire OS rootfs archive staging."""
+import importlib.util
 import io
 import pathlib
 import tarfile
 import tempfile
 import unittest
 
-from scripts.stage_rootfs import validate
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+SPEC = importlib.util.spec_from_file_location("stage_rootfs", ROOT / "scripts" / "stage-rootfs.py")
+STAGE_ROOTFS = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(STAGE_ROOTFS)
+validate = STAGE_ROOTFS.validate
 
 
 def archive_with(entries):
