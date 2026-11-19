@@ -66,7 +66,7 @@ class InstallerPreflightTests(unittest.TestCase):
     def test_preflight_refuses_disk_below_minimum_size(self):
         with tempfile.TemporaryDirectory() as temp:
             env, device = self.make_environment(temp)
-            (pathlib.Path(env["VAMPIRE_SYS_BLOCK"]) / "vda" / "size").write_text("1000\\n")
+            (pathlib.Path(env["VAMPIRE_SYS_BLOCK"]) / "vda" / "size").write_text("1000\n")
             result = self.run_installer(env, "preflight", str(device))
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("smaller than the 8 GiB minimum", result.stdout)
@@ -74,7 +74,7 @@ class InstallerPreflightTests(unittest.TestCase):
     def test_preflight_refuses_read_only_disk(self):
         with tempfile.TemporaryDirectory() as temp:
             env, device = self.make_environment(temp)
-            (pathlib.Path(env["VAMPIRE_SYS_BLOCK"]) / "vda" / "ro").write_text("1\\n")
+            (pathlib.Path(env["VAMPIRE_SYS_BLOCK"]) / "vda" / "ro").write_text("1\n")
             result = self.run_installer(env, "preflight", str(device))
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("kernel reports this device as read-only", result.stdout)
@@ -83,7 +83,7 @@ class InstallerPreflightTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             env, device = self.make_environment(temp)
             pathlib.Path(env["VAMPIRE_SWAPS_FILE"]).write_text(
-                f"{device} partition 1024 0 -2\\n"
+                f"{device} partition 1024 0 -2\n"
             )
             result = self.run_installer(env, "preflight", str(device))
             self.assertNotEqual(result.returncode, 0)
@@ -95,12 +95,12 @@ class InstallerPreflightTests(unittest.TestCase):
             sys_disk = pathlib.Path(env["VAMPIRE_SYS_BLOCK"]) / "vda"
             partition = sys_disk / "vda1"
             partition.mkdir()
-            (partition / "partition").write_text("1\\n")
-            (partition / "dev").write_text("8:1\\n")
+            (partition / "partition").write_text("1\n")
+            (partition / "dev").write_text("8:1\n")
             partition_device = pathlib.Path(env["VAMPIRE_DEV_ROOT"]) / "vda1"
             partition_device.write_bytes(b"partition")
             pathlib.Path(env["VAMPIRE_SWAPS_FILE"]).write_text(
-                f"{partition_device} partition 1024 0 -2\\n"
+                f"{partition_device} partition 1024 0 -2\n"
             )
             result = self.run_installer(env, "preflight", str(device))
             self.assertNotEqual(result.returncode, 0)
@@ -121,11 +121,11 @@ class InstallerPreflightTests(unittest.TestCase):
             sys_disk = pathlib.Path(env["VAMPIRE_SYS_BLOCK"]) / "vda"
             partition = sys_disk / "vda1"
             partition.mkdir()
-            (partition / "partition").write_text("1\\n")
-            (partition / "dev").write_text("8:1\\n")
+            (partition / "partition").write_text("1\n")
+            (partition / "dev").write_text("8:1\n")
             (pathlib.Path(env["VAMPIRE_DEV_ROOT"]) / "vda1").write_bytes(b"partition")
             pathlib.Path(env["VAMPIRE_MOUNTINFO_FILE"]).write_text(
-                "36 25 8:1 / /mnt/root rw - ext4 /dev/vda1 rw\\n"
+                "36 25 8:1 / /mnt/root rw - ext4 /dev/vda1 rw\n"
             )
             result = self.run_installer(env, "preflight", str(device))
             self.assertNotEqual(result.returncode, 0)
