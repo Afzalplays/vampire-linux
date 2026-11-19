@@ -8,7 +8,8 @@ import tempfile
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
-SPEC = importlib.util.spec_from_file_location("vpm_client", ROOT / "vpm" / "vpm")
+from importlib.machinery import SourceFileLoader
+SPEC = importlib.util.spec_from_loader("vpm_client", SourceFileLoader("vpm_client", str(ROOT / "vpm" / "vpm")))
 VPM = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(VPM)
 
