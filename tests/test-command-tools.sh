@@ -24,6 +24,18 @@ if "$ROOT/rootfs-overlay/usr/bin/vctl" start '../mocksvc' >/dev/null 2>&1; then
   echo "vctl accepted a path traversal service name" >&2
   exit 1
 fi
+ln -s "$TMP/external-service" "$TMP/services.d/linkedsvc"
+cat > "$TMP/external-service" <<'SERVICE'
+#!/bin/sh
+echo executed > "$VCTL_EXTERNAL_MARKER"
+SERVICE
+chmod +x "$TMP/external-service"
+export VCTL_EXTERNAL_MARKER="$TMP/external-marker"
+if "$ROOT/rootfs-overlay/usr/bin/vctl" start linkedsvc >/dev/null 2>&1; then
+  echo "vctl executed a symlinked service entry" >&2
+  exit 1
+fi
+test ! -e "$VCTL_EXTERNAL_MARKER"
 
 # Service enablement state must never follow a symlink or write through a symlinked parent.
 printf 'mocksvc\n' > "$TMP/external-enabled"
