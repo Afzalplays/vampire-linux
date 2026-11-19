@@ -75,6 +75,7 @@ feature release-ready.
 
 - [x] Read-only disk inventory and installation preflight.
 - [x] Add checksum-verified rootfs validation and guarded staging into an existing target directory.
+- [x] Reject rootfs archive entries nested beneath symlink or non-directory ancestors before extraction; add focused regression tests.
 - [x] Generate deterministic fstab and GRUB configuration for a staged target root using kernel-supported GPT PARTUUID root selection (bootloader installation remains pending).
 - [x] Regression-test the UEFI ESP GRUB handoff as exact newline-delimited configuration (firmware boot validation remains pending).
 - [x] Embed GPT, ext-family, FAT, filesystem-UUID search and GRUB configfile modules in the removable UEFI bootloader (installed-disk boot validation remains pending).
