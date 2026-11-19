@@ -46,7 +46,7 @@ class VSettingsCliTests(unittest.TestCase):
             config.symlink_to(target)
             result = self.run_settings(config, "set", "theme", "light")
             self.assertNotEqual(result.returncode, 0)
-            self.assertIn("refusing symlinked settings file", result.stderr)
+            self.assertIn("refusing symlinked settings path", result.stderr)
             self.assertTrue(config.is_symlink())
             self.assertEqual(target.read_text(), "theme=dark\n")
 
