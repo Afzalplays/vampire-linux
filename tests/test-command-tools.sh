@@ -63,7 +63,7 @@ cat > "$TMP/bin/nft" <<'NFT'
 printf '%s\n' "$*" >> "$NFT_CALLS"
 if [ "$1" = "-c" ] && [ "$2" = "-f" ]; then
   printf '%s\n' 'validated' >> "$NFT_CALLS"
-  test -s "$3"
+  [ "${NFT_REJECT_VALIDATION:-0}" != 1 ] && test -s "$3"
 elif [ "$1" = "-f" ]; then
   cat "$2" > "$NFT_RULES"
 fi
@@ -74,6 +74,17 @@ PATH="$TMP/bin:$PATH" VAMPIRE_SSH_PORT=2222 VAMPIRE_FIREWALL_RUN_DIR="$TMP/run" 
 grep -q 'tcp dport 2222 ct state new accept' "$NFT_RULES"
 grep -q '^-c -f ' "$NFT_CALLS"
 grep -q 'policy drop' "$NFT_RULES"
+cp "$NFT_RULES" "$TMP/rules-before-rejected-update"
+if PATH="$TMP/bin:$PATH" NFT_REJECT_VALIDATION=1 VAMPIRE_SSH_PORT=2223 VAMPIRE_FIREWALL_RUN_DIR="$TMP/run" sh "$ROOT/rootfs-overlay/usr/bin/vguard" apply >/dev/null 2>&1; then
+  echo "vguard applied a ruleset rejected by nft validation" >&2
+  exit 1
+fi
+cmp "$TMP/rules-before-rejected-update" "$NFT_RULES"
+ln -s "$TMP/run" "$TMP/run-link"
+if PATH="$TMP/bin:$PATH" VAMPIRE_FIREWALL_RUN_DIR="$TMP/run-link" sh "$ROOT/rootfs-overlay/usr/bin/vguard" apply >/dev/null 2>&1; then
+  echo "vguard accepted a symlinked runtime directory" >&2
+  exit 1
+fi
 PATH="$TMP/bin:$PATH" VAMPIRE_FIREWALL_RUN_DIR="$TMP/run" sh "$ROOT/rootfs-overlay/usr/bin/vguard" clear
 grep -q 'delete table inet vampire_filter' "$NFT_CALLS"
 if PATH="$TMP/bin:$PATH" VAMPIRE_FIREWALL_RUN_DIR="$TMP/run" VAMPIRE_SSH_PORT=70000 sh "$ROOT/rootfs-overlay/usr/bin/vguard" apply >/dev/null 2>&1; then
