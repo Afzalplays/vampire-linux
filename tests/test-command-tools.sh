@@ -37,7 +37,7 @@ ln -s "$TMP/state-real" "$TMP/state-link"
 if VAMPIRE_ENABLED_FILE="$TMP/state-link/enabled" "$ROOT/rootfs-overlay/usr/bin/vctl" enable mocksvc >/dev/null 2>&1; then
   echo "vctl accepted a symlinked enabled-state directory" >&2; exit 1
 fi
-test "$(cat "$TMP/external-enabled")" = mocksvc
+grep -qx mocksvc "$TMP/external-enabled"
 
 # Mock nft so firewall tests cannot modify the host firewall.
 cat > "$TMP/bin/nft" <<'NFT'
