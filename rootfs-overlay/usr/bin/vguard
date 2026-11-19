@@ -8,8 +8,15 @@ case "${1:-status}" in
  status) command -v nft >/dev/null 2>&1 && nft list ruleset || echo "vguard: nftables is not installed" ;;
  apply)
   command -v nft >/dev/null 2>&1 || { echo "vguard: nftables is not installed" >&2; exit 1; }
-  nft delete table inet vampire_filter 2>/dev/null || true
-  nft -f - <<EOF
+  # Build and syntax-check the candidate before touching the active firewall.
+  runtime=${VAMPIRE_FIREWALL_RUN_DIR:-/run/vampire}
+  mkdir -p "$runtime"
+  [ ! -L "$runtime" ] || { echo "vguard: refusing symlinked runtime directory" >&2; exit 1; }
+  old_umask=$(umask)
+  umask 077
+  candidate=$(mktemp "$runtime/firewall.XXXXXX") || { umask "$old_umask"; exit 1; }
+  trap 'rm -f "$candidate"; umask "$old_umask"' EXIT HUP INT TERM
+  cat > "$candidate" <<EOF
 table inet vampire_filter {
  chain input {
   type filter hook input priority 0; policy drop;
@@ -25,6 +32,13 @@ table inet vampire_filter {
  chain output { type filter hook output priority 0; policy accept; }
 }
 EOF
+  if ! nft -c -f "$candidate"; then
+    echo "vguard: candidate rules failed validation; active firewall unchanged" >&2
+    exit 1
+  fi
+  # Replace only after validation. If the old table is absent, continue.
+  nft delete table inet vampire_filter 2>/dev/null || true
+  nft -f "$candidate"
   echo "vguard: firewall applied; inbound TCP $SSH_PORT allowed"
   ;;
  clear) command -v nft >/dev/null 2>&1 || exit 1; nft delete table inet vampire_filter 2>/dev/null || true ;;
