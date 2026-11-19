@@ -102,6 +102,8 @@ def configure(root, root_uuid, mode, esp_uuid=None, root_partuuid=None):
         # ext4 root filesystem instead of looking for /boot on the FAT ESP.
         esp_grub = root / "boot" / "efi" / "EFI" / "BOOT" / "grub.cfg"
         esp_handoff = [
+            "insmod part_gpt",
+            "insmod ext2",
             "search --no-floppy --fs-uuid --set=root " + root_uuid,
             "set prefix=($root)/boot/grub",
             "configfile $prefix/grub.cfg",
