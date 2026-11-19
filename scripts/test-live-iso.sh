@@ -74,6 +74,12 @@ if [[ "$EDITION" == "desktop" ]]; then
   has_entry usr/bin/weston
   has_entry usr/bin/foot
   has_entry usr/bin/vampire-terminal
+  has_entry usr/bin/vsettings
+  has_entry usr/lib/vampire/settings_apply.py
+  has_entry usr/lib/vampire/settings-bootstrap
+  has_entry etc/vampire/settings.defaults
+  has_entry etc/xdg/weston/weston.ini
+  has_entry etc/xdg/foot/foot.ini
 else
   if grep -Eq "(/|^)usr/bin/weston$" <<<"$initramfs_listing"; then
     die "Server initramfs unexpectedly includes the Weston desktop"
