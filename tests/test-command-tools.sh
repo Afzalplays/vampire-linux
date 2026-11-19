@@ -36,6 +36,11 @@ if "$ROOT/rootfs-overlay/usr/bin/vctl" start linkedsvc >/dev/null 2>&1; then
   exit 1
 fi
 test ! -e "$VCTL_EXTERNAL_MARKER"
+ln -s "$TMP/services.d" "$TMP/services-link"
+if VAMPIRE_SERVICE_DIR="$TMP/services-link" "$ROOT/rootfs-overlay/usr/bin/vctl" start mocksvc >/dev/null 2>&1; then
+  echo "vctl accepted a symlinked service directory" >&2
+  exit 1
+fi
 
 # Service enablement state must never follow a symlink or write through a symlinked parent.
 printf 'mocksvc\n' > "$TMP/external-enabled"
