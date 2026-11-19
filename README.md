@@ -97,7 +97,7 @@ identifiers, and symlink refusal. Rootfs staging has separate security tests
 for required system files, traversal paths, duplicate entries, escaping
 symlinks, and refusing to merge into a non-empty destination. The read-only
 `vmonitor` utility has isolated procfs/sysfs tests for uptime, load, memory,
-thermal readings, missing telemetry and live refresh argument handling. Run the
+thermal readings, missing telemetry and live refresh argument handling. VPM archive extraction also has regression coverage for traversal, absolute paths, symlinks, duplicate entries, overwrite refusal and partial-write rollback. Run the
 suite from the repository root with:
 
 ```sh
