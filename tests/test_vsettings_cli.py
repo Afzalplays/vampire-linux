@@ -70,6 +70,20 @@ class VSettingsCliTests(unittest.TestCase):
             self.assertTrue(config.is_symlink())
             self.assertEqual(target.read_text(), "theme=dark\\n")
 
+    def test_set_refuses_symlinked_parent_directory(self):
+        with tempfile.TemporaryDirectory() as temp:
+            base = pathlib.Path(temp)
+            real_dir = base / "real"
+            real_dir.mkdir()
+            (real_dir / "settings.conf").write_text("theme=dark\\n")
+            linked_dir = base / "linked"
+            linked_dir.symlink_to(real_dir, target_is_directory=True)
+            config = linked_dir / "settings.conf"
+            result = self.run_settings(config, "set", "theme", "light")
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("refusing symlinked settings path", result.stderr)
+            self.assertEqual((real_dir / "settings.conf").read_text(), "theme=dark\\n")
+
     def test_set_refuses_to_modify_invalid_existing_file(self):
         with tempfile.TemporaryDirectory() as temp:
             config = pathlib.Path(temp) / "settings.conf"
