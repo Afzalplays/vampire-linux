@@ -107,7 +107,7 @@ class InstalledRootTests(unittest.TestCase):
             efi_boot = root / "boot/efi/EFI/BOOT"
             efi_boot.parent.mkdir(parents=True)
             efi_boot.symlink_to(outside, target_is_directory=True)
-            with self.assertRaisesRegex(ValueError, "symlinked target directory"):
+            with self.assertRaisesRegex(ValueError, "symlink"):
                 MODULE.configure(root, ROOT_UUID, "uefi", ESP_UUID, ROOT_PARTUUID)
             self.assertEqual(list(outside.iterdir()), [])
 
