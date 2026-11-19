@@ -75,5 +75,36 @@ class RootfsArchivePathTests(unittest.TestCase):
         self.assertGreater(validate(path), 0)
 
 
+    def test_rejects_duplicate_normalized_entries(self):
+        path = archive_with(self.make_entries([
+            ("usr", "dir", ""),
+            ("usr/", "dir", ""),
+        ]))
+        self.addCleanup(path.unlink)
+        with self.assertRaisesRegex(ValueError, "duplicate archive path"):
+            validate(path)
+
+    def test_rejects_escaping_symbolic_link(self):
+        path = archive_with(self.make_entries([
+            ("opt", "dir", ""),
+            ("opt/escape", "symlink", "../../../outside"),
+        ]))
+        self.addCleanup(path.unlink)
+        with self.assertRaisesRegex(ValueError, "link escapes rootfs"):
+            validate(path)
+
+    def test_accepts_absolute_rootfs_symlink_and_rewrites_relative(self):
+        path = archive_with(self.make_entries([
+            ("usr", "dir", ""),
+            ("usr/bin", "dir", ""),
+            ("usr/bin/sh", "symlink", "/bin/busybox"),
+        ]))
+        self.addCleanup(path.unlink)
+        with tarfile.open(path, "r") as tar:
+            member = next(item for item in tar.getmembers() if item.name == "usr/bin/sh")
+            STAGE_ROOTFS.sanitize_member(member)
+            self.assertEqual(member.linkname, "../../bin/busybox")
+
+
 if __name__ == "__main__":
     unittest.main()
