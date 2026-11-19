@@ -50,6 +50,7 @@ class SettingsBootstrapTests(unittest.TestCase):
             saved = list(backup.glob("settings.conf.invalid.*"))
             self.assertEqual(len(saved), 1)
             self.assertEqual(saved[0].read_text(), "theme=ultraviolet\n")
+            self.assertEqual(saved[0].stat().st_mode & 0o777, 0o600)
             self.assertIn("theme=dark", config.read_text())
 
     def test_refuses_symlinked_backup_directory(self):
