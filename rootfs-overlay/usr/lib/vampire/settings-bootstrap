@@ -11,7 +11,7 @@ BACKUP_DIR=${VAMPIRE_SETTINGS_BACKUP_DIR:-/var/lib/vampire}
 log() { printf 'Vampire OS: %s\n' "$*" >&2; }
 
 reject_config_path_symlinks() {
-  check_path=$CONFIG
+  check_path=${1:-$CONFIG}
   case "$check_path" in /*) ;; *) check_path=$PWD/$check_path ;; esac
   while [ -n "$check_path" ] && [ "$check_path" != "/" ]; do
     [ ! -L "$check_path" ] || {
@@ -24,6 +24,7 @@ reject_config_path_symlinks() {
 }
 
 install_defaults() {
+  reject_config_path_symlinks "$BACKUP_DIR" || return 1
   [ -r "$DEFAULTS" ] || { log "settings defaults are unavailable"; return 1; }
   dir=${CONFIG%/*}
   [ "$dir" != "$CONFIG" ] || dir=.
@@ -62,7 +63,9 @@ if "$VALIDATOR" validate >/dev/null 2>&1; then
   exit 0
 fi
 
+reject_config_path_symlinks "$BACKUP_DIR" || exit 1
 mkdir -p "$BACKUP_DIR"
+chmod 700 "$BACKUP_DIR"
 backup="$BACKUP_DIR/settings.conf.invalid.$$"
 if cp -p "$CONFIG" "$backup"; then
   log "invalid settings backed up to $backup"
