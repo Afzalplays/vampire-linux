@@ -66,10 +66,14 @@ fi
 reject_config_path_symlinks "$BACKUP_DIR" || exit 1
 mkdir -p "$BACKUP_DIR"
 chmod 700 "$BACKUP_DIR"
-backup="$BACKUP_DIR/settings.conf.invalid.$$"
-if cp -p "$CONFIG" "$backup"; then
+backup=$(mktemp "$BACKUP_DIR/settings.conf.invalid.XXXXXX") || {
+  log "could not allocate a private settings backup; leaving settings untouched"
+  exit 1
+}
+if cp "$CONFIG" "$backup" && chmod 600 "$backup"; then
   log "invalid settings backed up to $backup"
 else
+  rm -f "$backup"
   log "could not back up invalid settings; leaving them untouched"
   exit 1
 fi
