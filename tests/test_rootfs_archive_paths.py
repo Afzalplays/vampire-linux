@@ -53,7 +53,7 @@ class RootfsArchivePathTests(unittest.TestCase):
             ("opt/payload", "file", ""),
         ]))
         self.addCleanup(path.unlink)
-        with self.assertRaisesRegex(ValueError, "ancestor is not a directory"):
+        with self.assertRaisesRegex(ValueError, "ancestor that is not a directory"):
             validate(path)
 
     def test_rejects_child_beneath_regular_file(self):
@@ -62,7 +62,7 @@ class RootfsArchivePathTests(unittest.TestCase):
             ("opt/payload", "file", ""),
         ]))
         self.addCleanup(path.unlink)
-        with self.assertRaisesRegex(ValueError, "ancestor is not a directory"):
+        with self.assertRaisesRegex(ValueError, "ancestor that is not a directory"):
             validate(path)
 
     def test_accepts_normal_directory_tree(self):
