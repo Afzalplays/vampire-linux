@@ -54,6 +54,13 @@ class SettingsApplyTests(unittest.TestCase):
             self.assertIn("alpha=0.70", foot_text)
             self.assertIn("background=f2f2f6", foot_text)
 
+    def test_accepts_complete_shipped_settings_defaults(self):
+        with tempfile.TemporaryDirectory() as temp:
+            result, weston, foot = self.run_apply(temp, (ROOT / "rootfs-overlay" / "etc" / "vampire" / "settings.defaults").read_text())
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue(weston.is_file())
+            self.assertTrue(foot.is_file())
+
     def test_rejects_invalid_settings_before_writing_runtime_files(self):
         with tempfile.TemporaryDirectory() as temp:
             result, weston, foot = self.run_apply(temp, "theme=ultraviolet\n")
@@ -63,7 +70,7 @@ class SettingsApplyTests(unittest.TestCase):
 
     def test_rejects_invalid_stored_preference_even_when_not_applied_by_weston(self):
         with tempfile.TemporaryDirectory() as temp:
-            result, weston, foot = self.run_apply(temp, "dock_size=giant\\n")
+            result, weston, foot = self.run_apply(temp, "dock_size=giant\n")
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("invalid value for dock_size", result.stderr)
             self.assertFalse(weston.exists())
@@ -71,7 +78,7 @@ class SettingsApplyTests(unittest.TestCase):
 
     def test_rejects_unknown_preference_instead_of_silently_ignoring_it(self):
         with tempfile.TemporaryDirectory() as temp:
-            result, weston, foot = self.run_apply(temp, "experimental_switch=true\\n")
+            result, weston, foot = self.run_apply(temp, "experimental_switch=true\n")
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("unknown setting: experimental_switch", result.stderr)
             self.assertFalse(weston.exists())
@@ -80,7 +87,7 @@ class SettingsApplyTests(unittest.TestCase):
     def test_rejects_duplicate_preference_not_consumed_by_weston(self):
         with tempfile.TemporaryDirectory() as temp:
             result, weston, foot = self.run_apply(
-                temp, "dock_size=small\\ndock_size=large\\n"
+                temp, "dock_size=small\ndock_size=large\n"
             )
             self.assertNotEqual(result.returncode, 0)
             self.assertIn("duplicate setting: dock_size", result.stderr)
@@ -95,7 +102,7 @@ class SettingsApplyTests(unittest.TestCase):
             runtime_link = base / "runtime"
             runtime_link.symlink_to(real_runtime, target_is_directory=True)
             settings = base / "settings.conf"
-            settings.write_text("theme=dark\\n")
+            settings.write_text("theme=dark\n")
             env = os.environ.copy()
             env.update({
                 "VAMPIRE_SETTINGS_FILE": str(settings),
