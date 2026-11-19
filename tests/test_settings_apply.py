@@ -48,7 +48,7 @@ class SettingsApplyTests(unittest.TestCase):
             weston_text = weston.read_text()
             foot_text = foot.read_text()
             self.assertIn("background-color=0xfff2f2f6", weston_text)
-            self.assertIn("panel-color=0x996b2454", weston_text)
+            self.assertIn("panel-color=0x9924546b", weston_text)
             self.assertIn("panel-position=none", weston_text)
             self.assertIn("animation=none", weston_text)
             self.assertIn("alpha=0.70", foot_text)
