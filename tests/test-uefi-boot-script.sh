@@ -90,6 +90,12 @@ if [[ "${VAMPIRE_EDITION:-desktop}" == "desktop" ]]; then
 ./usr/bin/weston
 ./usr/bin/foot
 ./usr/bin/vampire-terminal
+./usr/bin/vsettings
+./usr/lib/vampire/settings_apply.py
+./usr/lib/vampire/settings-bootstrap
+./etc/vampire/settings.defaults
+./etc/xdg/weston/weston.ini
+./etc/xdg/foot/foot.ini
 DESKTOP
 fi
 FAKE_CPIO
