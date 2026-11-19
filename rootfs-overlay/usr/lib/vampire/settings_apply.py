@@ -10,10 +10,21 @@ import tempfile
 ALLOWED = {
     "theme": {"dark", "light", "system"},
     "accent": {"crimson", "rose", "ice", "violet"},
-    "surface_transparency": {"0", "10", "20", "30", "40", "50", "60"},
+    "surface_transparency": {str(n) for n in range(0, 61, 10)},
+    "blur": {"off", "low", "medium", "high", "extreme"},
     "terminal_opacity": {str(n) for n in range(0, 101, 10)},
+    "dock_size": {"small", "medium", "large"},
+    "dock_position": {"bottom-center", "left-center", "right-center"},
+    "dock_auto_hide": {"true", "false"},
+    "dock_magnification": {"true", "false"},
     "top_panel": {"true", "false"},
+    "show_date": {"true", "false"},
+    "show_clock": {"true", "false"},
+    "show_network": {"true", "false"},
+    "show_power": {"true", "false"},
     "reduced_motion": {"true", "false"},
+    "update_channel": {"stable", "testing"},
+    "voice_access": {"true", "false"},
 }
 
 def fail(message: str) -> None:
@@ -33,12 +44,10 @@ def load_settings() -> dict[str, str]:
             if "=" not in line:
                 fail("malformed settings line")
             key, value = line.split("=", 1)
-            if key not in ALLOWED:
-                # Other preferences are validated by the shell frontend but do
-                # not have a corresponding Weston/Foot setting yet.
-                continue
             if key in values:
                 fail("duplicate setting: " + key)
+            if key not in ALLOWED:
+                fail("unknown setting: " + key)
             if value not in ALLOWED[key]:
                 fail("invalid value for " + key)
             values[key] = value
