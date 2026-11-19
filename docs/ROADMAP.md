@@ -17,7 +17,7 @@ feature release-ready.
 - [x] Add validated settings storage and interactive console launcher MVP.
 - [x] Harden settings writes with process-unique staging files and symlink refusal; add CLI regression tests.
 - [x] Add isolated tests for applying desktop appearance settings and boot-time settings recovery; refuse symlinked persistent settings during bootstrap.
-- [x] Validate the complete settings schema in the runtime apply helper; reject symlinked settings, parent and backup paths during writes and recovery.
+- [x] Validate the complete settings schema in the runtime apply helper; reject symlinked settings, parent and backup paths during writes and recovery. Allocate recovery backups exclusively with private permissions.
 - [x] Add tests for settings validation, desktop launcher and core console tools.
 - [x] Verify the settings menu clearly distinguishes stored preferences from graphical controls not yet implemented.
 - [x] Add read-only installer disk discovery and target preflight checks.
