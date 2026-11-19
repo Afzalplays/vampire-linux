@@ -14,6 +14,8 @@ set_enabled() {
   name=$1 mode=$2
   service_path "$name" || return $?
   parent=${ENABLED%/*}; [ "$parent" = "$ENABLED" ] && parent=.
+  [ ! -L "$ENABLED" ] || { echo "vctl: refusing symlinked enabled-state file: $ENABLED" >&2; return 1; }
+  [ ! -L "$parent" ] || { echo "vctl: refusing symlinked enabled-state directory: $parent" >&2; return 1; }
   mkdir -p "$parent" || return 1
   old_umask=$(umask); umask 077
   tmp=$(mktemp "$ENABLED.tmp.XXXXXX") || { umask "$old_umask"; return 1; }
@@ -28,6 +30,7 @@ set_enabled() {
   if [ "$mode" = enable ]; then
     grep -Fxq "$name" "$tmp" || printf '%s\n' "$name" >> "$tmp" || { rm -f "$tmp"; umask "$old_umask"; return 1; }
   fi
+  chmod 0600 "$tmp" || { rm -f "$tmp"; umask "$old_umask"; return 1; }
   if ! mv -f "$tmp" "$ENABLED"; then rm -f "$tmp"; umask "$old_umask"; return 1; fi
   umask "$old_umask"
   printf 'vctl: %s %s at boot\n' "$name" "${mode}d"
