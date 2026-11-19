@@ -80,6 +80,7 @@ case "$1" in
     key=$2 value=$3
     valid_key "$key" || { echo "vsettings: unknown setting: $key" >&2; exit 1; }
     valid_value "$key" "$value" || { echo "vsettings: invalid value for $key: $value" >&2; exit 1; }
+    reject_config_symlink || exit 1
     if [ -e "$CONFIG" ]; then
       validate_file >/dev/null || {
         echo "vsettings: refusing to modify an invalid settings file" >&2
@@ -114,6 +115,7 @@ case "$1" in
     ;;
   reset)
     [ "$#" -eq 1 ] || usage
+    reject_config_symlink || exit 1
     [ -r "$DEFAULTS" ] || { echo "vsettings: defaults file missing" >&2; exit 1; }
     dir=${CONFIG%/*}; [ "$dir" = "$CONFIG" ] && dir=.
     mkdir -p "$dir"
