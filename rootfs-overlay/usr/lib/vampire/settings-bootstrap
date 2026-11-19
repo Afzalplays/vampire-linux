@@ -38,6 +38,8 @@ install_defaults() {
   trap - 0 HUP INT TERM
 }
 
+[ ! -L "$CONFIG" ] || { log "refusing symlinked settings file; current target left untouched"; exit 1; }
+
 if [ ! -e "$CONFIG" ]; then
   install_defaults || exit 1
   exit 0
