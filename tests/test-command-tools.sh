@@ -27,7 +27,7 @@ if "$ROOT/rootfs-overlay/usr/bin/vctl" start '../mocksvc' >/dev/null 2>&1; then
 fi
 
 # Service enablement state must never follow a symlink or write through a symlinked parent.
-printf 'mocksvc\\n' > "$TMP/external-enabled"
+printf 'mocksvc\n' > "$TMP/external-enabled"
 ln -s "$TMP/external-enabled" "$TMP/enabled-link"
 if VAMPIRE_ENABLED_FILE="$TMP/enabled-link" "$ROOT/rootfs-overlay/usr/bin/vctl" enable mocksvc >/dev/null 2>&1; then
   echo "vctl accepted a symlinked enabled-state file" >&2; exit 1
