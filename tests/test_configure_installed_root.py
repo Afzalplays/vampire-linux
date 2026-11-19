@@ -90,5 +90,27 @@ class InstalledRootTests(unittest.TestCase):
             self.assertTrue(handoff.endswith(b"\n"))
 
 
+    def test_rejects_symlinked_target_root(self):
+        with tempfile.TemporaryDirectory() as temp:
+            base = pathlib.Path(temp)
+            real = self.make_root(base)
+            alias = base / "alias"
+            alias.symlink_to(real, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "symlinked target path component"):
+                MODULE.configure(alias, ROOT_UUID, "bios", root_partuuid=ROOT_PARTUUID)
+
+    def test_rejects_symlinked_efi_handoff_directory(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = self.make_root(temp)
+            outside = pathlib.Path(temp) / "outside"
+            outside.mkdir()
+            efi_boot = root / "boot/efi/EFI/BOOT"
+            efi_boot.parent.mkdir(parents=True)
+            efi_boot.symlink_to(outside, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "symlinked target directory"):
+                MODULE.configure(root, ROOT_UUID, "uefi", ESP_UUID, ROOT_PARTUUID)
+            self.assertEqual(list(outside.iterdir()), [])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
