@@ -343,6 +343,9 @@ install_system() {
   IFS= read -r confirmation || return 1
   [ "$confirmation" = "ERASE $device" ] || { echo "Installation cancelled; disk was not changed."; return 1; }
 
+  # Recheck immediately after confirmation to close the preflight-to-write gap.
+  preflight "$device" || { echo "ERROR: target safety changed during confirmation; no disk writes were started." >&2; return 1; }
+
   name=$(disk_name "$device") || return 2
   case "$name" in *[0-9]) part1="${device}p1"; part2="${device}p2" ;;
     *) part1="${device}1"; part2="${device}2" ;;
