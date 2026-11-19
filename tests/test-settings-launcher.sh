@@ -22,14 +22,14 @@ cat > "$TMP/settings" <<'MOCK"
 #!/bin/sh
 case "$1" in
   list) echo "theme dark" ;;
-  set) printf 'set %s=%s\\n' "$2" "$3" >> "$SETTINGS_CALLS" ;;
+  set) printf 'set %s=%s\n' "$2" "$3" >> "$SETTINGS_CALLS" ;;
   apply) echo apply >> "$SETTINGS_CALLS" ;;
   *) exit 2 ;;
 esac
 MOCK
 chmod +x "$TMP/settings"
 : > "$TMP/calls"
-printf '4\\nextreme\\n0\\n' | SETTINGS_CALLS="$TMP/calls" VAMPIRE_SETTINGS_CMD="$TMP/settings" "$ROOT/rootfs-overlay/usr/bin/vdesktop" --settings > "$TMP/unsupported-output"
+printf '4\nextreme\n0\n' | SETTINGS_CALLS="$TMP/calls" VAMPIRE_SETTINGS_CMD="$TMP/settings" "$ROOT/rootfs-overlay/usr/bin/vdesktop" --settings > "$TMP/unsupported-output"
 grep -q 'preference is stored; its graphical control is not implemented' "$TMP/unsupported-output"
 grep -q '^set blur=extreme$' "$TMP/calls"
 ! grep -q '^apply$' "$TMP/calls"
