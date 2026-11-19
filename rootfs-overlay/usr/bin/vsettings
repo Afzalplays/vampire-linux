@@ -29,6 +29,12 @@ valid_value() {
     *) return 1 ;;
   esac
 }
+reject_config_symlink() {
+  [ ! -L "$CONFIG" ] || {
+    echo "vsettings: refusing symlinked settings file: $CONFIG" >&2
+    return 1
+  }
+}
 read_value() {
   [ -r "$CONFIG" ] || return 1
   awk -F= -v wanted="$1" '$1 == wanted { value=$2; found=1 } END { if (found) print value; else exit 1 }' "$CONFIG"
