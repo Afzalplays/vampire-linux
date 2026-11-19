@@ -104,5 +104,22 @@ class VpmArchiveSecurityTests(unittest.TestCase):
                 VPM.safe_extract(archive, alias)
 
 
+    def test_rolls_back_new_files_after_later_write_failure(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = pathlib.Path(temp) / "root"
+            (root / "usr/bin").mkdir(parents=True)
+            existing = root / "usr/bin/existing"
+            existing.write_text("preserve")
+            archive = pathlib.Path(temp) / "partial.tar.gz"
+            make_archive(archive, [
+                ("usr/bin/new-file", "file", "temporary"),
+                ("usr/bin/existing", "file", "replacement"),
+            ])
+            with self.assertRaises(FileExistsError):
+                VPM.safe_extract(archive, root)
+            self.assertFalse((root / "usr/bin/new-file").exists())
+            self.assertEqual(existing.read_text(), "preserve")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
