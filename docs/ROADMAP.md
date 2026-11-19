@@ -11,7 +11,7 @@ feature release-ready.
 - [x] Add VFetch, GRUB hybrid ISO builder and SHA-256 generation.
 - [x] Add VPM experimental client, signed-index verification and unit tests.
 - [x] Add shell/configuration CI checks and QEMU BIOS/UEFI smoke-test script.
-- [x] Add push/PR quality workflow for Python compilation, shell syntax checks and regression tests (first run pending).
+- [x] Add push/PR quality workflow for Python compilation (including installed runtime utilities), shell syntax checks (including runtime helpers) and regression tests (latest run pending).
 - [x] Add initial service dispatcher, DHCP helper and opt-in nftables helper.
 - [x] Harden service enablement updates, reject malformed state, deduplicate bulk operations, add status-all and fail-closed restart behavior.
 - [x] Add validated settings storage and interactive console launcher MVP.
