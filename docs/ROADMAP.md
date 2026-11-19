@@ -19,6 +19,7 @@ feature release-ready.
 - [x] Add isolated tests for applying desktop appearance settings and boot-time settings recovery; refuse symlinked persistent settings during bootstrap.
 - [x] Validate the complete settings schema in the runtime apply helper; reject symlinked settings, parent and backup paths during writes and recovery.
 - [x] Add tests for settings validation, desktop launcher and core console tools.
+- [x] Verify the settings menu clearly distinguishes stored preferences from graphical controls not yet implemented.
 - [x] Add read-only installer disk discovery and target preflight checks.
 - [x] Add non-destructive installer CLI and fake-sysfs preflight tests for read-only planning, mounted disks and partitions, active disk/partition swap, stacked devices, unavailable mount tables, read-only media and undersized targets.
 - [x] Add hardware, storage, health, log and support diagnostics.
