@@ -18,7 +18,7 @@ echo "Vampire Settings direct-launch test passed."
 
 # Unsupported graphical preferences must be stored honestly without claiming
 # that Weston applied a control it does not implement yet.
-cat > "$TMP/settings" <<'MOCK"
+cat > "$TMP/settings" <<'MOCK'
 #!/bin/sh
 case "$1" in
   list) echo "theme dark" ;;
