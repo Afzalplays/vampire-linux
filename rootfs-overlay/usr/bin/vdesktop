@@ -166,6 +166,9 @@ appearance_menu() {
         theme|accent|surface_transparency|terminal_opacity|top_panel|reduced_motion)
           run_tool "$SETTINGS" apply
           ;;
+        *)
+          printf 'Saved %s. This preference is stored; its graphical control is not implemented in this build yet.\\n' "$key"
+          ;;
       esac
     fi
   done
