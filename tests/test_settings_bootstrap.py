@@ -52,6 +52,21 @@ class SettingsBootstrapTests(unittest.TestCase):
             self.assertEqual(saved[0].read_text(), "theme=ultraviolet\n")
             self.assertIn("theme=dark", config.read_text())
 
+    def test_refuses_symlinked_backup_directory(self):
+        with tempfile.TemporaryDirectory() as temp:
+            base = pathlib.Path(temp)
+            config = base / "settings.conf"
+            config.write_text("theme=invalid\\n")
+            real_backup = base / "real-backup"
+            real_backup.mkdir()
+            backup_link = base / "backup"
+            backup_link.symlink_to(real_backup, target_is_directory=True)
+            result = self.run_bootstrap(config, backup_link)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("refusing symlinked settings path", result.stderr)
+            self.assertEqual(config.read_text(), "theme=invalid\\n")
+            self.assertEqual(list(real_backup.iterdir()), [])
+
     def test_refuses_symlinked_parent_directory(self):
         with tempfile.TemporaryDirectory() as temp:
             base = pathlib.Path(temp)
