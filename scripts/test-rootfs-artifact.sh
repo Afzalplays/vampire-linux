@@ -22,7 +22,7 @@ if [[ "$EDITION" == desktop ]]; then
     etc/vampire/settings.defaults \
     etc/xdg/weston/weston.ini \
     etc/xdg/foot/foot.ini; do
-    grep -Eq "(^|/)\${required}$" <<<"$rootfs_listing" || {
+    grep -Eq "(^|/)${required}$" <<<"$rootfs_listing" || {
       echo "ERROR: Desktop installer rootfs is missing required settings path: $required" >&2
       exit 1
     }
