@@ -13,7 +13,7 @@ feature release-ready.
 - [x] Add shell/configuration CI checks and QEMU BIOS/UEFI smoke-test script.
 - [x] Add push/PR quality workflow for Python compilation (including installed runtime utilities), shell syntax checks (including runtime helpers) and regression tests (GitHub Actions passed on 2026-11-19).
 - [x] Add initial service dispatcher, DHCP helper and opt-in nftables helper.
-- [x] Harden service enablement updates, reject malformed state, deduplicate bulk operations, add status-all and fail-closed restart behavior.
+- [x] Harden service enablement updates, reject malformed state, deduplicate bulk operations, add status-all and fail-closed restart behavior; reject symlinked state paths and store enablement state with private permissions.
 - [x] Add validated settings storage and interactive console launcher MVP.
 - [x] Harden settings writes with process-unique staging files and symlink refusal; add CLI regression tests.
 - [x] Add isolated tests for applying desktop appearance settings and boot-time settings recovery; refuse symlinked persistent settings during bootstrap.
@@ -109,7 +109,7 @@ feature release-ready.
 
 ## Security and updates
 
-- [x] Add opt-in firewall helper and service integration.
+- [x] Add opt-in firewall helper and service integration; validate candidate nftables rules before replacing the active policy.
 - [x] Add signed update-manifest verification and checksum-verified image staging (download only).
 - [x] Add a staged-image re-verification command against the currently signed manifest.
 - [ ] Configure production signing keys, trust rotation and maintained update metadata.
