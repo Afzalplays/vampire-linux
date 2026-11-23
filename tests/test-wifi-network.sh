@@ -20,6 +20,10 @@ case "$*" in
   *) exit 1 ;;
 esac
 MOCK
+cat > "$TMP/bin/ip" <<'MOCK'
+#!/bin/sh
+printf 'ip %s\n' "$*" >> "$NETWORK_LOG"
+MOCK
 cat > "$TMP/bin/ifconfig" <<'MOCK'
 #!/bin/sh
 printf 'ifconfig %s\n' "$*" >> "$NETWORK_LOG"
