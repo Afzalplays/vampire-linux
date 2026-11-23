@@ -61,6 +61,7 @@ printf '%s\n' "$*" > "$DHCP_ARGS"
 exit 0
 MOCK
 chmod +x "$TMP/bin/"*
+export PATH="$TMP/bin:$PATH"
 export NETWORK_LOG="$TMP/network-log"
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi list | grep -q wlan0
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi scan wlan0 | grep -q 'Test Network'
