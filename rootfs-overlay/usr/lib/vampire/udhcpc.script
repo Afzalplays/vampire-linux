@@ -1,7 +1,7 @@
 #!/bin/sh
 # BusyBox udhcpc lease hook. Validate DHCP data before changing system state.
 set -eu
-RESOLV_CONF=${VAMPIRE_RESOLV_CONF:-/etc/resolv.conf}
+RESOLV_CONF=${VAMPIRE_RESOLV_CONF:-/run/vampire/resolv.conf}
 # Never follow a resolver-file or parent-directory symlink from DHCP input.
 [ ! -L "$RESOLV_CONF" ] || { echo "udhcpc hook: refusing symlinked resolver file" >&2; exit 1; }
 resolver_dir=${RESOLV_CONF%/*}
