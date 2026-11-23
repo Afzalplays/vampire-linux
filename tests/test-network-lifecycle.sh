@@ -35,6 +35,7 @@ MOCK
 chmod +x "$TMP/bin/"*
 export DHCP_CALLS="$TMP/dhcp-calls" NETWORK_CALLS="$TMP/network-calls"
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" start test0
+grep -Fq 'ip link set dev test0 up' "$NETWORK_CALLS"
 grep -q -- '-R -b -i test0' "$DHCP_CALLS"
 dhcp_pid="$(cat "$TMP/run/test0.pid")"
 mkdir -p "$TMP/proc/$dhcp_pid"
