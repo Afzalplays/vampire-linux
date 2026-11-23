@@ -34,6 +34,16 @@ get_iface() {
   [ -e "$SYS_NET/$iface" ] || { echo "vnetwork: interface does not exist: $iface" >&2; return 1; }
 }
 pidfile_for() { printf '%s/%s.pid' "$RUN_DIR" "$iface"; }
+bring_iface_up() {
+  if command -v ip >/dev/null 2>&1; then
+    ip link set dev "$iface" up || { echo "vnetwork: could not bring interface up: $iface" >&2; return 1; }
+  elif command -v ifconfig >/dev/null 2>&1; then
+    ifconfig "$iface" up || { echo "vnetwork: could not bring interface up: $iface" >&2; return 1; }
+  else
+    echo "vnetwork: neither ip nor ifconfig is available to enable $iface" >&2
+    return 127
+  fi
+}
 is_running() {
   pidfile=$(pidfile_for)
   [ -s "$pidfile" ] || return 1
@@ -49,6 +59,7 @@ start_network() {
   [ -x "$HOOK" ] || { echo "vnetwork: DHCP hook is missing or not executable: $HOOK" >&2; return 1; }
   mkdir -p "$RUN_DIR"
   if is_running; then echo "vnetwork: DHCP already running on $iface"; return 0; fi
+  bring_iface_up || return $?
   rm -f "$(pidfile_for)"
   echo "vnetwork: requesting DHCP lease on $iface"
   udhcpc -R -b -i "$iface" -s "$HOOK" -p "$(pidfile_for)"
@@ -150,6 +161,7 @@ wifi_connect() {
     stop_wpa
     sleep 1
   fi
+  bring_iface_up || return $?
   echo "vnetwork: connecting to '$ssid' on $iface..."
   wpa_supplicant -B -i "$iface" -c "$config" -P "$WIFI_RUN_DIR/$iface.pid"
   count=0
