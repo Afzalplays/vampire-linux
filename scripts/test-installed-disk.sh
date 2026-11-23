@@ -75,6 +75,13 @@ run_boot() {
     VAMPIRE_KERNEL_IMAGE="$ROOT_DIR/.build/output-$EDITION/images/bzImage" \
     "$ROOT_DIR/rootfs-overlay/usr/bin/vinstall" install "$ROOTFS_TAR" "$loop" "$mode"
 
+  # Detach the loop device before QEMU opens the same backing image. This
+  # prevents the host block layer and QEMU from holding concurrent views of
+  # the test disk and makes the boot test exercise the flushed disk image.
+  sudo losetup -d "$loop"
+  LOOPS=()
+  udevadm settle
+
   rm -f "$log" "$stderr"
   local -a firmware=()
   if [[ "$mode" == "uefi" ]]; then
