@@ -29,7 +29,7 @@ while (($#)); do
   esac
 done
 [[ "$serial" == file:* ]]
-printf 'Vampire OS 0.1.0-dev | x86_64 live environment\nlogin: ' > "${serial#file:}"
+printf 'Vampire OS 0.1.0-dev | x86_64 live environment\nlogin: \nudhcpc: lease of 10.0.2.15 obtained, lease time 86400\n' > "${serial#file:}"
 printf '%s\n' "$drives" >> "$VAMPIRE_FAKE_DRIVE_COUNTS"
 exit 124
 FAKE
