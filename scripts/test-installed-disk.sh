@@ -97,7 +97,7 @@ run_boot() {
   set +e
   timeout --signal=TERM "$TIMEOUT_SECONDS" qemu-system-x86_64 \
     -machine accel=tcg -m 1024 -smp 2 -drive "file=$image,format=raw,if=ide,index=0" \
-    -boot c -display none -monitor none -serial "file:$log" -no-reboot \
+    -nic user,model=e1000 -boot c -display none -monitor none -serial "file:$log" -no-reboot \
     "${firmware[@]}" >/dev/null 2>"$stderr"
   status=$?
   set -e
@@ -119,6 +119,7 @@ run_boot() {
     die "$mode installed disk did not reach Vampire init"
   }
   grep -Eqi 'login:|Password:' "$log" || die "$mode installed disk did not reach serial login"
+  grep -Eqi 'udhcpc: lease of .* obtained' "$log" || die "$mode installed disk did not obtain a DHCP lease"
   printf 'PASS: %s installed disk reached Vampire OS init and serial login\n' "$mode"
 }
 
