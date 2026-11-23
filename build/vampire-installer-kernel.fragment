@@ -22,6 +22,7 @@ CONFIG_VIRTIO=y
 CONFIG_VIRTIO_PCI=y
 CONFIG_VIRTIO_BLK=y
 CONFIG_E1000=y
+# QEMU validation keeps E1000 built in for deterministic DHCP checks in both firmware modes.
 CONFIG_EFI_PARTITION=y
 CONFIG_MSDOS_PARTITION=y
 CONFIG_EXT4_FS=y
