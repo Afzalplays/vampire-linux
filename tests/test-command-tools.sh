@@ -92,7 +92,13 @@ if PATH="$TMP/bin:$PATH" VAMPIRE_FIREWALL_RUN_DIR="$TMP/run" VAMPIRE_SSH_PORT=70
   exit 1
 fi
 
-# Mock udhcpc; pass an isolated interface tree so tests never touch host networking.
+# Mock ip and udhcpc; pass an isolated interface tree so tests never touch host networking.
+cat > "$TMP/bin/ip" <<'IP'
+#!/bin/sh
+printf '%s\n' "$*" >> "$NETWORK_CALLS"
+IP
+chmod +x "$TMP/bin/ip"
+export NETWORK_CALLS="$TMP/network-calls"
 cat > "$TMP/bin/udhcpc" <<'DHCP'
 #!/bin/sh
 printf '%s\n' "$*" > "$DHCP_CALLS"
@@ -100,5 +106,6 @@ DHCP
 chmod +x "$TMP/bin/udhcpc"
 export DHCP_CALLS="$TMP/dhcp-calls"
 PATH="$TMP/bin:$PATH" VAMPIRE_NETWORK_RUN_DIR="$TMP/run" VAMPIRE_SYS_NET="$TMP/sys/class/net" VAMPIRE_DHCP_HOOK="$ROOT/rootfs-overlay/usr/lib/vampire/udhcpc.script" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" start test0
+grep -Fq 'link set dev test0 up' "$NETWORK_CALLS"
 grep -q -- '-R -b -i test0' "$DHCP_CALLS"
 echo "Vampire command integration tests passed."
