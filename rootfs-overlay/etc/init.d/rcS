@@ -20,6 +20,16 @@ mount_pseudo devtmpfs /dev devtmpfs || true
 if ! mkdir -p /dev/pts /run /tmp /var/log /var/lib/vampire /run/vampire; then
   boot_log "WARNING: one or more runtime directories could not be created"
 fi
+# Keep DHCP-managed resolver data in writable runtime storage. Buildroot may
+# provide /etc/resolv.conf as a symlink to a path the DHCP hook must not trust.
+if [ -L /etc/resolv.conf ] || [ -f /etc/resolv.conf ]; then
+  rm -f /etc/resolv.conf || boot_log "WARNING: could not replace resolver configuration"
+fi
+if [ ! -e /etc/resolv.conf ] && [ ! -L /etc/resolv.conf ]; then
+  : > /run/vampire/resolv.conf || boot_log "WARNING: could not create runtime resolver file"
+  chmod 0644 /run/vampire/resolv.conf 2>/dev/null || true
+  ln -s /run/vampire/resolv.conf /etc/resolv.conf || boot_log "WARNING: could not link system resolver configuration"
+fi
 mount_pseudo devpts /dev/pts devpts || true
 if ! chmod 1777 /tmp; then
   boot_log "WARNING: could not set the standard sticky permissions on /tmp"
