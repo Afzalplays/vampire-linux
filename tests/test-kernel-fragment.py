@@ -20,6 +20,7 @@ class KernelFragmentTests(unittest.TestCase):
             "CONFIG_VFAT_FS=y",
             "CONFIG_BLK_DEV_NVME=y",
             "CONFIG_VIRTIO_BLK=y",
+            "CONFIG_E1000=y",
             "CONFIG_SATA_AHCI=y",
             "CONFIG_USB_STORAGE=y",
             "CONFIG_USB_XHCI_PCI=y",
