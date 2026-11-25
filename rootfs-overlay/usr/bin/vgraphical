@@ -67,7 +67,7 @@ else
     exit 1
   }
   export XDG_RUNTIME_DIR="/run/user/$uid"
-  [ -d "$XDG_RUNTIME_DIR" ] && [ -O "$XDG_RUNTIME_DIR" ] || {
+  [ -d "$XDG_RUNTIME_DIR" ] && [ "$(stat -c %u "$XDG_RUNTIME_DIR" 2>/dev/null || echo -1)" = "$uid" ] || {
     error "runtime directory $XDG_RUNTIME_DIR is missing or not owned by this user; log in locally after boot."
     exit 1
   }
