@@ -60,7 +60,9 @@ make_archive desktop
   bash scripts/test-rootfs-artifact.sh
 )
 rm -f "$TMP/stage/usr/bin/vampire-app"
-tar -cf "$TMP/out/vampire-os-0.1.0-dev-desktop-x86_64-rootfs.tar" -C "$TMP/stage" .
+archive="$TMP/out/vampire-os-0.1.0-dev-desktop-x86_64-rootfs.tar"
+tar --owner=0 --group=0 --exclude='./home/vampire' -cf "$archive" -C "$TMP/stage" .
+tar --owner=1000 --group=1000 -rf "$archive" -C "$TMP/stage" home/vampire
 (cd "$TMP/out" && sha256sum "vampire-os-0.1.0-dev-desktop-x86_64-rootfs.tar" > "vampire-os-0.1.0-dev-desktop-x86_64-rootfs.tar.sha256")
 if (cd "$TMP" && bash scripts/test-rootfs-artifact.sh) >"$TMP/missing.out" 2>&1; then
   echo "Desktop artifact validator accepted a missing graphical app launcher" >&2
