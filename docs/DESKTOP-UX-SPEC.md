@@ -58,7 +58,7 @@ There is **no permanent bottom taskbar**.
 
 ## 4. Terminal and vfetch
 
-Vampire Terminal is translucent by default (88% opacity) on capable compositors, with a user-adjustable opacity. The Settings preview currently runs inside the same Foot terminal, so it inherits the same translucent surface. Blur is optional and is not claimed by the current Weston/Foot preview. Provide a solid-background fallback and readable contrast mode.
+Vampire Terminal is translucent by default (90% opacity) on capable compositors, with a user-adjustable opacity. The Settings preview currently runs inside the same Foot terminal, so it inherits the same translucent surface. Blur is optional and is not claimed by the current Weston/Foot preview. Provide a solid-background fallback and readable contrast mode.
 
 The vfetch output should use the following composition:
 
