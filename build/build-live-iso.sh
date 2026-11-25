@@ -18,6 +18,7 @@ need() { command -v "$1" >/dev/null 2>&1 || die "Missing host tool: $1"; }
 for tool in git make gcc g++ perl python3 rsync cpio file patch bc bison flex \
             xorriso grub-mkrescue mformat wget unzip xz; do need "$tool"; done
 mkdir -p "$BUILD_DIR" "$OUTPUT_DIR" "$OVERLAY/usr/bin" "$OVERLAY/usr/lib/vampire" "$OVERLAY/etc/vampire/services.d" "$OVERLAY/etc/vpm"
+chmod 0755 "$ROOT_DIR/scripts/post-fakeroot-vampire.sh"
 install -m 0755 "$ROOT_DIR/fetch/vfetch" "$OVERLAY/usr/bin/vfetch"
 install -m 0644 "$ROOT_DIR/vpm/vpm" "$OVERLAY/usr/lib/vampire/vpm"
 install -m 0644 "$ROOT_DIR/vpm/doctor.py" "$OVERLAY/usr/lib/vampire/doctor.py"
