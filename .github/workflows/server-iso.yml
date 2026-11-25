@@ -25,6 +25,7 @@ on:
       - "tests/test-installer-stage.sh"
       - "scripts/configure-build-output.py"
       - "scripts/configure-installed-root.py"
+      - "tests/test_configure_installed_root.py"
       - "scripts/test_configure_installed_root.py"
       - ".github/workflows/server-iso.yml"
 
