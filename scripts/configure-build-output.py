@@ -33,6 +33,11 @@ def configure(config_path, overlay_path, edition):
         raise ValueError(f"missing Vampire post-build script: {post_build}")
     replace_assignment(config_path, "BR2_ROOTFS_POST_BUILD_SCRIPT",
                        str(post_build.resolve()), allow_missing=True)
+    post_fakeroot = overlay.parent / "scripts/post-fakeroot-vampire.sh"
+    if not post_fakeroot.is_file():
+        raise ValueError(f"missing Vampire post-fakeroot script: {post_fakeroot}")
+    replace_assignment(config_path, "BR2_ROOTFS_POST_FAKEROOT_SCRIPT",
+                       str(post_fakeroot.resolve()), allow_missing=True)
     installer_fragment = overlay.parent / "build/vampire-installer-kernel.fragment"
     if not installer_fragment.is_file():
         raise ValueError(f"missing installer kernel fragment: {installer_fragment}")
