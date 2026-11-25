@@ -107,6 +107,25 @@ run_boot() {
     done
     grep -Fxq 'alpha=0.90' "$INSPECT_MOUNT/etc/xdg/foot/foot.ini" || die "$mode installed Desktop terminal transparency default is incorrect"
   fi
+
+  # Execute the installed userland in an isolated chroot, not merely inspect
+  # that files exist. This catches missing interpreters, broken symlinks and
+  # runtime dependencies before the disk is handed to QEMU.
+  sudo chroot "$INSPECT_MOUNT" /usr/bin/vfetch > "$WORK/$mode.vfetch.log" 2>&1 || die "$mode installed VFetch failed to execute"
+  grep -Fq 'V A M P I R E' "$WORK/$mode.vfetch.log" || die "$mode installed VFetch did not render the Vampire logo"
+  grep -Fq 'Kernel:' "$WORK/$mode.vfetch.log" || die "$mode installed VFetch omitted kernel information"
+  grep -Fq 'Memory:' "$WORK/$mode.vfetch.log" || die "$mode installed VFetch omitted memory information"
+
+  sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/bin/vpower status > "$WORK/$mode.vpower.log" 2>&1 || die "$mode installed vpower status failed"
+  grep -Fq 'Vampire OS power status' "$WORK/$mode.vpower.log" || die "$mode installed vpower status output is invalid"
+  if sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/bin/vpower reboot > "$WORK/$mode.vpower-reject.log" 2>&1; then
+    die "$mode installed vpower accepted reboot without explicit confirmation"
+  fi
+  grep -Fq 'refusing reboot without the explicit --yes flag' "$WORK/$mode.vpower-reject.log" || die "$mode installed vpower did not safely reject an unconfirmed reboot"
+
+  sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/bin/vinstall system-check > "$WORK/$mode.installer-check.log" 2>&1 || die "$mode installed installer system-check failed"
+  grep -Fq 'Architecture: x86_64' "$WORK/$mode.installer-check.log" || die "$mode installed installer system-check omitted architecture"
+
   sudo umount "$INSPECT_MOUNT"
   INSPECT_MOUNT=
   sudo losetup -d "$loop"
