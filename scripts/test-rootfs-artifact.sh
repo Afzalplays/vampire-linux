@@ -36,6 +36,39 @@ for group_name in video input; do
     exit 1
   }
 done
+
+python3 - "$ROOTFS_TAR" <<'PY'
+import sys
+import tarfile
+
+archive = sys.argv[1]
+with tarfile.open(archive, "r:*") as image:
+    entries = {member.name.lstrip("./").rstrip("/"): member for member in image.getmembers()}
+    def read_text(name):
+        member = entries.get(name)
+        if member is None:
+            raise SystemExit(f"ERROR: rootfs is missing {name}")
+        stream = image.extractfile(member)
+        if stream is None:
+            raise SystemExit(f"ERROR: rootfs {name} is not a regular file")
+        return stream.read().decode("utf-8", "strict")
+    user = next((line.split(":") for line in read_text("etc/passwd").splitlines()
+                 if line.startswith("vampire:")), None)
+    if user is None or len(user) < 7:
+        raise SystemExit("ERROR: invalid vampire passwd record")
+    home = entries.get("home/vampire")
+    if home is None or not home.isdir():
+        raise SystemExit("ERROR: rootfs is missing /home/vampire")
+    if (home.uid, home.gid, home.mode & 0o777) != (1000, int(user[3]), 0o755):
+        raise SystemExit(
+            "ERROR: /home/vampire ownership/mode is incorrect "
+            f"(uid={home.uid}, gid={home.gid}, mode={home.mode & 0o777:o})"
+        )
+    shadow = entries.get("etc/shadow")
+    if shadow is None or (shadow.uid, shadow.gid, shadow.mode & 0o777) != (0, 0, 0o640):
+        raise SystemExit("ERROR: /etc/shadow must be root-owned with mode 0640")
+print("PASS: unprivileged account home and shadow ownership metadata are correct")
+PY
 if [[ "$EDITION" == desktop ]]; then
   for required in \
     usr/bin/vsettings \
