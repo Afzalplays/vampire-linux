@@ -7,7 +7,7 @@
     "blur": "medium",
     "effects_mode": "balanced",
     "reduced_motion": false,
-    "terminal_opacity": 88,
+    "terminal_opacity": 90,
     "dock": {
       "position": "bottom-center",
       "auto_hide": true,
