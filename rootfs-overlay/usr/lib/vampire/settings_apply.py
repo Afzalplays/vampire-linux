@@ -90,7 +90,7 @@ def main() -> None:
     theme = values.get("theme", "dark")
     accent = values.get("accent", "crimson")
     transparency = int(values.get("surface_transparency", "20"))
-    opacity = int(values.get("terminal_opacity", "88"))
+    opacity = int(values.get("terminal_opacity", "90"))
     top_panel = values.get("top_panel", "true") == "true"
     reduced_motion = values.get("reduced_motion", "false") == "true"
 
