@@ -28,9 +28,25 @@ check() {
   [ -r "$found" ] && [ -w "$found" ] || {
     error "DRM device $found is not accessible; check seat permissions."; return 1;
   }
+  session_uid=$(id -u)
+  session_runtime="/run/user/$session_uid"
+  [ -d "$session_runtime" ] && [ "$(stat -c %u "$session_runtime" 2>/dev/null || echo -1)" = "$session_uid" ] || {
+    error "private session runtime $session_runtime is missing or has the wrong owner; check boot session-runtime setup."
+    return 1
+  }
+  [ "$(stat -c %a "$session_runtime" 2>/dev/null || echo 000)" = 700 ] || {
+    error "session runtime $session_runtime must have mode 0700."
+    return 1
+  }
+  if [ "$session_uid" -ne 0 ]; then
+    [ -n "${HOME:-}" ] && [ -d "$HOME" ] && [ -w "$HOME" ] || {
+      error "a writable home directory is required for a non-root desktop session."
+      return 1
+    }
+  fi
   printf 'Vampire Desktop preflight passed.\n'
-  printf '  Weston: %s\n  DRM device: %s\n  Base config: %s\n  Terminal config: %s\n' \
-    "$(command -v weston)" "$found" "$BASE_CONFIG" "$FOOT_CONFIG"
+  printf '  Weston: %s\n  DRM device: %s\n  Runtime: %s\n  Base config: %s\n  Terminal config: %s\n' \
+    "$(command -v weston)" "$found" "$session_runtime" "$BASE_CONFIG" "$FOOT_CONFIG"
 }
 
 case "${1:-}" in
