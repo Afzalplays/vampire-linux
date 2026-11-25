@@ -10,14 +10,14 @@ ROOTFS_SUM="$ROOTFS_TAR.sha256"
 (cd "$(dirname "$ROOTFS_TAR")" && sha256sum -c "$(basename "$ROOTFS_SUM")")
 rootfs_listing="$(tar -tf "$ROOTFS_TAR")"
 for required in etc/os-release sbin/init bin/busybox boot/vmlinuz usr/lib/vampire/stage-rootfs.py usr/lib/vampire/configure-installed-root.py usr/lib/vampire/session-runtime etc/passwd etc/group etc/shadow; do
-  grep -Eq "(^|/)\${required}$" <<<"$rootfs_listing" || {
+  grep -Eq "(^|/)${required}$" <<<"$rootfs_listing" || {
     echo "ERROR: installer rootfs is missing required path: $required" >&2
     exit 1
   }
 done
 member_path() {
   local suffix=$1
-  grep -E "(^|/)\${suffix}$" <<<"$rootfs_listing" | head -n 1 || true
+  grep -E "(^|/)${suffix}$" <<<"$rootfs_listing" | head -n 1 || true
 }
 passwd_member="$(member_path etc/passwd)"
 group_member="$(member_path etc/group)"
@@ -48,7 +48,7 @@ if [[ "$EDITION" == desktop ]]; then
     usr/bin/vgraphical \
     usr/bin/vampire-app \
     usr/bin/vampire-terminal; do
-    grep -Eq "(^|/)\${required}$" <<<"$rootfs_listing" || {
+    grep -Eq "(^|/)${required}$" <<<"$rootfs_listing" || {
       echo "ERROR: Desktop installer rootfs is missing required Desktop runtime path: $required" >&2
       exit 1
     }
