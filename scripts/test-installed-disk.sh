@@ -13,6 +13,7 @@ TIMEOUT_SECONDS=$((10#$TIMEOUT_SECONDS))
 (( TIMEOUT_SECONDS > 0 && TIMEOUT_SECONDS <= 86400 )) || { printf 'ERROR: VAMPIRE_INSTALLED_BOOT_TIMEOUT must be between 1 and 86400 seconds.\\n' >&2; exit 2; }
 LOOPS=()
 VARS_FILES=()
+INSPECT_MOUNT=
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 need() { command -v "$1" >/dev/null 2>&1 || die "Missing test tool: $1"; }
 WORK_ABS="$(python3 -c 'import os,sys; print(os.path.abspath(sys.argv[1]))' "$WORK")"
@@ -33,6 +34,7 @@ done
 VAMPIRE_ROOTFS_STAGE="$ROOT_DIR/scripts/stage-rootfs.py" "$ROOT_DIR/rootfs-overlay/usr/bin/vinstall" validate "$ROOTFS_TAR"
 cleanup() {
   set +e
+  if [[ -n "$INSPECT_MOUNT" ]]; then sudo umount "$INSPECT_MOUNT" >/dev/null 2>&1 || true; fi
   for loop in "${LOOPS[@]}"; do sudo losetup -d "$loop" >/dev/null 2>&1 || true; done
   for vars_file in "${VARS_FILES[@]}"; do rm -f -- "$vars_file"; done
 }
@@ -78,6 +80,35 @@ run_boot() {
   # Detach the loop device before QEMU opens the same backing image. This
   # prevents the host block layer and QEMU from holding concurrent views of
   # the test disk and makes the boot test exercise the flushed disk image.
+  sudo losetup -d "$loop"
+  LOOPS=()
+  udevadm settle
+
+  # Inspect the installed root filesystem independently of the boot log.
+  # This catches incomplete staging/configuration even if GRUB reaches init.
+  loop="$(sudo losetup --find --show --partscan "$image")"
+  LOOPS+=("$loop")
+  INSPECT_MOUNT="$WORK/inspect-$mode"
+  mkdir -p "$INSPECT_MOUNT"
+  sudo mount -o ro,noload "${loop}p2" "$INSPECT_MOUNT" || die "$mode installed root partition could not be mounted read-only"
+  local root_partuuid
+  root_partuuid="$(sudo blkid -s PARTUUID -o value "${loop}p2")"
+  [[ -n "$root_partuuid" ]] || die "$mode installed root partition has no PARTUUID"
+  for required in usr/bin/vfetch usr/bin/vpower usr/bin/vsettings etc/init.d/rcS etc/inittab etc/fstab etc/vampire/install.conf boot/vmlinuz boot/grub/grub.cfg; do
+    [[ -s "$INSPECT_MOUNT/$required" ]] || die "$mode installed root is missing required file: /$required"
+  done
+  [[ -x "$INSPECT_MOUNT/usr/bin/vfetch" ]] || die "$mode installed VFetch is not executable"
+  grep -Fxq "FIRMWARE=$mode" "$INSPECT_MOUNT/etc/vampire/install.conf" || die "$mode installed firmware metadata is incorrect"
+  grep -Fq "root=PARTUUID=$root_partuuid" "$INSPECT_MOUNT/boot/grub/grub.cfg" || die "$mode GRUB root PARTUUID does not match the installed partition"
+  grep -Fq ' / ext4 ' "$INSPECT_MOUNT/etc/fstab" || die "$mode installed fstab does not mount the root filesystem"
+  if [[ "$EDITION" == desktop ]]; then
+    for required in usr/bin/vdesktop usr/bin/vgraphical usr/bin/vampire-terminal usr/lib/vampire/settings_apply.py etc/xdg/weston/weston.ini etc/xdg/foot/foot.ini; do
+      [[ -s "$INSPECT_MOUNT/$required" ]] || die "$mode Desktop install is missing /$required"
+    done
+    grep -Fxq 'alpha=0.90' "$INSPECT_MOUNT/etc/xdg/foot/foot.ini" || die "$mode installed Desktop terminal transparency default is incorrect"
+  fi
+  sudo umount "$INSPECT_MOUNT"
+  INSPECT_MOUNT=
   sudo losetup -d "$loop"
   LOOPS=()
   udevadm settle
