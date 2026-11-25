@@ -20,6 +20,8 @@ on:
       - "scripts/test-rootfs-artifact.sh"
       - "scripts/test-installed-disk.sh"
       - "scripts/post-build-vampire.py"
+      - "scripts/post-fakeroot-vampire.sh"
+      - "scripts/configure-build-output.py"
       - "scripts/stage-rootfs.py"
       - "scripts/test_post_build_vampire.py"
       - "tests/test-uefi-boot-script.sh"
