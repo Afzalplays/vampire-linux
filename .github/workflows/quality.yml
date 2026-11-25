@@ -49,3 +49,4 @@ jobs:
           bash tests/test-command-tools.sh
           bash tests/test-vpower.sh
           bash tests/test-rootfs-artifact.sh
+          bash tests/test-session-runtime.sh
