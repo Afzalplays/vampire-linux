@@ -94,7 +94,9 @@ feature release-ready.
 - [x] Repeat disk safety preflight immediately after destructive confirmation to reject target-use changes before the first partition write.
 - [x] Verify firmware-specific GRUB boot files and generated configuration exist before reporting installer success.
 - [x] Discover and mount the installation ISO payload read-only for offline installation.
-- [x] Validate Server edition installation end-to-end on disposable BIOS and UEFI QEMU disks; both installed images reached Vampire init, serial login and DHCP lease (CI run 45596621598).\n- [ ] Validate Desktop edition installation end-to-end on disposable BIOS and UEFI QEMU disks; its ISO workflow is still running.\n- [ ] Add installed-system command execution checks for VFetch, reboot/shutdown and recovery cleanup.
+- [x] Validate Server edition installation end-to-end on disposable BIOS and UEFI QEMU disks; both installed images reached Vampire init, serial login and DHCP lease (CI run `45596621598`).
+- [ ] Validate Desktop edition installation end-to-end on disposable BIOS and UEFI QEMU disks.
+- [ ] Add installed-system command execution checks for VFetch, reboot/shutdown and recovery cleanup.
 - [ ] Add encrypted installation, recovery media, boot repair and tested restore workflow.
 
 ## Server edition
@@ -131,8 +133,9 @@ feature release-ready.
 - [x] Source commit `85bcee0` passed installer syntax and safety checks.
 - [x] Fix ISO workflow path filters so changes to `tests/test_configure_installed_root.py` trigger Desktop and Server image validation.
 - [x] Workflow-filter commit `7350182` passed quality gates; the following main commit `26b217e` only updates this validation record.
-- [ ] Server ISO validation for `7350182` and Desktop ISO validation for `38bd006` remain queued; neither installed-disk boot result is available yet.
-- [ ] Desktop and Server ISO builds, disposable BIOS/UEFI installation, and installed-disk boot must pass on the current main head before installer validation can be closed.
+- [x] Server edition disposable-disk installation and installed-disk boot passed in both BIOS and UEFI firmware in CI run `45596621598`.
+- [ ] Desktop edition disposable-disk installation and installed-disk boot remain unverified.
+- [ ] Repeat both edition build, live-ISO, and installed-disk tests on the current main head; add runtime checks for VFetch, power controls and installer cleanup.
 
 The current repository is a developer-stage live environment, not a finished
 desktop operating system or production installer. Do not label a feature
