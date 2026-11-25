@@ -48,3 +48,4 @@ jobs:
           bash tests/test-vfetch.sh
           bash tests/test-command-tools.sh
           bash tests/test-vpower.sh
+          bash tests/test-rootfs-artifact.sh
