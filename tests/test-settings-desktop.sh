@@ -34,12 +34,12 @@ printf "0\n" | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" "$ROOT/rootfs-overlay/usr/b
 grep -q "Vampire Settings" "$TMP/settings-menu.out"
 test "$("$TMP/vsettings" get accent)" = crimson
 test "$("$TMP/vsettings" get dock_position)" = bottom-center
-test "$("$TMP/vsettings" get terminal_opacity)" = 88
+test "$("$TMP/vsettings" get terminal_opacity)" = 90
 test "$("$TMP/vsettings" get update_channel)" = stable
 test "$("$TMP/vsettings" get voice_access)" = false
 "$TMP/vsettings" set theme light
 "$TMP/vsettings" apply
-grep -q "^alpha=0.88$" "$TMP/xdg/foot/foot.ini"
+grep -q "^alpha=0.90$" "$TMP/xdg/foot/foot.ini"
 test "$("$TMP/vsettings" get theme)" = light
 # Atomic writes must leave no temporary files and keep preferences private.
 if compgen -G "$CONFIG.tmp.*" >/dev/null; then
