@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-ROOT_DIR="$(cd -- "$(dirname -- "\${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 VPOWER="$ROOT_DIR/rootfs-overlay/usr/bin/vpower"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
@@ -14,7 +14,7 @@ for args in 'reboot' 'poweroff no' 'halt --force' 'status extra' 'unknown'; do
 done
 cat > "$TMP/bin/id" <<'MOCK'
 #!/bin/sh
-printf '%s\n' "\${MOCK_UID:-1000}"
+printf '%s\n' "${MOCK_UID:-1000}"
 MOCK
 cat > "$TMP/bin/sync" <<'MOCK'
 #!/bin/sh
@@ -23,7 +23,7 @@ MOCK
 for action in reboot poweroff halt; do
   cat > "$TMP/bin/$action" <<'MOCK'
 #!/bin/sh
-echo "\${0##*/}" >> "$POWER_CALLS"
+echo "${0##*/}" >> "$POWER_CALLS"
 MOCK
 done
 chmod +x "$TMP/bin/"*
