@@ -138,6 +138,7 @@ feature release-ready.
 - [ ] Desktop edition disposable-disk installation and installed-disk boot remain unverified.
 - [ ] Repeat both edition build, live-ISO, and installed-disk tests on the current main head; add installed-system runtime checks for VFetch, power controls and installer cleanup.
 - [x] Run VFetch, service/network/firewall command integration and mocked power-control regression tests in quality CI run `45614758508`.
+- [x] Require Desktop installer rootfs archives to include the Weston session launcher, graphical preflight and Vampire app/terminal launchers; regression-test Desktop/Server payload rules and reject unknown editions (quality CI run `45615705180`).
 
 The current repository is a developer-stage live environment, not a finished
 desktop operating system or production installer. Do not label a feature
