@@ -50,3 +50,4 @@ jobs:
           bash tests/test-vpower.sh
           bash tests/test-rootfs-artifact.sh
           bash tests/test-session-runtime.sh
+          bash tests/test-post-fakeroot-vampire.sh
