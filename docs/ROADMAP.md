@@ -130,7 +130,8 @@ feature release-ready.
 - [x] Source commit `85bcee0` passed the Vampire OS quality gates workflow.
 - [x] Source commit `85bcee0` passed installer syntax and safety checks.
 - [x] Fix ISO workflow path filters so changes to `tests/test_configure_installed_root.py` trigger Desktop and Server image validation.
-- [ ] Current main head `7350182` is awaiting quality-gate and Server ISO workflow results; Desktop ISO validation was triggered by the preceding workflow-filter commit.
+- [x] Workflow-filter commit `7350182` passed quality gates; the following main commit `26b217e` only updates this validation record.
+- [ ] Server ISO validation for `7350182` and Desktop ISO validation for `38bd006` remain queued; neither installed-disk boot result is available yet.
 - [ ] Desktop and Server ISO builds, disposable BIOS/UEFI installation, and installed-disk boot must pass on the current main head before installer validation can be closed.
 
 The current repository is a developer-stage live environment, not a finished
