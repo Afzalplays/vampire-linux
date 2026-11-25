@@ -43,10 +43,15 @@ def main():
         assert f"root=PARTUUID={ROOT_PARTUUID}" in grub
         assert "rootwait rw" in grub
         assert "initrd " not in grub
-        esp_grub = (root / "boot/efi/EFI/BOOT/grub.cfg").read_text()
-        assert f"--set=root {ROOT_UUID}" in esp_grub
-        assert "set prefix=($root)/boot/grub" in esp_grub
-        assert "configfile $prefix/grub.cfg" in esp_grub
+        # GRUB can initially resolve its embedded prefix on the ESP, so
+        # provide the hand-off there as well as in the removable-media path.
+        esp_grub = (root / "boot/efi/boot/grub/grub.cfg").read_text()
+        fallback_grub = (root / "boot/efi/EFI/BOOT/grub.cfg").read_text()
+        for handoff in (esp_grub, fallback_grub):
+            assert f"--set=root {ROOT_UUID}" in handoff
+            assert "insmod fat" in handoff
+            assert "set prefix=($root)/boot/grub" in handoff
+            assert "configfile $prefix/grub.cfg" in handoff
         assert (root / "etc/vampire/install.conf").read_text().find("FIRMWARE=uefi") >= 0
 
         result = run(root, "bios")
