@@ -24,7 +24,7 @@ feature release-ready.
 - [x] Add non-destructive installer CLI and fake-sysfs preflight tests for read-only planning, mounted disks and partitions, active disk/partition swap, stacked devices, unavailable mount tables, read-only media and undersized targets.
 - [x] Add hardware, storage, health, log and support diagnostics.
 - [x] Add explicit-confirmation reboot, poweroff and halt controls with root checks and isolated command tests.
-- [x] Add automated safe regression coverage for power status, argument validation, non-root rejection and mocked confirmed action dispatch.
+- [x] Add automated safe regression coverage for power status, argument validation, non-root rejection and mocked confirmed action dispatch (quality CI run `45614758508`).
 - [x] Add memory/thermal telemetry, live monitor refresh and private support-report export.
 - [x] Add bounded log viewing and follow mode for local diagnostics.
 - [x] Add DHCP lease application, DNS configuration and network start/stop lifecycle.
@@ -136,7 +136,8 @@ feature release-ready.
 - [x] Workflow-filter commit `7350182` passed quality gates; the following main commit `26b217e` only updates this validation record.
 - [x] Server edition disposable-disk installation and installed-disk boot passed in both BIOS and UEFI firmware in CI run `45596621598`.
 - [ ] Desktop edition disposable-disk installation and installed-disk boot remain unverified.
-- [ ] Repeat both edition build, live-ISO, and installed-disk tests on the current main head; add runtime checks for VFetch, power controls and installer cleanup.
+- [ ] Repeat both edition build, live-ISO, and installed-disk tests on the current main head; add installed-system runtime checks for VFetch, power controls and installer cleanup.
+- [x] Run VFetch, service/network/firewall command integration and mocked power-control regression tests in quality CI run `45614758508`.
 
 The current repository is a developer-stage live environment, not a finished
 desktop operating system or production installer. Do not label a feature
