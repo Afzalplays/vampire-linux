@@ -17,7 +17,7 @@ for required in etc/os-release sbin/init bin/busybox boot/vmlinuz usr/lib/vampir
 done
 member_path() {
   local suffix=$1
-  awk -v suffix="$suffix" '$0 ~ ("(^|/)" suffix "$") { print; exit }' <<<"$rootfs_listing"
+  grep -E "(^|/)${suffix}$" <<<"$rootfs_listing" | head -n 1 || true
 }
 passwd_member="$(member_path etc/passwd)"
 group_member="$(member_path etc/group)"
