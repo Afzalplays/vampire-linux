@@ -8,6 +8,7 @@ cp "$ROOT/scripts/test-rootfs-artifact.sh" "$TMP/scripts/"
 base_paths=(
   etc/os-release sbin/init bin/busybox boot/vmlinuz
   usr/lib/vampire/stage-rootfs.py usr/lib/vampire/configure-installed-root.py
+  usr/lib/vampire/session-runtime etc/passwd etc/group etc/shadow
 )
 desktop_paths=(
   usr/bin/vsettings usr/lib/vampire/settings_apply.py
@@ -26,6 +27,20 @@ make_archive() {
     mkdir -p "$TMP/stage/$(dirname "$path")"
     : > "$TMP/stage/$path"
   done
+  cat > "$TMP/stage/etc/passwd" <<'PASSWD'
+root:x:0:0:root:/root:/bin/sh
+vampire:x:1000:1000:Vampire OS User:/home/vampire:/bin/sh
+PASSWD
+  cat > "$TMP/stage/etc/group" <<'GROUP'
+root:x:0:
+vampire:x:1000:
+video:x:27:vampire
+input:x:100:vampire
+GROUP
+  cat > "$TMP/stage/etc/shadow" <<'SHADOW'
+root:*:19000:0:99999:7:::
+vampire:!:19000:0:99999:7:::
+SHADOW
   tar -cf "$TMP/out/vampire-os-0.1.0-dev-$edition-x86_64-rootfs.tar" -C "$TMP/stage" .
   (cd "$TMP/out" && sha256sum "vampire-os-0.1.0-dev-$edition-x86_64-rootfs.tar" > "vampire-os-0.1.0-dev-$edition-x86_64-rootfs.tar.sha256")
 }
