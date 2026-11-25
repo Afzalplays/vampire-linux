@@ -68,7 +68,7 @@ feature release-ready.
 - [x] Add theme, accent, transparency, blur, terminal, dock and top-panel preference storage.
 - [x] Add a Wayland terminal autostart with the Vampire Shell profile and branded dark terminal palette.
 - [x] Apply validated theme, accent, panel visibility/transparency, reduced-motion and terminal-opacity settings to the next Weston session.
-- [x] Set Foot terminal and terminal-hosted Settings preview to translucent 88% opacity by default; keep opacity user-adjustable with a solid-background option (regression-tested).
+- [x] Set Foot terminal and terminal-hosted Settings preview to translucent 90% opacity by default; keep opacity user-adjustable with a solid-background option (regression-tested).
 - [x] Add Weston panel launchers for Terminal, Files, Settings, Software Center and Monitor.
 - [x] Require the Desktop live-ISO smoke test to verify vsettings, settings bootstrap/apply helpers and Weston/Foot base configurations are present in the initramfs.
 - [x] Require the Desktop installer-rootfs artifact check to verify the same settings runtime and base configuration payload.
