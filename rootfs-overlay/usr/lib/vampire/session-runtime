@@ -1,0 +1,25 @@
+#!/bin/sh
+# Create private XDG runtime directories for local interactive accounts.
+set -eu
+RUN_ROOT=${VAMPIRE_RUN_ROOT:-/run}
+PASSWD_FILE=${VAMPIRE_PASSWD_FILE:-/etc/passwd}
+ensure_runtime() {
+  username=$1
+  uid=$2
+  gid=$3
+  directory="$RUN_ROOT/user/$uid"
+  case "$uid:$gid" in *[!0-9:]*|:*) echo "session-runtime: invalid account IDs" >&2; return 1 ;; esac
+  mkdir -p "$directory"
+  chown "$uid:$gid" "$directory"
+  chmod 0700 "$directory"
+}
+ensure_runtime root 0 0
+if [ -r "$PASSWD_FILE" ]; then
+  while IFS=: read -r username _ uid gid _ _ shell; do
+    [ "$username" = vampire ] || continue
+    [ "$uid" = 1000 ] || { echo "session-runtime: refusing unexpected vampire UID" >&2; exit 1; }
+    [ "$shell" = /bin/sh ] || { echo "session-runtime: vampire account has an unsupported shell" >&2; exit 1; }
+    ensure_runtime "$username" "$uid" "$gid"
+    break
+  done < "$PASSWD_FILE"
+fi
