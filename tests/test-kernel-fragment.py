@@ -62,6 +62,7 @@ class KernelFragmentTests(unittest.TestCase):
             (repo / "build").mkdir()
             (repo / "scripts").mkdir()
             (repo / "scripts/post-build-vampire.py").write_text("# fixture\\n", encoding="utf-8")
+            (repo / "scripts/post-fakeroot-vampire.sh").write_text("# fixture\\n", encoding="utf-8")
             (overlay / "etc/vampire/os.conf").write_text("EDITION=desktop\n", encoding="utf-8")
             (overlay / "etc/os-release").write_text('PRETTY_NAME="Vampire OS"\n', encoding="utf-8")
             config = repo / ".config"
