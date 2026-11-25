@@ -53,14 +53,38 @@ if command -v modprobe >/dev/null 2>&1; then
   for module in i915 amdgpu nouveau virtio_gpu; do modprobe "$module" 2>/dev/null || true; done
 fi
 check
-[ "$(id -u)" -eq 0 ] || {
-  error "this early preview requires root/seat access; non-root sessions are not implemented yet."
-  exit 1
-}
-export XDG_RUNTIME_DIR=/run/user/0
-export XDG_CONFIG_HOME=/run/vampire
-mkdir -p "$XDG_RUNTIME_DIR" "$XDG_CONFIG_HOME"
-chmod 0700 "$XDG_RUNTIME_DIR" "$XDG_CONFIG_HOME"
+uid=$(id -u)
+if [ "$uid" -eq 0 ]; then
+  export XDG_RUNTIME_DIR=/run/user/0
+  export XDG_CONFIG_HOME=/run/vampire
+  export VAMPIRE_SETTINGS_FILE=/etc/vampire/settings.conf
+  mkdir -p "$XDG_RUNTIME_DIR" "$XDG_CONFIG_HOME"
+  chmod 0700 "$XDG_RUNTIME_DIR" "$XDG_CONFIG_HOME"
+else
+  home=${HOME:-}
+  [ -n "$home" ] && [ -d "$home" ] && [ -w "$home" ] || {
+    error "a writable home directory is required for a non-root desktop session."
+    exit 1
+  }
+  export XDG_RUNTIME_DIR="/run/user/$uid"
+  [ -d "$XDG_RUNTIME_DIR" ] && [ -O "$XDG_RUNTIME_DIR" ] || {
+    error "runtime directory $XDG_RUNTIME_DIR is missing or not owned by this user; log in locally after boot."
+    exit 1
+  }
+  [ "$(stat -c %a "$XDG_RUNTIME_DIR" 2>/dev/null || echo 000)" = 700 ] || {
+    error "runtime directory must have mode 0700."
+    exit 1
+  }
+  export XDG_CONFIG_HOME="$home/.config"
+  export VAMPIRE_SETTINGS_FILE="$XDG_CONFIG_HOME/vampire/settings.conf"
+  mkdir -p "$XDG_CONFIG_HOME/vampire" "$XDG_RUNTIME_DIR/vampire"
+  chmod 0700 "$XDG_CONFIG_HOME/vampire" "$XDG_RUNTIME_DIR/vampire"
+fi
+export VAMPIRE_WESTON_RUNTIME_CONFIG="$XDG_RUNTIME_DIR/vampire/weston.ini"
+if [ ! -s "$VAMPIRE_SETTINGS_FILE" ]; then
+  vsettings reset
+fi
 vsettings apply
+CONFIG=$VAMPIRE_WESTON_RUNTIME_CONFIG
 [ -r "$CONFIG" ] || { error "generated Weston configuration is missing: $CONFIG"; exit 1; }
 exec weston --config="$CONFIG" --backend=drm-backend.so --shell=desktop-shell.so --tty=2 "$@"
