@@ -78,12 +78,12 @@ class InstalledRootTests(unittest.TestCase):
             root = self.make_root(temp)
             MODULE.configure(root, ROOT_UUID, "uefi", ESP_UUID, ROOT_PARTUUID)
             expected = (
-                "insmod part_gpt\\n"
-                "insmod fat\\n"
-                "insmod ext2\\n"
-                f"search --no-floppy --fs-uuid --set=root {ROOT_UUID}\\n"
-                "set prefix=($root)/boot/grub\\n"
-                "configfile $prefix/grub.cfg\\n"
+                "insmod part_gpt\n"
+                "insmod fat\n"
+                "insmod ext2\n"
+                f"search --no-floppy --fs-uuid --set=root {ROOT_UUID}\n"
+                "set prefix=($root)/boot/grub\n"
+                "configfile $prefix/grub.cfg\n"
             ).encode()
             handoffs = (
                 root / "boot/efi/boot/grub/grub.cfg",
@@ -92,8 +92,8 @@ class InstalledRootTests(unittest.TestCase):
             for handoff_path in handoffs:
                 handoff = handoff_path.read_bytes()
                 self.assertEqual(handoff, expected)
-                self.assertNotIn(b"\\\\n", handoff)
-                self.assertTrue(handoff.endswith(b"\\n"))
+                self.assertNotIn(b"\\\n", handoff)
+                self.assertTrue(handoff.endswith(b"\n"))
 
 
     def test_rejects_symlinked_target_root(self):
