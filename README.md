@@ -47,6 +47,7 @@ CPU, GPU, memory, package count, uptime, and other host details.
 - [Command reference](rootfs-overlay/usr/bin/vhelp)
 - [Vampire Shell](docs/VAMPIRE-SHELL.md)
 - [Hardware diagnostics](docs/HARDWARE-DIAGNOSTICS.md)
+- [Networking, DHCP and Wi-Fi](docs/NETWORKING.md)
 - [Optional firewall](docs/FIREWALL.md)
 - [Vampire Files console manager](docs/FILES-CONSOLE.md)
 - [Architecture](docs/ARCHITECTURE.md)
@@ -104,7 +105,7 @@ suite from the repository root with:
 python3 -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
-The custom graphical desktop, graphical installer, production package repository and transactional package manager, update application/rollback service, and supported hardware matrix remain incomplete. A confirmation-gated text-mode BIOS/UEFI erase-and-install path is implemented, but it still needs disposable-disk QEMU installation and installed-disk reboot validation. This is a developer live environment, not a finished or production-ready operating system.
+The DHCP and Wi-Fi command-line helpers have isolated regression tests; see [networking documentation](docs/NETWORKING.md) for their current scope and limitations. The custom graphical desktop, graphical installer, production package repository and transactional package manager, update application/rollback service, and supported hardware matrix remain incomplete. A confirmation-gated text-mode BIOS/UEFI erase-and-install path is implemented, but it still needs disposable-disk QEMU installation and installed-disk reboot validation. This is a developer live environment, not a finished or production-ready operating system.
 
 ## Independence and upstream sources
 
