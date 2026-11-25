@@ -36,6 +36,7 @@ class KernelFragmentTests(unittest.TestCase):
             (repo / "build").mkdir()
             (repo / "scripts").mkdir()
             (repo / "scripts/post-build-vampire.py").write_text("# fixture\\n", encoding="utf-8")
+            (repo / "scripts/post-fakeroot-vampire.sh").write_text("# fixture\\n", encoding="utf-8")
             installer_fragment = repo / "build/vampire-installer-kernel.fragment"
             installer_fragment.write_text("CONFIG_EXT4_FS=y\n", encoding="utf-8")
             fragment = repo / "build/vampire-desktop-kernel.fragment"
