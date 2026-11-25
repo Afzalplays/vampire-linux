@@ -15,6 +15,88 @@ for required in etc/os-release sbin/init bin/busybox boot/vmlinuz usr/lib/vampir
     exit 1
   }
 done
+member_path() {
+  local suffix=$1
+  awk -v suffix="$suffix" '$0 ~ ("(^|/)" suffix "$") { print; exit }' <<<"$rootfs_listing"
+}
+passwd_member="$(member_path etc/passwd)"
+group_member="$(member_path etc/group)"
+shadow_member="$(member_path etc/shadow)"
+for member in "$passwd_member" "$group_member" "$shadow_member"; do
+  [[ -n "$member" ]] || { echo "ERROR: installer rootfs is missing account database files" >&2; exit 1; }
+done
+grep -Eq '^vampire:x:1000:[0-9]+:Vampire OS User:/home/vampire:/bin/sh  for required in \
+    usr/bin/vsettings \
+    usr/lib/vampire/settings_apply.py \
+    usr/lib/vampire/settings-bootstrap \
+    etc/vampire/settings.defaults \
+    etc/xdg/weston/weston.ini \
+    etc/xdg/foot/foot.ini \
+    usr/bin/vdesktop \
+    usr/bin/vgraphical \
+    usr/bin/vampire-app \
+    usr/bin/vampire-terminal; do
+    grep -Eq "(^|/)${required}$" <<<"$rootfs_listing" || {
+      echo "ERROR: Desktop installer rootfs is missing required Desktop runtime path: $required" >&2
+      exit 1
+    }
+  done
+fi
+echo "PASS: $EDITION installer rootfs archive and checksum are valid"
+ <(tar -xOf "$ROOTFS_TAR" "$passwd_member") || {
+  echo "ERROR: rootfs does not contain the locked unprivileged Vampire account" >&2
+  exit 1
+}
+grep -Eq '^vampire:!:.*  for required in \
+    usr/bin/vsettings \
+    usr/lib/vampire/settings_apply.py \
+    usr/lib/vampire/settings-bootstrap \
+    etc/vampire/settings.defaults \
+    etc/xdg/weston/weston.ini \
+    etc/xdg/foot/foot.ini \
+    usr/bin/vdesktop \
+    usr/bin/vgraphical \
+    usr/bin/vampire-app \
+    usr/bin/vampire-terminal; do
+    grep -Eq "(^|/)${required}$" <<<"$rootfs_listing" || {
+      echo "ERROR: Desktop installer rootfs is missing required Desktop runtime path: $required" >&2
+      exit 1
+    }
+  done
+fi
+echo "PASS: $EDITION installer rootfs archive and checksum are valid"
+ <(tar -xOf "$ROOTFS_TAR" "$shadow_member") || {
+  echo "ERROR: Vampire account is not locked by default" >&2
+  exit 1
+}
+for group_name in video input; do
+  grep -Eq "^$group_name:[^:]*:[0-9]+:[^,]*,?vampire(,|$)|^$group_name:[^:]*:[0-9]+:vampire(,|$)" <(tar -xOf "$ROOTFS_TAR" "$group_member") || {
+    echo "ERROR: Vampire account is not in the $group_name group" >&2
+    exit 1
+  }
+done
+grep -Eq '(^|/)usr/lib/vampire/session-runtime  for required in \
+    usr/bin/vsettings \
+    usr/lib/vampire/settings_apply.py \
+    usr/lib/vampire/settings-bootstrap \
+    etc/vampire/settings.defaults \
+    etc/xdg/weston/weston.ini \
+    etc/xdg/foot/foot.ini \
+    usr/bin/vdesktop \
+    usr/bin/vgraphical \
+    usr/bin/vampire-app \
+    usr/bin/vampire-terminal; do
+    grep -Eq "(^|/)${required}$" <<<"$rootfs_listing" || {
+      echo "ERROR: Desktop installer rootfs is missing required Desktop runtime path: $required" >&2
+      exit 1
+    }
+  done
+fi
+echo "PASS: $EDITION installer rootfs archive and checksum are valid"
+ <<<"$rootfs_listing" || {
+  echo "ERROR: rootfs is missing the XDG session runtime helper" >&2
+  exit 1
+}
 if [[ "$EDITION" == desktop ]]; then
   for required in \
     usr/bin/vsettings \
