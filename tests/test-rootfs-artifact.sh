@@ -41,10 +41,11 @@ GROUP
 root:*:19000:0:99999:7:::
 vampire:!:19000:0:99999:7:::
 SHADOW
+  chmod 0640 "$TMP/stage/etc/shadow"
   mkdir -p "$TMP/stage/home/vampire"
   chmod 0755 "$TMP/stage/home/vampire"
   archive="$TMP/out/vampire-os-0.1.0-dev-$edition-x86_64-rootfs.tar"
-  tar --exclude='./home/vampire' -cf "$archive" -C "$TMP/stage" .
+  tar --owner=0 --group=0 --exclude='./home/vampire' -cf "$archive" -C "$TMP/stage" .
   tar --owner=1000 --group=1000 -rf "$archive" -C "$TMP/stage" home/vampire
   (cd "$TMP/out" && sha256sum "vampire-os-0.1.0-dev-$edition-x86_64-rootfs.tar" > "vampire-os-0.1.0-dev-$edition-x86_64-rootfs.tar.sha256")
 }
