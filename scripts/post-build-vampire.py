@@ -49,13 +49,9 @@ def configure_local_user(target: pathlib.Path) -> None:
         shadow.write_text("\n".join(shadow_lines) + "\n", encoding="utf-8")
     shadow.chmod(0o640)
     home.mkdir(parents=True, exist_ok=True)
-    try:
-        import grp
-        import pwd
-        import os
-        os.chown(home, 1000, group_gid)
-    except (ImportError, OSError):
-        pass
+    home.chmod(0o755)
+    # Buildroot's post-build hook is not privileged. Ownership is assigned by
+    # post-fakeroot-vampire.sh after the target tree enters fakeroot.
     print(
         "Vampire OS: provisioned locked local account 'vampire' "
         f"(uid 1000; video gid {video_gid}; input gid {input_gid}). "
