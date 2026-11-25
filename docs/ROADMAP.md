@@ -24,6 +24,7 @@ feature release-ready.
 - [x] Add non-destructive installer CLI and fake-sysfs preflight tests for read-only planning, mounted disks and partitions, active disk/partition swap, stacked devices, unavailable mount tables, read-only media and undersized targets.
 - [x] Add hardware, storage, health, log and support diagnostics.
 - [x] Add explicit-confirmation reboot, poweroff and halt controls with root checks and isolated command tests.
+- [x] Add automated safe regression coverage for power status, argument validation, non-root rejection and mocked confirmed action dispatch.
 - [x] Add memory/thermal telemetry, live monitor refresh and private support-report export.
 - [x] Add bounded log viewing and follow mode for local diagnostics.
 - [x] Add DHCP lease application, DNS configuration and network start/stop lifecycle.
