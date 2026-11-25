@@ -17,6 +17,7 @@ class BuildOutputConfigurationTests(unittest.TestCase):
         scripts = root / "scripts"
         scripts.mkdir()
         (scripts / "post-build-vampire.py").write_text("# test hook\\n")
+        (scripts / "post-fakeroot-vampire.sh").write_text("# test hook\\n")
         (build / "vampire-desktop-kernel.fragment").write_text("CONFIG_IWLWIFI=m\\n")
         (build / "vampire-installer-kernel.fragment").write_text("CONFIG_EXT4_FS=y\\n")
         overlay = root / 'rootfs & overlay | "special"'
@@ -38,6 +39,8 @@ class BuildOutputConfigurationTests(unittest.TestCase):
                 "BR2_ROOTFS_OVERLAY=" + json.dumps(str(overlay.resolve())),
                 config.read_text())
             self.assertIn("BR2_ROOTFS_POST_BUILD_SCRIPT=", config.read_text())
+            self.assertIn("BR2_ROOTFS_POST_FAKEROOT_SCRIPT=", config.read_text())
+            self.assertIn("BR2_ROOTFS_POST_FAKEROOT_SCRIPT=", config.read_text())
             fragments = next(line for line in config.read_text().splitlines()
                              if line.startswith("BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="))
             self.assertIn("vampire-installer-kernel.fragment", fragments)
