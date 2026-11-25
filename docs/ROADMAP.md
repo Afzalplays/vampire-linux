@@ -11,7 +11,7 @@ feature release-ready.
 - [x] Add VFetch, GRUB hybrid ISO builder and SHA-256 generation. Validate the installed VPM package count in VFetch regression tests.
 - [x] Add VPM experimental client, signed-index verification and unit tests.
 - [x] Add shell/configuration CI checks and QEMU BIOS/UEFI smoke-test script.
-- [x] Add push/PR quality workflow for Python compilation (including installed runtime utilities), shell syntax checks (including runtime helpers) and regression tests (GitHub Actions passed on 2026-11-19).
+- [x] Add push/PR quality workflow for Python compilation (including installed runtime utilities), shell syntax checks (including runtime helpers) and regression tests (GitHub Actions passed on 2026-11-25).
 - [x] Add initial service dispatcher, DHCP helper and opt-in nftables helper.
 - [x] Harden service enablement updates, reject malformed state, deduplicate bulk operations, add status-all and fail-closed restart behavior; reject symlinked state paths and store enablement state with private permissions.
 - [x] Add validated settings storage and interactive console launcher MVP.
@@ -123,6 +123,13 @@ feature release-ready.
 - [ ] Install to a blank virtual disk, reboot from installed disk and test recovery.
 - [ ] Hardware compatibility and accessibility test matrix.
 - [ ] Reproducible signed artifacts, notices and release notes.
+
+## Current validation snapshot (2026-11-25)
+
+- [x] Latest main commit `85bcee0` passes the Vampire OS build checks workflow.
+- [x] Latest main commit `85bcee0` passes the Vampire OS quality gates workflow.
+- [x] Latest main commit `85bcee0` passes installer syntax and safety checks.
+- [ ] Desktop and Server ISO builds, disposable BIOS/UEFI installation, and installed-disk boot must pass on the same latest commit before installer validation can be closed.
 
 The current repository is a developer-stage live environment, not a finished
 desktop operating system or production installer. Do not label a feature
