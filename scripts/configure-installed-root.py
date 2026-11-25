@@ -100,16 +100,23 @@ def configure(root, root_uuid, mode, esp_uuid=None, root_partuuid=None):
         # The removable-media GRUB executable starts from the ESP. Give it a
         # small hand-off config there so it can locate the real menu on the
         # ext4 root filesystem instead of looking for /boot on the FAT ESP.
-        esp_grub = root / "boot" / "efi" / "EFI" / "BOOT" / "grub.cfg"
+        # GRUB's EFI executable may start with its embedded prefix on the
+        # ESP (commonly /boot/grub), before it can read the hand-off file in
+        # EFI/BOOT. Install the same small hand-off at both entry points:
+        # the embedded-prefix location and the removable-media directory.
         esp_handoff = [
             "insmod part_gpt",
+            "insmod fat",
             "insmod ext2",
             "search --no-floppy --fs-uuid --set=root " + root_uuid,
             "set prefix=($root)/boot/grub",
             "configfile $prefix/grub.cfg",
             "",
         ]
-        atomic_write(esp_grub, "\n".join(esp_handoff))
+        atomic_write(root / "boot" / "efi" / "boot" / "grub" / "grub.cfg",
+                     "\n".join(esp_handoff))
+        atomic_write(root / "boot" / "efi" / "EFI" / "BOOT" / "grub.cfg",
+                     "\n".join(esp_handoff))
     metadata = f"FIRMWARE={mode}\nROOT_UUID={root_uuid}\n"
     if esp_uuid:
         metadata += f"ESP_UUID={esp_uuid}\n"
