@@ -2,6 +2,7 @@
 set -Eeuo pipefail
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 EDITION="${VAMPIRE_EDITION:-desktop}"
+case "$EDITION" in desktop|server) ;; *) echo "ERROR: unsupported edition: $EDITION" >&2; exit 2 ;; esac
 ROOTFS_TAR="$ROOT_DIR/out/vampire-os-0.1.0-dev-$EDITION-x86_64-rootfs.tar"
 ROOTFS_SUM="$ROOTFS_TAR.sha256"
 [[ -s "$ROOTFS_TAR" ]] || { echo "ERROR: installer rootfs archive not found: $ROOTFS_TAR" >&2; exit 1; }
