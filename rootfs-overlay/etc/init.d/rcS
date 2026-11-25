@@ -49,6 +49,9 @@ fi
 if [ -x /usr/bin/vsettings ] && [ -r /usr/lib/vampire/settings-bootstrap ]; then
   sh /usr/lib/vampire/settings-bootstrap || boot_log "settings bootstrap needs attention"
 fi
+if [ -x /usr/lib/vampire/session-runtime ]; then
+  /usr/lib/vampire/session-runtime || boot_log "unprivileged session runtime setup needs attention"
+fi
 if [ -r /etc/vampire/install.conf ]; then
   printf '\n  Vampire OS 0.1.0-dev | x86_64 installed system\n'
 else
