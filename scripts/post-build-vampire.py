@@ -15,14 +15,14 @@ def ensure_group(path: pathlib.Path, name: str, preferred_gid: int) -> int:
             if "vampire" not in members:
                 fields[3] = ",".join([*members, "vampire"]).strip(",")
                 lines[lines.index(line)] = ":".join(fields)
-                path.write_text("\\n".join(lines) + "\\n", encoding="utf-8")
+                path.write_text("\n".join(lines) + "\n", encoding="utf-8")
             return int(fields[2])
     used = {int(line.split(":")[2]) for line in lines if len(line.split(":")) >= 3 and line.split(":")[2].isdigit()}
     gid = preferred_gid
     while gid in used:
         gid += 1
     lines.append(f"{name}:x:{gid}:vampire")
-    path.write_text("\\n".join(lines) + "\\n", encoding="utf-8")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return gid
 
 
@@ -38,13 +38,15 @@ def configure_local_user(target: pathlib.Path) -> None:
     group_gid = ensure_group(group, "vampire", 1000)
     video_gid = ensure_group(group, "video", 27)
     input_gid = ensure_group(group, "input", 100)
+    if any(len(line.split(":")) > 2 and line.split(":")[2] == "1000" and line.split(":")[0] != "vampire" for line in passwd_lines):
+        raise SystemExit("Vampire OS: uid 1000 is already assigned to another account")
     if not any(line.split(":")[0] == "vampire" for line in passwd_lines):
         passwd_lines.append(f"vampire:x:1000:{group_gid}:Vampire OS User:/home/vampire:/bin/sh")
-        passwd.write_text("\\n".join(passwd_lines) + "\\n", encoding="utf-8")
+        passwd.write_text("\n".join(passwd_lines) + "\n", encoding="utf-8")
     shadow_lines = shadow.read_text(encoding="utf-8").splitlines() if shadow.exists() else []
     if not any(line.split(":")[0] == "vampire" for line in shadow_lines):
         shadow_lines.append("vampire:!:19000:0:99999:7:::")
-        shadow.write_text("\\n".join(shadow_lines) + "\\n", encoding="utf-8")
+        shadow.write_text("\n".join(shadow_lines) + "\n", encoding="utf-8")
     shadow.chmod(0o640)
     home.mkdir(parents=True, exist_ok=True)
     try:
