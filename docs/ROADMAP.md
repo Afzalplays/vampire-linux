@@ -86,15 +86,15 @@ feature release-ready.
 - [x] Add VPM archive-extraction regression tests for traversal, absolute paths, links, duplicate entries, overwrite refusal and partial-write rollback.
 - [x] Reject rootfs archive entries nested beneath symlink or non-directory ancestors before extraction; add focused regression tests.
 - [x] Generate deterministic fstab and GRUB configuration for a staged target root using kernel-supported GPT PARTUUID root selection (bootloader installation remains pending).
-- [x] Regression-test the UEFI ESP GRUB handoff as exact newline-delimited configuration (firmware boot validation remains pending).
-- [x] Embed GPT, ext-family, FAT, filesystem-UUID search and GRUB configfile modules in the removable UEFI bootloader (installed-disk boot validation remains pending).
+- [x] Regression-test the UEFI ESP GRUB handoff as exact newline-delimited configuration; Server installed-disk UEFI boot passed in CI run `45596621598`.
+- [x] Embed GPT, ext-family, FAT, filesystem-UUID search and GRUB configfile modules in the removable UEFI bootloader; Server installed-disk UEFI boot passed in CI run `45596621598`.
 - [x] Report required disk-installation tools without performing destructive actions.
 - [x] Implement guided text-mode erase-and-install flow in the console launcher (graphical installer remains pending).
 - [x] Implement GPT partitioning, FAT32/ext4 formatting, rootfs staging, UUID configuration, BIOS/UEFI GRUB installation and exact typed destructive confirmation.
 - [x] Repeat disk safety preflight immediately after destructive confirmation to reject target-use changes before the first partition write.
 - [x] Verify firmware-specific GRUB boot files and generated configuration exist before reporting installer success.
 - [x] Discover and mount the installation ISO payload read-only for offline installation.
-- [ ] Validate installer end-to-end on disposable BIOS and UEFI QEMU disks, including installed-disk reboot and failure cleanup.
+- [x] Validate Server edition installation end-to-end on disposable BIOS and UEFI QEMU disks; both installed images reached Vampire init, serial login and DHCP lease (CI run 45596621598).\n- [ ] Validate Desktop edition installation end-to-end on disposable BIOS and UEFI QEMU disks; its ISO workflow is still running.\n- [ ] Add installed-system command execution checks for VFetch, reboot/shutdown and recovery cleanup.
 - [ ] Add encrypted installation, recovery media, boot repair and tested restore workflow.
 
 ## Server edition
