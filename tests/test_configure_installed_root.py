@@ -92,7 +92,7 @@ class InstalledRootTests(unittest.TestCase):
             for handoff_path in handoffs:
                 handoff = handoff_path.read_bytes()
                 self.assertEqual(handoff, expected)
-                self.assertNotIn(b"\\\n", handoff)
+                self.assertNotIn(b"\\n", handoff)
                 self.assertTrue(handoff.endswith(b"\n"))
 
 
