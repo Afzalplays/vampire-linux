@@ -137,6 +137,8 @@ run_boot() {
     grep -Fq "Vampire Shell" "$WORK/$mode.vsh-version.log" || die "$mode installed Vampire Shell version output is invalid"
     sudo chroot "$INSPECT_MOUNT" /usr/bin/vsh -c "printf VAMPIRE_SHELL_OK" > "$WORK/$mode.vsh-command.log" 2>&1 || die "$mode installed Vampire Shell command execution failed"
     grep -Fxq "VAMPIRE_SHELL_OK" "$WORK/$mode.vsh-command.log" || die "$mode installed Vampire Shell command output is invalid"
+    printf 'complete -p vpower\\nexit\\n' | sudo chroot "$INSPECT_MOUNT" /usr/bin/vsh > "$WORK/$mode.vsh-completion.log" 2>&1 || die "$mode installed Vampire Shell interactive startup failed"
+    grep -Fq ' -F _vampire_complete vpower' "$WORK/$mode.vsh-completion.log" || die "$mode installed Vampire Shell did not register command completion"
     sudo chroot "$INSPECT_MOUNT" /usr/bin/vdesktop --help > "$WORK/$mode.vdesktop-help.log" 2>&1 || die "$mode installed Desktop launcher help failed"
     grep -Fq "Usage: vdesktop [--settings]" "$WORK/$mode.vdesktop-help.log" || die "$mode installed Desktop launcher help is invalid"
     grep -Fq "path=/usr/bin/vampire-app files" "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" || die "$mode installed Weston config omitted Vampire Files"
