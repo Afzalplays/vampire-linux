@@ -39,4 +39,24 @@ if CHOWN_LOG="$TMP/attack-root.log" PATH="$TMP/bin:$PATH" VAMPIRE_RUN_ROOT="$TMP
 fi
 [[ ! -s "$TMP/attack-root.log" ]] || { echo "session runtime attempted chown through a symlinked root" >&2; exit 1; }
 
+
+# Refuse unexpected account identity or shell instead of creating a session.
+cat > "$TMP/passwd-bad-uid" <<'PASSWD'
+root:x:0:0:root:/root:/bin/sh
+vampire:x:1001:1000:Vampire OS User:/home/vampire:/bin/sh
+PASSWD
+if CHOWN_LOG="$TMP/bad-uid.log" PATH="$TMP/bin:$PATH" VAMPIRE_RUN_ROOT="$TMP/run-bad-uid" VAMPIRE_PASSWD_FILE="$TMP/passwd-bad-uid" sh "$ROOT/rootfs-overlay/usr/lib/vampire/session-runtime" >/dev/null 2>&1; then
+  echo "session runtime accepted an unexpected vampire UID" >&2; exit 1
+fi
+[[ ! -e "$TMP/run-bad-uid/user/1001" ]] || { echo "session runtime created a directory for an unexpected UID" >&2; exit 1; }
+
+cat > "$TMP/passwd-bad-shell" <<'PASSWD'
+root:x:0:0:root:/root:/bin/sh
+vampire:x:1000:1000:Vampire OS User:/home/vampire:/bin/bash
+PASSWD
+if CHOWN_LOG="$TMP/bad-shell.log" PATH="$TMP/bin:$PATH" VAMPIRE_RUN_ROOT="$TMP/run-bad-shell" VAMPIRE_PASSWD_FILE="$TMP/passwd-bad-shell" sh "$ROOT/rootfs-overlay/usr/lib/vampire/session-runtime" >/dev/null 2>&1; then
+  echo "session runtime accepted an unsupported vampire shell" >&2; exit 1
+fi
+[[ ! -e "$TMP/run-bad-shell/user/1000" ]] || { echo "session runtime created a directory for an unsupported shell" >&2; exit 1; }
+
 echo "Vampire per-user XDG runtime setup tests passed."
