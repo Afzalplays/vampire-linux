@@ -2,6 +2,8 @@
 # Contract tests for the user-facing Vampire Fetch output.
 set -Eeuo pipefail
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
+shebang="$(head -n 1 "$ROOT_DIR/fetch/vfetch")"
+[[ "$shebang" == "#!/bin/bash" ]] || { printf 'FAIL: installed VFetch requires a direct /bin/bash interpreter, got: %s\\n' "$shebang" >&2; exit 1; }
 OUTPUT="$(bash "$ROOT_DIR/fetch/vfetch")"
 
 fail() { printf 'FAIL: %s\n' "$*" >&2; exit 1; }
