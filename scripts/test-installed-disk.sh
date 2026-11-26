@@ -94,7 +94,7 @@ run_boot() {
   local root_partuuid
   root_partuuid="$(sudo blkid -s PARTUUID -o value "${loop}p2")"
   [[ -n "$root_partuuid" ]] || die "$mode installed root partition has no PARTUUID"
-  for required in usr/bin/vfetch usr/bin/vpower usr/bin/vsettings etc/init.d/rcS etc/inittab etc/fstab etc/vampire/install.conf boot/vmlinuz boot/grub/grub.cfg; do
+  for required in usr/bin/vfetch usr/bin/vpower usr/bin/vsettings usr/bin/vdisplay etc/init.d/rcS etc/inittab etc/fstab etc/vampire/install.conf boot/vmlinuz boot/grub/grub.cfg; do
     [[ -s "$INSPECT_MOUNT/$required" ]] || die "$mode installed root is missing required file: /$required"
   done
   [[ -x "$INSPECT_MOUNT/usr/bin/vfetch" ]] || die "$mode installed VFetch is not executable"
@@ -116,7 +116,7 @@ run_boot() {
   grep -Fq 'Kernel:' "$WORK/$mode.vfetch.log" || die "$mode installed VFetch omitted kernel information"
   grep -Fq 'Memory:' "$WORK/$mode.vfetch.log" || die "$mode installed VFetch omitted memory information"
   if [[ "$EDITION" == desktop ]]; then
-    sudo chroot "$INSPECT_MOUNT" /usr/bin/vsettings keys > "$WORK/$mode.settings-keys.log" 2>&1 || die "$mode installed vsettings keys failed"
+    sudo chroot "$INSPECT_MOUNT" /usr/bin/vdisplay --help > "$WORK/$mode.display-help.log" 2>&1 || die "$mode installed vdisplay help failed"\n    grep -Fq "Usage: vdisplay" "$WORK/$mode.display-help.log" || die "$mode installed display utility help is invalid"\n    sudo chroot "$INSPECT_MOUNT" /usr/bin/vsettings keys > "$WORK/$mode.settings-keys.log" 2>&1 || die "$mode installed vsettings keys failed"
     grep -Fxq dock_auto_hide "$WORK/$mode.settings-keys.log" || die "$mode installed settings schema omitted dock_auto_hide"
     sudo chroot "$INSPECT_MOUNT" /usr/bin/vsettings list > "$WORK/$mode.settings-list.log" 2>&1 || die "$mode installed vsettings could not load defaults"
     grep -Eq "^theme[[:space:]]+dark$" "$WORK/$mode.settings-list.log" || die "$mode installed settings did not load dark theme default"
