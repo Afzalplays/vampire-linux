@@ -57,6 +57,7 @@ complete_for vinstall p preflight
 complete_for vssh s status
 complete_nested vsettings set d dock_auto_hide
 complete_nested vnetwork wifi c connect
+complete_nested vnetwork wifi a auto
 complete_value vsettings set theme d dark
 
 # Completion must be registered for supported tools and leave unknown commands alone.
