@@ -39,6 +39,7 @@ network_menu() {
       6)
         printf 'Wireless interface (blank = first): '; IFS= read -r wifi_iface
         run_and_pause "$NETWORK" wifi disconnect "$wifi_iface" ;;
+      7) run_and_pause "$NETWORK" wifi auto ;;
       0) return 0 ;;
       *) echo "Invalid choice." ;;
     esac
