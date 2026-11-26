@@ -36,6 +36,8 @@ class MobilePortalContractTests(unittest.TestCase):
         worker = (MOBILE / "sw.js").read_text()
         self.assertIn('request.method!=="GET"', worker)
         self.assertIn("url.origin!==self.location.origin", worker)
+        self.assertIn("!ASSETS.has(url.pathname)", worker)
+        self.assertIn("url.search", worker)
         self.assertNotRegex(worker, re.compile(r"Authorization|localStorage|sessionStorage|indexedDB", re.I))
 
     def test_phone_image_warning_is_visible(self):
