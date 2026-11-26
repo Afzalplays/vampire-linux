@@ -1,51 +1,60 @@
 #!/bin/sh
-# Vampire Launcher — keyboard-driven app discovery for the Weston preview.
+# Vampire Launcher — searchable application catalog and tested app dispatcher.
 set -eu
-APP=${VAMPIRE_APP_CMD:-/usr/bin/vampire-app}
-usage() { printf 'Usage: vlauncher [--search TEXT|--help]\n'; }
+APP=\${VAMPIRE_APP_CMD:-/usr/bin/vampire-app}
+TERMINAL=\${VAMPIRE_TERMINAL_CMD:-/usr/bin/vampire-terminal}
+usage() {
+  printf 'Usage: vlauncher [--list|--search TEXT|--launch APP-ID|--help]\n'
+}
 catalog() {
   printf '%s\n' \
-    'Terminal|Open a command terminal' \
-    'Files|Browse and manage files' \
-    'Settings|Configure appearance and desktop preferences' \
-    'Software|Search, install and remove VPM packages' \
-    'Monitor|View CPU, memory, thermal and network status'
+    'terminal|Terminal|Open Vampire Terminal' \
+    'files|Files|Browse and manage files' \
+    'settings|Settings|Configure appearance and desktop preferences' \
+    'software|Software Center|Search, install and remove VPM packages' \
+    'monitor|System Monitor|View CPU, memory, thermal and network status'
 }
-case "${1:-}" in
+launch_app() {
+  case "$1" in
+    terminal) "$TERMINAL" ;;
+    files|settings|software|monitor) "$APP" "$1" ;;
+    *) printf 'Vampire Launcher: unknown application ID: %s\n' "$1" >&2; return 1 ;;
+  esac
+}
+case "\${1:-}" in
   --help|-h) usage; exit 0 ;;
+  --list)
+    [ "$#" -eq 1 ] || { usage >&2; exit 2; }
+    catalog
+    exit 0
+    ;;
   --search)
     [ "$#" -eq 2 ] || { usage >&2; exit 2; }
     catalog | grep -iF -- "$2" || exit 1
     exit 0
+    ;;
+  --launch)
+    [ "$#" -eq 2 ] || { usage >&2; exit 2; }
+    launch_app "$2"
+    exit $?
     ;;
   "") [ "$#" -eq 0 ] || { usage >&2; exit 2; } ;;
   *) usage >&2; exit 2 ;;
 esac
 while :; do
   printf '\n  V A M P I R E  /  LAUNCHER\n'
-  printf '  Search: type --search TEXT from a terminal\n'
+  printf '  Search: vlauncher --search TEXT\n'
   printf '  ------------------------------------------\n'
-  catalog | while IFS='|' read -r name description; do
-    printf '  %-10s %s\n' "$name" "$description"
+  catalog | while IFS='|' read -r id name description; do
+    printf '  %-9s %-15s %s\n' "$id" "$name" "$description"
   done
-  printf '\n  1) Terminal\n  2) Files\n  3) Settings\n  4) Software Center\n  5) System Monitor\n  6) Search apps\n  0) Close launcher\n  Select: '
+  printf '\n  Enter an application ID to launch, or 0 to close.\n  App ID: '
   IFS= read -r choice || exit 0
   case "$choice" in
-    1) exec foot /bin/sh ;;
-    2) "$APP" files ;;
-    3) "$APP" settings ;;
-    4) "$APP" software ;;
-    5) "$APP" monitor ;;
-    6)
-      printf 'Search apps: '
-      IFS= read -r query || exit 0
-      if [ -n "$query" ]; then
-        catalog | grep -iF -- "$query" || printf '  No matching applications.\n'
-      else
-        catalog | sed 's/|/  —  /'
-      fi
+    0|q|quit) exit 0 ;;
+    terminal|files|settings|software|monitor)
+      launch_app "$choice"
       ;;
-    0) exit 0 ;;
-    *) printf '  Invalid selection.\n' ;;
+    *) printf '  Unknown app ID. Use one of the IDs listed above.\n' ;;
   esac
 done
