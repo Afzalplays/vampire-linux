@@ -30,7 +30,7 @@ reject_symlink_path() {
   case "$path" in /*) ;; *) path=$PWD/$path ;; esac
   while [ -n "$path" ] && [ "$path" != "/" ]; do
     [ ! -L "$path" ] || {
-      echo "vssh: refusing symlinked host-key path: $path" >&2
+      echo "vssh: refusing symlinked path: $path" >&2
       return 1
     }
     path=${path%/*}
@@ -45,7 +45,8 @@ authorize_user() {
   [ "$username" != root ] || { echo "vssh: root SSH login is disabled; authorize a regular user." >&2; exit 1; }
   home=$(user_home "$username") || { echo "vssh: user does not exist: $username" >&2; exit 1; }
   case "$home" in "$HOME_ROOT"/*) ;; *) echo "vssh: refusing a user home outside the configured home root." >&2; exit 1 ;; esac
-  [ -d "$home" ] && [ ! -L "$home" ] || { echo "vssh: user home is missing or symlinked: $home" >&2; exit 1; }
+  [ -d "$home" ] || { echo "vssh: user home is missing: $home" >&2; exit 1; }
+  reject_symlink_path "$home" || exit 1
 
   case "$public_key" in *'
 '*) echo "vssh: provide exactly one public key line." >&2; exit 2 ;; esac
@@ -58,9 +59,10 @@ authorize_user() {
 
   ssh_dir=$home/.ssh
   authorized=$ssh_dir/authorized_keys
-  [ ! -L "$ssh_dir" ] || { echo "vssh: refusing symlinked SSH directory." >&2; exit 1; }
-  [ ! -L "$authorized" ] || { echo "vssh: refusing symlinked authorized_keys." >&2; exit 1; }
+  reject_symlink_path "$ssh_dir" || exit 1
+  reject_symlink_path "$authorized" || exit 1
   mkdir -p "$ssh_dir"
+  reject_symlink_path "$ssh_dir" || exit 1
   chown "$username" "$ssh_dir"
   chmod 0700 "$ssh_dir"
   if [ -e "$authorized" ] && [ ! -f "$authorized" ]; then
