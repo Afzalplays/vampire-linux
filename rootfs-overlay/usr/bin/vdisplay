@@ -1,0 +1,57 @@
+#!/bin/sh
+# Vampire Display: read-only DRM connector and advertised-mode inventory.
+set -eu
+DRM_SYSFS=${VAMPIRE_DRM_SYSFS:-/sys/class/drm}
+usage() { echo "Usage: vdisplay [--help]" >&2; exit 2; }
+case "${1:-}" in
+  --help|-h) [ "$#" -eq 1 ] || usage; echo "Usage: vdisplay [--help]"; echo "  Lists DRM connectors and advertised display modes (read-only)."; exit 0 ;;
+  "") [ "$#" -eq 0 ] || usage ;;
+  *) usage ;;
+esac
+[ ! -L "$DRM_SYSFS" ] && [ -d "$DRM_SYSFS" ] || {
+  echo "Vampire Display: DRM sysfs directory is missing or unsafe: $DRM_SYSFS" >&2
+  exit 1
+}
+printf '  V A M P I R E  /  DISPLAY
+'
+printf '  DRM connector inventory (read-only)\n\n'
+found=0
+connected=0
+for connector in "$DRM_SYSFS"/card[0-9]*-*; do
+  [ -e "$connector" ] || continue
+  [ ! -L "$connector" ] && [ -d "$connector" ] || continue
+  name=${connector##*/}
+  printf '%s\n' "$name" | grep -Eq '^card[0-9]+-[A-Za-z0-9_-]+$' || continue
+  status_file=$connector/status
+  modes_file=$connector/modes
+  [ ! -L "$status_file" ] && [ -r "$status_file" ] || continue
+  IFS= read -r status < "$status_file" || status=
+  case "$status" in
+    connected) connected=$((connected + 1));;
+    disconnected) ;;
+    *) continue ;;
+  esac
+  found=$((found + 1))
+  output_name=${name#card*-}
+  printf '  %s: %s\n' "$output_name" "$status"
+  if [ "$status" = connected ]; then
+    if [ ! -L "$modes_file" ] && [ -r "$modes_file" ]; then
+      mode_count=0
+      while IFS= read -r mode || [ -n "$mode" ]; do
+        printf '%s\n' "$mode" | grep -Eq '^[0-9]{2,5}x[0-9]{2,5}$' || continue
+        if [ "$mode_count" -eq 0 ]; then printf '    Advertised modes:'; fi
+        printf ' %s' "$mode"
+        mode_count=$((mode_count + 1))
+      done < "$modes_file"
+      if [ "$mode_count" -gt 0 ]; then printf '\n'; else printf '    No valid modes reported.\n'; fi
+    else
+      printf '    Mode list unavailable.\n'
+    fi
+  fi
+done
+if [ "$found" -eq 0 ]; then
+  printf '  No DRM display connectors found. Check the graphics driver and /dev/dri.\n'
+else
+  printf '\n  Connectors: %s   Connected: %s\n' "$found" "$connected"
+fi
+printf '\n  Note: advertised modes are not a live-mode reading; this command makes no display changes.\n'
