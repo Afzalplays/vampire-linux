@@ -3,14 +3,14 @@
 set -Eeuo pipefail
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 EDITION="${VAMPIRE_EDITION:-desktop}"
-case "$EDITION" in desktop|server) ;; *) printf 'ERROR: unsupported edition: %s\\n' "$EDITION" >&2; exit 2 ;; esac
+case "$EDITION" in desktop|server) ;; *) printf 'ERROR: unsupported edition: %s\n' "$EDITION" >&2; exit 2 ;; esac
 ROOTFS_TAR="$ROOT_DIR/out/vampire-os-0.1.0-dev-$EDITION-x86_64-rootfs.tar"
 WORK="${VAMPIRE_INSTALL_TEST_DIR:-$ROOT_DIR/out/installed-disk-tests}"
 TIMEOUT_SECONDS="${VAMPIRE_INSTALLED_BOOT_TIMEOUT:-60}"
-case "$TIMEOUT_SECONDS" in ""|*[!0-9]*) printf 'ERROR: VAMPIRE_INSTALLED_BOOT_TIMEOUT must be a positive integer.\\n' >&2; exit 2 ;; esac
-(( ${#TIMEOUT_SECONDS} <= 5 )) || { printf 'ERROR: VAMPIRE_INSTALLED_BOOT_TIMEOUT must be between 1 and 86400 seconds.\\n' >&2; exit 2; }
+case "$TIMEOUT_SECONDS" in ""|*[!0-9]*) printf 'ERROR: VAMPIRE_INSTALLED_BOOT_TIMEOUT must be a positive integer.\n' >&2; exit 2 ;; esac
+(( ${#TIMEOUT_SECONDS} <= 5 )) || { printf 'ERROR: VAMPIRE_INSTALLED_BOOT_TIMEOUT must be between 1 and 86400 seconds.\n' >&2; exit 2; }
 TIMEOUT_SECONDS=$((10#$TIMEOUT_SECONDS))
-(( TIMEOUT_SECONDS > 0 && TIMEOUT_SECONDS <= 86400 )) || { printf 'ERROR: VAMPIRE_INSTALLED_BOOT_TIMEOUT must be between 1 and 86400 seconds.\\n' >&2; exit 2; }
+(( TIMEOUT_SECONDS > 0 && TIMEOUT_SECONDS <= 86400 )) || { printf 'ERROR: VAMPIRE_INSTALLED_BOOT_TIMEOUT must be between 1 and 86400 seconds.\n' >&2; exit 2; }
 LOOPS=()
 VARS_FILES=()
 INSPECT_MOUNT=
@@ -137,7 +137,7 @@ run_boot() {
     grep -Fq "Vampire Shell" "$WORK/$mode.vsh-version.log" || die "$mode installed Vampire Shell version output is invalid"
     sudo chroot "$INSPECT_MOUNT" /usr/bin/vsh -c "printf VAMPIRE_SHELL_OK" > "$WORK/$mode.vsh-command.log" 2>&1 || die "$mode installed Vampire Shell command execution failed"
     grep -Fxq "VAMPIRE_SHELL_OK" "$WORK/$mode.vsh-command.log" || die "$mode installed Vampire Shell command output is invalid"
-    printf 'complete -p vpower\\nexit\\n' | sudo chroot "$INSPECT_MOUNT" /usr/bin/vsh > "$WORK/$mode.vsh-completion.log" 2>&1 || die "$mode installed Vampire Shell interactive startup failed"
+    printf 'complete -p vpower\nexit\n' | sudo chroot "$INSPECT_MOUNT" /usr/bin/vsh > "$WORK/$mode.vsh-completion.log" 2>&1 || die "$mode installed Vampire Shell interactive startup failed"
     grep -Fq ' -F _vampire_complete vpower' "$WORK/$mode.vsh-completion.log" || die "$mode installed Vampire Shell did not register command completion"
     sudo chroot "$INSPECT_MOUNT" /usr/bin/vdesktop --help > "$WORK/$mode.vdesktop-help.log" 2>&1 || die "$mode installed Desktop launcher help failed"
     grep -Fq "Usage: vdesktop [--settings]" "$WORK/$mode.vdesktop-help.log" || die "$mode installed Desktop launcher help is invalid"
@@ -190,7 +190,7 @@ run_boot() {
     die "$mode installed-disk QEMU exited unexpectedly (status $status)"
   fi
   if grep -Eqi 'Kernel panic|VFS: Unable to mount root|No working init found|Failed to execute /sbin/init' "$log"; then
-    printf '%s\\n' "---- $mode boot failure signature ----" >&2
+    printf '%s\n' "---- $mode boot failure signature ----" >&2
     grep -Ein 'Kernel panic|VFS: Unable to mount root|No working init found|Failed to execute /sbin/init' "$log" >&2 || true
     die "$mode boot emitted a fatal kernel/init failure"
   fi
