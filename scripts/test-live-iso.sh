@@ -48,7 +48,7 @@ xorriso -osirrox on -indev "$ISO" -extract /install/rootfs.tar.sha256 "$install_
   || die "could not extract installer rootfs checksum from ISO"
 (cd "$install_tmp" && sha256sum -c rootfs.tar.sha256) || die "embedded installer rootfs checksum failed"
 embedded_listing="$(tar -tf "$install_tmp/rootfs.tar")"
-for required in etc/os-release sbin/init bin/busybox boot/vmlinuz usr/lib/vampire/stage-rootfs.py usr/lib/vampire/configure-installed-root.py; do
+for required in etc/os-release sbin/init bin/busybox boot/vmlinuz usr/lib/vampire/stage-rootfs.py usr/lib/vampire/configure-installed-root.py usr/bin/vssh; do
   grep -Eq "(^|/)${required}$" <<<"$embedded_listing" || die "embedded rootfs is missing required path: $required"
 done
 printf 'PASS: %s ISO contains a checksummed installer rootfs and kernel\n' "$EDITION"
@@ -67,7 +67,7 @@ has_entry() {
 }
 for required in \
   usr/bin/vfetch usr/bin/vdesktop usr/bin/vnetwork usr/bin/vinstall \
-  usr/bin/vpm usr/bin/vctl etc/vampire/os.conf etc/os-release; do
+  usr/bin/vpm usr/bin/vctl usr/bin/vssh etc/vampire/os.conf etc/os-release; do
   has_entry "$required"
 done
 if [[ "$EDITION" == "desktop" ]]; then

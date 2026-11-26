@@ -94,10 +94,12 @@ run_boot() {
   local root_partuuid
   root_partuuid="$(sudo blkid -s PARTUUID -o value "${loop}p2")"
   [[ -n "$root_partuuid" ]] || die "$mode installed root partition has no PARTUUID"
-  for required in usr/bin/vfetch usr/bin/vpower usr/bin/vsettings usr/bin/vdisplay usr/bin/vlauncher usr/bin/vsh bin/bash etc/vampire/shellrc etc/vampire/completion.bash etc/init.d/rcS etc/inittab etc/fstab etc/vampire/install.conf boot/vmlinuz boot/grub/grub.cfg; do
+  for required in usr/bin/vfetch usr/bin/vpower usr/bin/vsettings usr/bin/vdisplay usr/bin/vlauncher usr/bin/vsh usr/bin/vssh bin/bash etc/vampire/shellrc etc/vampire/completion.bash etc/init.d/rcS etc/inittab etc/fstab etc/vampire/install.conf boot/vmlinuz boot/grub/grub.cfg; do
     [[ -s "$INSPECT_MOUNT/$required" ]] || die "$mode installed root is missing required file: /$required"
   done
   [[ -x "$INSPECT_MOUNT/usr/bin/vfetch" ]] || die "$mode installed VFetch is not executable"
+  sudo chroot "$INSPECT_MOUNT" /usr/bin/vssh --help > "$WORK/$mode.vssh-help.log" 2>&1 || die "$mode installed SSH onboarding help failed"
+  grep -Fq "vssh authorize USER" "$WORK/$mode.vssh-help.log" || die "$mode installed SSH onboarding help is invalid"
   grep -Fxq "FIRMWARE=$mode" "$INSPECT_MOUNT/etc/vampire/install.conf" || die "$mode installed firmware metadata is incorrect"
   grep -Fq "root=PARTUUID=$root_partuuid" "$INSPECT_MOUNT/boot/grub/grub.cfg" || die "$mode GRUB root PARTUUID does not match the installed partition"
   grep -Fq ' / ext4 ' "$INSPECT_MOUNT/etc/fstab" || die "$mode installed fstab does not mount the root filesystem"

@@ -8,7 +8,7 @@ cp "$ROOT/scripts/test-rootfs-artifact.sh" "$TMP/scripts/"
 base_paths=(
   etc/os-release sbin/init bin/busybox boot/vmlinuz
   usr/lib/vampire/stage-rootfs.py usr/lib/vampire/configure-installed-root.py
-  usr/lib/vampire/session-runtime etc/passwd etc/group etc/shadow
+  usr/lib/vampire/session-runtime usr/bin/vssh etc/passwd etc/group etc/shadow
 )
 desktop_paths=(
   usr/bin/vsettings usr/lib/vampire/settings_apply.py
