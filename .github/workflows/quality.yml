@@ -45,6 +45,7 @@ jobs:
 
       - name: Run safe command regression tests
         run: |
+          bash tests/test-weston-launchers.sh
           bash tests/test-vfetch.sh
           bash tests/test-command-tools.sh
           bash tests/test-vdisplay.sh
@@ -57,6 +58,5 @@ jobs:
           bash tests/test-ssh-tool.sh
           bash tests/test-settings-desktop.sh
           bash tests/test-desktop-graphical-menu.sh
-          bash tests/test-weston-launchers.sh
           bash tests/test-installed-disk-harness.sh
           bash tests/test-post-fakeroot-vampire.sh

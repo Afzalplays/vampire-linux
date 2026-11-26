@@ -19,7 +19,7 @@ MOCK
 chmod +x "$TMP/bin/"*
 
 for app in launcher files settings software monitor; do
-  FOOT_ARGS="$TMP/$app.args" PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vampire-app" "$app"
+  FOOT_ARGS="$TMP/$app.args" PATH="$TMP/bin:$PATH" "$APP_LAUNCHER" "$app"
   case "$app" in
     launcher) grep -Fxq /usr/bin/vlauncher "$TMP/$app.args" ;;
     files) grep -Fxq /usr/bin/vfiles "$TMP/$app.args" ;;
@@ -28,7 +28,7 @@ for app in launcher files settings software monitor; do
     monitor) grep -Fxq /usr/bin/vmonitor "$TMP/$app.args" ;;
   esac
 done
-if PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vampire-app" unknown >/dev/null 2>&1; then
+if PATH="$TMP/bin:$PATH" "$APP_LAUNCHER" unknown >/dev/null 2>&1; then
   echo "Vampire app launcher accepted an unknown app" >&2; exit 1
 fi
 grep -q 'path=/usr/bin/vampire-terminal' "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
