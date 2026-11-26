@@ -79,7 +79,7 @@ verifier and an optional public-key-only SSH service. The Desktop profile also
 includes Wi-Fi scanning/association tools and common Intel iwlwifi firmware;
 the Server profile remains intentionally minimal. The custom Vampire
 compositor shell, native graphical apps and multi-user login are still under
-development.
+development. The current Desktop and Server ISOs target x86_64 PCs/servers and are not phone images. Mobile browser access, an Android device-specific port and iOS companion experience are separate planned work; see [mobile support](docs/MOBILE-SUPPORT.md).
 
 Build the Desktop ISO with `bash build/build-live-iso.sh`; build the Server ISO
 with `VAMPIRE_EDITION=server bash build/build-live-iso.sh`. Each edition has a
