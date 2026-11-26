@@ -10,7 +10,7 @@ grep -q '/var/lib/vampire/ssh/dropbear_ed25519_host_key' "$VSSH"
 grep -q 'authorize vampire' "$VSSH"
 grep -q 'BR2_PACKAGE_DROPBEAR=y' "$ROOT/build/vampire_server_defconfig"
 mkdir -p "$TMP/bin" "$TMP/home/vampire"
-printf 'vampire:x:1000:1000:Vampire User:%s/home/vampire:/bin/sh\n' "$TMP/" > "$TMP/passwd"
+printf 'vampire:x:1000:1000:Vampire User:%s/home/vampire:/bin/sh\n' "$TMP" > "$TMP/passwd"
 
 cat > "$TMP/bin/id" <<'MOCK'
 #!/bin/sh
