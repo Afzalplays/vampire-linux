@@ -1,0 +1,55 @@
+#!/bin/sh
+# Start the graphical desktop only from the dedicated unprivileged local user.
+set -eu
+GRAPHICAL=\${VAMPIRE_GRAPHICAL_CMD:-/usr/bin/vgraphical}
+RUNTIME_BASE=\${VAMPIRE_RUNTIME_BASE:-/run/user}
+error() { printf 'Vampire Desktop session: %s\n' "$*" >&2; }
+case "\${1:-}" in
+  --help|-h)
+    echo "Usage: vdesktop-session [vgraphical options]"
+    echo "  Start the Weston desktop as the unprivileged vampire account on a local VT."
+    exit 0
+    ;;
+esac
+uid=$(id -u)
+username=$(id -un)
+[ "$uid" = 1000 ] && [ "$username" = vampire ] || {
+  error "log in as the unprivileged vampire account; root desktop sessions are not supported."
+  exit 1
+}
+tty_path=$(tty 2>/dev/null || true)
+case "$tty_path" in
+  /dev/tty[0-9]*) ;;
+  *) error "a local Linux virtual terminal is required (not SSH or a serial console)."; exit 1 ;;
+esac
+home=\${HOME:-}
+[ -n "$home" ] && [ -d "$home" ] && [ -w "$home" ] || {
+  error "the vampire home directory is missing or not writable."
+  exit 1
+}
+home_owner=$(stat -c '%u' "$home" 2>/dev/null || echo invalid)
+[ "$home_owner" = "$uid" ] || {
+  error "the home directory must be owned by vampire (uid 1000)."
+  exit 1
+}
+runtime="$RUNTIME_BASE/$uid"
+reject_symlink_path() {
+  path=$1
+  case "$path" in /*) ;; *) path=$PWD/$path ;; esac
+  while [ -n "$path" ] && [ "$path" != "/" ]; do
+    [ ! -L "$path" ] || { error "refusing symlinked runtime path: $path"; return 1; }
+    path=\${path%/*}
+    [ -n "$path" ] || path=/
+  done
+}
+reject_symlink_path "$RUNTIME_BASE" || exit 1
+reject_symlink_path "$runtime" || exit 1
+[ -d "$runtime" ] && [ "$(stat -c '%u' "$runtime" 2>/dev/null || echo invalid)" = "$uid" ] || {
+  error "private runtime directory $runtime is missing or has the wrong owner; check boot session setup."
+  exit 1
+}
+[ "$(stat -c '%a' "$runtime" 2>/dev/null || echo 000)" = 700 ] || {
+  error "private runtime directory $runtime must have mode 0700."
+  exit 1
+}
+exec "$GRAPHICAL" "$@"

@@ -193,7 +193,7 @@ while :; do
     5) if command -v vsh >/dev/null 2>&1; then run_tool vsh; else run_tool "${SHELL:-/bin/sh}"; fi ;;
     6) run_and_pause "$SETTINGS" list ;;
     7) installer_menu ;;
-    8) run_and_pause vgraphical ;;
+    8) run_and_pause vdesktop-session ;;
     9) run_and_pause vpm doctor ;;
     10) run_and_pause vupdate check ;;
     11) run_tool vsoftware ;;

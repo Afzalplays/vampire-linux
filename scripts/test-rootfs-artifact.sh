@@ -79,6 +79,7 @@ if [[ "$EDITION" == desktop ]]; then
     etc/xdg/foot/foot.ini \
     usr/bin/vdesktop \
     usr/bin/vgraphical \
+    usr/bin/vdesktop-session \
     usr/bin/vampire-app \
     usr/bin/vampire-terminal \
     usr/bin/vdisplay \

@@ -7,8 +7,14 @@ clickable launchers for Terminal, Files, Settings and Software Center.
 Weston automatically opens Foot with the branded Vampire Shell as its
 interactive shell.
 
-Run \`vgraphical\` from a local console on a machine with a supported DRM/KMS
-graphics device. This launches the configured Weston session. The preview
+Set a password for the locked desktop account from the root console with
+`passwd vampire`, then log in locally as `vampire` and run
+`vdesktop-session`. This launches the configured Weston session through a
+non-root-only wrapper that verifies the account identity, local virtual
+terminal, home ownership, and private XDG runtime directory before starting
+Weston. The console preview Graphical session action uses this wrapper.
+`vgraphical --check` remains available for diagnostics; direct root launch is
+not the supported interactive desktop path. The preview
 provides a real Wayland terminal and working console applications through
 panel launchers; it is still **not the finished Vampire Desktop**. The
 approved custom Vampire top panel, floating dock, branded window controls,
