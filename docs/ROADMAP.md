@@ -119,6 +119,7 @@ feature release-ready.
 - [x] Discover and mount the installation ISO payload read-only for offline installation.
 - [x] Validate Server edition installation end-to-end on disposable BIOS and UEFI QEMU disks; both installed images reached Vampire init, serial login and DHCP lease (CI run `45596621598`).
 - [ ] Validate Desktop edition installation end-to-end on disposable BIOS and UEFI QEMU disks.
+- [x] Extend the Desktop installed-rootfs gate to reset and validate shipped settings, apply the appearance runtime, and verify generated Weston/Foot configuration before QEMU boot.
 - [ ] Add installed-system command execution checks for VFetch, reboot/shutdown and recovery cleanup.
 - [ ] Add encrypted installation, recovery media, boot repair and tested restore workflow.
 
