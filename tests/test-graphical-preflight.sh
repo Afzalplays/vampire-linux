@@ -46,13 +46,23 @@ uid=$(id -u)
 mkdir -p "$TMP/runtime-real"
 chmod 0700 "$TMP/runtime-real"
 ln -s "$TMP/runtime-real" "$TMP/runtime-link"
-if VAMPIRE_RUNTIME_BASE="$TMP/runtime-link" VAMPIRE_WESTON_BASE="$TMP/etc/xdg/weston/weston.ini" VAMPIRE_FOOT_BASE="$TMP/etc/xdg/foot/foot.ini" VAMPIRE_DRM_DIR="$TMP/dev/dri" PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vgraphical" --check >/dev/null 2>&1; then
+if VAMPIRE_RUNTIME_BASE="$TMP/runtime-link" VAMPIRE_WESTON_BASE="$TMP/etc/xdg/weston/weston.ini" VAMPIRE_FOOT_BASE="$TMP/etc/xdg/foot/foot.ini" VAMPIRE_DRM_DIR="$TMP/dev/dri" PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vgraphical" --check >"$TMP/runtime-base.out" 2>&1; then
   echo "vgraphical accepted a symlinked runtime base" >&2
   exit 1
 fi
+grep -q "refusing symlinked session runtime path" "$TMP/runtime-base.out" || {
+  echo "runtime-base symlink test failed for an unexpected reason" >&2
+  cat "$TMP/runtime-base.out" >&2
+  exit 1
+}
 ln -s "$TMP/runtime-real" "$TMP/runtime-real/$uid"
-if VAMPIRE_RUNTIME_BASE="$TMP/runtime-real" VAMPIRE_WESTON_BASE="$TMP/etc/xdg/weston/weston.ini" VAMPIRE_FOOT_BASE="$TMP/etc/xdg/foot/foot.ini" VAMPIRE_DRM_DIR="$TMP/dev/dri" PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vgraphical" --check >/dev/null 2>&1; then
+if VAMPIRE_RUNTIME_BASE="$TMP/runtime-real" VAMPIRE_WESTON_BASE="$TMP/etc/xdg/weston/weston.ini" VAMPIRE_FOOT_BASE="$TMP/etc/xdg/foot/foot.ini" VAMPIRE_DRM_DIR="$TMP/dev/dri" PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vgraphical" --check >"$TMP/runtime-user.out" 2>&1; then
   echo "vgraphical accepted a symlinked user runtime directory" >&2
   exit 1
 fi
+grep -q "refusing symlinked session runtime path" "$TMP/runtime-user.out" || {
+  echo "per-user runtime symlink test failed for an unexpected reason" >&2
+  cat "$TMP/runtime-user.out" >&2
+  exit 1
+}
 echo "Vampire graphical-session preflight tests passed."
