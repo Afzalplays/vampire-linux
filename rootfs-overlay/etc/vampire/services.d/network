@@ -1,7 +1,24 @@
 #!/bin/sh
 case "${1:-}" in
- start) exec /usr/bin/vnetwork start ;;
- stop) exec /usr/bin/vnetwork stop ;;
- status) exec /usr/bin/vnetwork status ;;
- *) echo "Usage: network {start|stop|status}" >&2; exit 2 ;;
+  start)
+    sys_net=${VAMPIRE_SYS_NET:-/sys/class/net}
+    wired=false
+    for path in "$sys_net"/*; do
+      [ -e "$path" ] || continue
+      iface=${path##*/}
+      [ "$iface" = lo ] && continue
+      if [ ! -d "$path/wireless" ] && [ ! -e "$path/phy80211" ]; then
+        wired=true
+        break
+      fi
+    done
+    if [ "$wired" != true ]; then
+      echo "network service: no wired interface; saved Wi-Fi is handled by the optional wifi service"
+      exit 0
+    fi
+    exec /usr/bin/vnetwork start
+    ;;
+  stop) exec /usr/bin/vnetwork stop ;;
+  status) exec /usr/bin/vnetwork status ;;
+  *) echo "Usage: network {start|stop|status}" >&2; exit 2 ;;
 esac
