@@ -16,6 +16,18 @@ valid_iface() {
   case "$1" in ''|*[!A-Za-z0-9_.-]*) return 1 ;; esac
   [ "${#1}" -le 15 ]
 }
+reject_symlink_path() {
+  path=$1
+  case "$path" in /*) ;; *) path=$PWD/$path ;; esac
+  while [ -n "$path" ] && [ "$path" != "/" ]; do
+    [ ! -L "$path" ] || {
+      echo "vnetwork: refusing symlinked Wi-Fi profile path: $path" >&2
+      return 1
+    }
+    path=${path%/*}
+    [ -n "$path" ] || path=/
+  done
+}
 find_iface() {
   for path in "$SYS_NET"/*; do
     [ -e "$path" ] || continue
@@ -133,8 +145,11 @@ wifi_connect() {
     echo "vnetwork: WPA passphrases must contain 8–63 characters" >&2
     return 2
   }
+  reject_symlink_path "$WIFI_CONFIG_DIR" || return 1
   mkdir -p "$WIFI_CONFIG_DIR" "$WIFI_RUN_DIR" "$WPA_CTRL_DIR" "$RUN_DIR"
+  reject_symlink_path "$WIFI_CONFIG_DIR" || return 1
   config="$WIFI_CONFIG_DIR/wpa_supplicant-$iface.conf"
+  reject_symlink_path "$config" || return 1
   network_tmp=$(mktemp "$config.network.XXXXXX")
   config_tmp=$(mktemp "$config.tmp.XXXXXX")
   trap 'rm -f "$network_tmp" "$config_tmp"' 0 HUP INT TERM
@@ -183,13 +198,13 @@ wifi_auto() {
   command -v wpa_supplicant >/dev/null 2>&1 || { echo "vnetwork: wpa_supplicant is not installed" >&2; return 127; }
   command -v wpa_cli >/dev/null 2>&1 || { echo "vnetwork: wpa_cli is not installed" >&2; return 127; }
   command -v udhcpc >/dev/null 2>&1 || { echo "vnetwork: udhcpc is not installed" >&2; return 127; }
-  [ ! -L "$WIFI_CONFIG_DIR" ] || { echo "vnetwork: refusing symlinked Wi-Fi profile directory" >&2; return 1; }
+  reject_symlink_path "$WIFI_CONFIG_DIR" || return 1
   found=0
   result=0
   for config in "$WIFI_CONFIG_DIR"/wpa_supplicant-*.conf; do
     [ -e "$config" ] || continue
     found=1
-    [ ! -L "$config" ] && [ -f "$config" ] || {
+    reject_symlink_path "$config" || {
       echo "vnetwork: refusing unsafe Wi-Fi profile: $config" >&2
       result=1
       continue
