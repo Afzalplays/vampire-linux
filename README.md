@@ -89,9 +89,7 @@ separate Buildroot output directory and ISO filename. CI build checks exercise t
 `12cc6d99ed4ab8dffa7a82441f2fc52b5dba82a8`, both Desktop and Server ISO builds
 completed and passed QEMU SeaBIOS and OVMF CODE/VARS live-init plus serial-login
 smoke tests (workflow runs `43246672356` and `43246672369`). Checksum-bearing
-developer ISO artifacts were uploaded by those runs. This is virtual firmware
-smoke-test evidence only; physical-machine installation, post-install reboot,
-and hardware compatibility remain unverified. See
+developer ISO artifacts were uploaded by those runs. This is historical virtual-firmware smoke-test evidence, not proof that the current main commit has produced a new release image. The current main revision (`76a599b`) has passing quality/build checks; its Desktop and Server ISO workflows are awaiting GitHub-hosted runner assignment, with no build jobs or artifacts yet. Physical-machine installation and hardware compatibility remain unverified. See
 [the live ISO build guide](build/README.md) and
 [the QEMU boot-test guide](docs/QEMU-BOOT-TESTS.md).
 
