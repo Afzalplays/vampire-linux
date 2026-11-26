@@ -22,6 +22,11 @@ manager. Audio, touchpads, multi-monitor support and GPU compatibility are not
 certified. Boot remains console-first; if Weston cannot acquire DRM/VT, return
 to the text console.
 
+The graphical preflight rejects symlinks in every component of the XDG runtime
+path before checking device access; regression tests cover symlinked runtime
+roots, per-user directories and their ancestors. This protects session setup
+from redirected runtime paths but does not replace a display manager.
+
 A release desktop still needs a dedicated Vampire shell, non-root session
 management, display manager, audio/network settings, accessibility, window
 management integration and hardware validation.
