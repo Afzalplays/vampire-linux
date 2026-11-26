@@ -83,6 +83,7 @@ feature release-ready.
 - [ ] Build graphical file manager, terminal and settings applications.
 - [x] Add read-only DRM connector and advertised-mode inventory (`vdisplay`) with fake-sysfs regression coverage; current active mode and display control remain unsupported.
 - [x] Add a validated JSON output mode to `vdisplay` for future desktop settings clients, with connected/disconnected, mode-filtering and empty-inventory regression tests.
+- [x] Execute installed `vdisplay --json` in the Desktop rootfs chroot and parse its empty-inventory response before BIOS/UEFI disk boot.
 - [ ] Add adaptive display scaling plus display, network, sound, power and personalization controls.
 - [ ] Validate audio, Bluetooth, printing, touchpads, multi-monitor and accessibility.
 - [ ] Implement Voice Access with confirmation-gated destructive actions.
