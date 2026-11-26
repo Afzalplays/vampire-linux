@@ -94,7 +94,7 @@ run_boot() {
   local root_partuuid
   root_partuuid="$(sudo blkid -s PARTUUID -o value "${loop}p2")"
   [[ -n "$root_partuuid" ]] || die "$mode installed root partition has no PARTUUID"
-  for required in usr/bin/vfetch usr/bin/vpower usr/bin/vsettings usr/bin/vsh usr/bin/vampire-app usr/bin/vampire-terminal etc/init.d/rcS etc/inittab etc/fstab etc/vampire/install.conf boot/vmlinuz boot/grub/grub.cfg; do
+  for required in usr/bin/vfetch usr/bin/vpower usr/bin/vsettings etc/init.d/rcS etc/inittab etc/fstab etc/vampire/install.conf boot/vmlinuz boot/grub/grub.cfg; do
     [[ -s "$INSPECT_MOUNT/$required" ]] || die "$mode installed root is missing required file: /$required"
   done
   [[ -x "$INSPECT_MOUNT/usr/bin/vfetch" ]] || die "$mode installed VFetch is not executable"
@@ -102,7 +102,7 @@ run_boot() {
   grep -Fq "root=PARTUUID=$root_partuuid" "$INSPECT_MOUNT/boot/grub/grub.cfg" || die "$mode GRUB root PARTUUID does not match the installed partition"
   grep -Fq ' / ext4 ' "$INSPECT_MOUNT/etc/fstab" || die "$mode installed fstab does not mount the root filesystem"
   if [[ "$EDITION" == desktop ]]; then
-    for required in usr/bin/vdesktop usr/bin/vgraphical usr/bin/vampire-terminal usr/lib/vampire/settings_apply.py etc/xdg/weston/weston.ini etc/xdg/foot/foot.ini; do
+    for required in usr/bin/vdesktop usr/bin/vgraphical usr/bin/vampire-app usr/bin/vsh usr/bin/vampire-terminal usr/lib/vampire/settings_apply.py etc/xdg/weston/weston.ini etc/xdg/foot/foot.ini; do
       [[ -s "$INSPECT_MOUNT/$required" ]] || die "$mode Desktop install is missing /$required"
     done
     grep -Fxq 'alpha=0.90' "$INSPECT_MOUNT/etc/xdg/foot/foot.ini" || die "$mode installed Desktop terminal transparency default is incorrect"
