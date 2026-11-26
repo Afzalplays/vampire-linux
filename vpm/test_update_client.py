@@ -166,4 +166,5 @@ class UpdateManifestTests(unittest.TestCase):
             with patch.object(vupdate, "CACHE", link):
                 with self.assertRaises(SystemExit):
                     vupdate.command_status(None)
-\nif __name__=="__main__": unittest.main()
+
+if __name__=="__main__": unittest.main()
