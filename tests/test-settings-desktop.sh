@@ -215,6 +215,7 @@ chmod +x "$TMP/mockbin/vnetwork"
 export VNETWORK_TEST_LOG="$TMP/network-menu.log"
 printf '3\n7\n\n0\n0\n' | VAMPIRE_NETWORK_CMD="$TMP/mockbin/vnetwork" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/network-menu.out"
 grep -qx 'vnetwork wifi auto' "$VNETWORK_TEST_LOG"
+test "$(grep -Fc '7) Reconnect saved Wi-Fi profile' "$TMP/network-menu.out")" -eq 1
 grep -q '7) Reconnect saved Wi-Fi profile' "$TMP/network-menu.out"
 
 echo "Vampire settings, Desktop preference menu, service/power controls, log/monitor dispatch, Vampire Shell dispatch and monitor tests passed."
