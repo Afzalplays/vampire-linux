@@ -1,8 +1,8 @@
 #!/bin/sh
 # Vampire Launcher — searchable application catalog and tested app dispatcher.
 set -eu
-APP=\${VAMPIRE_APP_CMD:-/usr/bin/vampire-app}
-TERMINAL=\${VAMPIRE_TERMINAL_CMD:-/usr/bin/vampire-terminal}
+APP=${VAMPIRE_APP_CMD:-/usr/bin/vampire-app}
+TERMINAL=${VAMPIRE_TERMINAL_CMD:-/usr/bin/vampire-terminal}
 usage() {
   printf 'Usage: vlauncher [--list|--search TEXT|--launch APP-ID|--help]\n'
 }
@@ -21,7 +21,7 @@ launch_app() {
     *) printf 'Vampire Launcher: unknown application ID: %s\n' "$1" >&2; return 1 ;;
   esac
 }
-case "\${1:-}" in
+case "${1:-}" in
   --help|-h) usage; exit 0 ;;
   --list)
     [ "$#" -eq 1 ] || { usage >&2; exit 2; }
