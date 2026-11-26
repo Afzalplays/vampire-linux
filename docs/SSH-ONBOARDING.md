@@ -48,7 +48,7 @@ through `vssh connect vampire@SERVER_IP`.
 The host key survives reboot only when `/var` is on persistent storage. The
 live initramfs uses temporary storage, so its host key changes after reboot.
 Regression tests now verify that repeated daemon starts reuse the same host
-key and reject symlinked host-key path ancestors. Installed-system host-key
+key and reject symlinked home-directory and host-key path ancestors. Installed-system host-key
 persistence across an actual reboot still requires end-to-end validation.
 This is a development-stage opt-in service, not a production server-management
 stack. Do not expose the live image to an untrusted network.
