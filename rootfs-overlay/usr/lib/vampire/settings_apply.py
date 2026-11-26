@@ -144,6 +144,13 @@ def main() -> None:
     atomic_write(output_weston, weston_text)
     atomic_write(config_home / "foot" / "foot.ini", foot_text)
     print("Vampire Desktop appearance applied for the next graphical session.")
+    applied = {
+        "theme", "accent", "surface_transparency", "terminal_opacity",
+        "top_panel", "reduced_motion",
+    }
+    pending = sorted(set(values) - applied)
+    if pending:
+        print("Stored but not applied by this desktop build: " + ", ".join(pending))
 
 if __name__ == "__main__":
     main()
