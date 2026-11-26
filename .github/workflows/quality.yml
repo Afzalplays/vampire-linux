@@ -54,6 +54,7 @@ jobs:
           bash tests/test-graphical-preflight.sh
           bash tests/test-vampire-shell.sh
           bash tests/test-vampire-completion.sh
+          bash tests/test-ssh-tool.sh
           bash tests/test-settings-desktop.sh
           bash tests/test-desktop-graphical-menu.sh
           bash tests/test-weston-launchers.sh
