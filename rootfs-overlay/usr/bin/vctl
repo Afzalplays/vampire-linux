@@ -8,9 +8,9 @@ service_path() {
   valid_name "$1" || { echo "vctl: invalid service name: $1" >&2; return 2; }
   [ ! -L "$DIR" ] || { echo "vctl: refusing symlinked service directory: $DIR" >&2; return 1; }
   [ ! -L "$DIR/$1" ] || { echo "vctl: refusing symlinked service entry: $1" >&2; return 1; }
-  [ -f "$DIR/$1" ] && [ -x "$DIR/$1" ] || { echo "vctl: service not found: $1" >&2; return 1; }
+  [ -f "$DIR/$1" ] && [ -r "$DIR/$1" ] || { echo "vctl: service not found: $1" >&2; return 1; }
 }
-run_service() { svc_name=$1 svc_action=$2; service_path "$svc_name" || return $?; "$DIR/$svc_name" "$svc_action"; }
+run_service() { svc_name=$1 svc_action=$2; service_path "$svc_name" || return $?; sh "$DIR/$svc_name" "$svc_action"; }
 is_enabled() { [ -f "$ENABLED" ] && grep -Fxq "$1" "$ENABLED"; }
 set_enabled() {
   name=$1 mode=$2
@@ -44,7 +44,7 @@ case "$action" in
     [ "$#" -eq 1 ] || usage
     found=0
     for service in "$DIR"/*; do
-      [ -f "$service" ] && [ -x "$service" ] || continue
+      [ -f "$service" ] && [ -r "$service" ] || continue
       found=1; name=${service##*/}
       if is_enabled "$name"; then printf '* %s (enabled)\n' "$name"; else printf '  %s (disabled)\n' "$name"; fi
     done
