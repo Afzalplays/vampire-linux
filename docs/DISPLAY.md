@@ -48,3 +48,7 @@ catalog entries so the user can choose an exact ID or name.
 This is a keyboard-driven application catalog hosted in the terminal. It is
 not yet a native graphical launcher, floating dock, or replacement for the
 Weston desktop shell.
+The launcher also exposes `vlauncher --json`, a stable machine-readable
+catalog containing each app's `id`, `name`, `description`, and `category`.
+This is intended as an integration boundary for a future graphical launcher;
+it does not itself provide graphical UI.
