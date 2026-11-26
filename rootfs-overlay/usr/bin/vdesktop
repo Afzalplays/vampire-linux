@@ -6,6 +6,7 @@ FETCH=${VAMPIRE_FETCH_CMD:-vfetch}
 NETWORK=${VAMPIRE_NETWORK_CMD:-vnetwork}
 INSTALLER=${VAMPIRE_INSTALLER_CMD:-vinstall}
 SERVICE=${VAMPIRE_SERVICE_CMD:-vctl}
+LAUNCHER=${VAMPIRE_LAUNCHER_CMD:-vlauncher}
 pause() { printf '\nPress Enter to continue...'; IFS= read -r _ || true; }
 run_tool() { if "$@"; then :; else status=$?; printf "Command failed (exit %s).\n" "$status"; fi; }
 run_and_pause() { run_tool "$@"; pause; }
@@ -183,7 +184,7 @@ case "${1:-}" in
 esac
 while :; do
   printf '\n  V A M P I R E  O S\n  Vampire Desktop — Console Preview\n  -------------------------------\n'
-  printf '  1) System information\n  2) Appearance and desktop settings\n  3) Network settings\n  4) System monitor\n  5) Open Vampire Shell\n  6) Show all settings\n  7) Installer (disk installation)\n  8) Graphical session (Weston preview)\n  9) VPM package manager diagnostics\n  10) Signed OS update check\n  11) Vampire Software Center (console)\n  12) SSH service status (opt-in)\n  13) Vampire Files (console)\n  14) Hardware inventory\n  15) System health check\n  16) Generate support snapshot\n  17) Firewall status (read-only)\n  18) Command reference\n  19) Recent system logs\n  20) Follow live logs\n  21) Live system monitor (Ctrl+C to return)\n  22) Power controls\n  23) Service manager\n  24) Graphical session preflight (no launch)\n  0) Exit launcher\n  Select: '
+  printf '  1) System information\n  2) Appearance and desktop settings\n  3) Network settings\n  4) System monitor\n  5) Open Vampire Shell\n  6) Show all settings\n  7) Installer (disk installation)\n  8) Graphical session (Weston preview)\n  9) VPM package manager diagnostics\n  10) Signed OS update check\n  11) Vampire Software Center (console)\n  12) SSH service status (opt-in)\n  13) Vampire Files (console)\n  14) Hardware inventory\n  15) System health check\n  16) Generate support snapshot\n  17) Firewall status (read-only)\n  18) Command reference\n  19) Recent system logs\n  20) Follow live logs\n  21) Live system monitor (Ctrl+C to return)\n  22) Power controls\n  23) Service manager\n  24) Graphical session preflight (no launch)\n  25) Vampire Launcher (search and open apps)\\n  0) Exit launcher\n  Select: '
   IFS= read -r choice || exit 0
   case "$choice" in
     1) run_and_pause "$FETCH" ;;
@@ -211,6 +212,7 @@ while :; do
     23) services_menu ;;
 
     24) run_and_pause vgraphical --check ;;
+    25) run_and_pause "$LAUNCHER" ;;
     0) exit 0 ;;
     *) echo "Invalid choice." ;;
   esac

@@ -56,7 +56,8 @@ grep -q terminal "$TMP/terminal.args"
 if VAMPIRE_APP_CMD="$TMP/bin/app" sh "$LAUNCHER" --launch nonexistent >/dev/null 2>&1; then
   echo "Vampire Launcher dispatched an unknown app" >&2; exit 1
 fi
-printf 'files\n0\n' | APP_ARGS="$TMP/menu.args" VAMPIRE_APP_CMD="$TMP/bin/app" sh "$LAUNCHER" > "$TMP/menu.out"
+printf 'file\nfiles\n0\n' | APP_ARGS="$TMP/menu.args" VAMPIRE_APP_CMD="$TMP/bin/app" sh "$LAUNCHER" > "$TMP/menu.out"
 grep -q 'Enter an application ID to launch' "$TMP/menu.out"
+grep -q "files|Files|Browse and manage files" "$TMP/menu.out"
 grep -Fxq files "$TMP/menu.args"
 echo "Vampire Weston desktop launcher tests passed."

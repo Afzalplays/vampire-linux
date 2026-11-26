@@ -34,6 +34,13 @@ for arg do printf ' <%s>' "$arg" >> "$VAMPIRE_TEST_LOG"; done
 printf '\\n' >> "$VAMPIRE_TEST_LOG"
 exit 0
 STUB
+cat > "$tmp/vlauncher" <<'STUB'
+#!/bin/sh
+printf 'vlauncher' >> "$VAMPIRE_TEST_LOG"
+for arg do printf ' <%s>' "$arg" >> "$VAMPIRE_TEST_LOG"; done
+printf '\\\\n' >> "$VAMPIRE_TEST_LOG"
+exit 0
+STUB
 cat > "$tmp/vpower" <<'STUB'
 #!/bin/sh
 printf 'vpower' >> "$VAMPIRE_TEST_LOG"
@@ -65,6 +72,7 @@ run_case 3 '3\n1\n0\n0\n'
 run_case 7 '7\n\n0\n0\n'
 run_case 22 '22\n1\n0\n0\n'
 run_case 23 '23\n1\n0\n0\n'
+run_case 25 '25\n\n0\n'
 grep -Fq 'vnetwork <status>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: network status action was not dispatched' >&2; exit 1; }
 grep -Fq 'vinstall <requirements>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: installer requirements action was not dispatched' >&2; exit 1; }
 grep -Fq 'vinstall <system-check>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: installer system check was not dispatched' >&2; exit 1; }
@@ -72,5 +80,6 @@ grep -Fq 'vinstall <list>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: installer disk l
 grep -Fq 'vsettings <set> <theme> <dark>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: appearance setting was not saved' >&2; exit 1; }
 grep -Fq 'vsettings <apply>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: appearance changes were not applied' >&2; exit 1; }
 grep -Fq 'vctl <list>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: service list action was not dispatched' >&2; exit 1; }
+grep -Fq 'vlauncher' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: Vampire Launcher was not dispatched from the main menu' >&2; exit 1; }
 grep -Fq 'vpower <status>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: power status action was not dispatched' >&2; exit 1; }
 echo 'PASS: Vampire Desktop submenu navigation and command dispatch regression tests'
