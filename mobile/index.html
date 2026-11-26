@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#100d12">
+  <meta name="description" content="Vampire OS — project portal, editions, documentation and release information.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Vampire OS">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icon.svg">
+  <link rel="stylesheet" href="./styles.css">
+  <title>Vampire OS</title>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#home" aria-label="Vampire OS home"><span class="brand-mark">V</span><span>VAMPIRE <small>OPERATING SYSTEM</small></span></a>
+    <a class="github" href="https://github.com/Afzalplays/vampire-linux" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
+  </header>
+  <main id="home">
+    <section class="hero">
+      <p class="eyebrow">INDEPENDENT • OPEN SOURCE • EXPERIMENTAL</p>
+      <h1>Your system.<br><span>Your rules.</span></h1>
+      <p class="intro">A lightweight Linux distribution in development, with Desktop and Server editions—and a mobile-friendly companion portal.</p>
+      <div class="actions">
+        <a class="button primary" href="https://github.com/Afzalplays/vampire-linux/releases" target="_blank" rel="noopener noreferrer">View releases</a>
+        <a class="button secondary" href="https://github.com/Afzalplays/vampire-linux/blob/main/docs/MOBILE-SUPPORT.md" target="_blank" rel="noopener noreferrer">Mobile support</a>
+      </div>
+      <p class="notice"><strong>Compatibility:</strong> Current Desktop and Server ISO images target x86_64 PCs and servers. They are not installable phone images.</p>
+    </section>
+    <section class="section" aria-labelledby="editions-title">
+      <div class="section-heading"><p class="eyebrow">CHOOSE YOUR PLATFORM</p><h2 id="editions-title">Editions & access</h2></div>
+      <div class="cards">
+        <article class="card"><span class="card-icon">▰</span><h3>Desktop</h3><p>Graphical Linux environment for compatible x86_64 computers.</p><span class="tag">PC • x86_64</span></article>
+        <article class="card"><span class="card-icon">⌘</span><h3>Server</h3><p>Console-first system profile for compatible x86_64 servers.</p><span class="tag">SERVER • x86_64</span></article>
+        <article class="card"><span class="card-icon">✦</span><h3>Mobile portal</h3><p>Install this companion on a phone for project links and offline help.</p><span class="tag available">ANDROID • iOS BROWSER</span></article>
+      </div>
+    </section>
+    <section class="section install" aria-labelledby="install-title">
+      <p class="eyebrow">TAKE IT WITH YOU</p><h2 id="install-title">Add to your Home Screen</h2>
+      <p class="muted">Use the browser menu to install or add Vampire OS. The portal shell and help page can remain available offline after the first successful visit.</p>
+      <div class="install-grid">
+        <div><h3>Android</h3><p>Open this page in a supported browser, then choose <strong>Install app</strong> or <strong>Add to Home screen</strong>.</p></div>
+        <div><h3>iPhone / iPad</h3><p>Open in Safari, tap <strong>Share</strong>, then <strong>Add to Home Screen</strong>.</p></div>
+      </div>
+      <button class="button secondary" id="install-button" type="button" hidden>Install app</button>
+      <p id="install-status" class="small" role="status" aria-live="polite"></p>
+    </section>
+    <section class="section links">
+      <div><p class="eyebrow">PROJECT RESOURCES</p><h2>Explore Vampire OS</h2></div>
+      <a href="https://github.com/Afzalplays/vampire-linux/blob/main/docs/ROADMAP.md" target="_blank" rel="noopener noreferrer">Development roadmap ↗</a>
+      <a href="https://github.com/Afzalplays/vampire-linux/blob/main/docs/MOBILE-SUPPORT.md" target="_blank" rel="noopener noreferrer">Android & iOS support plan ↗</a>
+      <a href="https://github.com/Afzalplays/vampire-linux/issues" target="_blank" rel="noopener noreferrer">Report an issue ↗</a>
+      <a href="https://github.com/Afzalplays/vampire-linux/releases" target="_blank" rel="noopener noreferrer">Downloads & checksums ↗</a>
+    </section>
+  </main>
+  <footer><span>© Vampire OS Project</span><span>Built for freedom. Designed to adapt.</span></footer>
+  <script src="./app.js" defer></script>
+</body>
+</html>
