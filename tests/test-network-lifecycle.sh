@@ -52,6 +52,23 @@ if PATH="$TMP/bin:$PATH" interface=test0 ip='192.0.2.999' subnet=255.255.255.0 s
   echo "DHCP hook accepted an invalid IPv4 address" >&2; exit 1
 fi
 
+# Exercise every legal contiguous IPv4 prefix length, including /0 and /32.
+for prefix in $(seq 0 32); do
+  remaining=$prefix
+  mask=
+  for octet in 1 2 3 4; do
+    if [ "$remaining" -ge 8 ]; then value=255
+    elif [ "$remaining" -le 0 ]; then value=0
+    else value=$((256 - (1 << (8 - remaining))))
+    fi
+    remaining=$((remaining - 8))
+    if [ "$octet" -eq 1 ]; then mask=$value; else mask="$mask.$value"; fi
+  done
+  if ! PATH="$TMP/bin:$PATH" interface=test0 ip=192.0.2.25 subnet="$mask" sh "$VAMPIRE_DHCP_HOOK" bound >/dev/null 2>&1; then
+    echo "DHCP hook rejected valid IPv4 subnet prefix /$prefix ($mask)" >&2; exit 1
+  fi
+done
+
 # A subnet mask must be a contiguous prefix, not merely four in-range octets.
 before_calls="$(wc -l < "$NETWORK_CALLS")"
 for invalid_mask in 255.0.255.0 255.255.255.1 255.255.255.256; do
