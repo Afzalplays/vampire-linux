@@ -16,9 +16,9 @@ case "${1:-}" in
       echo "network service: no wired interface; saved Wi-Fi is handled by the optional wifi service"
       exit 0
     fi
-    exec /usr/bin/vnetwork start
+    exec "${VAMPIRE_NETWORK_CMD:-/usr/bin/vnetwork}" start
     ;;
-  stop) exec /usr/bin/vnetwork stop ;;
-  status) exec /usr/bin/vnetwork status ;;
+  stop) exec "${VAMPIRE_NETWORK_CMD:-/usr/bin/vnetwork}" stop ;;
+  status) exec "${VAMPIRE_NETWORK_CMD:-/usr/bin/vnetwork}" status ;;
   *) echo "Usage: network {start|stop|status}" >&2; exit 2 ;;
 esac
