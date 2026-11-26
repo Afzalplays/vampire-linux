@@ -18,4 +18,4 @@ Publish the `mobile/` directory on an HTTPS static host. GitHub Pages can publis
 
 ## Scope and safety
 
-This is not a native Android build, iOS application, or phone-bootable OS image. The service worker caches only same-origin GET assets for the static portal. It does not cache credentials or privileged API responses. Review the compatibility and platform limits in [Mobile Support](../docs/MOBILE-SUPPORT.md).
+This is not a native Android build, iOS application, or phone-bootable OS image. The service worker caches only an explicit allowlist of same-origin static GET assets (HTML, CSS, JavaScript, manifest and icon). Requests with query strings, other paths, non-GET methods and external origins are not intercepted. It does not cache credentials or privileged API responses. Review the compatibility and platform limits in [Mobile Support](../docs/MOBILE-SUPPORT.md).
