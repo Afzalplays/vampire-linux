@@ -31,7 +31,7 @@ echo "Vampire Shell launcher tests passed."
 # Exercise the real interactive profile and ensure programmable completion is
 # loaded only in interactive mode, not merely present as an unreferenced file.
 cp "$ROOT/rootfs-overlay/etc/vampire/completion.bash" "$TMP/completion.bash"
-printf 'complete -p vpower\\nexit\\n' | \
+printf 'complete -p vpower\nexit\n' | \
   VAMPIRE_COMPLETION_FILE="$TMP/completion.bash" \
   VAMPIRE_HISTORY_FILE="$TMP/history" \
   bash --noprofile --rcfile "$TMP/etc/vampire/shellrc" -i >"$TMP/interactive.log" 2>&1
