@@ -71,6 +71,7 @@ case "$1" in
   keys) [ "$#" -eq 1 ] || usage; printf '%s\n' $KEYS ;;
   list)
     [ "$#" -eq 1 ] || usage
+    reject_config_symlink || exit 1
     for key in $KEYS; do
       value=$(read_value "$key" 2>/dev/null || awk -F= -v k="$key" '$1==k {print $2}' "$DEFAULTS" 2>/dev/null || true)
       printf '%-22s %s\n' "$key" "${value:-unset}"
@@ -79,6 +80,7 @@ case "$1" in
   get)
     [ "$#" -eq 2 ] || usage
     valid_key "$2" || { echo "vsettings: unknown setting: $2" >&2; exit 1; }
+    reject_config_symlink || exit 1
     read_value "$2"
     ;;
   set)
@@ -111,10 +113,12 @@ case "$1" in
     ;;
   validate)
     [ "$#" -eq 1 ] || usage
+    reject_config_symlink || exit 1
     validate_file
     ;;
   apply)
     [ "$#" -eq 1 ] || usage
+    reject_config_symlink || exit 1
     validate_file >/dev/null
     APPLY_SCRIPT=${VAMPIRE_SETTINGS_APPLY:-/usr/lib/vampire/settings_apply.py}
     exec python3 "$APPLY_SCRIPT"
