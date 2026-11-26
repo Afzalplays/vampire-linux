@@ -80,7 +80,7 @@ if [[ "$EDITION" == desktop ]]; then
     usr/bin/vdesktop \
     usr/bin/vgraphical \
     usr/bin/vampire-app \
-    usr/bin/vampire-terminal; do
+    usr/bin/vampire-terminal \\\n    usr/bin/vdisplay; do
     grep -Eq "(^|/)${required}$" <<<"$rootfs_listing" || {
       echo "ERROR: Desktop installer rootfs is missing required Desktop runtime path: $required" >&2
       exit 1
