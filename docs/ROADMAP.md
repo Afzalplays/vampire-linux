@@ -45,6 +45,7 @@ feature release-ready.
 - [ ] Establish reproducible builds and build provenance.
 - [x] Build a dedicated x86_64 musl-based Buildroot toolchain and stable live filesystem layout.
 - [x] Add the Vampire Shell branded Bash-compatible launcher and interactive profile.
+- [x] Add static programmable completion for Vampire power, settings, networking, services, VPM, installer, display and launcher commands; regression-test nested settings and Wi-Fi actions.
 - [ ] Replace the Bash compatibility engine with a dedicated Vampire Shell parser/runtime.
 - [ ] Implement a production Vampire Init supervisor.
 - [ ] Implement users, groups, permissions, logging and device management.

@@ -17,6 +17,18 @@ configures bounded command history, and applies a crimson prompt in interactive
 sessions. The shell profile is automatically included in both live-image
 editions through the root filesystem overlay.
 
+## Programmable command completion
+
+Interactive sessions load a static Bash completion profile for Vampire OS tools.
+It completes common subcommands for power, settings, networking, services,
+VPM, installation, display diagnostics and the application launcher. Nested
+Wi-Fi actions and settings keys are included. Completion uses static candidates
+and does not execute partially typed commands. Non-interactive `vsh -c`
+commands do not load the interactive completion profile.
+
+Run `bash tests/test-vampire-completion.sh` to exercise completion candidates
+and registration in a clean Bash process.
+
 ## Execution engine and limitations
 
 Bash remains the command execution engine in this milestone. Existing POSIX
