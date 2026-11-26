@@ -94,7 +94,7 @@ test ! -e "$TMP/real-var/lib"
 # A symlink in an ancestor of the account home must also be rejected.
 mkdir -p "$TMP/real-home/vampire"
 ln -s "$TMP/real-home" "$TMP/home-parent-link"
-printf 'vampire:x:1000:1000:Vampire User:%s/home-parent-link/vampire:/bin/sh\\n' "$TMP" > "$TMP/passwd-parent-link"
+printf 'vampire:x:1000:1000:Vampire User:%s/home-parent-link/vampire:/bin/sh\n' "$TMP" > "$TMP/passwd-parent-link"
 if VAMPIRE_PASSWD_FILE="$TMP/passwd-parent-link" VAMPIRE_HOME_ROOT="$TMP/home-parent-link" "$VSSH" authorize vampire "$PUBKEY" >/dev/null 2>&1; then
   echo "vssh followed a symlinked home-directory ancestor" >&2; exit 1
 fi
