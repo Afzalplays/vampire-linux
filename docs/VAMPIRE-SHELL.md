@@ -28,6 +28,8 @@ commands do not load the interactive completion profile.
 
 Run `bash tests/test-vampire-completion.sh` to exercise completion candidates
 and registration in a clean Bash process.
+Installed-image validation also runs `vsh` interactively inside the mounted rootfs and checks that `vpower` completion is registered. This verifies the profile is actually wired into the installed shell, not merely present in the source tree.
+
 
 ## Execution engine and limitations
 
