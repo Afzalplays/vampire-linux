@@ -33,6 +33,9 @@ find_iface() {
     [ -e "$path" ] || continue
     candidate=${path##*/}
     [ "$candidate" = lo ] && continue
+    # Keep generic DHCP startup on wired links; saved Wi-Fi is associated
+    # separately by the opt-in Wi-Fi service.
+    if [ -d "$path/wireless" ] || [ -e "$path/phy80211" ]; then continue; fi
     printf '%s\n' "$candidate"
     return 0
   done
