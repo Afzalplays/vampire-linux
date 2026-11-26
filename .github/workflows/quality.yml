@@ -29,6 +29,14 @@ jobs:
       - name: Validate Python syntax
         run: python -m compileall -q scripts tests vpm fetch rootfs-overlay/usr/lib/vampire
 
+      - name: Validate mobile portal JavaScript
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check mobile portal JavaScript syntax
+        run: node --check mobile/app.js && node --check mobile/sw.js
+
       - name: Validate shell syntax
         shell: bash
         run: |
