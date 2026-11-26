@@ -34,7 +34,7 @@ exit 1
 MOCK
 cat > "$TMP/bin/vgraphical" <<'MOCK'
 #!/bin/sh
-printf '%s\\n' "$@" > "$VGRAPHICAL_ARGS"
+printf '%s\n' "$@" > "$VGRAPHICAL_ARGS"
 MOCK
 chmod +x "$TMP/bin/"*
 SCRIPT="$ROOT/rootfs-overlay/usr/bin/vdesktop-session"
