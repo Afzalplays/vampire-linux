@@ -80,6 +80,17 @@ printf 'correcthorsebatterystaple\n' | PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-ov
 CONFIG="$TMP/etc/vampire/wpa_supplicant-wlan0.conf"
 test -s "$CONFIG"
 test "$(stat -c '%a' "$CONFIG")" = 600
+# Auto-connect must reject symlinked saved profiles without reading through them.
+cp "$CONFIG" "$TMP/real-wifi-profile.conf"
+rm -f "$CONFIG"
+ln -s "$TMP/real-wifi-profile.conf" "$CONFIG"
+if PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi auto >/dev/null 2>&1; then
+  echo "Wi-Fi auto-connect followed a symlinked profile" >&2; exit 1
+fi
+grep -q 'ssid="Test Network"' "$TMP/real-wifi-profile.conf"
+rm -f "$CONFIG"
+cp "$TMP/real-wifi-profile.conf" "$CONFIG"
+chmod 600 "$CONFIG"
 grep -q 'ssid="Test Network"' "$CONFIG"
 grep -Fq "ctrl_interface=DIR=$VAMPIRE_WPA_CTRL_DIR GROUP=0" "$CONFIG"
 grep -q '^[[:space:]]*psk=0123456789abcdef' "$CONFIG"
