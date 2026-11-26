@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
-for file in rootfs-overlay/usr/bin/vctl rootfs-overlay/usr/bin/vnetwork rootfs-overlay/usr/bin/vguard rootfs-overlay/usr/bin/vsettings rootfs-overlay/usr/bin/vdesktop rootfs-overlay/usr/bin/vmonitor rootfs-overlay/usr/bin/vinstall rootfs-overlay/usr/bin/vpm rootfs-overlay/usr/bin/vgraphical rootfs-overlay/usr/bin/vdesktop-session rootfs-overlay/usr/bin/vupdate rootfs-overlay/usr/bin/vsoftware rootfs-overlay/usr/bin/vssh rootfs-overlay/usr/bin/vfiles rootfs-overlay/usr/bin/vhardware rootfs-overlay/usr/bin/vstorage rootfs-overlay/usr/bin/vhealth rootfs-overlay/usr/bin/vlogs rootfs-overlay/usr/bin/vdiagnose rootfs-overlay/usr/bin/vfirewall rootfs-overlay/usr/bin/vpower rootfs-overlay/usr/lib/vampire/settings-bootstrap rootfs-overlay/usr/bin/vsh rootfs-overlay/etc/vampire/shellrc rootfs-overlay/etc/vampire/services.d/firewall rootfs-overlay/etc/vpm/vpm.json rootfs-overlay/etc/vampire/update.json rootfs-overlay/etc/vampire/settings.defaults rootfs-overlay/etc/vampire/services.d/network rootfs-overlay/etc/vampire/services.d/wifi rootfs-overlay/etc/profile.d/vampire.sh; do
+for file in rootfs-overlay/usr/bin/vctl rootfs-overlay/usr/bin/vnetwork rootfs-overlay/usr/bin/vguard rootfs-overlay/usr/bin/vsettings rootfs-overlay/usr/bin/vdesktop rootfs-overlay/usr/bin/vmonitor rootfs-overlay/usr/bin/vinstall rootfs-overlay/usr/bin/vpm rootfs-overlay/usr/bin/vgraphical rootfs-overlay/usr/bin/vdesktop-session rootfs-overlay/usr/bin/vlauncher rootfs-overlay/usr/bin/vampire-app rootfs-overlay/usr/bin/vampire-terminal rootfs-overlay/usr/bin/vupdate rootfs-overlay/usr/bin/vsoftware rootfs-overlay/usr/bin/vssh rootfs-overlay/usr/bin/vfiles rootfs-overlay/usr/bin/vhardware rootfs-overlay/usr/bin/vstorage rootfs-overlay/usr/bin/vhealth rootfs-overlay/usr/bin/vlogs rootfs-overlay/usr/bin/vdiagnose rootfs-overlay/usr/bin/vfirewall rootfs-overlay/usr/bin/vpower rootfs-overlay/usr/lib/vampire/settings-bootstrap rootfs-overlay/usr/bin/vsh rootfs-overlay/etc/vampire/shellrc rootfs-overlay/etc/vampire/services.d/firewall rootfs-overlay/etc/vpm/vpm.json rootfs-overlay/etc/vampire/update.json rootfs-overlay/etc/vampire/settings.defaults rootfs-overlay/etc/vampire/services.d/network rootfs-overlay/etc/vampire/services.d/wifi rootfs-overlay/etc/profile.d/vampire.sh; do
   test -s "$ROOT/$file"
 done
 sh -n "$ROOT/rootfs-overlay/usr/bin/vctl"
@@ -20,6 +20,10 @@ sh -n "$ROOT/rootfs-overlay/usr/bin/vinstall"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vpm"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vgraphical"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vdesktop-session"
+sh -n "$ROOT/rootfs-overlay/usr/bin/vlauncher"
+sh -n "$ROOT/rootfs-overlay/usr/bin/vampire-app"
+sh -n "$ROOT/rootfs-overlay/usr/bin/vampire-terminal"
+bash "$ROOT/tests/test-weston-launchers.sh"
 bash "$ROOT/tests/test-desktop-session.sh"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vupdate"
 sh -n "$ROOT/rootfs-overlay/usr/bin/vsoftware"
