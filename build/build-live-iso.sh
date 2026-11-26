@@ -70,4 +70,4 @@ install -m 0644 "$ROOT_DIR/build/grub.cfg" "$ISO_ROOT/boot/grub/grub.cfg"
 ISO="$OUTPUT_DIR/vampire-os-0.1.0-dev-$EDITION-x86_64.iso"
 grub-mkrescue -o "$ISO" "$ISO_ROOT"
 (cd "$OUTPUT_DIR" && sha256sum "$(basename "$ISO")" > "$(basename "$ISO").sha256")
-printf "\nBuildroot release: %s\nBuilt ISO: %s\nChecksum: %s.sha256\n' "$BUILDROOT_VERSION" "$ISO" "$ISO"
+printf '\nBuildroot release: %s\nBuilt ISO: %s\nChecksum: %s.sha256\n' "$BUILDROOT_VERSION" "$ISO" "$ISO"
