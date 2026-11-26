@@ -75,4 +75,44 @@ grep -Fxq files "$TMP/name.args"
 grep -q 'app ID/name' "$TMP/name.out"
 printf 'TERMINAL\n0\n' | TERMINAL_ARGS="$TMP/name-terminal.args" VAMPIRE_TERMINAL_CMD="$TMP/bin/terminal" sh "$LAUNCHER" > /dev/null
 grep -Fxq terminal "$TMP/name-terminal.args"
+
+# Each clickable Weston panel launcher has a bundled Vampire icon.
+python3 - "$ROOT" <<'PY'
+import pathlib, re, struct, sys, zlib
+root = pathlib.Path(sys.argv[1])
+config = (root / "rootfs-overlay/etc/xdg/weston/weston.ini").read_text()
+blocks = re.findall(r"(?ms)^\\[launcher\\]\\s*\\n(.*?)(?=^\\[|\\Z)", config)
+assert len(blocks) == 6, len(blocks)
+expected = {
+    "/usr/bin/vampire-terminal": "terminal.png",
+    "/usr/bin/vampire-app launcher": "launcher.png",
+    "/usr/bin/vampire-app files": "files.png",
+    "/usr/bin/vampire-app settings": "settings.png",
+    "/usr/bin/vampire-app software": "software.png",
+    "/usr/bin/vampire-app monitor": "monitor.png",
+}
+for block in blocks:
+    values = dict(line.split("=", 1) for line in block.splitlines() if "=" in line)
+    assert values.get("path") in expected, values
+    icon = values.get("icon", "")
+    assert icon == "/usr/share/vampire/icons/" + expected[values["path"]], (values, icon)
+    path = root / "rootfs-overlay" / icon.lstrip("/")
+    data = path.read_bytes()
+    assert data[:8] == bytes((137,80,78,71,13,10,26,10)), path
+    offset, seen_ihdr, idat = 8, False, []
+    while offset < len(data):
+        length = struct.unpack(">I", data[offset:offset+4])[0]
+        kind = data[offset+4:offset+8]
+        payload = data[offset+8:offset+8+length]
+        crc = struct.unpack(">I", data[offset+8+length:offset+12+length])[0]
+        assert zlib.crc32(kind + payload) & 0xffffffff == crc, path
+        if kind == b"IHDR":
+            width, height, depth, color, comp, filt, interlace = struct.unpack(">IIBBBBB", payload)
+            assert (width,height,depth,color,comp,filt,interlace) == (64,64,8,6,0,0,0)
+            seen_ihdr = True
+        elif kind == b"IDAT": idat.append(payload)
+        offset += length + 12
+    assert seen_ihdr and len(zlib.decompress(b"".join(idat))) == 64 * (1 + 64 * 4), path
+PY
+
 echo "Vampire Weston desktop launcher tests passed."

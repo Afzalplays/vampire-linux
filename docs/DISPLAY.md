@@ -39,8 +39,7 @@ hot-plug, multi-monitor layouts, HiDPI scaling, touchscreens and rotation.
 
 ## Vampire Launcher
 
-The keyboard-driven launcher is available as `vlauncher` from a terminal and
-from the Weston desktop-shell launcher entry. Use `vlauncher --list` to inspect
+The Weston desktop-shell panel now includes six clickable application launchers (Terminal, Launcher, Files, Settings, Software Center and System Monitor), each using its own bundled Vampire PNG icon. These are native Weston panel launchers, not a separate floating dock. The keyboard-driven launcher is also available as `vlauncher` from a terminal and from the panel launcher entry. Use `vlauncher --list` to inspect
 the stable application IDs, `vlauncher --search TEXT` to filter the catalog,
 and `vlauncher --launch APP-ID` to dispatch a known application. In its
 interactive prompt, enter either an application ID or its displayed name;
