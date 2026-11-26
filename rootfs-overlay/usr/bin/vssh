@@ -25,6 +25,18 @@ valid_port() {
 user_home() {
   awk -F: -v wanted="$1" '$1 == wanted { print $6; found=1; exit } END { if (!found) exit 1 }' "$PASSWD_FILE"
 }
+reject_symlink_path() {
+  path=$1
+  case "$path" in /*) ;; *) path=$PWD/$path ;; esac
+  while [ -n "$path" ] && [ "$path" != "/" ]; do
+    [ ! -L "$path" ] || {
+      echo "vssh: refusing symlinked host-key path: $path" >&2
+      return 1
+    }
+    path=${path%/*}
+    [ -n "$path" ] || path=/
+  done
+}
 authorize_user() {
   [ "$#" -eq 3 ] || { usage >&2; exit 2; }
   username=$2
@@ -103,13 +115,18 @@ case "${1:-}" in
       echo "Password authentication and root login are disabled." >&2
       exit 1
     }
-    [ ! -L "${KEY%/*}" ] || { echo "vssh: refusing a symlinked host-key directory." >&2; exit 1; }
-    [ ! -L "$KEY" ] || { echo "vssh: refusing a symlinked host key." >&2; exit 1; }
+    reject_symlink_path "${KEY%/*}" || exit 1
+    reject_symlink_path "$KEY" || exit 1
     mkdir -p "${KEY%/*}"
+    reject_symlink_path "${KEY%/*}" || exit 1
     chmod 0700 "${KEY%/*}"
-    if [ ! -s "$KEY" ]; then
+    if [ -e "$KEY" ]; then
+      [ -f "$KEY" ] && [ -s "$KEY" ] || { echo "vssh: existing host key is not a non-empty regular file." >&2; exit 1; }
+    else
       dropbearkey -t ed25519 -f "$KEY"
     fi
+    reject_symlink_path "$KEY" || exit 1
+    [ -f "$KEY" ] && [ -s "$KEY" ] || { echo "vssh: host-key generation did not create a regular key file." >&2; exit 1; }
     chmod 0600 "$KEY"
     dropbear -p "$PORT" -s -g -r "$KEY"
     echo "Dropbear started on port $PORT with public-key authentication only."
