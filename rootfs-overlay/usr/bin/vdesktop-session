@@ -1,10 +1,10 @@
 #!/bin/sh
 # Start the graphical desktop only from the dedicated unprivileged local user.
 set -eu
-GRAPHICAL=\${VAMPIRE_GRAPHICAL_CMD:-/usr/bin/vgraphical}
-RUNTIME_BASE=\${VAMPIRE_RUNTIME_BASE:-/run/user}
+GRAPHICAL=${VAMPIRE_GRAPHICAL_CMD:-/usr/bin/vgraphical}
+RUNTIME_BASE=${VAMPIRE_RUNTIME_BASE:-/run/user}
 error() { printf 'Vampire Desktop session: %s\n' "$*" >&2; }
-case "\${1:-}" in
+case "${1:-}" in
   --help|-h)
     echo "Usage: vdesktop-session [vgraphical options]"
     echo "  Start the Weston desktop as the unprivileged vampire account on a local VT."
@@ -22,7 +22,7 @@ case "$tty_path" in
   /dev/tty[0-9]*) ;;
   *) error "a local Linux virtual terminal is required (not SSH or a serial console)."; exit 1 ;;
 esac
-home=\${HOME:-}
+home=${HOME:-}
 [ -n "$home" ] && [ -d "$home" ] && [ -w "$home" ] || {
   error "the vampire home directory is missing or not writable."
   exit 1
@@ -38,7 +38,7 @@ reject_symlink_path() {
   case "$path" in /*) ;; *) path=$PWD/$path ;; esac
   while [ -n "$path" ] && [ "$path" != "/" ]; do
     [ ! -L "$path" ] || { error "refusing symlinked runtime path: $path"; return 1; }
-    path=\${path%/*}
+    path=${path%/*}
     [ -n "$path" ] || path=/
   done
 }

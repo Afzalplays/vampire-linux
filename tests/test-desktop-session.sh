@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
-ROOT="$(cd -- "$(dirname -- "\${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/bin" "$TMP/home" "$TMP/run/user/1000"
@@ -8,24 +8,24 @@ chmod 0700 "$TMP/run/user/1000"
 cat > "$TMP/bin/id" <<'MOCK'
 #!/bin/sh
 case "$1" in
-  -u) echo "\${VAMPIRE_TEST_UID:-0}" ;;
-  -un) echo "\${VAMPIRE_TEST_USER:-root}" ;;
+  -u) echo "${VAMPIRE_TEST_UID:-0}" ;;
+  -un) echo "${VAMPIRE_TEST_USER:-root}" ;;
   *) exit 2 ;;
 esac
 MOCK
 cat > "$TMP/bin/tty" <<'MOCK'
 #!/bin/sh
-echo "\${VAMPIRE_TEST_TTY:-/dev/tty1}"
+echo "${VAMPIRE_TEST_TTY:-/dev/tty1}"
 MOCK
 cat > "$TMP/bin/stat" <<'MOCK'
 #!/bin/sh
-case "$2" in
-  "$HOME") [ "$1" = -c ] && [ "$3" = %u ] && { echo 1000; exit 0; } ;;
-  */user/1000)
-    [ "$1" = -c ] && [ "$3" = %u ] && { echo 1000; exit 0; }
-    [ "$1" = -c ] && [ "$3" = %a ] && { echo 700; exit 0; }
-    ;;
-esac
+if [ "$1" = -c ] && [ "$2" = %u ]; then
+  case "$3" in "$HOME"|*/user/1000) echo 1000; exit 0 ;; esac
+fi
+if [ "$1" = -c ] && [ "$2" = %a ] && [ "$3" = */user/1000 ]; then
+  echo 700
+  exit 0
+fi
 exit 1
 MOCK
 cat > "$TMP/bin/vgraphical" <<'MOCK'
