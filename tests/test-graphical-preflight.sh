@@ -113,4 +113,19 @@ grep -q "refusing symlinked session runtime path" "$TMP/home-link.out" || {
   cat "$TMP/home-link.out" >&2
   exit 1
 }
+# A real home directory reached through a symlinked parent must also be rejected.
+mkdir -p "$TMP/real-home-parent/home"
+ln -s "$TMP/real-home-parent" "$TMP/home-parent-link"
+if VAMPIRE_RUNTIME_BASE="$TMP/home-runtime" HOME="$TMP/home-parent-link/home" \
+   VAMPIRE_WESTON_BASE="$TMP/etc/xdg/weston/weston.ini" \
+   VAMPIRE_FOOT_BASE="$TMP/etc/xdg/foot/foot.ini" VAMPIRE_DRM_DIR="$TMP/dev/dri" \
+   PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vgraphical" --check >"$TMP/home-ancestor.out" 2>&1; then
+  echo "vgraphical accepted a home directory beneath a symlinked parent" >&2
+  exit 1
+fi
+grep -q "refusing symlinked session runtime path" "$TMP/home-ancestor.out" || {
+  echo "home ancestor symlink test failed for an unexpected reason" >&2
+  cat "$TMP/home-ancestor.out" >&2
+  exit 1
+}
 echo "Vampire graphical-session preflight tests passed."
