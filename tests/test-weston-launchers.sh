@@ -60,4 +60,11 @@ printf 'file\nfiles\n0\n' | APP_ARGS="$TMP/menu.args" VAMPIRE_APP_CMD="$TMP/bin/
 grep -q 'Search applications or enter an app ID' "$TMP/menu.out"
 grep -q "files|Files|Browse and manage files" "$TMP/menu.out"
 grep -Fxq files "$TMP/menu.args"
+
+# Interactive launcher accepts stable IDs and case-insensitive display names.
+printf 'Files\n0\n' | APP_ARGS="$TMP/name.args" VAMPIRE_APP_CMD="$TMP/bin/app" sh "$LAUNCHER" > "$TMP/name.out"
+grep -Fxq files "$TMP/name.args"
+grep -q 'app ID/name' "$TMP/name.out"
+printf 'TERMINAL\n0\n' | TERMINAL_ARGS="$TMP/name-terminal.args" VAMPIRE_TERMINAL_CMD="$TMP/bin/terminal" sh "$LAUNCHER" > /dev/null
+grep -Fxq terminal "$TMP/name-terminal.args"
 echo "Vampire Weston desktop launcher tests passed."
