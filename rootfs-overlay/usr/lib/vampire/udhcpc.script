@@ -33,7 +33,7 @@ validate_ipv4_list() {
   set +f
 }
 valid_netmask() {
-  printf '%s\\n' "$1" | awk -F. '
+  printf '%s\n' "$1" | awk -F. '
     NF != 4 { exit 1 }
     {
       tail = 0
