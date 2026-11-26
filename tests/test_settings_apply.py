@@ -37,6 +37,30 @@ class SettingsApplyTests(unittest.TestCase):
         )
         return result, runtime / "weston.ini", config_home / "foot" / "foot.ini"
 
+    def test_bundled_wallpaper_is_a_valid_png_with_decodable_pixels(self):
+        import struct
+        import zlib
+
+        image = (ROOT / "rootfs-overlay" / "usr" / "share" / "vampire" / "wallpaper.png").read_bytes()
+        self.assertEqual(image[:8], bytes((137, 80, 78, 71, 13, 10, 26, 10)))
+        offset = 8
+        chunks = []
+        while offset < len(image):
+            length = struct.unpack(">I", image[offset:offset + 4])[0]
+            kind = image[offset + 4:offset + 8]
+            data = image[offset + 8:offset + 8 + length]
+            crc = struct.unpack(">I", image[offset + 8 + length:offset + 12 + length])[0]
+            self.assertEqual(zlib.crc32(kind + data) & 0xffffffff, crc)
+            chunks.append((kind, data))
+            offset += 12 + length
+        self.assertEqual(chunks[0][0], b"IHDR")
+        width, height, depth, color, compression, filtering, interlace = struct.unpack(">IIBBBBB", chunks[0][1])
+        self.assertEqual((width, height, depth, color, compression, filtering, interlace), (640, 360, 8, 6, 0, 0, 0))
+        self.assertEqual(chunks[-1], (b"IEND", b""))
+        pixels = zlib.decompress(b"".join(data for kind, data in chunks if kind == b"IDAT"))
+        self.assertEqual(len(pixels), height * (1 + width * 4))
+        self.assertTrue(all(pixels[row * (1 + width * 4)] == 0 for row in range(height)))
+
     def test_applies_theme_accent_transparency_motion_and_terminal_opacity(self):
         with tempfile.TemporaryDirectory() as temp:
             result, weston, foot = self.run_apply(
