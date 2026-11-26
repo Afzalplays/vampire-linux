@@ -260,7 +260,6 @@ printf 'Installed-disk BIOS and UEFI boot tests passed. Images: %s\n' "$WORK"
     grep -Fq 'path=/usr/bin/vampire-app files' "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" || die "$mode installed Weston config omitted Vampire Files"
   fi
 
-
   sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/bin/vpower status > "$WORK/$mode.vpower.log" 2>&1 || die "$mode installed vpower status failed"
   grep -Fq 'Vampire OS power status' "$WORK/$mode.vpower.log" || die "$mode installed vpower status output is invalid"
   for action in reboot poweroff halt; do
