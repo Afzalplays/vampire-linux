@@ -54,7 +54,7 @@ Every release artifact should show architecture, edition, version, checksum, sig
 
 ## Delivery phases
 
-1. Responsive project/download portal and PWA shell.
+1. [x] Responsive project/download portal and PWA shell (`mobile/`).
 2. Secure mobile-friendly server administration UX, with authentication and MFA.
 3. Select an Android ARM64 reference device and build a hardware-support matrix.
 4. Prototype and test a device-specific mobile image and touch-first shell.
