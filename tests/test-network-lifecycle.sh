@@ -122,7 +122,7 @@ test ! -e "$TMP/real-resolver-dir/resolv.conf"
 mkdir -p "$TMP/wifi-only/wlan0/wireless"
 cat > "$TMP/mock-vnetwork" <<'MOCK'
 #!/bin/sh
-printf 'vnetwork %s\\n' "$*" >> "$NETWORK_SERVICE_LOG"
+printf 'vnetwork %s\n' "$*" >> "$NETWORK_SERVICE_LOG"
 MOCK
 chmod +x "$TMP/mock-vnetwork"
 export NETWORK_SERVICE_LOG="$TMP/network-service.log"
