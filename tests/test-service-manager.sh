@@ -12,6 +12,10 @@ cat > "$TMP/services/second" <<'SERVICE'
 #!/bin/sh
 printf 'second:%s\n' "$1" >> "$VAMPIRE_TEST_LOG"
 SERVICE
+cat > "$TMP/services/wifi" <<'SERVICE'
+#!/bin/sh
+printf 'wifi:%s\\n' "$1" >> "$VAMPIRE_TEST_LOG"
+SERVICE
 cat > "$TMP/services/broken-stop" <<'SERVICE'
 #!/bin/sh
 printf 'broken-stop:%s\n' "$1" >> "$VAMPIRE_TEST_LOG"
@@ -26,6 +30,10 @@ sh -n "$VCTL"
 "$VCTL" enable mock
 "$VCTL" enable second
 "$VCTL" enable second
+# Packaged service files may be non-executable after content-only uploads.
+"$VCTL" enable wifi
+"$VCTL" start wifi
+grep -Fxq 'wifi:start' "$VAMPIRE_TEST_LOG"
 grep -Fxq mock "$VAMPIRE_ENABLED_FILE"
 grep -Fxq second "$VAMPIRE_ENABLED_FILE"
 [ "$(grep -Fc second "$VAMPIRE_ENABLED_FILE")" -eq 1 ]
