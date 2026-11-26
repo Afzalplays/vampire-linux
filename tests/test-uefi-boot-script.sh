@@ -82,6 +82,7 @@ cat <<'COMMON'
 ./usr/bin/vinstall
 ./usr/bin/vpm
 ./usr/bin/vctl
+./usr/bin/vssh
 ./etc/vampire/os.conf
 ./etc/os-release
 COMMON
