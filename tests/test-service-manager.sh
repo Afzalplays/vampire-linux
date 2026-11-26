@@ -49,7 +49,7 @@ grep -Fxq 'mock:status' "$VAMPIRE_TEST_LOG"
 : > "$VAMPIRE_TEST_LOG"
 "$VCTL" status-all
 grep -Fxq 'second:status' "$VAMPIRE_TEST_LOG"
-[ "$(grep -Fc ':status' "$VAMPIRE_TEST_LOG")" -eq 2 ]
+[ "$(grep -Fc ':status' "$VAMPIRE_TEST_LOG")" -eq 3 ]
 "$VCTL" stop-all
 [ "$(tail -n 2 "$VAMPIRE_TEST_LOG" | tr '\n' ' ')" = "second:stop mock:stop " ]
 "$VCTL" disable mock
