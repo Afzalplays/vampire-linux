@@ -35,6 +35,7 @@ sh -n "$VCTL"
 "$VCTL" enable wifi
 "$VCTL" start wifi
 grep -Fxq 'wifi:start' "$VAMPIRE_TEST_LOG"
+: > "$VAMPIRE_TEST_LOG"
 grep -Fxq mock "$VAMPIRE_ENABLED_FILE"
 grep -Fxq second "$VAMPIRE_ENABLED_FILE"
 [ "$(grep -Fc second "$VAMPIRE_ENABLED_FILE")" -eq 1 ]
