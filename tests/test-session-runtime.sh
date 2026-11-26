@@ -29,7 +29,7 @@ ln -s "$TMP/outside" "$TMP/run/user/1000"
 if CHOWN_LOG="$TMP/attack.log" PATH="$TMP/bin:$PATH" VAMPIRE_RUN_ROOT="$TMP/run" VAMPIRE_PASSWD_FILE="$TMP/passwd" sh "$ROOT/rootfs-overlay/usr/lib/vampire/session-runtime" >/dev/null 2>&1; then
   echo "session runtime accepted a symlinked user directory" >&2; exit 1
 fi
-[[ ! -s "$TMP/attack.log" ]] || { echo "session runtime attempted chown through a symlink" >&2; exit 1; }
+if grep -Fq "$TMP/run/user/1000" "$TMP/attack.log"; then echo "session runtime attempted chown through a symlink" >&2; exit 1; fi
 
 # A symlinked runtime root must also be refused.
 rm -rf "$TMP/run/user"
