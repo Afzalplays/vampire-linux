@@ -9,7 +9,7 @@ WIFI_CONFIG_DIR=${VAMPIRE_WIFI_CONFIG_DIR:-/etc/vampire}
 WPA_CTRL_DIR=${VAMPIRE_WPA_CTRL_DIR:-/run/wpa_supplicant}
 HOOK=${VAMPIRE_DHCP_HOOK:-/usr/lib/vampire/udhcpc.script}
 usage() {
-  echo "Usage: vnetwork {start|stop|restart|status} [IFACE] | wifi {list|scan|status|connect|disconnect} [IFACE] [SSID]" >&2
+  echo "Usage: vnetwork {start|stop|restart|status} [IFACE] | wifi {list|scan|status|connect|disconnect|auto} [IFACE] [SSID]" >&2
   exit 2
 }
 valid_iface() {
@@ -179,6 +179,67 @@ wifi_connect() {
   trap - 0 HUP INT TERM
   start_network
 }
+wifi_auto() {
+  command -v wpa_supplicant >/dev/null 2>&1 || { echo "vnetwork: wpa_supplicant is not installed" >&2; return 127; }
+  command -v wpa_cli >/dev/null 2>&1 || { echo "vnetwork: wpa_cli is not installed" >&2; return 127; }
+  command -v udhcpc >/dev/null 2>&1 || { echo "vnetwork: udhcpc is not installed" >&2; return 127; }
+  [ ! -L "$WIFI_CONFIG_DIR" ] || { echo "vnetwork: refusing symlinked Wi-Fi profile directory" >&2; return 1; }
+  found=0
+  result=0
+  for config in "$WIFI_CONFIG_DIR"/wpa_supplicant-*.conf; do
+    [ -e "$config" ] || continue
+    found=1
+    [ ! -L "$config" ] && [ -f "$config" ] || {
+      echo "vnetwork: refusing unsafe Wi-Fi profile: $config" >&2
+      result=1
+      continue
+    }
+    mode=$(stat -c '%a' "$config" 2>/dev/null || echo unknown)
+    [ "$mode" = 600 ] || {
+      echo "vnetwork: refusing Wi-Fi profile with unsafe permissions: $config" >&2
+      result=1
+      continue
+    }
+    profile=${config##*/wpa_supplicant-}
+    iface=${profile%.conf}
+    valid_iface "$iface" && [ -e "$SYS_NET/$iface" ] || {
+      echo "vnetwork: skipping Wi-Fi profile for unavailable interface: $iface" >&2
+      result=1
+      continue
+    }
+    if ! wpa_cli -i "$iface" ping >/dev/null 2>&1; then
+      bring_iface_up || { result=1; continue; }
+      mkdir -p "$WIFI_RUN_DIR" "$WPA_CTRL_DIR"
+      wpa_supplicant -B -i "$iface" -c "$config" -P "$WIFI_RUN_DIR/$iface.pid" || {
+        echo "vnetwork: could not start Wi-Fi supplicant on $iface" >&2
+        result=1
+        continue
+      }
+    fi
+    count=0
+    connected=false
+    timeout=${VAMPIRE_WIFI_CONNECT_TIMEOUT:-20}
+    case "$timeout" in ""|*[!0-9]*) timeout=20 ;; esac
+    [ "$timeout" -ge 1 ] && [ "$timeout" -le 120 ] || timeout=20
+    while [ "$count" -lt "$timeout" ]; do
+      if wpa_cli -i "$iface" status 2>/dev/null | grep -q 'wpa_state=COMPLETED'; then
+        connected=true
+        break
+      fi
+      sleep 1
+      count=$((count + 1))
+    done
+    if [ "$connected" = true ]; then
+      get_iface auto "$iface" && start_network || result=1
+      echo "vnetwork: saved Wi-Fi profile activated on $iface"
+    else
+      echo "vnetwork: saved Wi-Fi profile did not connect on $iface" >&2
+      result=1
+    fi
+  done
+  [ "$found" -eq 1 ] || { echo "vnetwork: no saved Wi-Fi profiles"; return 0; }
+  return "$result"
+}
 stop_wpa() {
   wifi_pidfile="$WIFI_RUN_DIR/$iface.pid"
   if command -v wpa_cli >/dev/null 2>&1; then wpa_cli -i "$iface" terminate >/dev/null 2>&1 || true; fi
@@ -206,6 +267,7 @@ wifi_command() {
   if [ "$subcommand" != list ] && command -v modprobe >/dev/null 2>&1; then modprobe iwlwifi 2>/dev/null || true; fi
   case "$subcommand" in
     list) [ "$#" -le 2 ] || usage; wifi_list ;;
+    auto) [ "$#" -eq 2 ] || usage; wifi_auto ;;
     scan|status|disconnect)
       [ "$#" -eq 3 ] || usage
       get_iface "$subcommand" "$3"
