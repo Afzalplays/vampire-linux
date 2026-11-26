@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Vampire Fetch - system information display. SPDX-License-Identifier: MIT
 set -u
 
