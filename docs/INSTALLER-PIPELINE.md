@@ -6,6 +6,19 @@ The live image carries a checksummed installer root filesystem at
 configuration helper. The live kernel is built with the storage and ext4
 drivers needed to mount an installed root filesystem directly.
 
+## Build source integrity
+
+Both Desktop and Server ISO builds default to the upstream Buildroot
+`2025.02` release tag. Set `BUILDROOT_VERSION` only when deliberately
+testing another published Buildroot tag. The builder validates the tag name,
+fetches/checks out that exact tag even when a cached checkout already exists,
+and verifies that HEAD resolves to the requested tag before configuring either
+edition. The CI build-check workflow regression-tests these safeguards.
+
+This pins the Buildroot framework release; it does not yet make every
+third-party package archive or the complete toolchain reproducible. Those
+remain separate release-engineering tasks.
+
 ## Read-only and staging operations
 
 1. `vinstall requirements` checks disk, filesystem, Python, checksum and GRUB utilities.
