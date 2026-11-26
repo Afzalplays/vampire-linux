@@ -38,7 +38,8 @@ test "$("$TMP/vsettings" get terminal_opacity)" = 90
 test "$("$TMP/vsettings" get update_channel)" = stable
 test "$("$TMP/vsettings" get voice_access)" = false
 "$TMP/vsettings" set theme light
-"$TMP/vsettings" apply
+"$TMP/vsettings" apply > "$TMP/apply.out"
+grep -q "^Stored but not applied by this desktop build: blur, dock_auto_hide, dock_magnification, dock_position, dock_size, show_clock, show_date, show_network, show_power, update_channel, voice_access$" "$TMP/apply.out"
 grep -q "^alpha=0.90$" "$TMP/xdg/foot/foot.ini"
 test "$("$TMP/vsettings" get theme)" = light
 # Atomic writes must leave no temporary files and keep preferences private.
