@@ -28,7 +28,7 @@ cat > "$TMP/bin/dropbearkey" <<'MOCK'
 #!/bin/sh
 echo generate >> "$DROPBEARKEY_CALLS"
 while [ "$#" -gt 0 ]; do
-  if [ "$1" = -f ]; then shift; printf 'TEST_HOST_KEY\\n' > "$1"; exit 0; fi
+  if [ "$1" = -f ]; then shift; printf 'TEST_HOST_KEY\n' > "$1"; exit 0; fi
   shift
 done
 exit 2
