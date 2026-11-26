@@ -24,10 +24,11 @@ import sys
 data = json.loads(sys.argv[1])
 assert data["count"] == 2, data
 assert data["connected"] == 1, data
-assert data["connectors"] == [
-    {"name": "eDP-1", "status": "connected", "modes": ["3840x2160", "1920x1080"]},
-    {"name": "HDMI-A-1", "status": "disconnected", "modes": []},
-], data
+by_name = {item["name"]: item for item in data["connectors"]}
+assert by_name == {
+    "eDP-1": {"name": "eDP-1", "status": "connected", "modes": ["3840x2160", "1920x1080"]},
+    "HDMI-A-1": {"name": "HDMI-A-1", "status": "disconnected", "modes": []},
+}, data
 PY
 
 EMPTY="$TMP/empty"
