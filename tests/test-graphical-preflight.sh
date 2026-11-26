@@ -65,4 +65,18 @@ grep -q "refusing symlinked session runtime path" "$TMP/runtime-user.out" || {
   cat "$TMP/runtime-user.out" >&2
   exit 1
 }
+
+# Symlinks in ancestors of the runtime base must not redirect the session.
+mkdir -p "$TMP/real-runtime-parent/run/user/$uid"
+chmod 0700 "$TMP/real-runtime-parent/run/user/$uid"
+ln -s "$TMP/real-runtime-parent" "$TMP/runtime-parent-link"
+if VAMPIRE_RUNTIME_BASE="$TMP/runtime-parent-link/run/user" VAMPIRE_WESTON_BASE="$TMP/etc/xdg/weston/weston.ini" VAMPIRE_FOOT_BASE="$TMP/etc/xdg/foot/foot.ini" VAMPIRE_DRM_DIR="$TMP/dev/dri" PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vgraphical" --check >"$TMP/runtime-ancestor.out" 2>&1; then
+  echo "vgraphical accepted a symlinked runtime ancestor" >&2
+  exit 1
+fi
+grep -q "refusing symlinked session runtime path" "$TMP/runtime-ancestor.out" || {
+  echo "runtime ancestor symlink test failed for an unexpected reason" >&2
+  cat "$TMP/runtime-ancestor.out" >&2
+  exit 1
+}
 echo "Vampire graphical-session preflight tests passed."
