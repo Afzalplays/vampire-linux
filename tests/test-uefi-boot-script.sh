@@ -91,6 +91,7 @@ if [[ "${VAMPIRE_EDITION:-desktop}" == "desktop" ]]; then
 ./usr/bin/foot
 ./usr/bin/vampire-terminal
 ./usr/bin/vsettings
+./usr/bin/vdisplay
 ./usr/lib/vampire/settings_apply.py
 ./usr/lib/vampire/settings-bootstrap
 ./etc/vampire/settings.defaults
