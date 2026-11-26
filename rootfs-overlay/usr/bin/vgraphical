@@ -6,6 +6,7 @@ CONFIG=${VAMPIRE_WESTON_RUNTIME_CONFIG:-/run/vampire/weston.ini}
 BASE_CONFIG=${VAMPIRE_WESTON_BASE:-/etc/xdg/weston/weston.ini}
 FOOT_CONFIG=${VAMPIRE_FOOT_BASE:-/etc/xdg/foot/foot.ini}
 DRM_DIR=${VAMPIRE_DRM_DIR:-/dev/dri}
+RUNTIME_BASE=${VAMPIRE_RUNTIME_BASE:-/run/user}
 
 error() { printf 'Vampire Desktop: %s\n' "$*" >&2; }
 require_file() {
@@ -16,6 +17,20 @@ check() {
   command -v foot >/dev/null 2>&1 || { error "Foot terminal is not installed."; return 1; }
   require_file "$BASE_CONFIG" || return 1
   require_file "$FOOT_CONFIG" || return 1
+  session_uid=$(id -u)
+  session_runtime="$RUNTIME_BASE/$session_uid"
+  [ ! -L "$RUNTIME_BASE" ] && [ ! -L "$session_runtime" ] || {
+    error "refusing symlinked session runtime path: $session_runtime"
+    return 1
+  }
+  [ -d "$session_runtime" ] && [ "$(stat -c %u "$session_runtime" 2>/dev/null || echo -1)" = "$session_uid" ] || {
+    error "private session runtime $session_runtime is missing or has the wrong owner; check boot session-runtime setup."
+    return 1
+  }
+  [ "$(stat -c %a "$session_runtime" 2>/dev/null || echo 000)" = 700 ] || {
+    error "session runtime $session_runtime must have mode 0700."
+    return 1
+  }
   [ -d "$DRM_DIR" ] || { error "no $DRM_DIR directory; enable a kernel DRM/KMS driver and firmware."; return 1; }
   found=
   for card in "$DRM_DIR"/card*; do
@@ -27,16 +42,6 @@ check() {
   [ -n "$found" ] || { error "no DRM card device found under $DRM_DIR."; return 1; }
   [ -r "$found" ] && [ -w "$found" ] || {
     error "DRM device $found is not accessible; check seat permissions."; return 1;
-  }
-  session_uid=$(id -u)
-  session_runtime="/run/user/$session_uid"
-  [ -d "$session_runtime" ] && [ "$(stat -c %u "$session_runtime" 2>/dev/null || echo -1)" = "$session_uid" ] || {
-    error "private session runtime $session_runtime is missing or has the wrong owner; check boot session-runtime setup."
-    return 1
-  }
-  [ "$(stat -c %a "$session_runtime" 2>/dev/null || echo 000)" = 700 ] || {
-    error "session runtime $session_runtime must have mode 0700."
-    return 1
   }
   if [ "$session_uid" -ne 0 ]; then
     [ -n "${HOME:-}" ] && [ -d "$HOME" ] && [ -w "$HOME" ] || {
@@ -71,7 +76,7 @@ fi
 check
 uid=$(id -u)
 if [ "$uid" -eq 0 ]; then
-  export XDG_RUNTIME_DIR=/run/user/0
+  export XDG_RUNTIME_DIR="$RUNTIME_BASE/0"
   export XDG_CONFIG_HOME=/run/vampire
   export VAMPIRE_SETTINGS_FILE=/etc/vampire/settings.conf
   mkdir -p "$XDG_RUNTIME_DIR" "$XDG_CONFIG_HOME"
@@ -82,8 +87,8 @@ else
     error "a writable home directory is required for a non-root desktop session."
     exit 1
   }
-  export XDG_RUNTIME_DIR="/run/user/$uid"
-  [ -d "$XDG_RUNTIME_DIR" ] && [ "$(stat -c %u "$XDG_RUNTIME_DIR" 2>/dev/null || echo -1)" = "$uid" ] || {
+  export XDG_RUNTIME_DIR="$RUNTIME_BASE/$uid"
+  [ ! -L "$RUNTIME_BASE" ] && [ ! -L "$XDG_RUNTIME_DIR" ] && [ -d "$XDG_RUNTIME_DIR" ] && [ "$(stat -c %u "$XDG_RUNTIME_DIR" 2>/dev/null || echo -1)" = "$uid" ] || {
     error "runtime directory $XDG_RUNTIME_DIR is missing or not owned by this user; log in locally after boot."
     exit 1
   }
