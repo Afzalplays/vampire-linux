@@ -16,9 +16,29 @@ grep -q 'Advertised modes: 3840x2160 1920x1080' <<<"$OUT"
 grep -q 'HDMI-A-1: disconnected' <<<"$OUT"
 grep -q 'Connectors: 2   Connected: 1' <<<"$OUT"
 grep -q 'not a live-mode reading' <<<"$OUT"
+
+JSON_OUT="$(VAMPIRE_DRM_SYSFS="$SYS" sh "$ROOT/rootfs-overlay/usr/bin/vdisplay" --json)"
+python3 - "$JSON_OUT" <<'PY'
+import json
+import sys
+data = json.loads(sys.argv[1])
+assert data["count"] == 2, data
+assert data["connected"] == 1, data
+assert data["connectors"] == [
+    {"name": "eDP-1", "status": "connected", "modes": ["3840x2160", "1920x1080"]},
+    {"name": "HDMI-A-1", "status": "disconnected", "modes": []},
+], data
+PY
+
 EMPTY="$TMP/empty"
 mkdir "$EMPTY"
 VAMPIRE_DRM_SYSFS="$EMPTY" sh "$ROOT/rootfs-overlay/usr/bin/vdisplay" | grep -q 'No DRM display connectors found'
+EMPTY_JSON="$(VAMPIRE_DRM_SYSFS="$EMPTY" sh "$ROOT/rootfs-overlay/usr/bin/vdisplay" --json)"
+python3 - "$EMPTY_JSON" <<'PY'
+import json
+import sys
+assert json.loads(sys.argv[1]) == {"connectors": [], "count": 0, "connected": 0}
+PY
 ln -s "$SYS" "$TMP/drm-link"
 if VAMPIRE_DRM_SYSFS="$TMP/drm-link" sh "$ROOT/rootfs-overlay/usr/bin/vdisplay" >/dev/null 2>&1; then
   echo "vdisplay accepted a symlinked sysfs root" >&2
@@ -28,4 +48,4 @@ if sh "$ROOT/rootfs-overlay/usr/bin/vdisplay" unexpected >/dev/null 2>&1; then
   echo "vdisplay accepted an unknown argument" >&2
   exit 1
 fi
-echo "Vampire display inventory tests passed."
+echo "Vampire display inventory and JSON tests passed."
