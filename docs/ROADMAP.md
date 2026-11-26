@@ -28,7 +28,8 @@ feature release-ready.
 - [x] Add memory/thermal telemetry, live monitor refresh and private support-report export.
 - [x] Add bounded log viewing and follow mode for local diagnostics.
 - [x] Add DHCP lease application, DNS configuration and network start/stop lifecycle.
-- [x] Add initial Wi-Fi discovery, WPA2 connection, disconnect and credential-file permission checks (hardware validation and persistent profiles remain pending).
+- [x] Add initial Wi-Fi discovery, WPA2 connection, disconnect and credential-file permission checks.
+- [x] Add opt-in saved Wi-Fi profile auto-connect service, mode-0600 and symlink validation, wired/Wi-Fi startup separation, and Desktop reconnect menu; add regression tests.
 - [x] Add firmware-specific read-only UEFI/GPT and BIOS/GPT installation-layout preview to the console installer menu.
 - [x] Enforce private permissions on support snapshot directories and report files, including pre-existing directories.
 - [x] Build Desktop and Server ISO images in CI.
