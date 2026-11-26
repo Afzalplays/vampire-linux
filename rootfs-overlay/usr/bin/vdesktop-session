@@ -27,7 +27,6 @@ home=${HOME:-}
   error "the vampire home directory is missing or not writable."
   exit 1
 }
-reject_symlink_path "$home" || exit 1
 home_owner=$(stat -c '%u' "$home" 2>/dev/null || echo invalid)
 [ "$home_owner" = "$uid" ] || {
   error "the home directory must be owned by vampire (uid 1000)."
@@ -43,6 +42,7 @@ reject_symlink_path() {
     [ -n "$path" ] || path=/
   done
 }
+reject_symlink_path "$home" || exit 1
 reject_symlink_path "$RUNTIME_BASE" || exit 1
 reject_symlink_path "$runtime" || exit 1
 [ -d "$runtime" ] && [ "$(stat -c '%u' "$runtime" 2>/dev/null || echo invalid)" = "$uid" ] || {
