@@ -103,6 +103,9 @@ grep -q -- '-R -b -i wlan0' "$DHCP_ARGS"
 : > "$DHCP_ARGS"
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi auto > "$TMP/wifi-auto.out"
 grep -q 'saved Wi-Fi profile activated on wlan0' "$TMP/wifi-auto.out"
+# The optional boot service invokes the same validated saved-profile path.
+VAMPIRE_NETWORK_CMD="$ROOT/rootfs-overlay/usr/bin/vnetwork" sh "$ROOT/rootfs-overlay/etc/vampire/services.d/wifi" start > "$TMP/wifi-service.out"
+grep -q 'saved Wi-Fi profile activated on wlan0' "$TMP/wifi-service.out"
 grep -q -- '-B -i wlan0' "$WPA_ARGS"
 grep -q -- '-R -b -i wlan0' "$DHCP_ARGS"
 test "$(stat -c '%a' "$CONFIG")" = 600
