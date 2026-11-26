@@ -118,6 +118,15 @@ ln -s "$CONFIG" "$TMP/settings-link.conf"
 if VAMPIRE_SETTINGS_FILE="$TMP/settings-link.conf" "$TMP/vsettings" apply >/dev/null 2>&1; then
   echo "settings apply accepted a symlinked preferences file" >&2; exit 1
 fi
+if VAMPIRE_SETTINGS_FILE="$TMP/settings-link.conf" "$TMP/vsettings" list >/dev/null 2>&1; then
+  echo "settings list accepted a symlinked preferences file" >&2; exit 1
+fi
+if VAMPIRE_SETTINGS_FILE="$TMP/settings-link.conf" "$TMP/vsettings" get theme >/dev/null 2>&1; then
+  echo "settings get accepted a symlinked preferences file" >&2; exit 1
+fi
+if VAMPIRE_SETTINGS_FILE="$TMP/settings-link.conf" "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validate accepted a symlinked preferences file" >&2; exit 1
+fi
 mkdir -p "$TMP/real-xdg"
 ln -s "$TMP/real-xdg" "$TMP/xdg-link"
 if XDG_CONFIG_HOME="$TMP/xdg-link" "$TMP/vsettings" apply >/dev/null 2>&1; then
