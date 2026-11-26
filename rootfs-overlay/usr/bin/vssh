@@ -1,40 +1,123 @@
 #!/bin/sh
-# Explicit, public-key-only Dropbear SSH service control.
+# Explicit, public-key-only Dropbear service with non-root user onboarding.
 set -eu
 PORT=${VAMPIRE_SSH_PORT:-22}
 KEY=${VAMPIRE_SSH_HOST_KEY:-/var/lib/vampire/ssh/dropbear_ed25519_host_key}
-AUTHORIZED=/root/.ssh/authorized_keys
-usage() { echo "Usage: vssh start|stop|status|connect user@host"; }
+PASSWD_FILE=${VAMPIRE_PASSWD_FILE:-/etc/passwd}
+HOME_ROOT=${VAMPIRE_HOME_ROOT:-/home}
+usage() {
+  cat <<'HELP'
+Usage:
+  vssh authorize USER 'ssh-ed25519 PUBLIC_KEY [comment]'
+  vssh start | stop | status
+  vssh connect user@host
+
+The server accepts public-key authentication only. Root SSH login is disabled.
+HELP
+}
+require_root() {
+  [ "$(id -u)" -eq 0 ] || { echo "vssh: this operation requires root." >&2; exit 1; }
+}
 valid_port() {
   case "$PORT" in ''|*[!0-9]*) return 1 ;; esac
   [ "$PORT" -ge 1 ] && [ "$PORT" -le 65535 ]
 }
+user_home() {
+  awk -F: -v wanted="$1" '$1 == wanted { print $6; found=1; exit } END { if (!found) exit 1 }' "$PASSWD_FILE"
+}
+authorize_user() {
+  [ "$#" -eq 3 ] || { usage >&2; exit 2; }
+  username=$2
+  public_key=$3
+  case "$username" in ''|*[!a-zA-Z0-9_-]*) echo "vssh: invalid username." >&2; exit 2 ;; esac
+  [ "$username" != root ] || { echo "vssh: root SSH login is disabled; authorize a regular user." >&2; exit 1; }
+  home=$(user_home "$username") || { echo "vssh: user does not exist: $username" >&2; exit 1; }
+  case "$home" in "$HOME_ROOT"/*) ;; *) echo "vssh: refusing a user home outside the configured home root." >&2; exit 1 ;; esac
+  [ -d "$home" ] && [ ! -L "$home" ] || { echo "vssh: user home is missing or symlinked: $home" >&2; exit 1; }
+
+  case "$public_key" in *'
+'*) echo "vssh: provide exactly one public key line." >&2; exit 2 ;; esac
+  case "$public_key" in *' '*) ;; *) echo "vssh: malformed public key." >&2; exit 2 ;; esac
+  key_type=${public_key%% *}
+  key_rest=${public_key#* }
+  key_blob=${key_rest%% *}
+  case "$key_type" in ssh-ed25519|ecdsa-sha2-nistp256|sk-ssh-ed25519@openssh.com) ;; *) echo "vssh: unsupported key type." >&2; exit 2 ;; esac
+  case "$key_blob" in ''|*[!A-Za-z0-9+/=]*) echo "vssh: malformed public-key data." >&2; exit 2 ;; esac
+
+  ssh_dir=$home/.ssh
+  authorized=$ssh_dir/authorized_keys
+  [ ! -L "$ssh_dir" ] || { echo "vssh: refusing symlinked SSH directory." >&2; exit 1; }
+  [ ! -L "$authorized" ] || { echo "vssh: refusing symlinked authorized_keys." >&2; exit 1; }
+  mkdir -p "$ssh_dir"
+  chown "$username" "$ssh_dir"
+  chmod 0700 "$ssh_dir"
+  if [ -e "$authorized" ] && [ ! -f "$authorized" ]; then
+    echo "vssh: authorized_keys is not a regular file." >&2
+    exit 1
+  fi
+  key_line="$key_type $key_blob"
+  if [ -f "$authorized" ] && awk -v t="$key_type" -v b="$key_blob" '$1 == t && $2 == b { found=1 } END { exit !found }' "$authorized"; then
+    echo "vssh: public key is already authorized for $username."
+    exit 0
+  fi
+
+  umask 077
+  tmp=$ssh_dir/authorized_keys.tmp.$$
+  (set -C; : > "$tmp") 2>/dev/null || { echo "vssh: temporary authorized_keys file already exists." >&2; exit 1; }
+  trap 'rm -f "$tmp"' 0
+  trap 'exit 1' HUP INT TERM
+  if [ -f "$authorized" ]; then
+    cat "$authorized" > "$tmp"
+    printf '\n%s\n' "$key_line" >> "$tmp"
+  else
+    printf '%s\n' "$key_line" > "$tmp"
+  fi
+  chown "$username" "$tmp"
+  chmod 0600 "$tmp"
+  mv -f "$tmp" "$authorized"
+  trap - 0 HUP INT TERM
+  echo "vssh: public key authorized for $username."
+}
 case "${1:-}" in
+  --help|-h) [ "$#" -eq 1 ] || { usage >&2; exit 2; }; usage ;;
+  authorize)
+    require_root
+    authorize_user "$@"
+    ;;
   start)
-    [ "$(id -u)" -eq 0 ] || { echo "vssh start requires root." >&2; exit 1; }
-    valid_port || { echo "Invalid VAMPIRE_SSH_PORT (1-65535)." >&2; exit 2; }
+    require_root
+    valid_port || { echo "vssh: invalid VAMPIRE_SSH_PORT (1-65535)." >&2; exit 2; }
     if pidof dropbear >/dev/null 2>&1; then echo "Dropbear is already running."; exit 0; fi
-    [ -s "$AUTHORIZED" ] || {
-      echo "Refusing to start: add a trusted public key to $AUTHORIZED first." >&2
-      echo "Password authentication is disabled; no default key is installed." >&2
+    authorized_found=0
+    for authorized in "$HOME_ROOT"/*/.ssh/authorized_keys; do
+      [ -f "$authorized" ] || continue
+      [ ! -L "$authorized" ] || { echo "vssh: refusing symlinked authorized_keys: $authorized" >&2; exit 1; }
+      [ ! -L "${authorized%/.ssh/authorized_keys}" ] && [ ! -L "${authorized%/authorized_keys}" ] || { echo "vssh: refusing symlinked home or SSH directory." >&2; exit 1; }
+      grep -Eq '^(ssh-ed25519|ecdsa-sha2-nistp256|sk-ssh-ed25519@openssh.com) [A-Za-z0-9+/=]+' "$authorized" || continue
+      chmod 0600 "$authorized"
+      authorized_found=1
+    done
+    [ "$authorized_found" -eq 1 ] || {
+      echo "vssh: refusing to start; authorize a regular user's public key first." >&2
+      echo "Use: vssh authorize vampire 'ssh-ed25519 YOUR_PUBLIC_KEY'." >&2
+      echo "Password authentication and root login are disabled." >&2
       exit 1
     }
-    grep -Eq '^(ssh-ed25519|ecdsa-sha2-nistp256|sk-ssh-ed25519@openssh.com) ' "$AUTHORIZED" || {
-      echo "No supported modern public key found in $AUTHORIZED." >&2
-      exit 1
-    }
-    mkdir -p /root/.ssh "${KEY%/*}"
-    chmod 0700 /root/.ssh "${KEY%/*}"
-    chmod 0600 "$AUTHORIZED"
+    [ ! -L "${KEY%/*}" ] || { echo "vssh: refusing a symlinked host-key directory." >&2; exit 1; }
+    [ ! -L "$KEY" ] || { echo "vssh: refusing a symlinked host key." >&2; exit 1; }
+    mkdir -p "${KEY%/*}"
+    chmod 0700 "${KEY%/*}"
     if [ ! -s "$KEY" ]; then
       dropbearkey -t ed25519 -f "$KEY"
-      chmod 0600 "$KEY"
     fi
+    chmod 0600 "$KEY"
     dropbear -p "$PORT" -s -g -r "$KEY"
-    echo "Dropbear started on port $PORT with password authentication disabled."
-    echo "Host key stored at $KEY. It persists across reboot when /var is on persistent storage."
+    echo "Dropbear started on port $PORT with public-key authentication only."
+    echo "Root SSH login is disabled. Host key: $KEY"
+    echo "The host key persists when /var is on persistent storage."
     ;;
   stop)
+    require_root
     if pidof dropbear >/dev/null 2>&1; then killall dropbear; echo "Dropbear stopped."
     else echo "Dropbear is not running."; fi
     ;;
