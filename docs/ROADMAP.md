@@ -79,6 +79,7 @@ feature release-ready.
 - [x] Add console file manager, hardware inventory and diagnostics.
 - [x] Add an interactive service manager to Vampire Desktop for list, status, start, stop, restart and boot enablement.
 - [ ] Build the branded Vampire Desktop shell: top panel, floating dock, launcher and window integration.
+- [x] Reject symlinked XDG runtime roots, per-user directories and ancestors in graphical preflight; add regression coverage.
 - [ ] Add non-root graphical login/session management and display manager.
 - [ ] Build graphical file manager, terminal and settings applications.
 - [x] Add read-only DRM connector and advertised-mode inventory (`vdisplay`) with fake-sysfs regression coverage; current active mode and display control remain unsupported.
