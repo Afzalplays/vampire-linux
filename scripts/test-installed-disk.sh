@@ -94,7 +94,7 @@ run_boot() {
   local root_partuuid
   root_partuuid="$(sudo blkid -s PARTUUID -o value "${loop}p2")"
   [[ -n "$root_partuuid" ]] || die "$mode installed root partition has no PARTUUID"
-  for required in usr/bin/vfetch usr/bin/vpower usr/bin/vsettings usr/bin/vdisplay etc/init.d/rcS etc/inittab etc/fstab etc/vampire/install.conf boot/vmlinuz boot/grub/grub.cfg; do
+  for required in usr/bin/vfetch usr/bin/vpower usr/bin/vsettings usr/bin/vdisplay usr/bin/vlauncher etc/init.d/rcS etc/inittab etc/fstab etc/vampire/install.conf boot/vmlinuz boot/grub/grub.cfg; do
     [[ -s "$INSPECT_MOUNT/$required" ]] || die "$mode installed root is missing required file: /$required"
   done
   [[ -x "$INSPECT_MOUNT/usr/bin/vfetch" ]] || die "$mode installed VFetch is not executable"
@@ -130,6 +130,9 @@ run_boot() {
     fi
     grep -Fq "unknown app: unknown" "$WORK/$mode.app-reject.log" || die "$mode installed app launcher rejection was unclear"
     grep -Fq "path=/usr/bin/vampire-terminal" "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" || die "$mode installed Weston config omitted Vampire Terminal"
+    grep -Fq "path=/usr/bin/vampire-app launcher" "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" || die "$mode installed Weston config omitted Vampire Launcher"
+    sudo chroot "$INSPECT_MOUNT" /usr/bin/vlauncher --search Settings > "$WORK/$mode.vlauncher-search.log" 2>&1 || die "$mode installed Vampire Launcher search failed"
+    grep -Fq "Settings|Configure appearance" "$WORK/$mode.vlauncher-search.log" || die "$mode installed Vampire Launcher search output is invalid"
     sudo chroot "$INSPECT_MOUNT" /usr/bin/vsh --version > "$WORK/$mode.vsh-version.log" 2>&1 || die "$mode installed Vampire Shell version command failed"
     grep -Fq "Vampire Shell" "$WORK/$mode.vsh-version.log" || die "$mode installed Vampire Shell version output is invalid"
     sudo chroot "$INSPECT_MOUNT" /usr/bin/vsh -c "printf VAMPIRE_SHELL_OK" > "$WORK/$mode.vsh-command.log" 2>&1 || die "$mode installed Vampire Shell command execution failed"

@@ -15,7 +15,7 @@ desktop_paths=(
   usr/lib/vampire/settings-bootstrap etc/vampire/settings.defaults
   etc/xdg/weston/weston.ini etc/xdg/foot/foot.ini
   usr/bin/vdesktop usr/bin/vgraphical usr/bin/vampire-app
-  usr/bin/vampire-terminal usr/bin/vdisplay
+  usr/bin/vampire-terminal usr/bin/vdisplay usr/bin/vlauncher
 )
 make_archive() {
   local edition="$1"

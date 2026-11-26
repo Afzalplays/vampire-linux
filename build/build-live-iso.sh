@@ -30,7 +30,7 @@ chmod 0755 "$OVERLAY/usr/bin/vctl" "$OVERLAY/usr/bin/vnetwork" "$OVERLAY/usr/bin
   "$OVERLAY/usr/bin/vsettings" "$OVERLAY/usr/bin/vdesktop" "$OVERLAY/usr/bin/vmonitor" \
   "$OVERLAY/usr/bin/vinstall" "$OVERLAY/usr/bin/vpm" "$OVERLAY/usr/bin/vgraphical" "$OVERLAY/usr/bin/vupdate" "$OVERLAY/usr/bin/vsoftware" "$OVERLAY/usr/bin/vssh" "$OVERLAY/usr/bin/vfiles" "$OVERLAY/usr/bin/vsh" \
   "$OVERLAY/usr/bin/vampire-terminal" "$OVERLAY/usr/bin/vampire-app" "$OVERLAY/usr/bin/vhelp" "$OVERLAY/usr/bin/vpower" \
-  "$OVERLAY/usr/bin/vdisplay" \
+  "$OVERLAY/usr/bin/vdisplay" "$OVERLAY/usr/bin/vlauncher" \
   "$OVERLAY/usr/lib/vampire/settings_apply.py" "$OVERLAY/usr/lib/vampire/udhcpc.script" "$OVERLAY/usr/lib/vampire/session-runtime"
 chmod 0755 "$OVERLAY/etc/init.d/rcS" "$OVERLAY/etc/vampire/services.d/network"
 if [[ ! -d "$BUILD_DIR/buildroot/.git" ]]; then
