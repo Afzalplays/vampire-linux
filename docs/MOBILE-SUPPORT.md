@@ -1,6 +1,6 @@
 # Vampire OS mobile support
 
-**Status:** Planned. This document separates mobile-friendly access from a native mobile operating-system port.
+**Status:** Responsive PWA portal implemented. Native Android device images and a native iOS companion remain planned and are not release deliverables.
 
 ## Goals
 
@@ -10,12 +10,13 @@ Vampire OS should be usable from a phone for project downloads, documentation, r
 
 ### 1. Mobile web experience (Android and iOS)
 
-Build an installable, responsive Progressive Web App (PWA) for the Vampire OS project portal. It can provide release/download links, checksums, documentation, support links and (when implemented and secured) a mobile-friendly server administration interface.
+The static, installable Progressive Web App (PWA) project portal lives in `mobile/`. It provides project/release/documentation links, a responsive layout, install guidance and a static offline shell.
 
 - Responsive layouts at phone, tablet and desktop widths.
 - Touch targets, keyboard accessibility, scalable text and high-contrast mode.
 - Respect `prefers-reduced-motion`, dark/light appearance and safe-area insets.
-- PWA manifest, app icons, offline cache for static help pages, and clear update behaviour.
+- PWA manifest, app icon, offline cache for the explicit static asset allowlist, and installation/update feedback.
+- Detect standalone installation, expose the browser install prompt when available, and provide Safari Home Screen instructions for iPhone/iPad.
 - HTTPS required for service-worker installation.
 - Do not cache credentials, private keys, tokens or privileged API responses.
 - A PWA is a web app; it does **not** boot or replace the phone's operating system.
@@ -54,7 +55,7 @@ Every release artifact should show architecture, edition, version, checksum, sig
 
 ## Delivery phases
 
-1. [x] Responsive project/download portal and PWA shell (`mobile/`).
+1. [x] Responsive project/download portal and PWA shell with install-state feedback and offline static asset caching (`mobile/`).
 2. Secure mobile-friendly server administration UX, with authentication and MFA.
 3. Select an Android ARM64 reference device and build a hardware-support matrix.
 4. Prototype and test a device-specific mobile image and touch-first shell.
@@ -65,6 +66,6 @@ Every release artifact should show architecture, edition, version, checksum, sig
 - Portal is usable at 320px, 360px, 390px, 768px and desktop widths without horizontal overflow.
 - Portrait and landscape layouts work; safe-area insets are respected.
 - Touch targets, scalable text, keyboard navigation and reduced-motion preferences are supported.
-- PWA install and offline static-page behaviour are tested on supported Android and iOS browser versions.
+- PWA install guidance and offline static-page behaviour are contract-tested; real browser/device installation still requires Android and iOS device validation.
 - Download labels prevent users from mistaking x86_64 ISOs for phone images.
 - Native mobile claims are backed by named-device boot, driver, power-management and recovery tests.

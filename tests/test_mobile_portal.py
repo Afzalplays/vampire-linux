@@ -40,6 +40,27 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn("url.search", worker)
         self.assertNotRegex(worker, re.compile(r"Authorization|localStorage|sessionStorage|indexedDB", re.I))
 
+    def test_install_ui_reports_platform_specific_fallback_and_user_choice(self):
+        app = (MOBILE / "app.js").read_text()
+        for marker in (
+            "navigator.standalone",
+            "display-mode",
+            "isAppleMobileDevice",
+            "open this page in Safari",
+            "Install app or Add to Home Screen",
+            'choice.outcome === "accepted"',
+            "Installation was cancelled",
+            "appinstalled",
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, app)
+
+    def test_service_worker_failure_is_reported_without_breaking_online_portal(self):
+        app = (MOBILE / "app.js").read_text()
+        self.assertIn('navigator.serviceWorker.register("./sw.js")', app)
+        self.assertIn("Offline support could not be enabled", app)
+        self.assertIn("portal still works online", app)
+
     def test_phone_image_warning_is_visible(self):
         html = (MOBILE / "index.html").read_text()
         self.assertIn("not installable phone images", html)
