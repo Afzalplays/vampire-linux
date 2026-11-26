@@ -120,7 +120,7 @@ run_boot() {
   if [[ "$EDITION" == desktop ]]; then
     sudo chroot "$INSPECT_MOUNT" /usr/bin/vdisplay --help > "$WORK/$mode.display-help.log" 2>&1 || die "$mode installed vdisplay help failed"
     grep -Fq "Usage: vdisplay" "$WORK/$mode.display-help.log" || die "$mode installed display utility help is invalid"
-    sudo chroot "$INSPECT_MOUNT" /usr/bin/vdisplay --json > "$WORK/$mode.display-json.log" 2>&1 || die "$mode installed vdisplay JSON inventory failed"
+    sudo chroot "$INSPECT_MOUNT" /bin/sh -c 'VAMPIRE_DRM_SYSFS=/tmp /usr/bin/vdisplay --json' > "$WORK/$mode.display-json.log" 2>&1 || die "$mode installed vdisplay JSON inventory failed"
     python3 - "$WORK/$mode.display-json.log" <<'PY'
 import json
 import sys
