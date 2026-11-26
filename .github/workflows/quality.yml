@@ -51,4 +51,9 @@ jobs:
           bash tests/test-rootfs-artifact.sh
           bash tests/test-session-runtime.sh
           bash tests/test-graphical-preflight.sh
+          bash tests/test-vampire-shell.sh
+          bash tests/test-settings-desktop.sh
+          bash tests/test-desktop-graphical-menu.sh
+          bash tests/test-weston-launchers.sh
+          bash tests/test-installed-disk-harness.sh
           bash tests/test-post-fakeroot-vampire.sh
