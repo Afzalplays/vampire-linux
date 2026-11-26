@@ -113,4 +113,58 @@ class UpdateManifestTests(unittest.TestCase):
         with self.assertRaises(ValueError): vupdate.validate_manifest(data)
     def test_reject_channel_mismatch(self):
         with self.assertRaises(ValueError): vupdate.validate_manifest(self.manifest(),channel="testing")
+
+    def test_read_config_rejects_symlink(self):
+        import json
+        import tempfile
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            target = root / "real-config.json"
+            target.write_text(json.dumps({
+                "manifest_url": "https://updates.example.invalid/manifest.json",
+                "signature_url": "https://updates.example.invalid/manifest.minisig",
+                "minisign_public_key": "trusted-key",
+            }))
+            link = root / "update.json"
+            link.symlink_to(target)
+            with patch.object(vupdate, "CONFIG", link):
+                with self.assertRaises(SystemExit):
+                    vupdate.read_config()
+
+    def test_verified_manifest_rejects_symlinked_cache_before_network(self):
+        import tempfile
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            target = root / "real-cache"
+            target.mkdir()
+            link = root / "cache-link"
+            link.symlink_to(target, target_is_directory=True)
+            with patch.object(vupdate, "CACHE", link), patch.object(
+                    vupdate, "read_config", return_value={
+                        "manifest_url": "https://updates.example.invalid/manifest.json",
+                        "signature_url": "https://updates.example.invalid/manifest.minisig",
+                        "minisign_public_key": "trusted-key",
+                    }), patch.object(vupdate.shutil, "which") as which:
+                with self.assertRaises(SystemExit):
+                    vupdate.verified_manifest()
+                which.assert_not_called()
+
+    def test_status_rejects_symlinked_cache(self):
+        import tempfile
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            target = root / "real-cache"
+            target.mkdir()
+            link = root / "cache-link"
+            link.symlink_to(target, target_is_directory=True)
+            with patch.object(vupdate, "CACHE", link):
+                with self.assertRaises(SystemExit):
+                    vupdate.command_status(None)
+
 if __name__=="__main__": unittest.main()

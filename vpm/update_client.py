@@ -15,6 +15,13 @@ def is_https_url(value):
     parsed=urllib.parse.urlparse(value if isinstance(value,str) else "")
     return parsed.scheme=="https" and bool(parsed.netloc) and not parsed.username and not parsed.password
 
+def reject_symlink_components(path, label):
+    """Reject symlinks in every existing component before privileged file I/O."""
+    absolute=pathlib.Path(os.path.abspath(os.fspath(path)))
+    for component in reversed((absolute,*absolute.parents)):
+        if component.is_symlink():
+            fail("refusing symlinked "+label+" path component: "+str(component))
+
 def validate_manifest(data,channel="stable",architecture="x86_64"):
     if not isinstance(data,dict) or data.get("format")!=1: raise ValueError("unsupported update manifest format")
     if data.get("channel")!=channel: raise ValueError("manifest channel mismatch")
@@ -31,6 +38,7 @@ def validate_manifest(data,channel="stable",architecture="x86_64"):
     return data
 
 def read_config():
+    reject_symlink_components(CONFIG,"update configuration")
     try: cfg=json.loads(CONFIG.read_text(encoding="utf-8"))
     except FileNotFoundError: fail("configuration not found: "+str(CONFIG))
     except (OSError,json.JSONDecodeError) as exc: fail("cannot read configuration: "+str(exc))
@@ -55,10 +63,12 @@ def fetch_bytes(url,limit):
 
 def verified_manifest():
     cfg=read_config()
+    reject_symlink_components(CACHE,"update cache")
     if not shutil.which("minisign"): fail("minisign is required to verify update metadata")
     manifest_bytes=fetch_bytes(cfg["manifest_url"],MAX_MANIFEST)
     signature_bytes=fetch_bytes(cfg["signature_url"],MAX_SIGNATURE)
     CACHE.mkdir(parents=True,exist_ok=True)
+    reject_symlink_components(CACHE,"update cache")
     with tempfile.TemporaryDirectory(prefix=".vupdate-",dir=CACHE) as tmp:
         manifest_path=pathlib.Path(tmp)/"manifest.json"
         signature_path=pathlib.Path(tmp)/"manifest.minisig"
@@ -81,7 +91,10 @@ def command_check(_args):
     print("This command does not install or apply the update.")
 
 def command_download(_args):
-    m=verified_manifest(); a=m["artifact"]; CACHE.mkdir(parents=True,exist_ok=True)
+    m=verified_manifest(); a=m["artifact"]
+    reject_symlink_components(CACHE,"update cache")
+    CACHE.mkdir(parents=True,exist_ok=True)
+    reject_symlink_components(CACHE,"update cache")
     final=CACHE/("vampire-os-"+m["version"]+"-x86_64.img")
     fd,tmp=tempfile.mkstemp(prefix=".download-",dir=CACHE); digest=hashlib.sha256(); total=0
     try:
@@ -132,6 +145,7 @@ def command_verify(args):
     print("Verification only; no system files were changed.")
 
 def command_status(_args):
+    reject_symlink_components(CACHE,"update cache")
     print("Vampire OS update cache: "+str(CACHE))
     items=sorted(p.name for p in CACHE.glob("vampire-os-*") if p.is_file()) if CACHE.is_dir() else []
     print("\n".join(items) if items else "No downloaded updates.")
