@@ -48,6 +48,8 @@ class SettingsApplyTests(unittest.TestCase):
             weston_text = weston.read_text()
             foot_text = foot.read_text()
             self.assertIn("background-color=0xfff2f2f6", weston_text)
+            self.assertIn("background-image=/usr/share/vampire/wallpaper.png", weston_text)
+            self.assertIn("background-type=scale-crop", weston_text)
             self.assertIn("panel-color=0x9924546b", weston_text)
             self.assertIn("panel-position=none", weston_text)
             self.assertIn("animation=none", weston_text)

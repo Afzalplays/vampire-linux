@@ -1,5 +1,7 @@
 # Vampire Display diagnostics
 
+The Weston desktop uses a bundled 640×360 Vampire dark wallpaper at `/usr/share/vampire/wallpaper.png`, rendered with `background-type=scale-crop` to fill displays with differing aspect ratios. The wallpaper is a restrained near-black and crimson abstract gradient without character or creature branding.
+
 `vdisplay` is a read-only DRM/KMS connector inventory for the early Desktop
 edition.
 

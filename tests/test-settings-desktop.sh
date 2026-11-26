@@ -41,6 +41,376 @@ test "$("$TMP/vsettings" get voice_access)" = false
 "$TMP/vsettings" apply > "$TMP/apply.out"
 grep -q "^Stored but not applied by this desktop build: blur, dock_auto_hide, dock_magnification, dock_position, dock_size, show_clock, show_date, show_network, show_power, update_channel, voice_access$" "$TMP/apply.out"
 grep -q "^alpha=0.90$" "$TMP/xdg/foot/foot.ini"
+grep -q '^background-image=/usr/share/vampire/wallpaper.png
+test "$("$TMP/vsettings" get theme)" = light
+# Atomic writes must leave no temporary files and keep preferences private.
+if compgen -G "$CONFIG.tmp.*" >/dev/null; then
+  echo "settings update left a temporary file behind" >&2; exit 1
+fi
+test "$(stat -c %a "$CONFIG")" = 600
+"$TMP/vsettings" set blur extreme
+test "$("$TMP/vsettings" get blur)" = extreme
+"$TMP/vsettings" set terminal_opacity 70
+test "$("$TMP/vsettings" get terminal_opacity)" = 70
+"$TMP/vsettings" set accent rose
+test "$("$TMP/vsettings" get accent)" = rose
+"$TMP/vsettings" set surface_transparency 60
+"$TMP/vsettings" set top_panel false
+"$TMP/vsettings" set reduced_motion true
+test "$("$TMP/vsettings" get surface_transparency)" = 60
+"$TMP/vsettings" set dock_auto_hide false
+test "$("$TMP/vsettings" get dock_auto_hide)" = false
+"$TMP/vsettings" set show_network false
+test "$("$TMP/vsettings" get show_network)" = false
+"$TMP/vsettings" set update_channel testing
+test "$("$TMP/vsettings" get update_channel)" = testing
+"$TMP/vsettings" set voice_access true
+test "$("$TMP/vsettings" get voice_access)" = true
+"$TMP/vsettings" apply
+grep -q "^background-color=0xfff2f2f6$" "$TMP/weston.ini"
+grep -q "^panel-color=0x6671324c$" "$TMP/weston.ini"
+grep -q "^panel-position=none$" "$TMP/weston.ini"
+grep -q "^animation=none$" "$TMP/weston.ini"
+grep -q "^alpha=0.70$" "$TMP/xdg/foot/foot.ini"
+"$TMP/vsettings" validate
+cp "$CONFIG" "$TMP/settings.good"
+printf 'unknown_key=bad\n' > "$CONFIG"
+if "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validation accepted an unknown key" >&2; exit 1
+fi
+cp "$CONFIG" "$TMP/settings.invalid"
+if "$TMP/vsettings" set theme light >/dev/null 2>&1; then
+  echo "settings update modified an invalid settings file" >&2; exit 1
+fi
+cmp -s "$CONFIG" "$TMP/settings.invalid" || { echo "invalid settings file changed after refused update" >&2; exit 1; }
+cp "$TMP/settings.good" "$CONFIG"
+printf 'theme=dark\ntheme=light\n' > "$CONFIG"
+if "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validation accepted a duplicate key" >&2; exit 1
+fi
+cp "$TMP/settings.good" "$CONFIG"
+if "$TMP/vsettings" set theme 'dark; touch /tmp/pwned' >/dev/null 2>&1; then
+  echo "settings accepted an invalid/injected value" >&2; exit 1
+fi
+if "$TMP/vsettings" set surface_transparency 90 >/dev/null 2>&1; then
+  echo "settings accepted out-of-range transparency" >&2; exit 1
+fi
+if "$TMP/vsettings" get unknown >/dev/null 2>&1; then
+  echo "settings accepted an unknown key" >&2; exit 1
+fi
+grep -q '^voice_access=true$' "$CONFIG"
+grep -q '^dock_magnification=true$' "$CONFIG"
+mkdir -p "$TMP/mockbin"
+cat > "$TMP/mockbin/vsh" <<'MOCK'
+#!/bin/sh
+printf 'started\n' >> "$VSH_TEST_LOG"
+MOCK
+chmod +x "$TMP/mockbin/vsh"
+export VSH_TEST_LOG="$TMP/vsh.log"
+printf '5\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
+grep -qx 'started' "$VSH_TEST_LOG"
+printf '2\n16\ntesting\n17\ntrue\n1\ndark\n0\n0\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
+test "$("$TMP/vsettings" get update_channel)" = testing
+test "$("$TMP/vsettings" get voice_access)" = true
+test "$("$TMP/vsettings" get theme)" = dark
+grep -q "^background-color=0xff08080c$" "$TMP/weston.ini"
+
+# Applying preferences must reject symlinked settings inputs and output roots.
+ln -s "$CONFIG" "$TMP/settings-link.conf"
+if VAMPIRE_SETTINGS_FILE="$TMP/settings-link.conf" "$TMP/vsettings" apply >/dev/null 2>&1; then
+  echo "settings apply accepted a symlinked preferences file" >&2; exit 1
+fi
+if VAMPIRE_SETTINGS_FILE="$TMP/settings-link.conf" "$TMP/vsettings" list >/dev/null 2>&1; then
+  echo "settings list accepted a symlinked preferences file" >&2; exit 1
+fi
+if VAMPIRE_SETTINGS_FILE="$TMP/settings-link.conf" "$TMP/vsettings" get theme >/dev/null 2>&1; then
+  echo "settings get accepted a symlinked preferences file" >&2; exit 1
+fi
+if VAMPIRE_SETTINGS_FILE="$TMP/settings-link.conf" "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validate accepted a symlinked preferences file" >&2; exit 1
+fi
+mkdir -p "$TMP/real-xdg"
+ln -s "$TMP/real-xdg" "$TMP/xdg-link"
+if XDG_CONFIG_HOME="$TMP/xdg-link" "$TMP/vsettings" apply >/dev/null 2>&1; then
+  echo "settings apply accepted a symlinked output directory" >&2; exit 1
+fi
+
+cat > "$TMP/mockbin/vpm" <<'MOCK'
+#!/bin/sh
+exit 1
+MOCK
+cat > "$TMP/mockbin/vupdate" <<'MOCK'
+#!/bin/sh
+exit 1
+MOCK
+chmod +x "$TMP/mockbin/vpm" "$TMP/mockbin/vupdate"
+printf '9\n\n10\n\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/errors.out"
+grep -q 'Command failed (exit 1)' "$TMP/errors.out"
+
+sh "$ROOT/rootfs-overlay/usr/bin/vmonitor" > "$TMP/monitor.out"
+grep -q "VAMPIRE MONITOR" "$TMP/monitor.out"
+
+# Recent/following log and live monitor menu entries must dispatch exact arguments.
+cat > "$TMP/mockbin/vlogs" <<'MOCK'
+#!/bin/sh
+printf 'vlogs %s\n' "$*" >> "$VLOGS_TEST_LOG"
+MOCK
+cat > "$TMP/mockbin/vmonitor" <<'MOCK'
+#!/bin/sh
+printf 'vmonitor %s\n' "$*" >> "$VLOGS_TEST_LOG"
+MOCK
+chmod +x "$TMP/mockbin/vlogs" "$TMP/mockbin/vmonitor"
+export VLOGS_TEST_LOG="$TMP/log-menu.log"
+printf '19\n\n20\n\n21\n\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/log-menu.out"
+grep -qx 'vlogs --lines 100' "$VLOGS_TEST_LOG"
+grep -qx 'vlogs --follow' "$VLOGS_TEST_LOG"
+grep -qx 'vmonitor --watch 2' "$VLOGS_TEST_LOG"
+
+# Installer menu exposes the non-destructive layout preview after preflight.
+cat > "$TMP/mockbin/vinstall" <<'MOCK'
+#!/bin/sh
+printf 'vinstall %s\n' "$*" >> "$VINSTALL_TEST_LOG"
+case "$1" in preflight|plan) exit 0 ;; *) exit 2 ;; esac
+MOCK
+chmod +x "$TMP/mockbin/vinstall"
+export VINSTALL_TEST_LOG="$TMP/install-menu.log"
+printf '7\n/dev/mockdisk\ny\nuefi\n\n0\n' | VAMPIRE_INSTALLER_CMD="$TMP/mockbin/vinstall" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/install-menu.out"
+grep -qx 'vinstall system-check' "$VINSTALL_TEST_LOG"
+grep -qx 'vinstall list' "$VINSTALL_TEST_LOG"
+grep -qx 'vinstall preflight /dev/mockdisk' "$VINSTALL_TEST_LOG"
+grep -qx 'vinstall plan /dev/mockdisk uefi' "$VINSTALL_TEST_LOG"
+
+
+# Power menu status and destructive-action confirmation dispatch.
+cat > "$TMP/mockbin/vpower" <<'MOCK'
+#!/bin/sh
+printf 'vpower %s\n' "$*" >> "$VPOWER_TEST_LOG"
+MOCK
+chmod +x "$TMP/mockbin/vpower"
+export VPOWER_TEST_LOG="$TMP/power-menu.log"
+printf '22\n1\n\n2\nREBOOT\n\n0\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/power-menu.out"
+grep -qx 'vpower status' "$VPOWER_TEST_LOG"
+grep -qx 'vpower reboot --yes' "$VPOWER_TEST_LOG"
+grep -q 'Vampire Power Controls' "$TMP/power-menu.out"
+
+
+# Service manager menu routes read/list/status and lifecycle requests to vctl.
+cat > "$TMP/mockbin/vctl" <<'MOCK'
+#!/bin/sh
+printf 'vctl %s\n' "$*" >> "$VCTL_TEST_LOG"
+MOCK
+chmod +x "$TMP/mockbin/vctl"
+export VCTL_TEST_LOG="$TMP/service-menu.log"
+printf '23\n1\n\n2\n\n3\nmock\n\n0\n0\n' | VAMPIRE_SERVICE_CMD="$TMP/mockbin/vctl" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/service-menu.out"
+grep -qx 'vctl list' "$VCTL_TEST_LOG"
+grep -qx 'vctl status-all' "$VCTL_TEST_LOG"
+grep -qx 'vctl start mock' "$VCTL_TEST_LOG"
+grep -q 'Vampire Service Manager' "$TMP/service-menu.out"
+
+# Saved Wi-Fi profiles can be reconnected from the Desktop network menu.
+cat > "$TMP/mockbin/vnetwork" <<'MOCK'
+#!/bin/sh
+printf 'vnetwork %s\n' "$*" >> "$VNETWORK_TEST_LOG"
+MOCK
+chmod +x "$TMP/mockbin/vnetwork"
+export VNETWORK_TEST_LOG="$TMP/network-menu.log"
+printf '3\n7\n\n0\n0\n' | VAMPIRE_NETWORK_CMD="$TMP/mockbin/vnetwork" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/network-menu.out"
+grep -qx 'vnetwork wifi auto' "$VNETWORK_TEST_LOG"
+grep -q '7) Reconnect saved Wi-Fi profile' "$TMP/network-menu.out"
+test "$(grep -Fc '7) run_and_pause "$NETWORK" wifi auto ;;' "$ROOT/rootfs-overlay/usr/bin/vdesktop")" -eq 1
+grep -q '7) Reconnect saved Wi-Fi profile' "$TMP/network-menu.out"
+
+echo "Vampire settings, Desktop preference menu, service/power controls, log/monitor dispatch, Vampire Shell dispatch and monitor tests passed."
+ "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
+grep -q '^background-type=scale-crop
+test "$("$TMP/vsettings" get theme)" = light
+# Atomic writes must leave no temporary files and keep preferences private.
+if compgen -G "$CONFIG.tmp.*" >/dev/null; then
+  echo "settings update left a temporary file behind" >&2; exit 1
+fi
+test "$(stat -c %a "$CONFIG")" = 600
+"$TMP/vsettings" set blur extreme
+test "$("$TMP/vsettings" get blur)" = extreme
+"$TMP/vsettings" set terminal_opacity 70
+test "$("$TMP/vsettings" get terminal_opacity)" = 70
+"$TMP/vsettings" set accent rose
+test "$("$TMP/vsettings" get accent)" = rose
+"$TMP/vsettings" set surface_transparency 60
+"$TMP/vsettings" set top_panel false
+"$TMP/vsettings" set reduced_motion true
+test "$("$TMP/vsettings" get surface_transparency)" = 60
+"$TMP/vsettings" set dock_auto_hide false
+test "$("$TMP/vsettings" get dock_auto_hide)" = false
+"$TMP/vsettings" set show_network false
+test "$("$TMP/vsettings" get show_network)" = false
+"$TMP/vsettings" set update_channel testing
+test "$("$TMP/vsettings" get update_channel)" = testing
+"$TMP/vsettings" set voice_access true
+test "$("$TMP/vsettings" get voice_access)" = true
+"$TMP/vsettings" apply
+grep -q "^background-color=0xfff2f2f6$" "$TMP/weston.ini"
+grep -q "^panel-color=0x6671324c$" "$TMP/weston.ini"
+grep -q "^panel-position=none$" "$TMP/weston.ini"
+grep -q "^animation=none$" "$TMP/weston.ini"
+grep -q "^alpha=0.70$" "$TMP/xdg/foot/foot.ini"
+"$TMP/vsettings" validate
+cp "$CONFIG" "$TMP/settings.good"
+printf 'unknown_key=bad\n' > "$CONFIG"
+if "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validation accepted an unknown key" >&2; exit 1
+fi
+cp "$CONFIG" "$TMP/settings.invalid"
+if "$TMP/vsettings" set theme light >/dev/null 2>&1; then
+  echo "settings update modified an invalid settings file" >&2; exit 1
+fi
+cmp -s "$CONFIG" "$TMP/settings.invalid" || { echo "invalid settings file changed after refused update" >&2; exit 1; }
+cp "$TMP/settings.good" "$CONFIG"
+printf 'theme=dark\ntheme=light\n' > "$CONFIG"
+if "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validation accepted a duplicate key" >&2; exit 1
+fi
+cp "$TMP/settings.good" "$CONFIG"
+if "$TMP/vsettings" set theme 'dark; touch /tmp/pwned' >/dev/null 2>&1; then
+  echo "settings accepted an invalid/injected value" >&2; exit 1
+fi
+if "$TMP/vsettings" set surface_transparency 90 >/dev/null 2>&1; then
+  echo "settings accepted out-of-range transparency" >&2; exit 1
+fi
+if "$TMP/vsettings" get unknown >/dev/null 2>&1; then
+  echo "settings accepted an unknown key" >&2; exit 1
+fi
+grep -q '^voice_access=true$' "$CONFIG"
+grep -q '^dock_magnification=true$' "$CONFIG"
+mkdir -p "$TMP/mockbin"
+cat > "$TMP/mockbin/vsh" <<'MOCK'
+#!/bin/sh
+printf 'started\n' >> "$VSH_TEST_LOG"
+MOCK
+chmod +x "$TMP/mockbin/vsh"
+export VSH_TEST_LOG="$TMP/vsh.log"
+printf '5\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
+grep -qx 'started' "$VSH_TEST_LOG"
+printf '2\n16\ntesting\n17\ntrue\n1\ndark\n0\n0\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" >/dev/null
+test "$("$TMP/vsettings" get update_channel)" = testing
+test "$("$TMP/vsettings" get voice_access)" = true
+test "$("$TMP/vsettings" get theme)" = dark
+grep -q "^background-color=0xff08080c$" "$TMP/weston.ini"
+
+# Applying preferences must reject symlinked settings inputs and output roots.
+ln -s "$CONFIG" "$TMP/settings-link.conf"
+if VAMPIRE_SETTINGS_FILE="$TMP/settings-link.conf" "$TMP/vsettings" apply >/dev/null 2>&1; then
+  echo "settings apply accepted a symlinked preferences file" >&2; exit 1
+fi
+if VAMPIRE_SETTINGS_FILE="$TMP/settings-link.conf" "$TMP/vsettings" list >/dev/null 2>&1; then
+  echo "settings list accepted a symlinked preferences file" >&2; exit 1
+fi
+if VAMPIRE_SETTINGS_FILE="$TMP/settings-link.conf" "$TMP/vsettings" get theme >/dev/null 2>&1; then
+  echo "settings get accepted a symlinked preferences file" >&2; exit 1
+fi
+if VAMPIRE_SETTINGS_FILE="$TMP/settings-link.conf" "$TMP/vsettings" validate >/dev/null 2>&1; then
+  echo "settings validate accepted a symlinked preferences file" >&2; exit 1
+fi
+mkdir -p "$TMP/real-xdg"
+ln -s "$TMP/real-xdg" "$TMP/xdg-link"
+if XDG_CONFIG_HOME="$TMP/xdg-link" "$TMP/vsettings" apply >/dev/null 2>&1; then
+  echo "settings apply accepted a symlinked output directory" >&2; exit 1
+fi
+
+cat > "$TMP/mockbin/vpm" <<'MOCK'
+#!/bin/sh
+exit 1
+MOCK
+cat > "$TMP/mockbin/vupdate" <<'MOCK'
+#!/bin/sh
+exit 1
+MOCK
+chmod +x "$TMP/mockbin/vpm" "$TMP/mockbin/vupdate"
+printf '9\n\n10\n\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/errors.out"
+grep -q 'Command failed (exit 1)' "$TMP/errors.out"
+
+sh "$ROOT/rootfs-overlay/usr/bin/vmonitor" > "$TMP/monitor.out"
+grep -q "VAMPIRE MONITOR" "$TMP/monitor.out"
+
+# Recent/following log and live monitor menu entries must dispatch exact arguments.
+cat > "$TMP/mockbin/vlogs" <<'MOCK'
+#!/bin/sh
+printf 'vlogs %s\n' "$*" >> "$VLOGS_TEST_LOG"
+MOCK
+cat > "$TMP/mockbin/vmonitor" <<'MOCK'
+#!/bin/sh
+printf 'vmonitor %s\n' "$*" >> "$VLOGS_TEST_LOG"
+MOCK
+chmod +x "$TMP/mockbin/vlogs" "$TMP/mockbin/vmonitor"
+export VLOGS_TEST_LOG="$TMP/log-menu.log"
+printf '19\n\n20\n\n21\n\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/log-menu.out"
+grep -qx 'vlogs --lines 100' "$VLOGS_TEST_LOG"
+grep -qx 'vlogs --follow' "$VLOGS_TEST_LOG"
+grep -qx 'vmonitor --watch 2' "$VLOGS_TEST_LOG"
+
+# Installer menu exposes the non-destructive layout preview after preflight.
+cat > "$TMP/mockbin/vinstall" <<'MOCK'
+#!/bin/sh
+printf 'vinstall %s\n' "$*" >> "$VINSTALL_TEST_LOG"
+case "$1" in preflight|plan) exit 0 ;; *) exit 2 ;; esac
+MOCK
+chmod +x "$TMP/mockbin/vinstall"
+export VINSTALL_TEST_LOG="$TMP/install-menu.log"
+printf '7\n/dev/mockdisk\ny\nuefi\n\n0\n' | VAMPIRE_INSTALLER_CMD="$TMP/mockbin/vinstall" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/install-menu.out"
+grep -qx 'vinstall system-check' "$VINSTALL_TEST_LOG"
+grep -qx 'vinstall list' "$VINSTALL_TEST_LOG"
+grep -qx 'vinstall preflight /dev/mockdisk' "$VINSTALL_TEST_LOG"
+grep -qx 'vinstall plan /dev/mockdisk uefi' "$VINSTALL_TEST_LOG"
+
+
+# Power menu status and destructive-action confirmation dispatch.
+cat > "$TMP/mockbin/vpower" <<'MOCK'
+#!/bin/sh
+printf 'vpower %s\n' "$*" >> "$VPOWER_TEST_LOG"
+MOCK
+chmod +x "$TMP/mockbin/vpower"
+export VPOWER_TEST_LOG="$TMP/power-menu.log"
+printf '22\n1\n\n2\nREBOOT\n\n0\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/power-menu.out"
+grep -qx 'vpower status' "$VPOWER_TEST_LOG"
+grep -qx 'vpower reboot --yes' "$VPOWER_TEST_LOG"
+grep -q 'Vampire Power Controls' "$TMP/power-menu.out"
+
+
+# Service manager menu routes read/list/status and lifecycle requests to vctl.
+cat > "$TMP/mockbin/vctl" <<'MOCK'
+#!/bin/sh
+printf 'vctl %s\n' "$*" >> "$VCTL_TEST_LOG"
+MOCK
+chmod +x "$TMP/mockbin/vctl"
+export VCTL_TEST_LOG="$TMP/service-menu.log"
+printf '23\n1\n\n2\n\n3\nmock\n\n0\n0\n' | VAMPIRE_SERVICE_CMD="$TMP/mockbin/vctl" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/service-menu.out"
+grep -qx 'vctl list' "$VCTL_TEST_LOG"
+grep -qx 'vctl status-all' "$VCTL_TEST_LOG"
+grep -qx 'vctl start mock' "$VCTL_TEST_LOG"
+grep -q 'Vampire Service Manager' "$TMP/service-menu.out"
+
+# Saved Wi-Fi profiles can be reconnected from the Desktop network menu.
+cat > "$TMP/mockbin/vnetwork" <<'MOCK'
+#!/bin/sh
+printf 'vnetwork %s\n' "$*" >> "$VNETWORK_TEST_LOG"
+MOCK
+chmod +x "$TMP/mockbin/vnetwork"
+export VNETWORK_TEST_LOG="$TMP/network-menu.log"
+printf '3\n7\n\n0\n0\n' | VAMPIRE_NETWORK_CMD="$TMP/mockbin/vnetwork" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/network-menu.out"
+grep -qx 'vnetwork wifi auto' "$VNETWORK_TEST_LOG"
+grep -q '7) Reconnect saved Wi-Fi profile' "$TMP/network-menu.out"
+test "$(grep -Fc '7) run_and_pause "$NETWORK" wifi auto ;;' "$ROOT/rootfs-overlay/usr/bin/vdesktop")" -eq 1
+grep -q '7) Reconnect saved Wi-Fi profile' "$TMP/network-menu.out"
+
+echo "Vampire settings, Desktop preference menu, service/power controls, log/monitor dispatch, Vampire Shell dispatch and monitor tests passed."
+ "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
+python3 - "$ROOT/rootfs-overlay/usr/share/vampire/wallpaper.png" <<'PY'
+import pathlib, sys
+image = pathlib.Path(sys.argv[1]).read_bytes()
+assert image[:8] == bytes((137, 80, 78, 71, 13, 10, 26, 10))
+assert image[12:16] == b"IHDR"
+assert int.from_bytes(image[16:20], "big") == 640
+assert int.from_bytes(image[20:24], "big") == 360
+PY
 test "$("$TMP/vsettings" get theme)" = light
 # Atomic writes must leave no temporary files and keep preferences private.
 if compgen -G "$CONFIG.tmp.*" >/dev/null; then
