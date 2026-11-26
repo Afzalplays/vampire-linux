@@ -1,0 +1,28 @@
+#!/bin/sh
+# Optional boot-time Wi-Fi profile activation. Enable with: vctl enable wifi
+set -eu
+case "${1:-}" in
+  start)
+    exec /usr/bin/vnetwork wifi auto
+    ;;
+  stop)
+    config_dir=${VAMPIRE_WIFI_CONFIG_DIR:-/etc/vampire}
+    [ ! -L "$config_dir" ] || { echo "wifi service: refusing symlinked profile directory" >&2; exit 1; }
+    result=0
+    for config in "$config_dir"/wpa_supplicant-*.conf; do
+      [ -e "$config" ] || continue
+      [ ! -L "$config" ] && [ -f "$config" ] || { result=1; continue; }
+      profile=${config##*/wpa_supplicant-}
+      iface=${profile%.conf}
+      /usr/bin/vnetwork wifi disconnect "$iface" || result=1
+    done
+    exit "$result"
+    ;;
+  status)
+    exec /usr/bin/vnetwork wifi list
+    ;;
+  *)
+    echo "Usage: wifi {start|stop|status}" >&2
+    exit 2
+    ;;
+esac
