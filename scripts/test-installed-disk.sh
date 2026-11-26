@@ -94,7 +94,7 @@ run_boot() {
   local root_partuuid
   root_partuuid="$(sudo blkid -s PARTUUID -o value "${loop}p2")"
   [[ -n "$root_partuuid" ]] || die "$mode installed root partition has no PARTUUID"
-  for required in usr/bin/vfetch usr/bin/vpower usr/bin/vsettings etc/init.d/rcS etc/inittab etc/fstab etc/vampire/install.conf boot/vmlinuz boot/grub/grub.cfg; do
+  for required in usr/bin/vfetch usr/bin/vpower usr/bin/vsettings usr/bin/vsh usr/bin/vampire-app usr/bin/vampire-terminal etc/init.d/rcS etc/inittab etc/fstab etc/vampire/install.conf boot/vmlinuz boot/grub/grub.cfg; do
     [[ -s "$INSPECT_MOUNT/$required" ]] || die "$mode installed root is missing required file: /$required"
   done
   [[ -x "$INSPECT_MOUNT/usr/bin/vfetch" ]] || die "$mode installed VFetch is not executable"
@@ -115,6 +115,151 @@ run_boot() {
   grep -Fq 'V A M P I R E' "$WORK/$mode.vfetch.log" || die "$mode installed VFetch did not render the Vampire logo"
   grep -Fq 'Kernel:' "$WORK/$mode.vfetch.log" || die "$mode installed VFetch omitted kernel information"
   grep -Fq 'Memory:' "$WORK/$mode.vfetch.log" || die "$mode installed VFetch omitted memory information"
+
+  if [[ "$EDITION" == desktop ]]; then
+    # Exercise the installed desktop command surface in the read-only chroot.
+    # The VM has no DRM device here, so graphical launch itself is validated
+    # separately by the live-image hardware/session preflight tests.
+    sudo chroot "$INSPECT_MOUNT" /usr/bin/vsettings keys > "$WORK/$mode.settings-keys.log" 2>&1 || die "$mode installed vsettings keys failed"
+    grep -Fxq dock_auto_hide "$WORK/$mode.settings-keys.log" || die "$mode installed settings schema omitted dock_auto_hide"
+    sudo chroot "$INSPECT_MOUNT" /usr/bin/vsettings list > "$WORK/$mode.settings-list.log" 2>&1 || die "$mode installed vsettings could not load defaults"
+    grep -Eq '^theme[[:space:]]+dark
+  sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/bin/vpower status > "$WORK/$mode.vpower.log" 2>&1 || die "$mode installed vpower status failed"
+  grep -Fq 'Vampire OS power status' "$WORK/$mode.vpower.log" || die "$mode installed vpower status output is invalid"
+  for action in reboot poweroff halt; do
+    if sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/bin/vpower "$action" > "$WORK/$mode.vpower-reject-$action.log" 2>&1; then
+      die "$mode installed vpower accepted $action without explicit confirmation"
+    fi
+    grep -Fq "refusing $action without the explicit --yes flag" "$WORK/$mode.vpower-reject-$action.log" || die "$mode installed vpower did not safely reject an unconfirmed $action"
+  done
+
+  sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/bin/vinstall system-check > "$WORK/$mode.installer-check.log" 2>&1 || die "$mode installed installer system-check failed"
+  grep -Fq 'Architecture: x86_64' "$WORK/$mode.installer-check.log" || die "$mode installed installer system-check omitted architecture"
+
+  sudo umount "$INSPECT_MOUNT"
+  INSPECT_MOUNT=
+  sudo losetup -d "$loop"
+  LOOPS=()
+  udevadm settle
+
+  rm -f "$log" "$stderr"
+  local -a firmware=()
+  if [[ "$mode" == "uefi" ]]; then
+    local pair code vars_copy
+    pair="$(find_ovmf)" || die "OVMF firmware pair not found"
+    code="${pair%%|*}"
+    vars_copy="$(mktemp "$WORK/OVMF_VARS.XXXXXX.fd")"
+    VARS_FILES+=("$vars_copy")
+    cp "${pair#*|}" "$vars_copy"
+    firmware=(-drive "if=pflash,format=raw,unit=0,readonly=on,file=$code"
+              -drive "if=pflash,format=raw,unit=1,file=$vars_copy")
+  fi
+  set +e
+  timeout --signal=TERM "$TIMEOUT_SECONDS" qemu-system-x86_64 \
+    -machine accel=tcg -m 1024 -smp 2 -drive "file=$image,format=raw,if=ide,index=0" \
+    -nic user,model=e1000 -boot c -display none -monitor none -serial "file:$log" -no-reboot \
+    "${firmware[@]}" >/dev/null 2>"$stderr"
+  status=$?
+  set -e
+  if [[ "$mode" == "uefi" ]]; then
+    rm -f -- "$vars_copy"
+  fi
+  if [[ "$status" -ne 124 && "$status" -ne 143 ]]; then
+    cat "$stderr" >&2 || true
+    cat "$log" >&2 || true
+    die "$mode installed-disk QEMU exited unexpectedly (status $status)"
+  fi
+  if grep -Eqi 'Kernel panic|VFS: Unable to mount root|No working init found|Failed to execute /sbin/init' "$log"; then
+    printf '%s\\n' "---- $mode boot failure signature ----" >&2
+    grep -Ein 'Kernel panic|VFS: Unable to mount root|No working init found|Failed to execute /sbin/init' "$log" >&2 || true
+    die "$mode boot emitted a fatal kernel/init failure"
+  fi
+  grep -Fq 'Vampire OS 0.1.0-dev | x86_64 installed system' "$log" || {
+    cat "$log" >&2 || true
+    die "$mode installed disk did not reach Vampire init"
+  }
+  grep -Eqi 'login:|Password:' "$log" || die "$mode installed disk did not reach serial login"
+  grep -Eqi 'udhcpc: lease of .* obtained' "$log" || die "$mode installed disk did not obtain a DHCP lease"
+  printf 'PASS: %s installed disk reached Vampire OS init and serial login\n' "$mode"
+}
+
+run_boot bios
+run_boot uefi
+printf 'Installed-disk BIOS and UEFI boot tests passed. Images: %s\n' "$WORK"
+ "$WORK/$mode.settings-list.log" || die "$mode installed settings did not load the dark theme default"
+    grep -Eq '^dock_auto_hide[[:space:]]+true
+  sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/bin/vpower status > "$WORK/$mode.vpower.log" 2>&1 || die "$mode installed vpower status failed"
+  grep -Fq 'Vampire OS power status' "$WORK/$mode.vpower.log" || die "$mode installed vpower status output is invalid"
+  for action in reboot poweroff halt; do
+    if sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/bin/vpower "$action" > "$WORK/$mode.vpower-reject-$action.log" 2>&1; then
+      die "$mode installed vpower accepted $action without explicit confirmation"
+    fi
+    grep -Fq "refusing $action without the explicit --yes flag" "$WORK/$mode.vpower-reject-$action.log" || die "$mode installed vpower did not safely reject an unconfirmed $action"
+  done
+
+  sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/bin/vinstall system-check > "$WORK/$mode.installer-check.log" 2>&1 || die "$mode installed installer system-check failed"
+  grep -Fq 'Architecture: x86_64' "$WORK/$mode.installer-check.log" || die "$mode installed installer system-check omitted architecture"
+
+  sudo umount "$INSPECT_MOUNT"
+  INSPECT_MOUNT=
+  sudo losetup -d "$loop"
+  LOOPS=()
+  udevadm settle
+
+  rm -f "$log" "$stderr"
+  local -a firmware=()
+  if [[ "$mode" == "uefi" ]]; then
+    local pair code vars_copy
+    pair="$(find_ovmf)" || die "OVMF firmware pair not found"
+    code="${pair%%|*}"
+    vars_copy="$(mktemp "$WORK/OVMF_VARS.XXXXXX.fd")"
+    VARS_FILES+=("$vars_copy")
+    cp "${pair#*|}" "$vars_copy"
+    firmware=(-drive "if=pflash,format=raw,unit=0,readonly=on,file=$code"
+              -drive "if=pflash,format=raw,unit=1,file=$vars_copy")
+  fi
+  set +e
+  timeout --signal=TERM "$TIMEOUT_SECONDS" qemu-system-x86_64 \
+    -machine accel=tcg -m 1024 -smp 2 -drive "file=$image,format=raw,if=ide,index=0" \
+    -nic user,model=e1000 -boot c -display none -monitor none -serial "file:$log" -no-reboot \
+    "${firmware[@]}" >/dev/null 2>"$stderr"
+  status=$?
+  set -e
+  if [[ "$mode" == "uefi" ]]; then
+    rm -f -- "$vars_copy"
+  fi
+  if [[ "$status" -ne 124 && "$status" -ne 143 ]]; then
+    cat "$stderr" >&2 || true
+    cat "$log" >&2 || true
+    die "$mode installed-disk QEMU exited unexpectedly (status $status)"
+  fi
+  if grep -Eqi 'Kernel panic|VFS: Unable to mount root|No working init found|Failed to execute /sbin/init' "$log"; then
+    printf '%s\\n' "---- $mode boot failure signature ----" >&2
+    grep -Ein 'Kernel panic|VFS: Unable to mount root|No working init found|Failed to execute /sbin/init' "$log" >&2 || true
+    die "$mode boot emitted a fatal kernel/init failure"
+  fi
+  grep -Fq 'Vampire OS 0.1.0-dev | x86_64 installed system' "$log" || {
+    cat "$log" >&2 || true
+    die "$mode installed disk did not reach Vampire init"
+  }
+  grep -Eqi 'login:|Password:' "$log" || die "$mode installed disk did not reach serial login"
+  grep -Eqi 'udhcpc: lease of .* obtained' "$log" || die "$mode installed disk did not obtain a DHCP lease"
+  printf 'PASS: %s installed disk reached Vampire OS init and serial login\n' "$mode"
+}
+
+run_boot bios
+run_boot uefi
+printf 'Installed-disk BIOS and UEFI boot tests passed. Images: %s\n' "$WORK"
+ "$WORK/$mode.settings-list.log" || die "$mode installed settings did not load dock auto-hide default"
+    sudo chroot "$INSPECT_MOUNT" /usr/bin/vgraphical --help > "$WORK/$mode.graphical-help.log" 2>&1 || die "$mode installed graphical-session launcher help failed"
+    grep -Fq 'Usage: vgraphical [--check]' "$WORK/$mode.graphical-help.log" || die "$mode installed graphical-session launcher help is invalid"
+    if sudo chroot "$INSPECT_MOUNT" /usr/bin/vampire-app unknown > "$WORK/$mode.app-reject.log" 2>&1; then
+      die "$mode installed Vampire app launcher accepted an unknown application"
+    fi
+    grep -Fq 'unknown app: unknown' "$WORK/$mode.app-reject.log" || die "$mode installed Vampire app launcher rejection was unclear"
+    grep -Fq 'path=/usr/bin/vampire-terminal' "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" || die "$mode installed Weston config omitted Vampire Terminal"
+    grep -Fq 'path=/usr/bin/vampire-app files' "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" || die "$mode installed Weston config omitted Vampire Files"
+  fi
 
   sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/bin/vpower status > "$WORK/$mode.vpower.log" 2>&1 || die "$mode installed vpower status failed"
   grep -Fq 'Vampire OS power status' "$WORK/$mode.vpower.log" || die "$mode installed vpower status output is invalid"
