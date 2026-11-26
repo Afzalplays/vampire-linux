@@ -76,6 +76,7 @@ jobs:
           bash tests/test-graphical-preflight.sh
           bash -n tests/test-desktop-graphical-menu.sh
           bash tests/test-desktop-graphical-menu.sh
+          bash tests/test_vdesktop_menus.sh
           bash tests/test-settings-launcher.sh
           bash tests/test-vhelp.sh
           echo '=== desktop settings ==='
