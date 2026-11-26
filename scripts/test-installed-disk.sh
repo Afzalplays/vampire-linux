@@ -133,6 +133,13 @@ PY
     sudo chroot "$INSPECT_MOUNT" /usr/bin/vsettings list > "$WORK/$mode.settings-list.log" 2>&1 || die "$mode installed vsettings could not load defaults"
     grep -Eq "^theme[[:space:]]+dark$" "$WORK/$mode.settings-list.log" || die "$mode installed settings did not load dark theme default"
     grep -Eq "^dock_auto_hide[[:space:]]+true$" "$WORK/$mode.settings-list.log" || die "$mode installed settings did not load dock auto-hide default"
+    sudo chroot "$INSPECT_MOUNT" /usr/bin/vsettings reset > "$WORK/$mode.settings-reset.log" 2>&1 || die "$mode installed settings could not initialize defaults"
+    sudo chroot "$INSPECT_MOUNT" /usr/bin/vsettings validate > "$WORK/$mode.settings-validate.log" 2>&1 || die "$mode installed settings defaults failed validation"
+    grep -Fq "Vampire settings are valid." "$WORK/$mode.settings-validate.log" || die "$mode installed settings validation output is invalid"
+    sudo chroot "$INSPECT_MOUNT" /usr/bin/vsettings apply > "$WORK/$mode.settings-apply.log" 2>&1 || die "$mode installed desktop appearance apply failed"
+    grep -Fq "Vampire Desktop appearance applied" "$WORK/$mode.settings-apply.log" || die "$mode installed appearance apply output is invalid"
+    grep -Fq "background-color=0xff08080c" "$INSPECT_MOUNT/run/vampire/weston.ini" || die "$mode installed appearance did not generate the dark Weston theme"
+    grep -Fq "alpha=0.90" "$INSPECT_MOUNT/run/vampire/foot/foot.ini" || die "$mode installed appearance did not generate translucent terminal config"
     sudo chroot "$INSPECT_MOUNT" /usr/bin/vgraphical --help > "$WORK/$mode.graphical-help.log" 2>&1 || die "$mode installed graphical launcher help failed"
     grep -Fq "Usage: vgraphical [--check]" "$WORK/$mode.graphical-help.log" || die "$mode installed graphical launcher help is invalid"
     if sudo chroot "$INSPECT_MOUNT" /usr/bin/vampire-app unknown > "$WORK/$mode.app-reject.log" 2>&1; then
