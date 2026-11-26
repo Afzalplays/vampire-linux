@@ -24,6 +24,7 @@ grep -Fq "1000:1000 $TMP/run/user/1000" "$TMP/chown.log"
 
 # A symlinked per-user runtime directory must be rejected before chown/chmod.
 mkdir -p "$TMP/outside"
+rm -rf "$TMP/run/user/1000"
 ln -s "$TMP/outside" "$TMP/run/user/1000"
 if CHOWN_LOG="$TMP/attack.log" PATH="$TMP/bin:$PATH" VAMPIRE_RUN_ROOT="$TMP/run" VAMPIRE_PASSWD_FILE="$TMP/passwd" sh "$ROOT/rootfs-overlay/usr/lib/vampire/session-runtime" >/dev/null 2>&1; then
   echo "session runtime accepted a symlinked user directory" >&2; exit 1
