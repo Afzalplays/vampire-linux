@@ -9,9 +9,10 @@ cat > "$TMP/bin/foot" <<'MOCK'
 printf '%s\n' "$@" > "$FOOT_ARGS"
 MOCK
 chmod +x "$TMP/bin/foot"
-for app in files settings software monitor; do
+for app in launcher files settings software monitor; do
   FOOT_ARGS="$TMP/$app.args" PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vampire-app" "$app"
   case "$app" in
+    launcher) grep -Fxq /usr/bin/vlauncher "$TMP/$app.args" ;;
     files) grep -Fxq /usr/bin/vfiles "$TMP/$app.args" ;;
     settings) grep -Fxq /usr/bin/vdesktop "$TMP/$app.args"; grep -Fxq -- --settings "$TMP/$app.args" ;;
     software) grep -Fxq /usr/bin/vsoftware "$TMP/$app.args" ;;
@@ -22,7 +23,12 @@ if PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vampire-app" unknown >/de
   echo "Vampire app launcher accepted an unknown app" >&2; exit 1
 fi
 grep -q 'path=/usr/bin/vampire-terminal' "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
+grep -q 'path=/usr/bin/vampire-app launcher' "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
 grep -q 'path=/usr/bin/vampire-app files' "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
+"$ROOT/rootfs-overlay/usr/bin/vlauncher" --search Settings | grep -Fq 'Settings|Configure appearance'
+if "$ROOT/rootfs-overlay/usr/bin/vlauncher" --search no-such-app >/dev/null 2>&1; then
+  echo "Vampire Launcher search returned a missing app" >&2; exit 1
+fi
 grep -q 'path=/usr/bin/vampire-app settings' "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
 grep -q 'path=/usr/bin/vampire-app software' "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
 grep -q 'path=/usr/bin/vampire-app monitor' "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
