@@ -25,8 +25,8 @@ fi
 grep -q 'path=/usr/bin/vampire-terminal' "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
 grep -q 'path=/usr/bin/vampire-app launcher' "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
 grep -q 'path=/usr/bin/vampire-app files' "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
-"$ROOT/rootfs-overlay/usr/bin/vlauncher" --search Settings | grep -Fq 'Settings|Configure appearance'
-if "$ROOT/rootfs-overlay/usr/bin/vlauncher" --search no-such-app >/dev/null 2>&1; then
+sh "$ROOT/rootfs-overlay/usr/bin/vlauncher" --search Settings | grep -Fq 'Settings|Configure appearance'
+if sh "$ROOT/rootfs-overlay/usr/bin/vlauncher" --search no-such-app >/dev/null 2>&1; then
   echo "Vampire Launcher search returned a missing app" >&2; exit 1
 fi
 grep -q 'path=/usr/bin/vampire-app settings' "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
