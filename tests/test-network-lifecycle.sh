@@ -52,6 +52,16 @@ if PATH="$TMP/bin:$PATH" interface=test0 ip='192.0.2.999' subnet=255.255.255.0 s
   echo "DHCP hook accepted an invalid IPv4 address" >&2; exit 1
 fi
 
+# A subnet mask must be a contiguous prefix, not merely four in-range octets.
+before_calls="$(wc -l < "$NETWORK_CALLS")"
+for invalid_mask in 255.0.255.0 255.255.255.1 255.255.255.256; do
+  if PATH="$TMP/bin:$PATH" interface=test0 ip=192.0.2.25 subnet="$invalid_mask" sh "$VAMPIRE_DHCP_HOOK" bound >/dev/null 2>&1; then
+    echo "DHCP hook accepted non-contiguous or out-of-range subnet mask: $invalid_mask" >&2; exit 1
+  fi
+done
+after_calls="$(wc -l < "$NETWORK_CALLS")"
+test "$before_calls" = "$after_calls"
+
 before_calls="$(wc -l < "$NETWORK_CALLS")"
 if PATH="$TMP/bin:$PATH" interface=test0 ip=192.0.2.25 subnet=255.255.255.0 dns='1.1.1.1 8.8.8.999' sh "$VAMPIRE_DHCP_HOOK" bound >/dev/null 2>&1; then
   echo "DHCP hook accepted an invalid DNS address" >&2; exit 1
