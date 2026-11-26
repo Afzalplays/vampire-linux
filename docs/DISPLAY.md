@@ -8,12 +8,16 @@ edition.
 ```sh
 vdisplay
 vdisplay --help
+vdisplay --json
 ```
 
 The command reads connector status and advertised modes from
 `/sys/class/drm`. For isolated tests, set `VAMPIRE_DRM_SYSFS` to a fixture
 directory. It rejects a symlinked sysfs root, skips symlinked connector entries,
-and validates mode strings before printing them.
+and validates mode strings before printing them. The `--json` option emits a
+machine-readable object containing connector names, connection states,
+advertised modes, and aggregate counts; it is suitable for future desktop
+settings and diagnostics clients.
 
 ## Important limitations
 
