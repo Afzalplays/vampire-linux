@@ -57,3 +57,7 @@ The launcher also exposes `vlauncher --json`, a stable machine-readable
 catalog containing each app's `id`, `name`, `description`, and `category`.
 This is intended as an integration boundary for a future graphical launcher;
 it does not itself provide graphical UI.
+
+## Console menu integration
+
+The Vampire Desktop console preview exposes Display connector inventory as menu item 26. It launches `vdisplay` for a read-only report of connected/disconnected DRM connectors and advertised modes; use `vdisplay --json` from a terminal when a machine-readable inventory is needed. This diagnostic does not alter output modes or scaling.

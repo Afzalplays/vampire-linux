@@ -213,6 +213,7 @@ while :; do
 
     24) run_and_pause vgraphical --check ;;
     25) run_and_pause "$LAUNCHER" ;;
+    26) run_and_pause vdisplay ;;
     0) exit 0 ;;
     *) echo "Invalid choice." ;;
   esac
