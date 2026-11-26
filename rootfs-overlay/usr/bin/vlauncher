@@ -48,20 +48,23 @@ while :; do
   catalog | while IFS='|' read -r id name description; do
     printf '  %-9s %-15s %s\n' "$id" "$name" "$description"
   done
-  printf '\n  Search applications or enter an app ID (0 to close): '
+  printf '\n  Search applications or enter an app ID/name (0 to close): '
   IFS= read -r choice || exit 0
   case "$choice" in
     0|q|quit) exit 0 ;;
-    terminal|files|settings|software|monitor) launch_app "$choice" ;;
-    "") ;;
-    *)
-      matches=$(catalog | grep -iF -- "$choice" || true)
-      if [ -n "$matches" ]; then
-        printf '\n  Matching applications:\n%s\n' "$matches"
-        printf '  Enter the matching app ID to launch it.\n'
-      else
-        printf '  No applications match: %s\n' "$choice"
-      fi
-      ;;
+    "") continue ;;
   esac
+  exact=$(catalog | awk -F'|' -v query="$choice" 'tolower($1) == tolower(query) || tolower($2) == tolower(query)')
+  if [ -n "$exact" ]; then
+    app_id=$(printf '%s\n' "$exact" | cut -d'|' -f1)
+    launch_app "$app_id"
+    continue
+  fi
+  matches=$(catalog | grep -iF -- "$choice" || true)
+  if [ -n "$matches" ]; then
+    printf '\n  Matching applications:\n%s\n' "$matches"
+    printf '  Enter an exact app ID or application name to launch it.\n'
+  else
+    printf '  No applications match: %s\n' "$choice"
+  fi
 done
