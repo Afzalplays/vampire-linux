@@ -34,7 +34,9 @@ feature release-ready.
 - [x] Build Desktop and Server ISO images in CI.
 - [x] Pass legacy BIOS QEMU live-init and serial-login smoke test.
 - [x] Pass UEFI QEMU live-init and serial-login test with OVMF (Desktop and Server, CI run 43246672356 / 43246672369).
-- [ ] Verify VFetch, DHCP, reboot and shutdown inside both images.
+- [x] Verify VFetch executes from the installed rootfs and DHCP obtains a lease during BIOS/UEFI live and installed-disk boot tests for both editions.
+- [x] Verify power-status reporting and that reboot/poweroff/halt reject unconfirmed requests in both installed editions.
+- [ ] Exercise confirmed reboot and poweroff end-to-end inside disposable QEMU sessions and verify the expected restart/shutdown behaviour.
 - [x] Publish checksum-verified developer ISO workflow artifacts after BIOS and UEFI tests pass (Desktop and Server artifacts uploaded).
 
 ## Core operating system
