@@ -38,6 +38,7 @@ CPU, GPU, memory, package count, uptime, and other host details.
 - [Product and engineering blueprint](docs/PRODUCT-BLUEPRINT.md)
 - [Mobile support and Android/iOS compatibility](docs/MOBILE-SUPPORT.md)
 - [Installable mobile portal (PWA)](mobile/README.md)
+- [Display diagnostics and limitations](docs/DISPLAY.md)
 - [Server edition](docs/SERVER-EDITION.md)
 - [Desktop UX specification](docs/DESKTOP-UX-SPEC.md)
 - [Settings, voice, updates and boot specification](docs/SETTINGS-VOICE-UPDATES-BOOT.md)
