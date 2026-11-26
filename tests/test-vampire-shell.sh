@@ -27,3 +27,17 @@ if VAMPIRE_BASH_CMD="$TMP/missing" VAMPIRE_SHELL_RC="$TMP/etc/vampire/shellrc" "
   exit 1
 fi
 echo "Vampire Shell launcher tests passed."
+
+# Exercise the real interactive profile and ensure programmable completion is
+# loaded only in interactive mode, not merely present as an unreferenced file.
+cp "$ROOT/rootfs-overlay/etc/vampire/completion.bash" "$TMP/completion.bash"
+printf 'complete -p vpower\nexit\n' | \
+  VAMPIRE_COMPLETION_FILE="$TMP/completion.bash" \
+  VAMPIRE_HISTORY_FILE="$TMP/history" \
+  bash --noprofile --rcfile "$TMP/etc/vampire/shellrc" -i >"$TMP/interactive.log" 2>&1
+grep -Fq ' -F _vampire_complete vpower' "$TMP/interactive.log" || {
+  cat "$TMP/interactive.log" >&2
+  echo "interactive Vampire Shell did not load programmable completion" >&2
+  exit 1
+}
+echo "Vampire Shell interactive completion profile test passed."

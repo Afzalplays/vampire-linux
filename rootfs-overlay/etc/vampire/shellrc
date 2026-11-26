@@ -18,9 +18,10 @@ if [[ $- == *i* ]]; then
   alias ..='cd ..'
   alias vinfo='vfetch'
   alias help='vhelp'
-  if [[ -r /etc/vampire/completion.bash ]]; then
+  completion_file="${VAMPIRE_COMPLETION_FILE:-/etc/vampire/completion.bash}"
+  if [[ -r "$completion_file" ]]; then
     # Only load programmable completion in interactive sessions.
-    source /etc/vampire/completion.bash
+    source "$completion_file"
   fi
   printf '\033[1;31mVampire Shell\033[0m  |  Type vhelp for the command reference.\n'
 fi
