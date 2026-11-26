@@ -40,9 +40,19 @@ wpa_supplicant configuration with mode 0600, and starts DHCP after association.
 The configuration is stored under `/etc/vampire/`; on a live image this is
 temporary unless the user has configured persistence.
 
+Saved profiles can be reactivated with `vnetwork wifi auto`. To enable
+automatic activation at boot on an installed system, run
+`vctl enable wifi`; disable it with `vctl disable wifi`. The optional Wi-Fi
+service only reads regular profile files with mode 0600, refuses symlinked
+profile paths, waits for WPA association, and then requests DHCP. The generic
+wired-network service skips wireless interfaces so DHCP does not race ahead of
+Wi-Fi authentication. The Desktop network menu also exposes saved-profile
+reconnection.
+
 Current limitations: WPA3/Enterprise authentication, managed profile
-selection and deletion, automatic reconnection policy, static IPv4 profiles,
-VPN integration, and a graphical network settings panel are not implemented.
+selection and deletion, automatic retry/backoff after a failed association,
+static IPv4 profiles, VPN integration, and a graphical network settings panel
+are not implemented.
 Hardware compatibility still requires testing with physical wireless adapters
 and firmware.
 
