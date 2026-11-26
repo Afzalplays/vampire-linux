@@ -4,13 +4,13 @@ ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 export TMP
-mkdir -p "$TMP/bin" "$TMP/ovmf" "$TMP/logs" "$TMP/payload/etc" "$TMP/payload/sbin" "$TMP/payload/bin" "$TMP/payload/boot" "$TMP/payload/usr/lib/vampire"
+mkdir -p "$TMP/bin" "$TMP/ovmf" "$TMP/logs" "$TMP/payload/etc" "$TMP/payload/sbin" "$TMP/payload/bin" "$TMP/payload/boot" "$TMP/payload/usr/lib/vampire" "$TMP/payload/usr/bin"
 printf 'NAME="Vampire OS"\\n' > "$TMP/payload/etc/os-release"
 printf 'init' > "$TMP/payload/sbin/init"
 printf 'busybox' > "$TMP/payload/bin/busybox"
 printf 'kernel' > "$TMP/payload/boot/vmlinuz"
 printf 'stage' > "$TMP/payload/usr/lib/vampire/stage-rootfs.py"
-printf 'configure' > "$TMP/payload/usr/lib/vampire/configure-installed-root.py"
+printf 'configure' > "$TMP/payload/usr/lib/vampire/configure-installed-root.py"\nprintf 'vssh' > "$TMP/payload/usr/bin/vssh"
 tar -cf "$TMP/rootfs.tar" -C "$TMP/payload" .
 (cd "$TMP" && sha256sum rootfs.tar > rootfs.tar.sha256)
 printf "firmware-code" > "$TMP/ovmf/OVMF_CODE_4M.fd"
