@@ -130,7 +130,7 @@ feature release-ready.
 - [x] Store SSH host keys under configurable `/var/lib/vampire/ssh/` state for persistence on installed systems with persistent `/var`.
 - [x] Add monitoring, network, storage and hardware diagnostics.
 - [x] Add non-root SSH public-key onboarding with per-user authorized_keys, strict permissions, duplicate detection and symlink rejection; keep password authentication and root login disabled.
-- [x] Test SSH host-key reuse across repeated daemon starts and reject symlinked host-key path ancestors.
+- [x] Test SSH host-key reuse across repeated daemon starts and reject symlinked home-directory and host-key path ancestors.
 - [ ] Validate host-key persistence across an actual installed-system reboot and complete production SSH hardening.
 - [ ] Build multi-host administration, file transfer, deployment and recovery.
 - [ ] Integrate secure remote desktop with VPN-only access controls.
