@@ -3,23 +3,43 @@
 set -eu
 RUN_ROOT=${VAMPIRE_RUN_ROOT:-/run}
 PASSWD_FILE=${VAMPIRE_PASSWD_FILE:-/etc/passwd}
+
+reject_symlink_path() {
+  path=$1
+  case "$path" in /*) ;; *) path=$PWD/$path ;; esac
+  while [ -n "$path" ] && [ "$path" != "/" ]; do
+    [ ! -L "$path" ] || {
+      echo "session-runtime: refusing symlinked runtime path: $path" >&2
+      return 1
+    }
+    path=${path%/*}
+    [ -n "$path" ] || path=/
+  done
+}
+
 ensure_runtime() {
-  username=$1
-  uid=$2
-  gid=$3
+  uid=$1
+  gid=$2
+  case "$uid:$gid" in *[!0-9:]*|:*|*:) echo "session-runtime: invalid account IDs" >&2; return 1 ;; esac
   directory="$RUN_ROOT/user/$uid"
-  case "$uid:$gid" in *[!0-9:]*|:*) echo "session-runtime: invalid account IDs" >&2; return 1 ;; esac
+  reject_symlink_path "$RUN_ROOT" || return 1
+  reject_symlink_path "$RUN_ROOT/user" || return 1
+  reject_symlink_path "$directory" || return 1
   mkdir -p "$directory"
+  # Recheck after creation so a pre-existing link cannot redirect chown/chmod.
+  reject_symlink_path "$directory" || return 1
+  [ -d "$directory" ] || { echo "session-runtime: runtime path is not a directory" >&2; return 1; }
   chown "$uid:$gid" "$directory"
   chmod 0700 "$directory"
 }
-ensure_runtime root 0 0
+
+ensure_runtime 0 0
 if [ -r "$PASSWD_FILE" ]; then
   while IFS=: read -r username _ uid gid _ _ shell; do
     [ "$username" = vampire ] || continue
     [ "$uid" = 1000 ] || { echo "session-runtime: refusing unexpected vampire UID" >&2; exit 1; }
     [ "$shell" = /bin/sh ] || { echo "session-runtime: vampire account has an unsupported shell" >&2; exit 1; }
-    ensure_runtime "$username" "$uid" "$gid"
+    ensure_runtime "$uid" "$gid"
     break
   done < "$PASSWD_FILE"
 fi
