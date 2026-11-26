@@ -81,7 +81,7 @@ python3 - "$ROOT" <<'PY'
 import pathlib, re, struct, sys, zlib
 root = pathlib.Path(sys.argv[1])
 config = (root / "rootfs-overlay/etc/xdg/weston/weston.ini").read_text()
-blocks = re.findall(r"(?ms)^\\[launcher\\]\\s*\\n(.*?)(?=^\\[|\\Z)", config)
+blocks = re.findall(r"(?ms)^\[launcher\]\s*\n(.*?)(?=^\[|\Z)", config)
 assert len(blocks) == 6, len(blocks)
 expected = {
     "/usr/bin/vampire-terminal": "terminal.png",
