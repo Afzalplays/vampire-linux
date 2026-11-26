@@ -28,7 +28,7 @@ while :; do
   catalog | while IFS='|' read -r name description; do
     printf '  %-10s %s\n' "$name" "$description"
   done
-  printf '\n  1) Terminal\n  2) Files\n  3) Settings\n  4) Software Center\n  5) System Monitor\n  0) Close launcher\n  Select: '
+  printf '\n  1) Terminal\n  2) Files\n  3) Settings\n  4) Software Center\n  5) System Monitor\n  6) Search apps\n  0) Close launcher\n  Select: '
   IFS= read -r choice || exit 0
   case "$choice" in
     1) exec foot /bin/sh ;;
@@ -40,7 +40,7 @@ while :; do
       printf 'Search apps: '
       IFS= read -r query || exit 0
       if [ -n "$query" ]; then
-        catalog | grep -iF -- "$query" || printf '  No matching applications.\\n'
+        catalog | grep -iF -- "$query" || printf '  No matching applications.\n'
       else
         catalog | sed 's/|/  —  /'
       fi
