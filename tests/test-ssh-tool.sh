@@ -26,8 +26,9 @@ exit 1
 MOCK
 cat > "$TMP/bin/dropbearkey" <<'MOCK'
 #!/bin/sh
+echo generate >> "$DROPBEARKEY_CALLS"
 while [ "$#" -gt 0 ]; do
-  if [ "$1" = -f ]; then shift; printf 'TEST_HOST_KEY\n' > "$1"; exit 0; fi
+  if [ "$1" = -f ]; then shift; printf 'TEST_HOST_KEY\\n' > "$1"; exit 0; fi
   shift
 done
 exit 2
@@ -38,6 +39,7 @@ printf '%s\n' "$@" > "$DROPBEAR_ARGS"
 MOCK
 chmod +x "$TMP/bin/"*
 export DROPBEAR_ARGS="$TMP/dropbear.args"
+export DROPBEARKEY_CALLS="$TMP/dropbearkey.calls"
 export VAMPIRE_PASSWD_FILE="$TMP/passwd"
 export VAMPIRE_HOME_ROOT="$TMP/home"
 export VAMPIRE_SSH_HOST_KEY="$TMP/var/lib/vampire/ssh/host_key"
@@ -70,6 +72,24 @@ grep -Fxq -- '-p' "$DROPBEAR_ARGS"
 grep -Fxq -- '22' "$DROPBEAR_ARGS"
 test -s "$VAMPIRE_SSH_HOST_KEY"
 test "$(stat -c %a "$VAMPIRE_SSH_HOST_KEY")" = 600
+test "$(wc -l < "$DROPBEARKEY_CALLS")" -eq 1
+
+# A second service start, representing a reboot on persistent /var, must reuse
+# the exact host key rather than silently rotating the server identity.
+cp "$VAMPIRE_SSH_HOST_KEY" "$TMP/host-key.before-restart"
+: > "$DROPBEAR_ARGS"
+"$VSSH" start
+cmp -s "$TMP/host-key.before-restart" "$VAMPIRE_SSH_HOST_KEY"
+test "$(wc -l < "$DROPBEARKEY_CALLS")" -eq 1
+grep -Fxq "$VAMPIRE_SSH_HOST_KEY" "$DROPBEAR_ARGS"
+
+# Every host-key path component is checked, not just the final directory.
+mkdir -p "$TMP/real-var"
+ln -s "$TMP/real-var" "$TMP/linked-var"
+if VAMPIRE_SSH_HOST_KEY="$TMP/linked-var/lib/vampire/ssh/host_key" "$VSSH" start >/dev/null 2>&1; then
+  echo "vssh followed a symlinked host-key ancestor" >&2; exit 1
+fi
+test ! -e "$TMP/real-var/lib"
 
 # Symlinked SSH state must fail closed.
 rm -rf "$TMP/home/vampire/.ssh"
