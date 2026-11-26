@@ -13,9 +13,9 @@ BUILD_OUTPUT="$BUILD_DIR/output-$EDITION"
 JOBS="${JOBS:-$(getconf _NPROCESSORS_ONLN 2>/dev/null || printf '2')}"
 OVERLAY="$ROOT_DIR/rootfs-overlay"
 ISO_ROOT="$BUILD_DIR/iso-root"
-die() { printf 'ERROR: %s\\n' "$*" >&2; exit 1; }
+die() { printf "ERROR: %s\\n" "$*" >&2; exit 1; }
 need() { command -v "$1" >/dev/null 2>&1 || die "Missing host tool: $1"; }
-for tool in git make gcc g++ perl python3 rsync cpio file patch bc bison flex \
+for tool in git make gcc g++ perl python3 rsync cpio file patch bc bison flex \\
             xorriso grub-mkrescue mformat wget unzip xz; do need "$tool"; done
 mkdir -p "$BUILD_DIR" "$OUTPUT_DIR" "$OVERLAY/usr/bin" "$OVERLAY/usr/lib/vampire" "$OVERLAY/etc/vampire/services.d" "$OVERLAY/etc/vpm"
 chmod 0755 "$ROOT_DIR/scripts/post-fakeroot-vampire.sh"
@@ -26,17 +26,28 @@ install -m 0644 "$ROOT_DIR/vpm/update_client.py" "$OVERLAY/usr/lib/vampire/updat
 install -m 0644 "$ROOT_DIR/vpm/vpm.example.json" "$OVERLAY/etc/vpm/vpm.example.json"
 install -m 0755 "$ROOT_DIR/scripts/stage-rootfs.py" "$OVERLAY/usr/lib/vampire/stage-rootfs.py"
 install -m 0755 "$ROOT_DIR/scripts/configure-installed-root.py" "$OVERLAY/usr/lib/vampire/configure-installed-root.py"
-chmod 0755 "$OVERLAY/usr/bin/vctl" "$OVERLAY/usr/bin/vnetwork" "$OVERLAY/usr/bin/vguard" \
-  "$OVERLAY/usr/bin/vsettings" "$OVERLAY/usr/bin/vdesktop" "$OVERLAY/usr/bin/vmonitor" \
-  "$OVERLAY/usr/bin/vinstall" "$OVERLAY/usr/bin/vpm" "$OVERLAY/usr/bin/vgraphical" "$OVERLAY/usr/bin/vupdate" "$OVERLAY/usr/bin/vsoftware" "$OVERLAY/usr/bin/vssh" "$OVERLAY/usr/bin/vfiles" "$OVERLAY/usr/bin/vsh" \
-  "$OVERLAY/usr/bin/vampire-terminal" "$OVERLAY/usr/bin/vampire-app" "$OVERLAY/usr/bin/vhelp" "$OVERLAY/usr/bin/vpower" \
-  "$OVERLAY/usr/bin/vdisplay" "$OVERLAY/usr/bin/vlauncher" \
+chmod 0755 "$OVERLAY/usr/bin/vctl" "$OVERLAY/usr/bin/vnetwork" "$OVERLAY/usr/bin/vguard" \\
+  "$OVERLAY/usr/bin/vsettings" "$OVERLAY/usr/bin/vdesktop" "$OVERLAY/usr/bin/vmonitor" \\
+  "$OVERLAY/usr/bin/vinstall" "$OVERLAY/usr/bin/vpm" "$OVERLAY/usr/bin/vgraphical" "$OVERLAY/usr/bin/vupdate" "$OVERLAY/usr/bin/vsoftware" "$OVERLAY/usr/bin/vssh" "$OVERLAY/usr/bin/vfiles" "$OVERLAY/usr/bin/vsh" \\
+  "$OVERLAY/usr/bin/vampire-terminal" "$OVERLAY/usr/bin/vampire-app" "$OVERLAY/usr/bin/vhelp" "$OVERLAY/usr/bin/vpower" \\
+  "$OVERLAY/usr/bin/vdisplay" "$OVERLAY/usr/bin/vlauncher" \\
   "$OVERLAY/usr/lib/vampire/settings_apply.py" "$OVERLAY/usr/lib/vampire/udhcpc.script" "$OVERLAY/usr/lib/vampire/session-runtime"
 chmod 0755 "$OVERLAY/etc/init.d/rcS" "$OVERLAY/etc/vampire/services.d/network"
+
+# Never reuse an arbitrary or stale Buildroot checkout: both editions must be
+# built from the exact upstream release selected above.
+git check-ref-format "refs/tags/$BUILDROOT_VERSION" >/dev/null || die "Invalid Buildroot release tag: $BUILDROOT_VERSION"
 if [[ ! -d "$BUILD_DIR/buildroot/.git" ]]; then
   git clone --depth 1 --branch "$BUILDROOT_VERSION" https://github.com/buildroot/buildroot.git "$BUILD_DIR/buildroot"
+else
+  git -C "$BUILD_DIR/buildroot" fetch --depth 1 origin \\
+    "refs/tags/$BUILDROOT_VERSION:refs/tags/$BUILDROOT_VERSION"
+  git -C "$BUILD_DIR/buildroot" checkout --detach "$BUILDROOT_VERSION"
 fi
 BR_DIR="$BUILD_DIR/buildroot"
+ACTUAL_BUILDROOT_VERSION="$(git -C "$BR_DIR" describe --tags --exact-match HEAD 2>/dev/null || true)"
+[[ "$ACTUAL_BUILDROOT_VERSION" == "$BUILDROOT_VERSION" ]] || die "Buildroot checkout mismatch: requested $BUILDROOT_VERSION, got ${ACTUAL_BUILDROOT_VERSION:-untagged}"
+
 make -C "$BR_DIR" O="$BUILD_OUTPUT" BR2_DEFCONFIG="$DEFCONFIG" defconfig
 python3 "$ROOT_DIR/scripts/configure-build-output.py" "$BUILD_OUTPUT/.config" "$OVERLAY" "$EDITION"
 make -C "$BR_DIR" O="$BUILD_OUTPUT" olddefconfig
@@ -59,4 +70,4 @@ install -m 0644 "$ROOT_DIR/build/grub.cfg" "$ISO_ROOT/boot/grub/grub.cfg"
 ISO="$OUTPUT_DIR/vampire-os-0.1.0-dev-$EDITION-x86_64.iso"
 grub-mkrescue -o "$ISO" "$ISO_ROOT"
 (cd "$OUTPUT_DIR" && sha256sum "$(basename "$ISO")" > "$(basename "$ISO").sha256")
-printf '\\nBuilt ISO: %s\\nChecksum: %s.sha256\\n' "$ISO" "$ISO"
+printf "\\nBuildroot release: %s\\nBuilt ISO: %s\\nChecksum: %s.sha256\\n' "$BUILDROOT_VERSION" "$ISO" "$ISO"
