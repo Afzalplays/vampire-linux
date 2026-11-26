@@ -39,6 +39,16 @@ if CHOWN_LOG="$TMP/attack-root.log" PATH="$TMP/bin:$PATH" VAMPIRE_RUN_ROOT="$TMP
 fi
 [[ ! -s "$TMP/attack-root.log" ]] || { echo "session runtime attempted chown through a symlinked root" >&2; exit 1; }
 
+# A symlinked ancestor of the runtime root must be rejected too.
+rm -rf "$TMP/run/user"
+mkdir -p "$TMP/real-runtime-parent"
+ln -s "$TMP/real-runtime-parent" "$TMP/runtime-parent-link"
+if CHOWN_LOG="$TMP/attack-parent.log" PATH="$TMP/bin:$PATH" VAMPIRE_RUN_ROOT="$TMP/runtime-parent-link/run" VAMPIRE_PASSWD_FILE="$TMP/passwd" sh "$ROOT/rootfs-overlay/usr/lib/vampire/session-runtime" >/dev/null 2>&1; then
+  echo "session runtime accepted a symlinked runtime-root ancestor" >&2; exit 1
+fi
+[[ ! -s "$TMP/attack-parent.log" ]] || { echo "session runtime attempted chown through a symlinked ancestor" >&2; exit 1; }
+[[ ! -e "$TMP/real-runtime-parent/run" ]] || { echo "session runtime created a directory through a symlinked ancestor" >&2; exit 1; }
+
 
 # Refuse unexpected account identity or shell instead of creating a session.
 cat > "$TMP/passwd-bad-uid" <<'PASSWD'
