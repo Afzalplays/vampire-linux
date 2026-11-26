@@ -22,6 +22,7 @@ printf 'broken-stop:%s\n' "$1" >> "$VAMPIRE_TEST_LOG"
 [ "$1" != stop ]
 SERVICE
 chmod +x "$TMP/services/"*
+chmod 0644 "$TMP/services/wifi"
 export VAMPIRE_SERVICE_DIR="$TMP/services"
 export VAMPIRE_ENABLED_FILE="$TMP/etc/services.enabled"
 export VAMPIRE_TEST_LOG="$TMP/actions"
