@@ -4,6 +4,7 @@ set -eu
 PORT=${VAMPIRE_SSH_PORT:-22}
 KEY=${VAMPIRE_SSH_HOST_KEY:-/var/lib/vampire/ssh/dropbear_ed25519_host_key}
 PASSWD_FILE=${VAMPIRE_PASSWD_FILE:-/etc/passwd}
+HOME_ROOT=${VAMPIRE_HOME_ROOT:-/home}
 usage() {
   cat <<'HELP'
 Usage:
@@ -31,7 +32,7 @@ authorize_user() {
   case "$username" in ''|*[!a-zA-Z0-9_-]*) echo "vssh: invalid username." >&2; exit 2 ;; esac
   [ "$username" != root ] || { echo "vssh: root SSH login is disabled; authorize a regular user." >&2; exit 1; }
   home=$(user_home "$username") || { echo "vssh: user does not exist: $username" >&2; exit 1; }
-  case "$home" in /home/*) ;; *) echo "vssh: refusing a user home outside /home." >&2; exit 1 ;; esac
+  case "$home" in "$HOME_ROOT"/*) ;; *) echo "vssh: refusing a user home outside the configured home root." >&2; exit 1 ;; esac
   [ -d "$home" ] && [ ! -L "$home" ] || { echo "vssh: user home is missing or symlinked: $home" >&2; exit 1; }
 
   case "$public_key" in *'
@@ -88,10 +89,10 @@ case "${1:-}" in
     valid_port || { echo "vssh: invalid VAMPIRE_SSH_PORT (1-65535)." >&2; exit 2; }
     if pidof dropbear >/dev/null 2>&1; then echo "Dropbear is already running."; exit 0; fi
     authorized_found=0
-    for authorized in /home/*/.ssh/authorized_keys; do
+    for authorized in "$HOME_ROOT"/*/.ssh/authorized_keys; do
       [ -f "$authorized" ] || continue
       [ ! -L "$authorized" ] || { echo "vssh: refusing symlinked authorized_keys: $authorized" >&2; exit 1; }
-      [ ! -L "${authorized%/.ssh/authorized_keys}/.ssh" ] || { echo "vssh: refusing symlinked SSH directory." >&2; exit 1; }
+      [ ! -L "${authorized%/.ssh/authorized_keys}" ] && [ ! -L "${authorized%/authorized_keys}" ] || { echo "vssh: refusing symlinked home or SSH directory." >&2; exit 1; }
       grep -Eq '^(ssh-ed25519|ecdsa-sha2-nistp256|sk-ssh-ed25519@openssh.com) [A-Za-z0-9+/=]+' "$authorized" || continue
       chmod 0600 "$authorized"
       authorized_found=1
