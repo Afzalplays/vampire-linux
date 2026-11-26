@@ -202,10 +202,15 @@ wifi_auto() {
   found=0
   result=0
   for config in "$WIFI_CONFIG_DIR"/wpa_supplicant-*.conf; do
-    [ -e "$config" ] || continue
+    [ -e "$config" ] || [ -L "$config" ] || continue
     found=1
     reject_symlink_path "$config" || {
       echo "vnetwork: refusing unsafe Wi-Fi profile: $config" >&2
+      result=1
+      continue
+    }
+    [ -f "$config" ] || {
+      echo "vnetwork: refusing non-regular Wi-Fi profile: $config" >&2
       result=1
       continue
     }
