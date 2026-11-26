@@ -81,6 +81,7 @@ run_case 22 '22\n1\n0\n0\n'
 run_case 23 '23\n1\n0\n0\n'
 run_case 25 '25\n\n0\n'
 run_case 26 '26\n0\n0\n'
+grep -Fq '26) Display connector inventory' "$tmp/output" || { echo 'FAIL: display diagnostics menu entry is not visible' >&2; exit 1; }
 grep -Fq 'vnetwork <status>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: network status action was not dispatched' >&2; exit 1; }
 grep -Fq 'vinstall <requirements>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: installer requirements action was not dispatched' >&2; exit 1; }
 grep -Fq 'vinstall <system-check>' "$VAMPIRE_TEST_LOG" || { echo 'FAIL: installer system check was not dispatched' >&2; exit 1; }
