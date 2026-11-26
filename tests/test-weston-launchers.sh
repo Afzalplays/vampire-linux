@@ -29,7 +29,7 @@ sh "$ROOT/rootfs-overlay/usr/bin/vlauncher" --search Settings | grep -Fq 'Settin
 if sh "$ROOT/rootfs-overlay/usr/bin/vlauncher" --search no-such-app >/dev/null 2>&1; then
   echo "Vampire Launcher search returned a missing app" >&2; exit 1
 fi
-printf '6\\nFiles\\n0\\n' | sh "$ROOT/rootfs-overlay/usr/bin/vlauncher" > "$TMP/search-menu.out"
+printf '6\nFiles\n0\n' | sh "$ROOT/rootfs-overlay/usr/bin/vlauncher" > "$TMP/search-menu.out"
 grep -q '6) Search apps' "$TMP/search-menu.out"
 grep -q 'Files|Browse and manage files' "$TMP/search-menu.out"
 grep -q 'path=/usr/bin/vampire-app settings' "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
