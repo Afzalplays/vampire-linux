@@ -39,7 +39,7 @@ _vampire_complete() {
       ;;
     vnetwork)
       case "$previous" in
-        wifi) candidates="list scan status connect disconnect" ;;
+        wifi) candidates="list scan status connect disconnect auto" ;;
         *) candidates="start stop restart status wifi --help" ;;
       esac
       ;;
