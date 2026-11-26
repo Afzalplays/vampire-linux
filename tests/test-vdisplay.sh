@@ -4,13 +4,15 @@ ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 SYS="$TMP/drm"
-mkdir -p "$SYS/card0-eDP-1" "$SYS/card0-HDMI-A-1" "$SYS/card0-DP-1" "$TMP/external"
+mkdir -p "$SYS/card0-eDP-1" "$SYS/card0-HDMI-A-1" "$SYS/card0-DP-1" "$SYS/card0-DP-2" "$SYS/card0-DP-3" "$TMP/external"
 printf 'connected\n' > "$SYS/card0-eDP-1/status"
 printf '3840x2160\n1920x1080\nnot-a-mode\n' > "$SYS/card0-eDP-1/modes"
 printf 'disconnected\n' > "$SYS/card0-HDMI-A-1/status"
 printf '1920x1080\n' > "$SYS/card0-HDMI-A-1/modes"
 printf 'connected\n' > "$SYS/card0-DP-1/status"
 ln -s "$TMP/external" "$SYS/card0-DP-1/modes"
+ln -s "$TMP/external" "$SYS/card0-DP-2/status"
+printf 'unknown\n' > "$SYS/card0-DP-3/status"
 ln -s "$TMP/external" "$SYS/card0-DP-9"
 OUT="$(VAMPIRE_DRM_SYSFS="$SYS" sh "$ROOT/rootfs-overlay/usr/bin/vdisplay")"
 grep -q 'eDP-1: connected' <<<"$OUT"
@@ -20,6 +22,8 @@ grep -q 'DP-1: connected' <<<"$OUT"
 grep -q 'Mode list unavailable' <<<"$OUT"
 grep -q 'Connectors: 3   Connected: 2' <<<"$OUT"
 grep -q 'not a live-mode reading' <<<"$OUT"
+! grep -q 'DP-2:' <<<"$OUT"
+! grep -q 'DP-3:' <<<"$OUT"
 
 JSON_OUT="$(VAMPIRE_DRM_SYSFS="$SYS" sh "$ROOT/rootfs-overlay/usr/bin/vdisplay" --json)"
 python3 - "$JSON_OUT" <<'PY'
@@ -45,6 +49,7 @@ import json
 import sys
 assert json.loads(sys.argv[1]) == {"connectors": [], "count": 0, "connected": 0}
 PY
+sh "$ROOT/rootfs-overlay/usr/bin/vdisplay" --help | grep -q -- '--json'
 ln -s "$SYS" "$TMP/drm-link"
 if VAMPIRE_DRM_SYSFS="$TMP/drm-link" sh "$ROOT/rootfs-overlay/usr/bin/vdisplay" >/dev/null 2>&1; then
   echo "vdisplay accepted a symlinked sysfs root" >&2
@@ -54,4 +59,8 @@ if sh "$ROOT/rootfs-overlay/usr/bin/vdisplay" unexpected >/dev/null 2>&1; then
   echo "vdisplay accepted an unknown argument" >&2
   exit 1
 fi
-echo "Vampire display inventory and JSON tests passed."
+if sh "$ROOT/rootfs-overlay/usr/bin/vdisplay" --json unexpected >/dev/null 2>&1; then
+  echo "vdisplay accepted extra arguments after --json" >&2
+  exit 1
+fi
+echo "Vampire display inventory, JSON and unsafe-entry tests passed."
