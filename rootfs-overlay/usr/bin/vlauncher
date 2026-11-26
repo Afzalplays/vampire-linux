@@ -15,7 +15,7 @@ catalog() {
     'monitor|System Monitor|View CPU, memory, thermal and network status'
 }
 json_catalog() {
-  printf '%s\\n' '[{"id":"terminal","name":"Terminal","description":"Open Vampire Terminal","category":"system"},{"id":"files","name":"Files","description":"Browse and manage files","category":"utilities"},{"id":"settings","name":"Settings","description":"Configure appearance and desktop preferences","category":"system"},{"id":"software","name":"Software Center","description":"Search, install and remove VPM packages","category":"system"},{"id":"monitor","name":"System Monitor","description":"View CPU, memory, thermal and network status","category":"utilities"}]'
+  printf '%s\n' '[{"id":"terminal","name":"Terminal","description":"Open Vampire Terminal","category":"system"},{"id":"files","name":"Files","description":"Browse and manage files","category":"utilities"},{"id":"settings","name":"Settings","description":"Configure appearance and desktop preferences","category":"system"},{"id":"software","name":"Software Center","description":"Search, install and remove VPM packages","category":"system"},{"id":"monitor","name":"System Monitor","description":"View CPU, memory, thermal and network status","category":"utilities"}]'
 }
 launch_app() {
   case "$1" in
