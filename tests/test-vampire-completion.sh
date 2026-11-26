@@ -10,11 +10,11 @@ complete_for() {
     COMP_WORDS=("$2" "$3")
     COMP_CWORD=1
     _vampire_complete
-    printf "%s\\n" "${COMPREPLY[@]}"
+    printf "%s\n" "${COMPREPLY[@]}"
   ' bash "$COMPLETION" "$command_name" "$prefix")"
   grep -Fxq -- "$expected" <<<"$output" || {
-    printf 'FAIL: %s completion for prefix %s omitted %s\\n' "$command_name" "$prefix" "$expected" >&2
-    printf 'Actual candidates:\\n%s\\n' "$output" >&2
+    printf 'FAIL: %s completion for prefix %s omitted %s\n' "$command_name" "$prefix" "$expected" >&2
+    printf 'Actual candidates:\n%s\n' "$output" >&2
     exit 1
   }
 }
@@ -26,11 +26,11 @@ complete_nested() {
     COMP_WORDS=("$2" "$3" "$4")
     COMP_CWORD=2
     _vampire_complete
-    printf "%s\\n" "${COMPREPLY[@]}"
+    printf "%s\n" "${COMPREPLY[@]}"
   ' bash "$COMPLETION" "$command_name" "$previous" "$prefix")"
   grep -Fxq -- "$expected" <<<"$output" || {
-    printf 'FAIL: %s %s completion omitted %s\\n' "$command_name" "$previous" "$expected" >&2
-    printf 'Actual candidates:\\n%s\\n' "$output" >&2
+    printf 'FAIL: %s %s completion omitted %s\n' "$command_name" "$previous" "$expected" >&2
+    printf 'Actual candidates:\n%s\n' "$output" >&2
     exit 1
   }
 }
@@ -42,11 +42,11 @@ complete_value() {
     COMP_WORDS=("$2" "$3" "$4" "$5")
     COMP_CWORD=3
     _vampire_complete
-    printf "%s\\n" "${COMPREPLY[@]}"
+    printf "%s\n" "${COMPREPLY[@]}"
   ' bash "$COMPLETION" "$command_name" "$subcommand" "$key" "$prefix")"
   grep -Fxq -- "$expected" <<<"$output" || {
-    printf 'FAIL: %s %s %s completion omitted %s\\n' "$command_name" "$subcommand" "$key" "$expected" >&2
-    printf 'Actual candidates:\\n%s\\n' "$output" >&2
+    printf 'FAIL: %s %s %s completion omitted %s\n' "$command_name" "$subcommand" "$key" "$expected" >&2
+    printf 'Actual candidates:\n%s\n' "$output" >&2
     exit 1
   }
 }
