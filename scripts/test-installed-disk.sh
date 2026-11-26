@@ -115,7 +115,6 @@ run_boot() {
   grep -Fq 'V A M P I R E' "$WORK/$mode.vfetch.log" || die "$mode installed VFetch did not render the Vampire logo"
   grep -Fq 'Kernel:' "$WORK/$mode.vfetch.log" || die "$mode installed VFetch omitted kernel information"
   grep -Fq 'Memory:' "$WORK/$mode.vfetch.log" || die "$mode installed VFetch omitted memory information"
-
   if [[ "$EDITION" == desktop ]]; then
     # Exercise the installed desktop command surface in the read-only chroot.
     # The VM has no DRM device here, so graphical launch itself is validated
@@ -260,6 +259,7 @@ printf 'Installed-disk BIOS and UEFI boot tests passed. Images: %s\n' "$WORK"
     grep -Fq 'path=/usr/bin/vampire-terminal' "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" || die "$mode installed Weston config omitted Vampire Terminal"
     grep -Fq 'path=/usr/bin/vampire-app files' "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" || die "$mode installed Weston config omitted Vampire Files"
   fi
+
 
   sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/bin/vpower status > "$WORK/$mode.vpower.log" 2>&1 || die "$mode installed vpower status failed"
   grep -Fq 'Vampire OS power status' "$WORK/$mode.vpower.log" || die "$mode installed vpower status output is invalid"
