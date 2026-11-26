@@ -84,6 +84,7 @@ feature release-ready.
 ## Mobile support
 
 - [x] Define platform boundaries: responsive PWA, device-specific Android port and iOS companion experience; document why desktop/server x86_64 ISOs are not phone images.
+- [x] Implement responsive Vampire OS mobile portal with PWA manifest, install prompt, safe-area-aware layouts and static offline cache; add automated contract tests.
 - [ ] Build responsive Vampire OS project/download PWA for Android and iOS browsers.
 - [ ] Test installability, safe-area handling, touch accessibility, portrait/landscape layouts and offline static documentation on supported mobile browsers.
 - [ ] Design secure mobile server-administration UX with authentication and MFA.
