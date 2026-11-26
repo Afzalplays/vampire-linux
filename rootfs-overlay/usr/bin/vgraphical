@@ -9,6 +9,18 @@ DRM_DIR=${VAMPIRE_DRM_DIR:-/dev/dri}
 RUNTIME_BASE=${VAMPIRE_RUNTIME_BASE:-/run/user}
 
 error() { printf 'Vampire Desktop: %s\n' "$*" >&2; }
+reject_symlink_path() {
+  path=$1
+  case "$path" in /*) ;; *) path=$PWD/$path ;; esac
+  while [ -n "$path" ] && [ "$path" != "/" ]; do
+    [ ! -L "$path" ] || {
+      error "refusing symlinked session runtime path: $path"
+      return 1
+    }
+    path=${path%/*}
+    [ -n "$path" ] || path=/
+  done
+}
 require_file() {
   [ ! -L "$1" ] && [ -f "$1" ] && [ -r "$1" ] || { error "required configuration is missing or unsafe: $1"; return 1; }
 }
@@ -19,10 +31,8 @@ check() {
   require_file "$FOOT_CONFIG" || return 1
   session_uid=$(id -u)
   session_runtime="$RUNTIME_BASE/$session_uid"
-  [ ! -L "$RUNTIME_BASE" ] && [ ! -L "$session_runtime" ] || {
-    error "refusing symlinked session runtime path: $session_runtime"
-    return 1
-  }
+  reject_symlink_path "$RUNTIME_BASE" || return 1
+  reject_symlink_path "$session_runtime" || return 1
   [ -d "$session_runtime" ] && [ "$(stat -c %u "$session_runtime" 2>/dev/null || echo -1)" = "$session_uid" ] || {
     error "private session runtime $session_runtime is missing or has the wrong owner; check boot session-runtime setup."
     return 1
@@ -88,7 +98,9 @@ else
     exit 1
   }
   export XDG_RUNTIME_DIR="$RUNTIME_BASE/$uid"
-  [ ! -L "$RUNTIME_BASE" ] && [ ! -L "$XDG_RUNTIME_DIR" ] && [ -d "$XDG_RUNTIME_DIR" ] && [ "$(stat -c %u "$XDG_RUNTIME_DIR" 2>/dev/null || echo -1)" = "$uid" ] || {
+  reject_symlink_path "$RUNTIME_BASE" || exit 1
+  reject_symlink_path "$XDG_RUNTIME_DIR" || exit 1
+  [ -d "$XDG_RUNTIME_DIR" ] && [ "$(stat -c %u "$XDG_RUNTIME_DIR" 2>/dev/null || echo -1)" = "$uid" ] || {
     error "runtime directory $XDG_RUNTIME_DIR is missing or not owned by this user; log in locally after boot."
     exit 1
   }
