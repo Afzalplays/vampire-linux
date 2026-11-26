@@ -63,6 +63,13 @@ after_calls="$(wc -l < "$NETWORK_CALLS")"
 test "$before_calls" = "$after_calls"
 
 before_calls="$(wc -l < "$NETWORK_CALLS")"
+if PATH="$TMP/bin:$PATH" interface=test0 ip=192.0.2.25 subnet=255.255.255.0 router='192.0.2.999' sh "$VAMPIRE_DHCP_HOOK" bound >/dev/null 2>&1; then
+  echo "DHCP hook accepted an invalid router address" >&2; exit 1
+fi
+after_calls="$(wc -l < "$NETWORK_CALLS")"
+test "$before_calls" = "$after_calls"
+
+before_calls="$(wc -l < "$NETWORK_CALLS")"
 if PATH="$TMP/bin:$PATH" interface=test0 ip=192.0.2.25 subnet=255.255.255.0 dns='1.1.1.1 8.8.8.999' sh "$VAMPIRE_DHCP_HOOK" bound >/dev/null 2>&1; then
   echo "DHCP hook accepted an invalid DNS address" >&2; exit 1
 fi
