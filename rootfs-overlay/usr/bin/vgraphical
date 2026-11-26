@@ -58,6 +58,7 @@ check() {
       error "a writable home directory is required for a non-root desktop session."
       return 1
     }
+    reject_symlink_path "$HOME" || return 1
   fi
   printf 'Vampire Desktop preflight passed.\n'
   printf '  Weston: %s\n  DRM device: %s\n  Runtime: %s\n  Base config: %s\n  Terminal config: %s\n' \

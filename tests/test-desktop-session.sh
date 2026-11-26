@@ -45,6 +45,16 @@ if VAMPIRE_GRAPHICAL_CMD="$TMP/bin/vgraphical" PATH="$TMP/bin:$PATH" "$SCRIPT" >
 fi
 grep -q 'log in as the unprivileged vampire account' "$TMP/root.out"
 test ! -e "$TMP/graphical.args"
+
+# A symlinked home directory (or any ancestor) must not be accepted.
+ln -s "$TMP/home" "$TMP/home-link"
+if VAMPIRE_TEST_UID=1000 VAMPIRE_TEST_USER=vampire \
+VAMPIRE_GRAPHICAL_CMD="$TMP/bin/vgraphical" VAMPIRE_RUNTIME_BASE="$TMP/run/user" \
+VGRAPHICAL_ARGS="$TMP/symlink-home.args" HOME="$TMP/home-link" PATH="$TMP/bin:$PATH" \
+  "$SCRIPT" >/dev/null 2>&1; then
+  echo "desktop session accepted a symlinked home directory" >&2; exit 1
+fi
+test ! -e "$TMP/symlink-home.args"
 VAMPIRE_TEST_UID=1000 VAMPIRE_TEST_USER=vampire \
 VAMPIRE_GRAPHICAL_CMD="$TMP/bin/vgraphical" VAMPIRE_RUNTIME_BASE="$TMP/run/user" \
 VGRAPHICAL_ARGS="$TMP/graphical.args" HOME="$TMP/home" PATH="$TMP/bin:$PATH" \
