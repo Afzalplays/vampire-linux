@@ -14,7 +14,7 @@ printf 'second:%s\n' "$1" >> "$VAMPIRE_TEST_LOG"
 SERVICE
 cat > "$TMP/services/wifi" <<'SERVICE'
 #!/bin/sh
-printf 'wifi:%s\\n' "$1" >> "$VAMPIRE_TEST_LOG"
+printf 'wifi:%s\n' "$1" >> "$VAMPIRE_TEST_LOG"
 SERVICE
 cat > "$TMP/services/broken-stop" <<'SERVICE'
 #!/bin/sh
