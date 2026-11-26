@@ -41,6 +41,13 @@ check() {
     error "session runtime $session_runtime must have mode 0700."
     return 1
   }
+  if [ "$session_uid" -ne 0 ]; then
+    [ -n "${HOME:-}" ] && [ -d "$HOME" ] && [ -w "$HOME" ] || {
+      error "a writable home directory is required for a non-root desktop session."
+      return 1
+    }
+    reject_symlink_path "$HOME" || return 1
+  fi
   [ -d "$DRM_DIR" ] || { error "no $DRM_DIR directory; enable a kernel DRM/KMS driver and firmware."; return 1; }
   found=
   for card in "$DRM_DIR"/card*; do
@@ -53,13 +60,6 @@ check() {
   [ -r "$found" ] && [ -w "$found" ] || {
     error "DRM device $found is not accessible; check seat permissions."; return 1;
   }
-  if [ "$session_uid" -ne 0 ]; then
-    [ -n "${HOME:-}" ] && [ -d "$HOME" ] && [ -w "$HOME" ] || {
-      error "a writable home directory is required for a non-root desktop session."
-      return 1
-    }
-    reject_symlink_path "$HOME" || return 1
-  fi
   printf 'Vampire Desktop preflight passed.\n'
   printf '  Weston: %s\n  DRM device: %s\n  Runtime: %s\n  Base config: %s\n  Terminal config: %s\n' \
     "$(command -v weston)" "$found" "$session_runtime" "$BASE_CONFIG" "$FOOT_CONFIG"
