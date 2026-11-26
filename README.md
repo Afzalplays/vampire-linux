@@ -13,7 +13,7 @@ editions: Vampire Desktop and Vampire Server.
 - **Shell:** Vampire Shell (Bash-compatible branded shell launcher available as `vsh`; dedicated parser/runtime planned)
 - **Fetch utility:** [Vampire Fetch](fetch/README.md) — `vfetch`
 - **Architecture:** x86_64 / AMD64
-- **Editions:** Desktop and Server (x86_64); mobile web/PWA support is planned separately
+- **Editions:** Desktop and Server (x86_64); mobile web/PWA companion portal is implemented; native Android port is planned separately
 
 ## Vampire Fetch
 
