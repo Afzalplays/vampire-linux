@@ -67,4 +67,9 @@ jobs:
           bash tests/test-settings-desktop.sh
           bash tests/test-desktop-graphical-menu.sh
           bash tests/test-installed-disk-harness.sh
+          bash tests/test-installer-confirmation.sh
+          bash tests/test-installer-preflight.sh
+          bash tests/test-installer-requirements.sh
+          bash tests/test-installer-stage.sh
+          bash tests/test-installer-configure.sh
           bash tests/test-post-fakeroot-vampire.sh
