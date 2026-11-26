@@ -118,4 +118,20 @@ if PATH="$TMP/bin:$PATH" VAMPIRE_RESOLV_CONF="$TMP/resolver-dir-link/resolv.conf
   echo "DHCP hook followed a symlinked resolver directory" >&2; exit 1
 fi
 test ! -e "$TMP/real-resolver-dir/resolv.conf"
+# The boot network service must not start DHCP on Wi-Fi before WPA association.
+mkdir -p "$TMP/wifi-only/wlan0/wireless"
+cat > "$TMP/mock-vnetwork" <<'MOCK'
+#!/bin/sh
+printf 'vnetwork %s\\n' "$*" >> "$NETWORK_SERVICE_LOG"
+MOCK
+chmod +x "$TMP/mock-vnetwork"
+export NETWORK_SERVICE_LOG="$TMP/network-service.log"
+NETWORK_SERVICE="$ROOT/rootfs-overlay/etc/vampire/services.d/network"
+VAMPIRE_SYS_NET="$TMP/wifi-only" VAMPIRE_NETWORK_CMD="$TMP/mock-vnetwork" sh "$NETWORK_SERVICE" start > "$TMP/wifi-only-service.out"
+grep -q 'no wired interface' "$TMP/wifi-only-service.out"
+test ! -e "$NETWORK_SERVICE_LOG"
+mkdir -p "$TMP/wifi-only/eth0"
+VAMPIRE_SYS_NET="$TMP/wifi-only" VAMPIRE_NETWORK_CMD="$TMP/mock-vnetwork" sh "$NETWORK_SERVICE" start
+grep -Fxq 'vnetwork start' "$NETWORK_SERVICE_LOG"
+
 echo "Vampire DHCP lifecycle and lease hook tests passed."
