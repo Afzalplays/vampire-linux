@@ -19,12 +19,16 @@ echo "${VAMPIRE_TEST_TTY:-/dev/tty1}"
 MOCK
 cat > "$TMP/bin/stat" <<'MOCK'
 #!/bin/sh
-if [ "$1" = -c ] && [ "$2" = %u ]; then
-  case "$3" in "$HOME"|*/user/1000) echo 1000; exit 0 ;; esac
-fi
-if [ "$1" = -c ] && [ "$2" = %a ] && [ "$3" = */user/1000 ]; then
-  echo 700
-  exit 0
+if [ "$1" = -c ]; then
+  case "$3" in
+    "$HOME")
+      [ "$2" = %u ] && { echo 1000; exit 0; }
+      ;;
+    */user/1000)
+      [ "$2" = %u ] && { echo 1000; exit 0; }
+      [ "$2" = %a ] && { echo 700; exit 0; }
+      ;;
+  esac
 fi
 exit 1
 MOCK
