@@ -118,10 +118,12 @@ run_boot() {
 
   sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/bin/vpower status > "$WORK/$mode.vpower.log" 2>&1 || die "$mode installed vpower status failed"
   grep -Fq 'Vampire OS power status' "$WORK/$mode.vpower.log" || die "$mode installed vpower status output is invalid"
-  if sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/bin/vpower reboot > "$WORK/$mode.vpower-reject.log" 2>&1; then
-    die "$mode installed vpower accepted reboot without explicit confirmation"
-  fi
-  grep -Fq 'refusing reboot without the explicit --yes flag' "$WORK/$mode.vpower-reject.log" || die "$mode installed vpower did not safely reject an unconfirmed reboot"
+  for action in reboot poweroff halt; do
+    if sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/bin/vpower "$action" > "$WORK/$mode.vpower-reject-$action.log" 2>&1; then
+      die "$mode installed vpower accepted $action without explicit confirmation"
+    fi
+    grep -Fq "refusing $action without the explicit --yes flag" "$WORK/$mode.vpower-reject-$action.log" || die "$mode installed vpower did not safely reject an unconfirmed $action"
+  done
 
   sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/bin/vinstall system-check > "$WORK/$mode.installer-check.log" 2>&1 || die "$mode installed installer system-check failed"
   grep -Fq 'Architecture: x86_64' "$WORK/$mode.installer-check.log" || die "$mode installed installer system-check omitted architecture"
