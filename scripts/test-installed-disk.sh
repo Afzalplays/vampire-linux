@@ -128,6 +128,12 @@ run_boot() {
     fi
     grep -Fq "unknown app: unknown" "$WORK/$mode.app-reject.log" || die "$mode installed app launcher rejection was unclear"
     grep -Fq "path=/usr/bin/vampire-terminal" "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" || die "$mode installed Weston config omitted Vampire Terminal"
+    sudo chroot "$INSPECT_MOUNT" /usr/bin/vsh --version > "$WORK/$mode.vsh-version.log" 2>&1 || die "$mode installed Vampire Shell version command failed"
+    grep -Fq "Vampire Shell" "$WORK/$mode.vsh-version.log" || die "$mode installed Vampire Shell version output is invalid"
+    sudo chroot "$INSPECT_MOUNT" /usr/bin/vsh -c "printf VAMPIRE_SHELL_OK" > "$WORK/$mode.vsh-command.log" 2>&1 || die "$mode installed Vampire Shell command execution failed"
+    grep -Fxq "VAMPIRE_SHELL_OK" "$WORK/$mode.vsh-command.log" || die "$mode installed Vampire Shell command output is invalid"
+    sudo chroot "$INSPECT_MOUNT" /usr/bin/vdesktop --help > "$WORK/$mode.vdesktop-help.log" 2>&1 || die "$mode installed Desktop launcher help failed"
+    grep -Fq "Usage: vdesktop [--settings]" "$WORK/$mode.vdesktop-help.log" || die "$mode installed Desktop launcher help is invalid"
     grep -Fq "path=/usr/bin/vampire-app files" "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" || die "$mode installed Weston config omitted Vampire Files"
   fi
 
