@@ -14,27 +14,28 @@ non-root-only wrapper that verifies the account identity, local virtual
 terminal, home ownership, and private XDG runtime directory before starting
 Weston. The console preview Graphical session action uses this wrapper.
 `vgraphical --check` remains available for diagnostics; direct root launch is
-not the supported interactive desktop path. The preview
-provides a real Wayland terminal and working console applications through
-panel launchers; it is still **not the finished Vampire Desktop**. The
+not the supported interactive desktop path. The preview provides a real
+Wayland terminal and working console applications through panel launchers;
+it is still **not the finished Vampire Desktop**. The
 approved custom Vampire top panel, floating dock, branded window controls,
 native graphical file manager and graphical settings application remain
 unimplemented.
 
 A usable \`/dev/dri/card0\`, kernel DRM driver and suitable firmware are required.
 Virtual machines without virtual GPU/DRM support will not show a graphical
-session. This early live preview is root/seat based, not a multi-user display
-manager. Audio, touchpads, multi-monitor support and GPU compatibility are not
-certified. Boot remains console-first; if Weston cannot acquire DRM/VT, return
-to the text console.
+session. The supported interactive launcher is non-root and local-VT based, but there is
+not yet a graphical display manager, automatic login, or multi-user seat
+management. Audio, touchpads, multi-monitor support and GPU compatibility are
+not certified. Boot remains console-first; if Weston cannot acquire DRM/VT,
+return to the text console.
 
 The graphical preflight rejects symlinks in every component of the XDG runtime
 path before checking device access; regression tests cover symlinked runtime
 roots, per-user directories and their ancestors. This protects session setup
 from redirected runtime paths but does not replace a display manager.
 
-A release desktop still needs a dedicated Vampire shell, non-root session
-management, display manager, audio/network settings, accessibility, window
+A release desktop still needs a dedicated Vampire shell, graphical display
+manager and session lifecycle, audio/network settings, accessibility, window
 management integration and hardware validation.
 
 ## Persistent desktop preferences
