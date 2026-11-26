@@ -18,9 +18,11 @@ and validates mode strings before printing them. The `--json` option emits a
 machine-readable object containing connector names, connection states,
 advertised modes, and aggregate counts; it is suitable for future desktop
 settings and diagnostics clients. Installed Desktop rootfs validation also
-runs `vdisplay --json` in a chroot and parses the empty-inventory response, so
-the packaged executable and its runtime dependencies are exercised before the
-installed disk is booted.
+runs `vdisplay --json` in a chroot and parses the empty-inventory response. It
+also resets, validates and applies the installed Desktop settings defaults,
+then checks the generated Weston and Foot runtime configuration. These checks
+exercise packaged executables and runtime dependencies before the installed
+disk is booted.
 
 ## Important limitations
 
