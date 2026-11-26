@@ -81,8 +81,27 @@ grep -q "refusing symlinked session runtime path" "$TMP/runtime-ancestor.out" ||
 }
 
 # Non-root graphical sessions must not follow a symlinked home directory.
+mkdir -p "$TMP/home-runtime/1000"
+chmod 0700 "$TMP/home-runtime/1000"
+cat > "$TMP/bin/id" <<'MOCK'
+#!/bin/sh
+case "$1" in
+  -u) echo 1000 ;;
+  -un) echo vampire ;;
+  *) exit 2 ;;
+esac
+MOCK
+cat > "$TMP/bin/stat" <<'MOCK'
+#!/bin/sh
+if [ "$1" = -c ] && [ "$3" = "$VAMPIRE_RUNTIME_BASE/1000" ]; then
+  [ "$2" = %u ] && { echo 1000; exit 0; }
+  [ "$2" = %a ] && { echo 700; exit 0; }
+fi
+exec /usr/bin/stat "$@"
+MOCK
+chmod +x "$TMP/bin/id" "$TMP/bin/stat"
 ln -s "$TMP/etc" "$TMP/home-link"
-if VAMPIRE_RUNTIME_BASE="$TMP/runtime-real" HOME="$TMP/home-link" \
+if VAMPIRE_RUNTIME_BASE="$TMP/home-runtime" HOME="$TMP/home-link" \
    VAMPIRE_WESTON_BASE="$TMP/etc/xdg/weston/weston.ini" \
    VAMPIRE_FOOT_BASE="$TMP/etc/xdg/foot/foot.ini" VAMPIRE_DRM_DIR="$TMP/dev/dri" \
    PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vgraphical" --check >"$TMP/home-link.out" 2>&1; then
