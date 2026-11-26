@@ -77,7 +77,8 @@ feature release-ready.
 - [ ] Build the branded Vampire Desktop shell: top panel, floating dock, launcher and window integration.
 - [ ] Add non-root graphical login/session management and display manager.
 - [ ] Build graphical file manager, terminal and settings applications.
-- [ ] Add display, network, sound, power and personalization controls.
+- [x] Add read-only DRM connector and advertised-mode inventory (`vdisplay`) with fake-sysfs regression coverage; current active mode and display control remain unsupported.
+- [ ] Add adaptive display scaling plus display, network, sound, power and personalization controls.
 - [ ] Validate audio, Bluetooth, printing, touchpads, multi-monitor and accessibility.
 - [ ] Implement Voice Access with confirmation-gated destructive actions.
 
