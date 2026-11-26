@@ -1,9 +1,10 @@
 #!/bin/sh
 # Optional boot-time Wi-Fi profile activation. Enable with: vctl enable wifi
 set -eu
+VNETWORK=${VAMPIRE_NETWORK_CMD:-/usr/bin/vnetwork}
 case "${1:-}" in
   start)
-    exec /usr/bin/vnetwork wifi auto
+    exec "$VNETWORK" wifi auto
     ;;
   stop)
     config_dir=${VAMPIRE_WIFI_CONFIG_DIR:-/etc/vampire}
@@ -14,12 +15,12 @@ case "${1:-}" in
       [ ! -L "$config" ] && [ -f "$config" ] || { result=1; continue; }
       profile=${config##*/wpa_supplicant-}
       iface=${profile%.conf}
-      /usr/bin/vnetwork wifi disconnect "$iface" || result=1
+      "$VNETWORK" wifi disconnect "$iface" || result=1
     done
     exit "$result"
     ;;
   status)
-    exec /usr/bin/vnetwork wifi list
+    exec "$VNETWORK" wifi list
     ;;
   *)
     echo "Usage: wifi {start|stop|status}" >&2
