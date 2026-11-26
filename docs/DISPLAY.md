@@ -26,6 +26,10 @@ then checks the generated Weston and Foot runtime configuration. These checks
 exercise packaged executables and runtime dependencies before the installed
 disk is booted.
 
+## Adaptive wallpaper fitting
+
+Weston uses `background-type=scale-crop` for the bundled wallpaper. The compositor scales the image to cover the active output while preserving its aspect ratio, so the desktop background follows the display's current resolution without a fixed pixel-mode setting. Displays with a different aspect ratio may crop the outer edges; the logo and main title remain centered in the composition. This is wallpaper fitting only: it does not change the monitor's resolution, refresh rate, orientation, or per-output HiDPI scale.
+
 ## Important limitations
 
 The modes listed by sysfs are advertised modes, not necessarily the mode

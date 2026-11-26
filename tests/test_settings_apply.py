@@ -61,6 +61,13 @@ class SettingsApplyTests(unittest.TestCase):
         self.assertEqual(len(pixels), height * (1 + width * 4))
         self.assertTrue(all(pixels[row * (1 + width * 4)] == 0 for row in range(height)))
 
+    def test_weston_uses_adaptive_aspect_preserving_wallpaper_fit(self):
+        config = WESTON.read_text()
+        self.assertIn("background-image=/usr/share/vampire/wallpaper.png", config)
+        self.assertIn("background-type=scale-crop", config)
+        self.assertNotRegex(config, r"(?m)^\s*output-mode\s*=")
+        self.assertNotRegex(config, r"(?m)^\s*output-scale\s*=")
+
     def test_applies_theme_accent_transparency_motion_and_terminal_opacity(self):
         with tempfile.TemporaryDirectory() as temp:
             result, weston, foot = self.run_apply(
