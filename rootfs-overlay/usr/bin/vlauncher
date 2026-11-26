@@ -36,6 +36,15 @@ while :; do
     3) "$APP" settings ;;
     4) "$APP" software ;;
     5) "$APP" monitor ;;
+    6)
+      printf 'Search apps: '
+      IFS= read -r query || exit 0
+      if [ -n "$query" ]; then
+        catalog | grep -iF -- "$query" || printf '  No matching applications.\\n'
+      else
+        catalog | sed 's/|/  —  /'
+      fi
+      ;;
     0) exit 0 ;;
     *) printf '  Invalid selection.\n' ;;
   esac
