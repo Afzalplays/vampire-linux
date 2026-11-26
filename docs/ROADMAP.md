@@ -81,6 +81,18 @@ feature release-ready.
 - [ ] Validate audio, Bluetooth, printing, touchpads, multi-monitor and accessibility.
 - [ ] Implement Voice Access with confirmation-gated destructive actions.
 
+## Mobile support
+
+- [x] Define platform boundaries: responsive PWA, device-specific Android port and iOS companion experience; document why desktop/server x86_64 ISOs are not phone images.
+- [ ] Build responsive Vampire OS project/download PWA for Android and iOS browsers.
+- [ ] Test installability, safe-area handling, touch accessibility, portrait/landscape layouts and offline static documentation on supported mobile browsers.
+- [ ] Design secure mobile server-administration UX with authentication and MFA.
+- [ ] Select and document a supported ARM64 Android reference device and bootloader requirements.
+- [ ] Bring up a device-specific kernel, device tree, firmware and core hardware drivers.
+- [ ] Implement a touch-first mobile shell and adaptive phone/tablet interfaces.
+- [ ] Validate radio, audio, camera, sensors, GPU, suspend/resume, encryption, recovery and updates on each supported device.
+- [ ] Evaluate a native iOS companion app if PWA capabilities are insufficient; no iOS replacement OS/ISO is planned.
+
 ## Installer and recovery
 
 - [x] Read-only disk inventory and installation preflight.
