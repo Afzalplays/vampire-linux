@@ -34,7 +34,7 @@ exit 1
 MOCK
 cat > "$TMP/bin/vgraphical" <<'MOCK'
 #!/bin/sh
-printf '%s\n' "$@" > "$VGRAPHICAL_ARGS"
+printf '%s\\n' "$@" > "$VGRAPHICAL_ARGS"
 MOCK
 chmod +x "$TMP/bin/"*
 SCRIPT="$ROOT/rootfs-overlay/usr/bin/vdesktop-session"
@@ -55,6 +55,18 @@ VGRAPHICAL_ARGS="$TMP/symlink-home.args" HOME="$TMP/home-link" PATH="$TMP/bin:$P
   echo "desktop session accepted a symlinked home directory" >&2; exit 1
 fi
 test ! -e "$TMP/symlink-home.args"
+
+# Also reject a normal-looking home path reached through a symlinked parent.
+mkdir -p "$TMP/real-parent/home"
+ln -s "$TMP/real-parent" "$TMP/home-parent-link"
+if VAMPIRE_TEST_UID=1000 VAMPIRE_TEST_USER=vampire \
+VAMPIRE_GRAPHICAL_CMD="$TMP/bin/vgraphical" VAMPIRE_RUNTIME_BASE="$TMP/run/user" \
+VGRAPHICAL_ARGS="$TMP/symlink-parent-home.args" HOME="$TMP/home-parent-link/home" PATH="$TMP/bin:$PATH" \
+  "$SCRIPT" >/dev/null 2>&1; then
+  echo "desktop session accepted a home directory beneath a symlinked parent" >&2; exit 1
+fi
+test ! -e "$TMP/symlink-parent-home.args"
+
 VAMPIRE_TEST_UID=1000 VAMPIRE_TEST_USER=vampire \
 VAMPIRE_GRAPHICAL_CMD="$TMP/bin/vgraphical" VAMPIRE_RUNTIME_BASE="$TMP/run/user" \
 VGRAPHICAL_ARGS="$TMP/graphical.args" HOME="$TMP/home" PATH="$TMP/bin:$PATH" \
