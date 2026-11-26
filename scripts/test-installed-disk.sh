@@ -94,7 +94,7 @@ run_boot() {
   local root_partuuid
   root_partuuid="$(sudo blkid -s PARTUUID -o value "${loop}p2")"
   [[ -n "$root_partuuid" ]] || die "$mode installed root partition has no PARTUUID"
-  for required in usr/bin/vfetch usr/bin/vpower usr/bin/vsettings usr/bin/vdisplay usr/bin/vlauncher etc/init.d/rcS etc/inittab etc/fstab etc/vampire/install.conf boot/vmlinuz boot/grub/grub.cfg; do
+  for required in usr/bin/vfetch usr/bin/vpower usr/bin/vsettings usr/bin/vdisplay usr/bin/vlauncher usr/bin/vsh bin/bash etc/vampire/shellrc etc/vampire/completion.bash etc/init.d/rcS etc/inittab etc/fstab etc/vampire/install.conf boot/vmlinuz boot/grub/grub.cfg; do
     [[ -s "$INSPECT_MOUNT/$required" ]] || die "$mode installed root is missing required file: /$required"
   done
   [[ -x "$INSPECT_MOUNT/usr/bin/vfetch" ]] || die "$mode installed VFetch is not executable"
