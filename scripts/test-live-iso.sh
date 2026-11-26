@@ -75,6 +75,7 @@ if [[ "$EDITION" == "desktop" ]]; then
   has_entry usr/bin/foot
   has_entry usr/bin/vampire-terminal
   has_entry usr/bin/vsettings
+  has_entry usr/bin/vdisplay
   has_entry usr/lib/vampire/settings_apply.py
   has_entry usr/lib/vampire/settings-bootstrap
   has_entry etc/vampire/settings.defaults
