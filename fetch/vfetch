@@ -117,11 +117,18 @@ INFO=$(printf '%s\n' \
   "Local IP:   $IP" \
   "Locale:     $LOCALE")
 
+# Keep the renderer usable in an installer chroot where /proc may not
+# be mounted yet. Bash process substitution relies on /dev/fd (usually
+# backed by /proc/self/fd), so use a short-lived file for the info column.
+INFO_FILE=$(mktemp "${TMPDIR:-/tmp}/vfetch.XXXXXX") || exit 1
+trap 'rm -f -- "$INFO_FILE"' EXIT HUP INT TERM
+printf '%s\n' "$INFO" > "$INFO_FILE"
+
 # Add two blank logo rows so the user header begins above the system fields.
 {
   printf '\n\n'
   printf '%s\n' "$LOGO"
-} | paste -d '' - <(printf '%s\n' "$INFO") | while IFS= read -r line; do
+} | paste -d '' - "$INFO_FILE" | while IFS= read -r line; do
   printf '%b\n' "$line"
 done
 
