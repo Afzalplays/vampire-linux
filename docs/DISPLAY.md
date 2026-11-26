@@ -34,3 +34,17 @@ as automatic display scaling.
 
 Physical validation is still required for laptop panels, external monitors,
 hot-plug, multi-monitor layouts, HiDPI scaling, touchscreens and rotation.
+
+## Vampire Launcher
+
+The keyboard-driven launcher is available as `vlauncher` from a terminal and
+from the Weston desktop-shell launcher entry. Use `vlauncher --list` to inspect
+the stable application IDs, `vlauncher --search TEXT` to filter the catalog,
+and `vlauncher --launch APP-ID` to dispatch a known application. In its
+interactive prompt, enter either an application ID or its displayed name;
+exact ID/name matching is case-insensitive. A partial query prints matching
+catalog entries so the user can choose an exact ID or name.
+
+This is a keyboard-driven application catalog hosted in the terminal. It is
+not yet a native graphical launcher, floating dock, or replacement for the
+Weston desktop shell.
