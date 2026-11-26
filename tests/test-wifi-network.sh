@@ -88,6 +88,13 @@ grep -q '^[[:space:]]*psk=0123456789abcdef' "$CONFIG"
 grep -Fq 'ip link set dev wlan0 up' "$NETWORK_LOG"
 grep -q -- '-B -i wlan0' "$WPA_ARGS"
 grep -q -- '-R -b -i wlan0' "$DHCP_ARGS"
+# Saved credentials are reused at boot without prompting or rewriting them.
+: > "$DHCP_ARGS"
+PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi auto > "$TMP/wifi-auto.out"
+grep -q 'saved Wi-Fi profile activated on wlan0' "$TMP/wifi-auto.out"
+grep -q -- '-B -i wlan0' "$WPA_ARGS"
+grep -q -- '-R -b -i wlan0' "$DHCP_ARGS"
+test "$(stat -c '%a' "$CONFIG")" = 600
 PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi status wlan0 > "$TMP/wifi-status.out"
 grep -q 'wpa_state=COMPLETED' "$TMP/wifi-status.out"
 if printf 'short\n' | PATH="$TMP/bin:$PATH" sh "$ROOT/rootfs-overlay/usr/bin/vnetwork" wifi connect wlan0 'Test Network' >/dev/null 2>&1; then
