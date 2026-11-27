@@ -130,6 +130,9 @@ run_boot() {
     for required in usr/bin/vdesktop usr/bin/vdesktop-session usr/lib/vampire/session-runtime usr/lib/vampire/settings-bootstrap usr/bin/vgraphical usr/bin/vampire-app usr/bin/vsh usr/bin/vampire-terminal usr/lib/vampire/settings_apply.py etc/xdg/weston/weston.ini etc/xdg/foot/foot.ini usr/share/vampire/wallpaper.png usr/share/vampire/icons/terminal.png usr/share/vampire/icons/launcher.png usr/share/vampire/icons/files.png usr/share/vampire/icons/settings.png usr/share/vampire/icons/software.png usr/share/vampire/icons/monitor.png; do
       [[ -s "$INSPECT_MOUNT/$required" ]] || die "$mode Desktop install is missing /$required"
     done
+    for executable in usr/bin/vdesktop-session usr/lib/vampire/session-runtime usr/lib/vampire/settings-bootstrap; do
+      [[ -x "$INSPECT_MOUNT/$executable" ]] || die "$mode Desktop component is not executable: /$executable"
+    done
     grep -Fxq 'alpha=0.90' "$INSPECT_MOUNT/etc/xdg/foot/foot.ini" || die "$mode installed Desktop terminal transparency default is incorrect"
   fi
 
