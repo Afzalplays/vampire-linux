@@ -51,9 +51,14 @@ class MobilePortalContractTests(unittest.TestCase):
 
     def test_service_worker_refreshes_navigation_and_limits_offline_fallback(self):
         worker = (MOBILE / "sw.js").read_text()
-        self.assertIn('const CACHE="vampire-mobile-v4"', worker)
+        self.assertIn('const CACHE="vampire-mobile-v5"', worker)
         self.assertIn('if(request.mode==="navigate")', worker)
         self.assertIn("fetch(request)", worker)
+        self.assertIn("async function offlinePage(request)", worker)
+        self.assertIn('path.endsWith("/experience.html")', worker)
+        self.assertIn("async function networkFirst(request)", worker)
+        self.assertIn("if(response.ok)return cacheResponse(request,response)", worker)
+        self.assertIn("return await offlinePage(request)||response", worker)
         self.assertIn('.catch(()=>caches.match(request).then(cached=>cached||caches.match("./index.html")))', worker)
         self.assertIn('key.startsWith("vampire-mobile-")', worker)
         self.assertIn("caches.match(request).then(cached=>cached||fetch(request)", worker)
