@@ -81,3 +81,10 @@ Every release artifact should show architecture, edition, version, checksum, sig
 ## Expanded Vampire Mobile concept
 
 The mobile interface prototype now includes Allines voice-command recognition where the browser supports the Web Speech API, a simulated screen-lock flow, Vampire Caller UI, Game Booster profiles, an expanded quick panel, and a simulated Vampire Security Lab terminal command. These are UI demonstrations only. The browser cannot lock or unlock the device, authenticate biometrically, identify or block live callers, tune CPU/GPU performance, or run native security utilities. Voice recognition must never be treated as an authentication factor. A real unlock must remain behind the device's trusted PIN/biometric lock screen. Caller identification needs lawful data provenance, explicit permissions, opt-out and correction workflows. Security tools must be signed, permission-scoped and used only on systems the operator is authorized to test.
+
+
+## Live device dashboard and built-in themes
+
+The mobile experience prototype includes a best-effort live dashboard. Battery percentage, charging state and estimated charge/discharge time are shown only when the browser exposes the Battery Status API. Storage figures are the PWA origin's browser storage usage/quota, not the phone's total free disk space. Device RAM is shown only as the coarse `navigator.deviceMemory` estimate where supported; JavaScript heap usage, when exposed, is labelled as web-app memory rather than total system RAM. Unsupported readings are explicitly marked unavailable. iOS Safari commonly restricts these hardware APIs, so full battery, disk and RAM telemetry requires a native companion or OS service.
+
+Built-in CSS animated themes (Aurora, Nebula and Ocean), a static battery-friendly theme, animation intensity and a reduce-motion setting are included directly in the mobile experience; no separate theme app or download is required. The interface also respects the platform's `prefers-reduced-motion` preference. These are PWA-level visual themes, not system-wide iOS themes.
