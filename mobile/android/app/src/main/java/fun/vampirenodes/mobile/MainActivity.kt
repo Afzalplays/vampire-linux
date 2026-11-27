@@ -1,4 +1,4 @@
-package fun.vampirenodes.mobile
+package com.vampirenodes.mobile
 
 import android.app.Activity
 import android.content.Intent
