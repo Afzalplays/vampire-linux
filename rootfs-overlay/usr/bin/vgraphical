@@ -148,4 +148,4 @@ fi
 vsettings apply
 CONFIG=$VAMPIRE_WESTON_RUNTIME_CONFIG
 [ -r "$CONFIG" ] || { error "generated Weston configuration is missing: $CONFIG"; exit 1; }
-exec weston --config="$CONFIG" --backend=drm-backend.so --shell=desktop-shell.so --tty=2 "$@"
+exec weston --config="$CONFIG" --backend=drm-backend.so --shell=desktop-shell.so --tty="$session_tty_number" "$@"
