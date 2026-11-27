@@ -29,6 +29,14 @@ if "$ROOT/rootfs-overlay/usr/bin/vgraphical" --unknown >/dev/null 2>&1; then
 fi
 "$ROOT/rootfs-overlay/usr/bin/vgraphical" --help | grep -q -- '--check'
 grep -q 'modprobe "$module"' "$ROOT/rootfs-overlay/usr/bin/vgraphical"
+# Interactive state setup must reject symlinked XDG/runtime state paths before
+# mkdir/chmod, then verify both private directories have the expected owner
+# and restrictive mode.
+grep -q 'reject_symlink_path "$XDG_CONFIG_HOME/vampire"' "$ROOT/rootfs-overlay/usr/bin/vgraphical"
+grep -q 'reject_symlink_path "$XDG_RUNTIME_DIR/vampire"' "$ROOT/rootfs-overlay/usr/bin/vgraphical"
+grep -q 'stat -c %u "$private_dir"' "$ROOT/rootfs-overlay/usr/bin/vgraphical"
+grep -q 'stat -c %a "$private_dir"' "$ROOT/rootfs-overlay/usr/bin/vgraphical"
+
 # Interactive desktop startup must reject root before probing devices or loading modules.
 cat > "$TMP/bin/id" <<'MOCK'
 #!/bin/sh
