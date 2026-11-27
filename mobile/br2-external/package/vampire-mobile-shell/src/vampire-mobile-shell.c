@@ -150,12 +150,12 @@ static void activate(int x,int y) {
     if(page==3&&x>=action_one.x&&x<action_one.x+action_one.w&&y>=action_one.y&&y<action_one.y+action_one.h){open_console();return;}
     if(page==4) {
         if(x>=action_one.x&&x<action_one.x+action_one.w&&y>=action_one.y&&y<action_one.y+action_one.h) {
-            if(power_confirm) { SDL_Quit(); TTF_Quit(); execl("/sbin/reboot","reboot",(char *)NULL); _exit(127); }
-            power_confirm=1; return;
+            if(power_confirm&&power_choice==1) { SDL_Quit(); TTF_Quit(); execl("/sbin/reboot","reboot",(char *)NULL); _exit(127); }
+            power_confirm=1; power_choice=1; return;
         }
         if(x>=action_two.x&&x<action_two.x+action_two.w&&y>=action_two.y&&y<action_two.y+action_two.h) {
-            if(power_confirm) { SDL_Quit(); TTF_Quit(); execl("/sbin/poweroff","poweroff",(char *)NULL); _exit(127); }
-            power_confirm=1; return;
+            if(power_confirm&&power_choice==2) { SDL_Quit(); TTF_Quit(); execl("/sbin/poweroff","poweroff",(char *)NULL); _exit(127); }
+            power_confirm=1; power_choice=2; return;
         }
     }
 }
