@@ -34,7 +34,10 @@ assert "url.origin!==self.location.origin" in sw
 assert "url.search" in sw
 assert 'if(request.mode==="navigate")' in sw
 assert 'fetch(request)' in sw
-assert '.catch(()=>caches.match(request).then(cached=>cached||caches.match("./index.html")))' in sw
+assert 'async function offlinePage(request)' in sw
+assert 'async function networkFirst(request)' in sw
+assert 'return await offlinePage(request)||response' in sw
+assert 'return offlinePage(request)' in sw
 assert 'key.startsWith("vampire-mobile-")' in sw
 prototype = (root / "experience.html").read_text()
 for marker in ("Vampire Caller", "Game Booster", "Vampire Terminal", "SpeechRecognition", "vampire -activate hacker mode -y", "secure-unlock"):
