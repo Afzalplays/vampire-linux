@@ -12,6 +12,7 @@ on:
       - "build/vampire_mobile_qemu.fragment"
       - "build/build-mobile-qemu.sh"
       - "mobile/rootfs-overlay/**"
+      - "mobile/br2-external/**"
       - ".github/workflows/mobile-arm64.yml"
   pull_request:
     paths:
