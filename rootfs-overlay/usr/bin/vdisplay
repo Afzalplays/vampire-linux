@@ -26,7 +26,7 @@ fi
 for connector in "$DRM_SYSFS"/card[0-9]*-*; do
   [ -e "$connector" ] || continue
   name=${connector##*/}
-  printf '%s\\n' "$name" | grep -Eq '^card[0-9]+-[A-Za-z0-9_-]+$' || continue
+  printf '%s\n' "$name" | grep -Eq '^card[0-9]+-[A-Za-z0-9_-]+$' || continue
   connector_dir=$connector
   if [ -L "$connector" ]; then
     [ ! -L "$SYSFS_DEVICES" ] && [ -d "$SYSFS_DEVICES" ] || continue
