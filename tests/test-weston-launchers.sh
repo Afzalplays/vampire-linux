@@ -43,12 +43,19 @@ grep -q 'path=/usr/bin/vampire-app monitor' "$ROOT/rootfs-overlay/etc/xdg/weston
 LAUNCHER="$ROOT/rootfs-overlay/usr/bin/vlauncher"
 sh "$LAUNCHER" --list > "$TMP/catalog"
 sh "$LAUNCHER" --json > "$TMP/catalog.json"
-python3 - "$TMP/catalog.json" <<'PY'
+python3 - "$TMP/catalog.json" "$ROOT" <<'PY'
 import json, pathlib, sys
+root = pathlib.Path(sys.argv[2])
 items = json.loads(pathlib.Path(sys.argv[1]).read_text())
 assert [item["id"] for item in items] == ["terminal", "files", "settings", "software", "monitor"]
-assert all(set(item) == {"id", "name", "description", "category"} for item in items)
+assert all(set(item) == {"id", "name", "description", "category", "icon"} for item in items)
 assert all(item["category"] in {"system", "utilities"} for item in items)
+icons = [item["icon"] for item in items]
+assert len(icons) == len(set(icons)), "each launcher app must have its own icon"
+for item in items:
+    icon = root / "rootfs-overlay" / item["icon"].lstrip("/")
+    assert icon.is_file(), icon
+    assert item["icon"].endswith("/" + item["id"] + ".png"), item
 PY
 grep -Fxq 'terminal|Terminal|Open Vampire Terminal' "$TMP/catalog"
 grep -Fxq 'files|Files|Browse and manage files' "$TMP/catalog"
