@@ -140,7 +140,7 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn("savedPreferences.wallpaper=reader.result", prototype)
         self.assertIn("wallpaper:savedPreferences.wallpaper||null", prototype)
         self.assertIn('typeof savedPreferences.wallpaper==="string"', prototype)
-        self.assertIn("data:image\\\\/(png|jpeg|webp|gif);base64,", prototype)
+        self.assertIn("data:image\\/(png|jpeg|webp|gif);base64,", prototype)
         self.assertIn("Wallpaper images up to 2 MB are saved locally", prototype)
 
     def test_launcher_panels_support_keyboard_escape_and_touch_dismissal(self):
