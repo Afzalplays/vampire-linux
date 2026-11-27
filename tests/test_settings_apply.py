@@ -65,6 +65,7 @@ class SettingsApplyTests(unittest.TestCase):
         config = WESTON.read_text()
         self.assertIn("background-image=/usr/share/vampire/wallpaper.png", config)
         self.assertIn("background-type=scale-crop", config)
+        self.assertIn("[libinput]\nenable-tap=true", config)
         self.assertNotRegex(config, r"(?m)^\s*output-mode\s*=")
         self.assertNotRegex(config, r"(?m)^\s*output-scale\s*=")
 
