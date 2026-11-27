@@ -25,6 +25,8 @@ ALLOWED = {
     "reduced_motion": {"true", "false"},
     "update_channel": {"stable", "testing"},
     "voice_access": {"true", "false"},
+    "keyboard_repeat_rate": {"20", "30", "40", "50", "60"},
+    "keyboard_repeat_delay": {"200", "300", "400", "500", "600", "700", "800"},
 }
 
 def fail(message: str) -> None:
@@ -125,6 +127,8 @@ def main() -> None:
     opacity = int(values.get("terminal_opacity", "90"))
     top_panel = values.get("top_panel", "true") == "true"
     reduced_motion = values.get("reduced_motion", "false") == "true"
+    repeat_rate = values.get("keyboard_repeat_rate", "40")
+    repeat_delay = values.get("keyboard_repeat_delay", "400")
 
     if theme == "light":
         background, foot_background, foot_foreground = "0xfff2f2f6", "f2f2f6", "17171d"
@@ -168,6 +172,8 @@ def main() -> None:
         ("startup-animation", motion),
     ):
         weston_text = replace_key(weston_text, key, value)
+    weston_text = replace_key(weston_text, "repeat-rate", repeat_rate)
+    weston_text = replace_key(weston_text, "repeat-delay", repeat_delay)
     weston_text += adaptive_output_config(pathlib.Path(os.environ.get("VAMPIRE_DRM_SYSFS", "/sys/class/drm")))
 
     for key, value in (
@@ -183,6 +189,7 @@ def main() -> None:
     applied = {
         "theme", "accent", "surface_transparency", "terminal_opacity",
         "top_panel", "show_clock", "reduced_motion",
+        "keyboard_repeat_rate", "keyboard_repeat_delay",
     }
     pending = sorted(set(values) - applied)
     if pending:
