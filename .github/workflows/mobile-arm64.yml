@@ -38,7 +38,7 @@ jobs:
       - name: Build ARM64 kernel and initramfs
         env:
           JOBS: "2"
-        run: build/build-mobile-qemu.sh
+        run: bash build/build-mobile-qemu.sh
       - name: Boot the image in QEMU
         shell: bash
         run: |
