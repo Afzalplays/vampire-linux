@@ -1,6 +1,6 @@
 # Vampire OS mobile support
 
-**Status:** Responsive PWA portal implemented. Native Android device images and a native iOS companion remain planned and are not release deliverables.
+**Status:** Current deliverable is the Vampire Mobile Launcher Beta (PWA/web launcher preview) only. A full bootable mobile OS is a later project, to begin after the main Vampire OS is complete. No bootable phone image is promised in the beta.
 
 ## Goals
 
@@ -62,11 +62,12 @@ Every release artifact should show architecture, edition, version, checksum, sig
 
 ## Delivery phases
 
-1. [x] Responsive project/download portal and PWA shell with install-state feedback and offline static asset caching (`mobile/`).
-2. Secure mobile-friendly server administration UX, with authentication and MFA.
-3. Select an Android ARM64 reference device and build a hardware-support matrix.
-4. Prototype and test a device-specific mobile image and touch-first shell.
-5. Evaluate a native iOS companion app only if the PWA is insufficient.
+1. [x] Build the responsive PWA portal and installable offline shell (`mobile/`).
+2. [x] Create the Vampire Mobile Launcher Beta prototype with app drawer, taskbar, quick panel, notifications, Allines preview, Caller/Game Booster/Terminal previews, live browser-available stats and built-in animated themes.
+3. [ ] Polish and validate the launcher beta on real Android and iPhone browsers; fix responsive, touch, accessibility and offline issues. Keep unsupported hardware readings clearly labelled.
+4. [ ] Complete and validate the main Vampire OS Desktop/Server releases before starting phone-OS porting.
+5. [ ] Later project: choose supported ARM64 Android devices, port kernel/drivers/firmware, build a bootable mobile image and validate calls, data, camera, sensors, power, security, recovery and updates.
+6. [ ] iPhone support remains a PWA/native companion; do not promise replacing or booting over iOS on ordinary iPhones.
 
 ## Acceptance criteria
 
@@ -88,3 +89,8 @@ The mobile interface prototype now includes Allines voice-command recognition wh
 The mobile experience prototype includes a best-effort live dashboard. Battery percentage, charging state and estimated charge/discharge time are shown only when the browser exposes the Battery Status API. Storage figures are the PWA origin's browser storage usage/quota, not the phone's total free disk space. Device RAM is shown only as the coarse `navigator.deviceMemory` estimate where supported; JavaScript heap usage, when exposed, is labelled as web-app memory rather than total system RAM. Unsupported readings are explicitly marked unavailable. iOS Safari commonly restricts these hardware APIs, so full battery, disk and RAM telemetry requires a native companion or OS service.
 
 Built-in CSS animated themes (Aurora, Nebula and Ocean), a static battery-friendly theme, animation intensity and a reduce-motion setting are included directly in the mobile experience; no separate theme app or download is required. The interface also respects the platform's `prefers-reduced-motion` preference. These are PWA-level visual themes, not system-wide iOS themes.
+
+
+## Current beta scope decision
+
+The immediate goal is a **launcher beta**, not a full mobile operating system. The app drawer, left-side launcher/taskbar, quick settings preview, notifications, Allines, theme picker, dashboard, Caller, Game Booster and terminal are being built as a touch-first web launcher. It can be installed to the Home Screen as a PWA for testing. It cannot control protected phone settings or act as the phone's default system launcher on iOS. On Android, default-launcher integration and real system controls require a later native app. The full bootable Vampire Mobile OS is deliberately deferred until the primary Vampire OS Desktop/Server work is complete.
