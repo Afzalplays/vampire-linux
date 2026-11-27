@@ -16,6 +16,7 @@ The static, installable Progressive Web App (PWA) project portal lives in `mobil
 - Touch targets, keyboard accessibility, scalable text and high-contrast mode.
 - Respect `prefers-reduced-motion`, dark/light appearance and safe-area insets.
 - PWA manifest, app icon, offline cache for the explicit static asset allowlist, and installation/update feedback.
+- Refresh navigations from the network when online, retain the last cached portal page for offline navigation, and keep static assets cache-first; old Vampire mobile cache versions are retired on activation.
 - Detect standalone installation, expose the browser install prompt when available, and provide Safari Home Screen instructions for iPhone/iPad.
 - HTTPS required for service-worker installation.
 - Do not cache credentials, private keys, tokens or privileged API responses.
