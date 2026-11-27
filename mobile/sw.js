@@ -1,4 +1,4 @@
-const CACHE="vampire-mobile-v4";
+const CACHE="vampire-mobile-v5";
 const CORE=["./","./index.html","./experience.html","./styles.css","./app.js","./manifest.webmanifest","./icon.svg"];
 const ASSETS=new Set(CORE.map(path=>new URL(path,self.location.href).pathname));
 
@@ -8,6 +8,27 @@ async function cacheResponse(request,response){
     await cache.put(request,response.clone());
   }
   return response;
+}
+
+async function offlinePage(request){
+  const cached=await caches.match(request);
+  if(cached)return cached;
+  const path=new URL(request.url).pathname;
+  if(path.endsWith("/experience.html")){
+    const launcher=await caches.match("./experience.html");
+    if(launcher)return launcher;
+  }
+  return caches.match("./index.html");
+}
+
+async function networkFirst(request){
+  try{
+    const response=await fetch(request);
+    if(response.ok)return cacheResponse(request,response);
+    return await offlinePage(request)||response;
+  }catch{
+    return offlinePage(request);
+  }
 }
 
 self.addEventListener("install",event=>{
@@ -29,11 +50,7 @@ self.addEventListener("fetch",event=>{
   if(url.origin!==self.location.origin||url.search||!ASSETS.has(url.pathname))return;
 
   if(request.mode==="navigate"){
-    event.respondWith(
-      fetch(request)
-        .then(response=>cacheResponse(request,response))
-        .catch(()=>caches.match(request).then(cached=>cached||caches.match("./index.html")))
-    );
+    event.respondWith(networkFirst(request));
     return;
   }
 
