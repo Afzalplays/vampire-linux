@@ -17,7 +17,7 @@ if command -v udhcpc >/dev/null 2>&1; then
 fi
 chmod 1777 /tmp 2>/dev/null || true
 hostname vampire-mobile 2>/dev/null || true
-chmod 0755 /usr/bin/vmobile 2>/dev/null || true
+chmod 0755 /usr/bin/vmobile /usr/bin/vmobile-ui 2>/dev/null || true
 if command -v udevd >/dev/null 2>&1; then
   udevd --daemon || log "udev did not start"
   if command -v udevadm >/dev/null 2>&1; then
