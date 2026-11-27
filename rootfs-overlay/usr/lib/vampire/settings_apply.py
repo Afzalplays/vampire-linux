@@ -88,18 +88,30 @@ def atomic_write(path: pathlib.Path, content: str) -> None:
         raise
 
 def adaptive_output_config(drm_root: pathlib.Path) -> str:
-    """Return Weston per-output scale hints from connected DRM mode inventories."""
+    """Return Weston scale hints, following only trusted sysfs device links."""
     if drm_root.is_symlink() or not drm_root.is_dir():
+        return ""
+    devices_root = pathlib.Path(os.environ.get("VAMPIRE_SYSFS_DEVICES_ROOT", "/sys/devices"))
+    try:
+        devices_root = devices_root.resolve(strict=True)
+    except OSError:
         return ""
     sections: list[str] = []
     for connector in sorted(drm_root.glob("card[0-9]*-*")):
-        if connector.is_symlink() or not connector.is_dir():
-            continue
         name = connector.name
         if not re.fullmatch(r"card[0-9]+-[A-Za-z0-9_-]+", name):
             continue
-        status_file = connector / "status"
-        modes_file = connector / "modes"
+        connector_dir = connector
+        if connector.is_symlink():
+            try:
+                connector_dir = connector.resolve(strict=True)
+                connector_dir.relative_to(devices_root)
+            except (OSError, ValueError):
+                continue
+        if not connector_dir.is_dir():
+            continue
+        status_file = connector_dir / "status"
+        modes_file = connector_dir / "modes"
         if status_file.is_symlink() or not status_file.is_file():
             continue
         try:
