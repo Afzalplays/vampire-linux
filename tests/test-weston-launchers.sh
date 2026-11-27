@@ -90,6 +90,14 @@ grep -q terminal "$TMP/terminal.args"
 if VAMPIRE_APP_CMD="$TMP/bin/app" sh "$LAUNCHER" --launch nonexistent >/dev/null 2>&1; then
   echo "Vampire Launcher dispatched an unknown app" >&2; exit 1
 fi
+printf 'utilities\n0\n' | sh "$LAUNCHER" > "$TMP/category-menu.out"
+grep -q 'Files.*Browse and manage files' "$TMP/category-menu.out"
+grep -q 'System Monitor' "$TMP/category-menu.out"
+! grep -q 'Software Center' "$TMP/category-menu.out"
+printf 'system\n0\n' | sh "$LAUNCHER" > "$TMP/system-menu.out"
+grep -q 'Software Center' "$TMP/system-menu.out"
+! grep -q 'System Monitor' "$TMP/system-menu.out"
+
 printf 'file\nfiles\n0\n' | APP_ARGS="$TMP/menu.args" VAMPIRE_APP_CMD="$TMP/bin/app" sh "$LAUNCHER" > "$TMP/menu.out"
 grep -q 'Search applications or enter an app ID' "$TMP/menu.out"
 grep -Eq "^  files +Files +Browse and manage files$" "$TMP/menu.out"
