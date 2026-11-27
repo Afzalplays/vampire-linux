@@ -176,3 +176,18 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn('e.key!=="Tab"', prototype)
         self.assertIn('e.shiftKey&&(document.activeElement===first||!active.contains(document.activeElement))', prototype)
         self.assertIn('!e.shiftKey&&(document.activeElement===last||!active.contains(document.activeElement))', prototype)
+
+    def test_mobile_first_roadmap_prioritizes_android_boot_port(self):
+        roadmap = (ROOT / "docs" / "MOBILE-SUPPORT.md").read_text()
+        self.assertIn("Mobile-first priority approved", roadmap)
+        self.assertIn("Build the native ARM64 mobile base", roadmap)
+        self.assertIn("Produce a device-specific boot/recovery image", roadmap)
+        self.assertIn("Desktop/server release polish after the mobile boot milestone", roadmap)
+        self.assertNotIn("before starting phone-OS porting", roadmap)
+
+    def test_mobile_support_never_claims_an_ordinary_iphone_boot_image(self):
+        roadmap = (ROOT / "docs" / "MOBILE-SUPPORT.md").read_text()
+        self.assertIn("ordinary iPhones are not a supported target for replacing iOS", roadmap)
+        self.assertIn("PWA/native companion", roadmap)
+        self.assertIn("device-specific", roadmap)
+
