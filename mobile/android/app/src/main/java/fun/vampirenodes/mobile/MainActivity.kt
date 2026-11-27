@@ -3,7 +3,6 @@ package com.vampirenodes.mobile
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -30,7 +29,7 @@ class MainActivity : Activity() {
         webView = WebView(this).apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
-            settings.allowFileAccess = true
+            settings.allowFileAccess = false
             settings.allowContentAccess = false
             settings.allowFileAccessFromFileURLs = false
             settings.allowUniversalAccessFromFileURLs = false
@@ -141,4 +140,5 @@ class MainActivity : Activity() {
         @JavascriptInterface
         fun exitToHome() { runOnUiThread { exitToSystemHome() } }
     }
+    companion object { private const val REQUEST_AUDIO = 7101 }
 }
