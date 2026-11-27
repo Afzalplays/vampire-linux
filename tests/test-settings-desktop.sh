@@ -249,6 +249,7 @@ test "$(grep -Fc '7) run_and_pause "$NETWORK" wifi auto ;;' "$ROOT/rootfs-overla
 grep -q '7) Reconnect saved Wi-Fi profile' "$TMP/network-menu.out"
 
 # Keyboard repeat preferences are reachable from the interactive Desktop settings menu.
+"$TMP/vsettings" reset
 printf '18\n50\n19\n600\n0\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" "$ROOT/rootfs-overlay/usr/bin/vdesktop" --settings > "$TMP/keyboard-settings-menu.out"
 grep -q '18) Keyboard repeat rate (20/30/40/50/60)' "$TMP/keyboard-settings-menu.out"
 grep -q 'Current keyboard_repeat_rate: 40' "$TMP/keyboard-settings-menu.out"
