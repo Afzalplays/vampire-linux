@@ -66,7 +66,8 @@ else if(name==="Recorder"){body.append(add("p",{},"Audio recording requires a br
 else if(name==="Tools"){body.append(add("p",{},"Tools hub: Calculator, Notes, Clock and local file previews are available from the app drawer."))}
 else{body.append(add("p",{},"Preview for "+name+". Native integration will be added in the bootable mobile OS."))}openPanel("app-view")}
 document.querySelector("[data-app-close]").addEventListener("click",closePanels);
-\nfunction toast(msg){const t=document.querySelector("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove("show"),2400)}
+
+function toast(msg){const t=document.querySelector("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove("show"),2400)}
 let lastPanelTrigger=null;function openPanel(id){const panel=document.getElementById(id);if(!panel)return;lastPanelTrigger=document.activeElement;document.querySelectorAll(".overlay").forEach(x=>{const active=x===panel;x.classList.toggle("open",active);x.setAttribute("aria-hidden",String(!active))});document.querySelectorAll(".dock-btn").forEach(x=>x.classList.toggle("active",x.dataset.panel===id));const focusTarget=id==="drawer"?document.querySelector("#app-search"):panel.querySelector("button:not([disabled]),input:not([disabled]),select:not([disabled])");focusTarget?.focus()}
 function closePanels(){document.querySelectorAll(".overlay").forEach(x=>{x.classList.remove("open");x.setAttribute("aria-hidden","true")});if(lastPanelTrigger?.isConnected)lastPanelTrigger.focus();lastPanelTrigger=null}
 document.querySelectorAll("[data-panel]").forEach(b=>b.addEventListener("click",()=>b.dataset.panel==="home"?closePanels():openPanel(b.dataset.panel)));
