@@ -33,6 +33,10 @@ if [ -x /usr/bin/vampire-mobile-shell ]; then
     log "WARNING: native SDL2 shell self-test failed"
   fi
 fi
+drm_devices=$(ls /sys/class/drm 2>/dev/null | tr '\n' ' ' || true)
+input_devices=$(ls /sys/class/input 2>/dev/null | tr '\n' ' ' || true)
+log "DRM devices: ${drm_devices:-none}"
+log "Input devices: ${input_devices:-none}"
 printf '\n  VAMPIRE MOBILE OS | ARM64 bring-up\n'
 printf '  Device: QEMU virt (generic emulator target)\n'
 printf '  Architecture: '
