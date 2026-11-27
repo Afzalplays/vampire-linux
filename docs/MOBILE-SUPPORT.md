@@ -36,7 +36,7 @@ On iPhone, users can add the PWA to the Home Screen through Safari where support
 
 ### 3. ARM64 QEMU bring-up target
 
-The QEMU profile now overlays a dedicated ARM64 console rootfs, configures the PL011 serial console and virtio support, and starts a `ttyAMA0` login prompt. The `vmobile` menu offers only basic system inspection, network interface listing, shell, reboot and poweroff. It deliberately does not expose the x86 disk installer or pretend to operate phone hardware. This is still an emulator bring-up stage, not a touch UI or phone build.
+The QEMU profile now overlays a dedicated ARM64 console rootfs, configures the PL011 serial console and virtio support, and starts a `ttyAMA0` login prompt, and enables virtio GPU, keyboard, tablet/input and network drivers for the emulator. The `vmobile` menu offers system inspection, network interface listing, display/input device diagnostics, shell, reboot and poweroff. It deliberately does not expose the x86 disk installer or pretend to operate phone hardware. This is still an emulator bring-up stage, not a touch UI or phone build.
 
 `build/vampire_mobile_qemu_defconfig` and `build/build-mobile-qemu.sh` define a separate AArch64 Buildroot profile for QEMU `virt`. This is a generic kernel/initramfs bring-up path only; it is not a phone image and does not validate touch, cellular, cameras, sensors, suspend or vendor firmware. A device-specific port remains blocked on selecting a real reference device.
 
