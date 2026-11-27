@@ -23,7 +23,7 @@ chmod +x "$TMP/vsettings"
 "$TMP/vsettings" reset
 test "$("$TMP/vsettings" get theme)" = dark
 cp "$VAMPIRE_SETTINGS_DEFAULTS" "$TMP/defaults.good"
-printf 'theme=invalid\\n' > "$VAMPIRE_SETTINGS_DEFAULTS"
+printf 'theme=invalid\n' > "$VAMPIRE_SETTINGS_DEFAULTS"
 if "$TMP/vsettings" reset >/dev/null 2>&1; then
   echo "settings reset accepted invalid defaults" >&2; exit 1
 fi
@@ -159,9 +159,9 @@ grep -q 'Command failed (exit 1)' "$TMP/errors.out"
 sh "$ROOT/rootfs-overlay/usr/bin/vmonitor" > "$TMP/monitor.out"
 
 # The interactive desktop settings menu applies the native panel clock immediately.
-printf '2\\n12\\nfalse\\n0\\n0\\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/clock-menu.out"
+printf '2\n12\nfalse\n0\n0\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/clock-menu.out"
 grep -q "^clock-format=none$" "$TMP/weston.ini"
-printf '2\\n12\\ntrue\\n0\\n0\\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/clock-menu.out"
+printf '2\n12\ntrue\n0\n0\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/clock-menu.out"
 grep -q "^clock-format=minutes-24h$" "$TMP/weston.ini"
 
 
