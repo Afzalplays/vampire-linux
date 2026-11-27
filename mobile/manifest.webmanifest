@@ -10,6 +10,39 @@
   "background_color": "#100d12",
   "theme_color": "#100d12",
   "icons": [
-    { "src": "./icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Vampire Mobile Launcher",
+      "short_name": "Launcher",
+      "description": "Open the touch-first Vampire Mobile launcher preview.",
+      "url": "./experience.html",
+      "icons": [
+        {
+          "src": "./icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Vampire OS Portal",
+      "short_name": "Portal",
+      "description": "Open project downloads and documentation.",
+      "url": "./index.html",
+      "icons": [
+        {
+          "src": "./icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
   ]
 }
