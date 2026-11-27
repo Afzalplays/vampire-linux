@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -Eeuxo pipefail
+set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 APP_LAUNCHER="$ROOT/rootfs-overlay/usr/bin/vampire-app"
 test -x "$APP_LAUNCHER" || { echo "Missing tracked Vampire app launcher: $APP_LAUNCHER" >&2; ls -la "$ROOT/rootfs-overlay/usr/bin" >&2; exit 1; }
@@ -99,7 +99,7 @@ grep -q 'Software Center' "$TMP/system-menu.out"
 test "$(grep -c 'System Monitor' "$TMP/system-menu.out")" -eq 2
 
 printf 'file\nfiles\n0\n' | APP_ARGS="$TMP/menu.args" VAMPIRE_APP_CMD="$TMP/bin/app" sh "$LAUNCHER" > "$TMP/menu.out"
-grep -q 'Search applications or enter an app ID' "$TMP/menu.out"
+grep -q 'Search apps, enter an app ID/name' "$TMP/menu.out"
 grep -Eq "^  files +Files +Browse and manage files$" "$TMP/menu.out"
 grep -Fxq files "$TMP/menu.args"
 
