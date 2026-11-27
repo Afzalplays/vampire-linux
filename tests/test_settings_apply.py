@@ -186,15 +186,15 @@ class SettingsApplyTests(unittest.TestCase):
             ):
                 connector = drm / name
                 connector.mkdir()
-                (connector / "status").write_text("connected\\n")
-                (connector / "modes").write_text(mode + "\\n")
+                (connector / "status").write_text("connected\n")
+                (connector / "modes").write_text(mode + "\n")
                 edid = bytearray(128)
                 edid[:8] = bytes((0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00))
                 edid[21], edid[22] = width_cm, height_cm
                 edid[127] = (-sum(edid[:127])) % 256
                 (connector / "edid").write_bytes(edid)
             settings = base / "settings.conf"
-            settings.write_text("theme=dark\\n")
+            settings.write_text("theme=dark\n")
             runtime = base / "run" / "vampire"
             config_home = base / "config"
             env = os.environ.copy()
@@ -213,8 +213,8 @@ class SettingsApplyTests(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, result.stderr)
             config = (runtime / "weston.ini").read_text()
-            self.assertIn("[output]\\nname=eDP-1\\nscale=2", config)
-            self.assertIn("[output]\\nname=HDMI-A-1\\nscale=1", config)
+            self.assertIn("[output]\nname=eDP-1\nscale=2", config)
+            self.assertIn("[output]\nname=HDMI-A-1\nscale=1", config)
 
     def test_missing_drm_inventory_keeps_default_weston_scaling(self):
         with tempfile.TemporaryDirectory() as temp:
