@@ -244,6 +244,8 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn("REQUEST_IMAGE", activity)
         self.assertIn("PermissionRequest.RESOURCE_AUDIO_CAPTURE", activity)
         self.assertIn("android.permission.RECORD_AUDIO", manifest)
+        self.assertIn('android:icon="@drawable/ic_vampire_mobile"', manifest)
+        self.assertTrue((root / "app" / "src" / "main" / "res" / "drawable" / "ic_vampire_mobile.xml").is_file())
         self.assertIn("androidx.webkit:webkit", (root / "app" / "build.gradle.kts").read_text())
         self.assertIn("Intent.ACTION_MAIN", activity)
         self.assertIn("Intent.CATEGORY_HOME", activity)
