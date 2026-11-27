@@ -34,4 +34,9 @@ grep -Fq 'git -C "$BUILD_DIR/buildroot" fetch --depth 1 origin' "$BUILDER"
 grep -Fq 'git -C "$BUILD_DIR/buildroot" checkout --detach "$BUILDROOT_VERSION"' "$BUILDER"
 grep -Fq 'ACTUAL_BUILDROOT_VERSION="$(git -C "$BR_DIR" describe --tags --exact-match HEAD' "$BUILDER"
 grep -Fq '[[ "$ACTUAL_BUILDROOT_VERSION" == "$BUILDROOT_VERSION" ]]' "$BUILDER"
+# Desktop session entry points are invoked directly at boot/login; keep their
+# executable mode explicit instead of relying on the checkout's file mode.
+grep -Fq '"$OVERLAY/usr/bin/vdesktop-session" "$OVERLAY/usr/lib/vampire/settings-bootstrap"' "$BUILDER"
+grep -Fq '"$OVERLAY/usr/lib/vampire/session-runtime"' "$BUILDER"
 printf 'PASS: ISO builder pins and verifies the exact Buildroot release tag\\n'
+printf 'PASS: ISO builder explicitly installs executable desktop session tools\\n'
