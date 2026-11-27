@@ -1,0 +1,1 @@
+source "$BR2_EXTERNAL_VAMPIRE_MOBILE_PATH/package/vampire-mobile-shell/Config.in"
