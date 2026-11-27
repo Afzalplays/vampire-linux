@@ -29,6 +29,40 @@ if "$ROOT/rootfs-overlay/usr/bin/vgraphical" --unknown >/dev/null 2>&1; then
 fi
 "$ROOT/rootfs-overlay/usr/bin/vgraphical" --help | grep -q -- '--check'
 grep -q 'modprobe "$module"' "$ROOT/rootfs-overlay/usr/bin/vgraphical"
+# Interactive desktop startup must reject root before probing devices or loading modules.
+cat > "$TMP/bin/id" <<'MOCK'
+#!/bin/sh
+case "$1" in
+  -u) echo "${VAMPIRE_TEST_UID:-0}" ;;
+  -un) echo "${VAMPIRE_TEST_USER:-root}" ;;
+  *) exit 2 ;;
+esac
+MOCK
+cat > "$TMP/bin/tty" <<'MOCK'
+#!/bin/sh
+echo "${VAMPIRE_TEST_TTY:-/dev/tty1}"
+MOCK
+chmod +x "$TMP/bin/id" "$TMP/bin/tty"
+if VAMPIRE_TEST_UID=0 VAMPIRE_TEST_USER=root PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vgraphical" >"$TMP/root-start.out" 2>&1; then
+  echo "vgraphical allowed an interactive root desktop" >&2
+  exit 1
+fi
+grep -q 'unprivileged vampire account' "$TMP/root-start.out"
+# tty0 is the active-console alias, not a numbered login VT.
+if VAMPIRE_TEST_UID=1000 VAMPIRE_TEST_USER=vampire VAMPIRE_TEST_TTY=/dev/tty0 PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vgraphical" >"$TMP/tty0.out" 2>&1; then
+  echo "vgraphical accepted tty0 as a login virtual terminal" >&2
+  exit 1
+fi
+grep -q 'local Linux virtual terminal is required' "$TMP/tty0.out"
+# Diagnostics remain available to root and do not start a session.
+VAMPIRE_TEST_UID=0 VAMPIRE_TEST_USER=root PATH="$TMP/bin:$PATH" \
+  VAMPIRE_WESTON_BASE="$TMP/etc/xdg/weston/weston.ini" \
+  VAMPIRE_FOOT_BASE="$TMP/etc/xdg/foot/foot.ini" VAMPIRE_DRM_DIR="$TMP/dev/dri" \
+  "$ROOT/rootfs-overlay/usr/bin/vgraphical" --check >/dev/null 2>&1 && {
+    echo "vgraphical --check unexpectedly passed without a DRM device" >&2
+    exit 1
+  }
+
 # Configuration symlinks must not be followed.
 ln -s "$TMP/etc/xdg/weston/weston.ini" "$TMP/weston-link.ini"
 if VAMPIRE_WESTON_BASE="$TMP/weston-link.ini" VAMPIRE_FOOT_BASE="$TMP/etc/xdg/foot/foot.ini" VAMPIRE_DRM_DIR="$TMP/dev/dri" PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vgraphical" --check >/dev/null 2>&1; then
