@@ -227,3 +227,15 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn('Security features are intentionally deferred', prototype)
         self.assertNotIn('Contacts:"contacts"', prototype)
         self.assertNotIn('Security:"terminal"', prototype)
+
+    def test_native_android_launcher_declares_home_role_and_exit_bridge(self):
+        root = ROOT / "mobile" / "android"
+        manifest = (root / "app" / "src" / "main" / "AndroidManifest.xml").read_text()
+        activity = (root / "app" / "src" / "main" / "java" / "fun" / "vampirenodes" / "mobile" / "MainActivity.kt").read_text()
+        prototype = (MOBILE / "experience.html").read_text()
+        self.assertIn("android.intent.category.HOME", manifest)
+        self.assertIn("android.intent.category.DEFAULT", manifest)
+        self.assertIn("@JavascriptInterface", activity)
+        self.assertIn("Intent.ACTION_MAIN", activity)
+        self.assertIn("Intent.CATEGORY_HOME", activity)
+        self.assertIn("window.VampireNative.exitToHome()", prototype)
