@@ -229,15 +229,15 @@ class SettingsApplyTests(unittest.TestCase):
 
             # 69 x 69 cm gives a 38.34-inch diagonal. These two modes
             # straddle the 180-PPI policy boundary without relying on rounding.
-            self.assertLess(math.hypot(6890, 6890) / (math.hypot(69, 69) / 2.54), 180)
-            self.assertGreaterEqual(math.hypot(6900, 6900) / (math.hypot(69, 69) / 2.54), 180)
+            self.assertLess(math.hypot(4880, 4880) / (math.hypot(69, 69) / 2.54), 180)
+            self.assertGreaterEqual(math.hypot(4900, 4900) / (math.hypot(69, 69) / 2.54), 180)
 
             import importlib.util
             spec = importlib.util.spec_from_file_location("vampire_settings_apply", APPLY)
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
-            self.assertEqual(module.display_scale([(6890, 6890)], edid_file), 1)
-            self.assertEqual(module.display_scale([(6900, 6900)], edid_file), 2)
+            self.assertEqual(module.display_scale([(4880, 4880)], edid_file), 1)
+            self.assertEqual(module.display_scale([(4900, 4900)], edid_file), 2)
 
     def test_invalid_or_symlinked_edid_uses_safe_resolution_fallback(self):
         with tempfile.TemporaryDirectory() as temp:
