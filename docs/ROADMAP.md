@@ -89,6 +89,8 @@ feature release-ready.
 - [x] Add `vlauncher --check` to validate the installed Desktop command set and all six distinct application icons; regression-test both complete and deliberately incomplete rootfs payloads.
 - [x] Gate Weston startup on the installed Vampire Launcher payload self-check so missing desktop commands or app icons fail graphical preflight before the compositor starts; add regression coverage for a failed payload check.
 - [x] Add category-filtered launcher catalog queries (`vlauncher --category system|utilities`) with invalid-category rejection and regression coverage.
+- [x] Add interactive System and Utilities category browsing to the console launcher, retaining direct app-ID/name launch and category query modes.
+- [x] Restore the installed desktop payload `vlauncher --check` command dispatch and cover it through the desktop launcher regression suite.
 - [x] Require the Desktop live-ISO smoke test to verify vsettings, settings bootstrap/apply helpers and Weston/Foot base configurations are present in the initramfs.
 - [x] Require the Desktop installer-rootfs artifact check to verify the same settings runtime and base configuration payload.
 - [x] Add console file manager, hardware inventory and diagnostics.
