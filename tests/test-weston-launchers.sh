@@ -67,6 +67,19 @@ grep -Fxq 'terminal|Terminal|Open Vampire Terminal' "$TMP/catalog"
 grep -Fxq 'files|Files|Browse and manage files' "$TMP/catalog"
 grep -q 'settings|Settings|Configure appearance' "$TMP/catalog"
 sh "$LAUNCHER" --search Settings | grep -Fq 'settings|Settings|Configure appearance'
+sh "$LAUNCHER" --category system > "$TMP/system-category"
+sh "$LAUNCHER" --category utilities > "$TMP/utilities-category"
+grep -Fxq 'terminal|Terminal|Open Vampire Terminal' "$TMP/system-category"
+grep -Fxq 'settings|Settings|Configure appearance and desktop preferences' "$TMP/system-category"
+grep -Fxq 'software|Software Center|Search, install and remove VPM packages' "$TMP/system-category"
+grep -Fxq 'files|Files|Browse and manage files' "$TMP/utilities-category"
+grep -Fxq 'monitor|System Monitor|View CPU, memory, thermal and network status' "$TMP/utilities-category"
+if grep -Eq '^(files|monitor)\\|' "$TMP/system-category" || grep -Eq '^(terminal|settings|software)\\|' "$TMP/utilities-category"; then
+  echo "Vampire Launcher category filter leaked an app into the wrong category" >&2; exit 1
+fi
+if sh "$LAUNCHER" --category unknown >/dev/null 2>&1; then
+  echo "Vampire Launcher accepted an unknown category" >&2; exit 1
+fi
 if sh "$LAUNCHER" --search no-such-app >/dev/null 2>&1; then
   echo "Vampire Launcher search returned a missing app" >&2; exit 1
 fi
