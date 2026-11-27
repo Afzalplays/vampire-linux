@@ -36,6 +36,22 @@ def main():
                                 env=env, text=True, capture_output=True)
         assert result.returncode == 0, result.stderr
         assert (target / "boot/vmlinuz").read_bytes() == kernel.read_bytes()
+        passwd = (target / "etc/passwd").read_text(encoding="utf-8").splitlines()
+        vampire = next(line.split(":") for line in passwd if line.startswith("vampire:"))
+        assert vampire[2:4] == ["1000", "1000"], vampire
+        assert vampire[5:] == ["/home/vampire", "/bin/sh"], vampire
+        groups = {
+            fields[0]: (int(fields[2]), set(fields[3].split(",")) if fields[3] else set())
+            for fields in (line.split(":") for line in (target / "etc/group").read_text(encoding="utf-8").splitlines())
+        }
+        for name, expected_gid in (("vampire", 1000), ("video", 27), ("input", 100), ("render", 107), ("audio", 29)):
+            assert name in groups, name
+            assert groups[name][0] == expected_gid, (name, groups[name])
+            assert "vampire" in groups[name][1], (name, groups[name])
+        shadow = next(line.split(":") for line in (target / "etc/shadow").read_text(encoding="utf-8").splitlines() if line.startswith("vampire:"))
+        assert shadow[1] == "!", shadow
+        assert (target / "etc/shadow").stat().st_mode & 0o777 == 0o640
+        assert (target / "home/vampire").is_dir()
         for relative in (
             "usr/bin/vdesktop-session",
             "usr/lib/vampire/session-runtime",
