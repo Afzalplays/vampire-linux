@@ -8,6 +8,7 @@ feature release-ready.
 
 - [x] Stage the Desktop session entry point, private runtime bootstrap and settings bootstrap into the installed root filesystem with executable permissions.
 - [x] Add regression checks for rootfs staging, ISO-builder executable modes, and the Desktop initramfs/installed-rootfs contracts.
+- [x] Provision the Desktop user's supplementary `video`, `input`, `render`, and `audio` device groups; quality-gate regression tests verify group membership, UID/GID, locked initial password state, and home-directory creation (commit `4536957a`).
 - [x] Pass Vampire OS build checks on commit `1e5c25a0` (workflow run [46007431003](https://github.com/Afzalplays/vampire-linux/actions/runs/46007431003)).
 - [x] Pass Vampire OS quality gates on commit `1e5c25a0` (workflow run [46007430954](https://github.com/Afzalplays/vampire-linux/actions/runs/46007430954)).
 - [ ] Complete fresh Desktop and Server ISO builds, installer-to-disk tests, and BIOS/UEFI reboot validation for the current source. The latest ISO runs are queued without jobs assigned; no current-head ISO artifact or successful installed-disk boot is confirmed yet.
