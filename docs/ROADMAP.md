@@ -79,6 +79,7 @@ feature release-ready.
 - [x] Add a Wayland terminal autostart with the Vampire Shell profile and branded dark terminal palette.
 - [x] Apply validated theme, accent, panel visibility/transparency, reduced-motion and terminal-opacity settings to the next Weston session.
 - [x] Apply the native Weston panel clock visibility preference and use a 24-hour clock by default; date, network and power indicators remain pending because the current Weston desktop shell does not provide those widgets.
+- [x] Add configurable keyboard repeat rate and initial delay with validated settings, Weston application and regression coverage.
 - [x] Set Foot terminal and terminal-hosted Settings preview to translucent 90% opacity by default; keep opacity user-adjustable with a solid-background option (regression-tested).
 - [x] Add Weston panel launchers for Terminal, Files, Settings, Software Center and Monitor.
 - [x] Add a searchable keyboard-driven Vampire Launcher with stable app IDs, `--list`, `--search` and `--launch` modes, interactive catalog filtering, case-insensitive app ID/display-name dispatch, and a direct entry in the main console Desktop menu; test application dispatch and expose it as a Weston panel entry. The graphical floating dock and native graphical launcher remain pending.
