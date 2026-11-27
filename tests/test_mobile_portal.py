@@ -72,7 +72,7 @@ class MobilePortalContractTests(unittest.TestCase):
 
     def test_vampire_mobile_prototype_has_requested_interactive_surfaces(self):
         prototype = (MOBILE / "experience.html").read_text()
-        for marker in ("Left-side taskbar", "All apps", "Quick panel", "Notifications", "Wallpaper & display", "Allines", "brightness", "volume", "prefers-reduced-motion", "wallpaper-file"):
+        for marker in ("Left-side taskbar", "All apps", "Quick panel", "Notifications", "Wallpaper & display", "Allines", "brightness", "volume", "prefers-reduced-motion", "wallpaper-file", "battery-live", "storage-live", "ram-live", "updateDeviceStats", "navigator.getBattery", "navigator.storage?.estimate", "theme-drift", "Animated themes", "Aurora flow", "Deep ocean", "motion-level", "reduce-motion"):
             with self.subTest(marker=marker):
                 self.assertIn(marker, prototype)
         self.assertIn("URL.createObjectURL", prototype)
