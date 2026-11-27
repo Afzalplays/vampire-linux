@@ -1,14 +1,16 @@
 # Vampire OS roadmap
 
-A feature is complet
-
-- [x] Source commit `cfe26ec` passed the Vampire OS build checks workflow (run `45953047012`) and quality gates workflow (run `45953046978`); shell/configuration checks, VPM checks, Python regression tests and mobile JavaScript syntax checks all passed.
-- [x] Desktop installed-rootfs test now checks wallpaper and per-application icon assets and their Weston configuration references; the source and quality workflows passed on the current commit.
-- [x] Expose each searchable launcher app's distinct bundled icon path in the machine-readable app catalog; regression tests verify unique icon mappings and that every icon asset exists.
-- [ ] Desktop and Server ISO workflows for current main commit `cfe26ec` are queued/pending runner assignment; no new ISO artifacts or current-head ISO boot results are available yet.
-e only after implementation, automated tests, and relevant
+A feature is complete only after implementation, automated tests, and relevant
 runtime validation. A design document or build script alone does not make a
 feature release-ready.
+
+## Latest engineering checkpoint — 2026-11-27
+
+- [x] Stage the Desktop session entry point, private runtime bootstrap and settings bootstrap into the installed root filesystem with executable permissions.
+- [x] Add regression checks for rootfs staging, ISO-builder executable modes, and the Desktop initramfs/installed-rootfs contracts.
+- [x] Pass Vampire OS build checks on commit `1e5c25a0` (workflow run [46007431003](https://github.com/Afzalplays/vampire-linux/actions/runs/46007431003)).
+- [x] Pass Vampire OS quality gates on commit `1e5c25a0` (workflow run [46007430954](https://github.com/Afzalplays/vampire-linux/actions/runs/46007430954)).
+- [ ] Complete fresh Desktop and Server ISO builds, installer-to-disk tests, and BIOS/UEFI reboot validation for the current source. The latest ISO runs are queued without jobs assigned; no current-head ISO artifact or successful installed-disk boot is confirmed yet.
 
 ## 0.1 developer live environment
 
