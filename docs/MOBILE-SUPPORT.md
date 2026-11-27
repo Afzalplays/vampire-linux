@@ -1,6 +1,6 @@
 # Vampire OS mobile support
 
-**Status:** Mobile-first priority approved. The immediate deliverable is the Vampire Mobile launcher experience; the next major engineering track is a real, bootable Android/Linux mobile edition. Desktop and server polish is deferred while this mobile track is active. The current PWA is still a prototype and is not a bootable phone OS.
+**Status:** Mobile-first priority approved. The immediate deliverable is the Vampire Mobile launcher experience; the next major engineering track is a real, bootable Android/Linux mobile edition. Desktop and server polish is deferred while this mobile track is active. Desktop/server release polish after the mobile boot milestone. The current PWA is still a prototype and is not a bootable phone OS.
 
 ## Goals
 
@@ -28,7 +28,7 @@ The static, installable Progressive Web App (PWA) project portal lives in `mobil
 - Do not cache credentials, private keys, tokens or privileged API responses.
 - A PWA is a web app; it does **not** boot or replace the phone's operating system.
 
-On iPhone, users can add the PWA to the Home Screen through Safari where supported. On Android, supported browsers can install it. Browser and OS capabilities differ.
+On iPhone, users can add the PWA to the Home Screen through Safari where supported. On Android, supported browsers can install it. Browser and OS capabilities differ. Ordinary iPhones are not a supported target for replacing iOS; iPhone support remains a PWA/native companion.
 
 ### 2. Native Android/Linux mobile edition
 
