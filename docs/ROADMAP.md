@@ -1,6 +1,11 @@
 # Vampire OS roadmap
 
-A feature is complete only after implementation, automated tests, and relevant
+A feature is complet
+
+- [x] Source commit `cfe26ec` passed the Vampire OS build checks workflow (run `45953047012`) and quality gates workflow (run `45953046978`); shell/configuration checks, VPM checks, Python regression tests and mobile JavaScript syntax checks all passed.
+- [x] Desktop installed-rootfs test now checks wallpaper and per-application icon assets and their Weston configuration references; the source and quality workflows passed on the current commit.
+- [ ] Desktop and Server ISO workflows for current main commit `cfe26ec` are queued/pending runner assignment; no new ISO artifacts or current-head ISO boot results are available yet.
+e only after implementation, automated tests, and relevant
 runtime validation. A design document or build script alone does not make a
 feature release-ready.
 
@@ -123,6 +128,7 @@ feature release-ready.
 - [x] Validate Server edition installation end-to-end on disposable BIOS and UEFI QEMU disks; both installed images reached Vampire init, serial login and DHCP lease (CI run `45596621598`).
 - [ ] Validate Desktop edition installation end-to-end on disposable BIOS and UEFI QEMU disks.
 - [x] Extend the Desktop installed-rootfs gate to reset and validate shipped settings, apply the appearance runtime, and verify generated Weston/Foot configuration before QEMU boot.
+- [x] Extend the Desktop installed-rootfs gate to require the bundled wallpaper and all six distinct app icons, and verify every Weston launcher references its matching icon plus adaptive `scale-crop` wallpaper configuration.
 - [ ] Add installed-system command execution checks for VFetch, reboot/shutdown and recovery cleanup.
 - [ ] Add encrypted installation, recovery media, boot repair and tested restore workflow.
 
@@ -155,7 +161,7 @@ feature release-ready.
 - [ ] Hardware compatibility and accessibility test matrix.
 - [ ] Reproducible signed artifacts, notices and release notes.
 
-## Current validation snapshot (2026-11-25)
+## Current validation snapshot (2026-11-27)
 
 - [x] Source commit `85bcee0` passed the Vampire OS build checks workflow.
 - [x] Source commit `85bcee0` passed the Vampire OS quality gates workflow.
