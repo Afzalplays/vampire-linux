@@ -6,7 +6,8 @@ feature release-ready.
 
 ## Latest engineering checkpoint — 2026-11-27
 
-- [x] Refresh mobile portal navigations from the network while preserving a cached offline fallback; keep static assets cache-first and retire only older Vampire mobile caches. Add Python and shell regression assertions (commit `ed1e1f7`; CI validation queued at checkpoint).
+- [x] Refresh mobile portal navigations from the network while preserving a cached offline fallback; keep static assets cache-first and retire only older Vampire mobile caches. Add Python and shell regression assertions (CI passed on commit `44af034f`).
+- [x] Extend installed Desktop BIOS/UEFI disk validation to execute `vlauncher --check` inside the installed root filesystem and confirm all desktop commands and six distinct app icons are present; add installed-disk harness contract coverage (commit `041888c2`; CI validation pending).
 
 - [x] Stage the Desktop session entry point, private runtime bootstrap and settings bootstrap into the installed root filesystem with executable permissions.
 - [x] Add regression checks for rootfs staging, ISO-builder executable modes, and the Desktop initramfs/installed-rootfs contracts.
