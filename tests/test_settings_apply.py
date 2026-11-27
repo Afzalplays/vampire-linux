@@ -83,9 +83,21 @@ class SettingsApplyTests(unittest.TestCase):
             self.assertIn("background-type=scale-crop", weston_text)
             self.assertIn("panel-color=0x9924546b", weston_text)
             self.assertIn("panel-position=none", weston_text)
+            self.assertIn("clock-format=none", weston_text)
             self.assertIn("animation=none", weston_text)
             self.assertIn("alpha=0.70", foot_text)
             self.assertIn("background=f2f2f6", foot_text)
+
+
+    def test_panel_clock_defaults_to_24_hour_and_can_be_hidden(self):
+        with tempfile.TemporaryDirectory() as temp:
+            result, weston, _ = self.run_apply(temp, "theme=dark\\nshow_clock=true\\n")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("clock-format=minutes-24h", weston.read_text())
+        with tempfile.TemporaryDirectory() as temp:
+            result, weston, _ = self.run_apply(temp, "theme=dark\\nshow_clock=false\\n")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("clock-format=none", weston.read_text())
 
     def test_adaptive_output_scaling_uses_connected_display_modes(self):
         with tempfile.TemporaryDirectory() as temp:
