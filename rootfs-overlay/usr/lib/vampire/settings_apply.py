@@ -91,6 +91,8 @@ def atomic_write(path: pathlib.Path, content: str) -> None:
 def display_scale(modes: list[tuple[int, int]], edid_file: pathlib.Path) -> int:
     """Choose integer UI scale from physical pixel density when EDID is valid."""
     try:
+        if edid_file.is_symlink():
+            raise OSError("refusing symlinked EDID")
         edid = edid_file.read_bytes()
         header = bytes((0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00))
         if (len(edid) >= 128 and edid[:8] == header
