@@ -129,6 +129,18 @@ class SettingsApplyTests(unittest.TestCase):
             (drm / "card0-HDMI-A-1" / "modes").write_text("1920x1080\n")
             (drm / "card0-DP-1" / "status").write_text("disconnected\n")
             (drm / "card0-DP-1" / "modes").write_text("3840x2160\n")
+            # Real /sys/class/drm connector entries are symlinks into /sys/devices.
+            devices = pathlib.Path(temp) / "devices"
+            linked_connector = devices / "pci0000:00" / "card0-DP-4"
+            linked_connector.mkdir(parents=True)
+            (linked_connector / "status").write_text("connected\n")
+            (linked_connector / "modes").write_text("3200x1800\n")
+            (drm / "card0-DP-4").symlink_to(linked_connector, target_is_directory=True)
+            outside_connector = pathlib.Path(temp) / "outside-connector"
+            outside_connector.mkdir()
+            (outside_connector / "status").write_text("connected\n")
+            (outside_connector / "modes").write_text("3840x2160\n")
+            (drm / "card0-DP-5").symlink_to(outside_connector, target_is_directory=True)
             settings = pathlib.Path(temp) / "settings.conf"
             settings.write_text("theme=dark\n")
             runtime = pathlib.Path(temp) / "run" / "vampire"
@@ -141,6 +153,7 @@ class SettingsApplyTests(unittest.TestCase):
                 "VAMPIRE_WESTON_RUNTIME_CONFIG": str(runtime / "weston.ini"),
                 "XDG_CONFIG_HOME": str(config_home),
                 "VAMPIRE_DRM_SYSFS": str(drm),
+                "VAMPIRE_SYSFS_DEVICES_ROOT": str(devices),
             })
             result = subprocess.run(
                 ["python3", str(APPLY)], env=env, text=True,
@@ -150,7 +163,9 @@ class SettingsApplyTests(unittest.TestCase):
             config = (runtime / "weston.ini").read_text()
             self.assertIn("[output]\nname=eDP-1\nscale=2", config)
             self.assertIn("[output]\nname=HDMI-A-1\nscale=1", config)
+            self.assertIn("[output]\nname=DP-4\nscale=2", config)
             self.assertNotIn("name=DP-1", config)
+            self.assertNotIn("name=DP-5", config)
 
     def test_missing_drm_inventory_keeps_default_weston_scaling(self):
         with tempfile.TemporaryDirectory() as temp:
