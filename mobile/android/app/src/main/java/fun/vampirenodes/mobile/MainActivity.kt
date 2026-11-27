@@ -3,6 +3,7 @@ package com.vampirenodes.mobile
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -12,12 +13,14 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.PermissionRequest
 import androidx.webkit.WebViewAssetLoader
+import android.webkit.ValueCallback
 import android.webkit.WebView
 import android.webkit.WebViewClient
 
 class MainActivity : Activity() {
     private lateinit var webView: WebView
     private var pendingAudioRequest: PermissionRequest? = null
+    private var pendingFileChooser: ValueCallback<Array<Uri>>? = null
     private val assetLoader by lazy {
         WebViewAssetLoader.Builder()
             .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
@@ -30,7 +33,7 @@ class MainActivity : Activity() {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.allowFileAccess = false
-            settings.allowContentAccess = false
+            settings.allowContentAccess = true
             settings.allowFileAccessFromFileURLs = false
             settings.allowUniversalAccessFromFileURLs = false
             settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
@@ -54,6 +57,29 @@ class MainActivity : Activity() {
                 }
             }
             webChromeClient = object : WebChromeClient() {
+                override fun onShowFileChooser(
+                    view: WebView,
+                    filePathCallback: ValueCallback<Array<Uri>>,
+                    fileChooserParams: FileChooserParams
+                ): Boolean {
+                    pendingFileChooser?.onReceiveValue(null)
+                    pendingFileChooser = filePathCallback
+                    val picker = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "image/*"
+                        putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/png", "image/jpeg", "image/webp", "image/gif"))
+                        putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
+                    }
+                    return try {
+                        startActivityForResult(picker, REQUEST_IMAGE)
+                        true
+                    } catch (_: Exception) {
+                        pendingFileChooser = null
+                        filePathCallback.onReceiveValue(null)
+                        false
+                    }
+                }
+
                 override fun onPermissionRequest(request: PermissionRequest) {
                     runOnUiThread {
                         val wantsAudio = request.resources.contains(PermissionRequest.RESOURCE_AUDIO_CAPTURE)
@@ -93,6 +119,17 @@ class MainActivity : Activity() {
         }
     }
 
+    @Deprecated("Deprecated Android callback retained for the platform file picker")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_IMAGE) {
+            val callback = pendingFileChooser
+            pendingFileChooser = null
+            val result = if (resultCode == RESULT_OK && data?.data != null) arrayOf(data.data!!) else null
+            callback?.onReceiveValue(result)
+        }
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == REQUEST_AUDIO) {
@@ -111,6 +148,8 @@ class MainActivity : Activity() {
     override fun onDestroy() {
         pendingAudioRequest?.deny()
         pendingAudioRequest = null
+        pendingFileChooser?.onReceiveValue(null)
+        pendingFileChooser = null
         if (::webView.isInitialized) {
             webView.stopLoading()
             webView.loadUrl("about:blank")
@@ -140,5 +179,5 @@ class MainActivity : Activity() {
         @JavascriptInterface
         fun exitToHome() { runOnUiThread { exitToSystemHome() } }
     }
-    companion object { private const val REQUEST_AUDIO = 7101 }
+    companion object { private const val REQUEST_AUDIO = 7101; private const val REQUEST_IMAGE = 7102 }
 }
