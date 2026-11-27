@@ -6,6 +6,8 @@ feature release-ready.
 
 ## Latest engineering checkpoint — 2026-11-27
 
+- [x] Refresh mobile portal navigations from the network while preserving a cached offline fallback; keep static assets cache-first and retire only older Vampire mobile caches. Add Python and shell regression assertions (commit `ed1e1f7`; CI validation queued at checkpoint).
+
 - [x] Stage the Desktop session entry point, private runtime bootstrap and settings bootstrap into the installed root filesystem with executable permissions.
 - [x] Add regression checks for rootfs staging, ISO-builder executable modes, and the Desktop initramfs/installed-rootfs contracts.
 - [x] Provision the Desktop user's supplementary `video`, `input`, `render`, and `audio` device groups; quality-gate regression tests verify group membership, UID/GID, locked initial password state, and home-directory creation (commit `4536957a`).
