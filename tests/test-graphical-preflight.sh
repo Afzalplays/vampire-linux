@@ -62,6 +62,8 @@ VAMPIRE_TEST_UID=0 VAMPIRE_TEST_USER=root PATH="$TMP/bin:$PATH" \
     echo "vgraphical --check unexpectedly passed without a DRM device" >&2
     exit 1
   }
+# Restore the host identity/TTY commands for the remaining runtime-path tests.
+rm -f "$TMP/bin/id" "$TMP/bin/tty"
 
 # Configuration symlinks must not be followed.
 ln -s "$TMP/etc/xdg/weston/weston.ini" "$TMP/weston-link.ini"
