@@ -58,7 +58,9 @@ class MobileArm64BringupTests(unittest.TestCase):
         self.assertIn("Launch touch UI", menu)
         shell = (MOBILE / "br2-external" / "package" / "vampire-mobile-shell" / "src" / "vampire-mobile-shell.c").read_text()
         self.assertIn("SDL_FINGERDOWN", shell)
+        self.assertIn("--self-test", shell)
         self.assertIn("VAMPIRE", shell)
+        self.assertIn("native SDL2 shell self-test passed", rc)
         self.assertIn("SDL_VIDEODRIVER", (MOBILE / "rootfs-overlay" / "usr" / "bin" / "vmobile-ui").read_text())
         self.assertIn("sh /usr/bin/vmobile", (MOBILE / "rootfs-overlay" / "etc" / "profile.d" / "vampire-mobile.sh").read_text())
 
