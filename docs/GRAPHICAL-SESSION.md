@@ -23,8 +23,12 @@ unimplemented.
 
 A usable \`/dev/dri/card0\`, kernel DRM driver and suitable firmware are required.
 Virtual machines without virtual GPU/DRM support will not show a graphical
-session. The supported interactive launcher is non-root and local-VT based, but there is
-not yet a graphical display manager, automatic login, or multi-user seat
+session. The supported interactive launcher is restricted in both the session wrapper
+and the graphical entry point to the dedicated unprivileged `vampire` account
+(uid 1000) on a numbered local Linux virtual terminal (`/dev/tty1` and above).
+The `vgraphical --check` diagnostics mode remains available to administrators,
+but an interactive root session and the `/dev/tty0` alias are rejected. There
+is not yet a graphical display manager, automatic login, or multi-user seat
 management. Audio, touchpads, multi-monitor support and GPU compatibility are
 not certified. Boot remains console-first; if Weston cannot acquire DRM/VT,
 return to the text console.
