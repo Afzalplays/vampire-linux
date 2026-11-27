@@ -159,8 +159,10 @@ static void activate(int x,int y) {
         }
     }
 }
-int main(void) {
-    SDL_setenv("SDL_VIDEODRIVER","fbcon",0);
+int main(int argc,char **argv) {
+    int self_test = argc > 1 && strcmp(argv[1],"--self-test")==0;
+    if(self_test) SDL_setenv("SDL_VIDEODRIVER","dummy",1);
+    else SDL_setenv("SDL_VIDEODRIVER","fbcon",0);
     SDL_setenv("SDL_FBDEV","/dev/fb0",0);
     if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_EVENTS)!=0){fprintf(stderr,"Vampire Mobile UI: SDL init failed: %s\n",SDL_GetError());return 1;}
     if(TTF_Init()!=0){fprintf(stderr,"Vampire Mobile UI: font subsystem failed: %s\n",TTF_GetError());SDL_Quit();return 1;}
@@ -174,6 +176,15 @@ int main(void) {
     if(!renderer){fprintf(stderr,"Vampire Mobile UI: renderer creation failed: %s\n",SDL_GetError());SDL_DestroyWindow(window);TTF_CloseFont(font);TTF_CloseFont(small_font);TTF_Quit();SDL_Quit();return 1;}
     SDL_GetRendererOutputSize(renderer,&screen_w,&screen_h);
     if(screen_w<320||screen_h<320){screen_w=480;screen_h=800;}
+    if(self_test) {
+        draw_home();
+        SDL_RenderPresent(renderer);
+        SDL_DestroyRenderer(renderer); SDL_DestroyWindow(window);
+        TTF_CloseFont(font); TTF_CloseFont(small_font);
+        TTF_Quit(); SDL_Quit();
+        puts("VAMPIRE_MOBILE_UI_SELF_TEST_OK");
+        return 0;
+    }
     while(running) {
         SDL_Event event;
         while(SDL_PollEvent(&event)) {
