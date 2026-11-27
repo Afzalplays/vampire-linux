@@ -78,6 +78,9 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn("URL.createObjectURL", prototype)
         self.assertIn("../rootfs-overlay/usr/share/vampire/wallpaper.png", prototype)
         self.assertIn("aria-pressed", prototype)
+        for marker in ("Vampire Caller", "Game Booster", "Vampire Terminal", "lockscreen", "SpeechRecognition", "vampire -activate hacker mode -y", "vsecurity scan --safe", "secure-unlock"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prototype)
 
     def test_phone_image_warning_is_visible(self):
         html = (MOBILE / "index.html").read_text()
