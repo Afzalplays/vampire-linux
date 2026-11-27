@@ -181,6 +181,7 @@ feature release-ready.
 - [x] Run VFetch, service/network/firewall command integration and mocked power-control regression tests in quality CI run `45614758508`.
 - [x] Require Desktop installer rootfs archives to include the Weston session launcher, graphical preflight and Vampire app/terminal launchers; regression-test Desktop/Server payload rules and reject unknown editions (quality CI run `45615705180`).
 - [x] Mobile companion portal now announces online/offline state through an accessible live region, clarifies that offline access is limited to cached local pages/assets, and improves keyboard focus, coarse-pointer targets and forced-colors support.
+- [x] Add a keyboard-visible skip-to-content link and focusable main-content target to the mobile portal; cover both in the PWA contract test.
 - [x] Add mobile PWA regression checks for manifest scope/orientation, install affordances, service-worker cache allowlist, same-origin GET-only caching and responsive/accessibility hooks; quality gates passed on commit `f833da0` (run `45954124375`).
 
 The current repository is a developer-stage live environment, not a finished
