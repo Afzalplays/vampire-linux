@@ -4,6 +4,7 @@ A feature is complet
 
 - [x] Source commit `cfe26ec` passed the Vampire OS build checks workflow (run `45953047012`) and quality gates workflow (run `45953046978`); shell/configuration checks, VPM checks, Python regression tests and mobile JavaScript syntax checks all passed.
 - [x] Desktop installed-rootfs test now checks wallpaper and per-application icon assets and their Weston configuration references; the source and quality workflows passed on the current commit.
+- [x] Expose each searchable launcher app's distinct bundled icon path in the machine-readable app catalog; regression tests verify unique icon mappings and that every icon asset exists.
 - [ ] Desktop and Server ISO workflows for current main commit `cfe26ec` are queued/pending runner assignment; no new ISO artifacts or current-head ISO boot results are available yet.
 e only after implementation, automated tests, and relevant
 runtime validation. A design document or build script alone does not make a
