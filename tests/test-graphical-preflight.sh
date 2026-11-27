@@ -12,9 +12,23 @@ cat > "$TMP/bin/foot" <<'MOCK'
 #!/bin/sh
 exit 0
 MOCK
-chmod +x "$TMP/bin/weston" "$TMP/bin/foot"
+cat > "$TMP/bin/vlauncher" <<'MOCK'
+#!/bin/sh
+[ "${1:-}" = --check ] || exit 2
+exit "${VAMPIRE_TEST_LAUNCHER_STATUS:-0}"
+MOCK
+chmod +x "$TMP/bin/weston" "$TMP/bin/foot" "$TMP/bin/vlauncher"
 : > "$TMP/etc/xdg/weston/weston.ini"
 : > "$TMP/etc/xdg/foot/foot.ini"
+# The graphical preflight must reject a broken installed app/icon payload
+# before attempting to start Weston.
+if VAMPIRE_TEST_LAUNCHER_STATUS=1 VAMPIRE_WESTON_BASE="$TMP/etc/xdg/weston/weston.ini" \
+   VAMPIRE_FOOT_BASE="$TMP/etc/xdg/foot/foot.ini" VAMPIRE_DRM_DIR="$TMP/dev/dri" \
+   PATH="$TMP/bin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vgraphical" --check >"$TMP/launcher-fail.out" 2>&1; then
+  echo "vgraphical accepted a failed Vampire Launcher payload check" >&2
+  exit 1
+fi
+grep -q 'desktop applications or icons failed' "$TMP/launcher-fail.out"
 # A regular file is intentionally not accepted as a DRM character device.
 if VAMPIRE_WESTON_BASE="$TMP/etc/xdg/weston/weston.ini" \
    VAMPIRE_FOOT_BASE="$TMP/etc/xdg/foot/foot.ini" \
