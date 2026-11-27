@@ -3,10 +3,10 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 android {
-    namespace = "fun.vampirenodes.mobile"
+    namespace = "com.vampirenodes.mobile"
     compileSdk = 35
     defaultConfig {
-        applicationId = "fun.vampirenodes.mobile"
+        applicationId = "com.vampirenodes.mobile"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
