@@ -45,7 +45,7 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn('const CACHE="vampire-mobile-v3"', worker)
         self.assertIn('if(request.mode==="navigate")', worker)
         self.assertIn('fetch(request)', worker)
-        self.assertIn('.catch(()=>caches.match("./index.html"))', worker)
+        self.assertIn('.catch(()=>caches.match(request).then(cached=>cached||caches.match("./index.html")))', worker)
         self.assertIn('key.startsWith("vampire-mobile-")', worker)
         self.assertIn('caches.match(request).then(cached=>cached||fetch(request)', worker)
 
@@ -76,6 +76,7 @@ class MobilePortalContractTests(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertIn(marker, prototype)
         self.assertIn("URL.createObjectURL", prototype)
+        self.assertIn("../rootfs-overlay/usr/share/vampire/wallpaper.png", prototype)
         self.assertIn("aria-pressed", prototype)
 
     def test_phone_image_warning_is_visible(self):
