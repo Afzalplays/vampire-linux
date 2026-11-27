@@ -1,0 +1,5 @@
+#!/bin/sh
+# Start the native SDL2 touch shell on the local framebuffer/console.
+export SDL_VIDEODRIVER="${SDL_VIDEODRIVER:-fbcon}"
+export SDL_FBDEV="${SDL_FBDEV:-/dev/fb0}"
+exec /usr/bin/vampire-mobile-shell "$@"
