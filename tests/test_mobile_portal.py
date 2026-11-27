@@ -191,3 +191,22 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn("PWA/native companion", roadmap)
         self.assertIn("device-specific", roadmap)
 
+    def test_launcher_has_exit_action_in_dock_and_mobile_shortcuts(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        self.assertGreaterEqual(prototype.count("data-exit-launcher"), 3)
+        self.assertIn('aria-label="Exit launcher"', prototype)
+        self.assertIn("Native launcher exit will return Home", prototype)
+        self.assertIn("Launcher preview cannot close the phone OS", prototype)
+
+    def test_launcher_supports_local_animated_wallpaper_selection(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        self.assertIn('accept="image/png,image/jpeg,image/webp,image/gif"', prototype)
+        self.assertIn('["image/png","image/jpeg","image/webp","image/gif"]', prototype)
+        self.assertIn("Animated wallpaper applied:", prototype)
+        self.assertIn('id="clear-wallpaper"', prototype)
+        self.assertIn("2*1024*1024", prototype)
+
+    def test_security_features_are_deferred_to_bootable_mobile_release(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        self.assertIn("Reserved for the bootable Vampire Mobile OS release", prototype)
+        self.assertIn("Native permissions arrive with the bootable OS", prototype)
