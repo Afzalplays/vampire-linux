@@ -106,7 +106,7 @@ class MobilePortalContractTests(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertIn(marker, prototype)
         self.assertIn("Browser storage is unavailable", prototype)
-        self.assertIn("Wallpaper images up to 2 MB are saved locally", prototype)
+        self.assertIn("Wallpaper files up to 2 MB are saved locally", prototype)
 
     def test_launcher_page_has_its_own_install_metadata(self):
         prototype = (MOBILE / "experience.html").read_text()
