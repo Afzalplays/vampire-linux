@@ -166,7 +166,7 @@ appearance_menu() {
     IFS= read -r value || return
     if "$SETTINGS" set "$key" "$value"; then
       case "$key" in
-        theme|accent|surface_transparency|terminal_opacity|top_panel|show_clock|reduced_motion)
+        theme|accent|surface_transparency|terminal_opacity|top_panel|show_clock|reduced_motion|keyboard_repeat_rate|keyboard_repeat_delay)
           run_tool "$SETTINGS" apply
           ;;
         *)
