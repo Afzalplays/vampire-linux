@@ -60,6 +60,26 @@ def main():
             staged = target / relative
             assert staged.read_text(encoding="utf-8").startswith("#!/bin/sh")
             assert staged.stat().st_mode & 0o777 == 0o755
+        # Never silently accept an image that already contains a conflicting
+        # local account: the graphical session and device permissions assume
+        # this exact unprivileged identity.
+        conflict = root / "conflicting-target"
+        (conflict / "etc").mkdir(parents=True)
+        (conflict / "etc/passwd").write_text(
+            "root:x:0:0:root:/root:/bin/sh\\nvampire:x:1001:1000:Vampire:/home/vampire:/bin/sh\\n",
+            encoding="utf-8",
+        )
+        (conflict / "etc/group").write_text("root:x:0:\\n", encoding="utf-8")
+        (conflict / "etc/shadow").write_text("root:*:19000:0:99999:7:::\\nvampire:!:19000:0:99999:7:::\\n", encoding="utf-8")
+        conflict_kernel = binaries / "conflict-bzImage"
+        conflict_kernel.write_bytes(b"test-kernel-image")
+        conflict_env = dict(env, BINARIES_DIR=str(binaries))
+        (binaries / "bzImage").write_bytes(conflict_kernel.read_bytes())
+        result = subprocess.run([sys.executable, str(SCRIPT), str(conflict)],
+                                env=conflict_env, text=True, capture_output=True)
+        assert result.returncode != 0
+        assert "existing 'vampire' account conflicts" in result.stderr, result.stderr
+
         (target / "boot/vmlinuz").unlink()
         kernel.unlink()
         result = subprocess.run([sys.executable, str(SCRIPT), str(target)],
