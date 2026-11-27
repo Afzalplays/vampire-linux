@@ -4,7 +4,7 @@ set -eu
 APP=${VAMPIRE_APP_CMD:-/usr/bin/vampire-app}
 TERMINAL=${VAMPIRE_TERMINAL_CMD:-/usr/bin/vampire-terminal}
 usage() {
-  printf 'Usage: vlauncher [--list|--json|--check|--search TEXT|--launch APP-ID|--help]\n'
+  printf 'Usage: vlauncher [--list|--json|--check|--search TEXT|--category system|utilities|--launch APP-ID|--help]\n'
 }
 catalog() {
   printf '%s\n' \
@@ -13,6 +13,14 @@ catalog() {
     'settings|Settings|Configure appearance and desktop preferences' \
     'software|Software Center|Search, install and remove VPM packages' \
     'monitor|System Monitor|View CPU, memory, thermal and network status'
+}
+category_catalog() {
+  [ "$#" -eq 1 ] || { usage >&2; return 2; }
+  case "$1" in system|utilities) ;; *) printf 'Vampire Launcher: unknown category: %s\\n' "$1" >&2; return 2 ;; esac
+  catalog | awk -F'|' -v wanted="$1" '
+    ($1 == "terminal" || $1 == "settings" || $1 == "software") && wanted == "system" { print; next }
+    ($1 == "files" || $1 == "monitor") && wanted == "utilities" { print }
+  '
 }
 json_catalog() {
   printf '%s\n' '[{"id":"terminal","name":"Terminal","description":"Open Vampire Terminal","category":"system","icon":"/usr/share/vampire/icons/terminal.png"},{"id":"files","name":"Files","description":"Browse and manage files","category":"utilities","icon":"/usr/share/vampire/icons/files.png"},{"id":"settings","name":"Settings","description":"Configure appearance and desktop preferences","category":"system","icon":"/usr/share/vampire/icons/settings.png"},{"id":"software","name":"Software Center","description":"Search, install and remove VPM packages","category":"system","icon":"/usr/share/vampire/icons/software.png"},{"id":"monitor","name":"System Monitor","description":"View CPU, memory, thermal and network status","category":"utilities","icon":"/usr/share/vampire/icons/monitor.png"}]'
