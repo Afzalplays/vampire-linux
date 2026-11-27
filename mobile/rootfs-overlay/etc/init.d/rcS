@@ -27,7 +27,7 @@ if command -v udevd >/dev/null 2>&1; then
   fi
 fi
 if [ -x /usr/bin/vampire-mobile-shell ]; then
-  if SDL_VIDEODRIVER=dummy /usr/bin/vampire-mobile-shell --self-test; then
+  if /usr/bin/vampire-mobile-shell --self-test; then
     log "native SDL2 shell self-test passed"
   else
     log "WARNING: native SDL2 shell self-test failed"
