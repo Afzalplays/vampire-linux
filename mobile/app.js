@@ -29,7 +29,7 @@ function isAppleMobileDevice() {
 }
 
 if (isStandalone()) {
-  setInstallStatus("Vampire OS portal is installed on this device.");
+  setInstallStatus("Vampire OS is installed on this device.");
 } else if (isAppleMobileDevice()) {
   setInstallStatus("To install on iPhone or iPad: open this page in Safari, tap Share, then Add to Home Screen.");
 } else {
@@ -65,7 +65,7 @@ if (installButton) {
 }
 
 window.addEventListener("appinstalled", () => {
-  setInstallStatus("Vampire OS portal installed.");
+  setInstallStatus("Vampire OS launcher installed.");
   if (installButton) installButton.hidden = true;
 });
 
