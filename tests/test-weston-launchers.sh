@@ -83,6 +83,18 @@ grep -q 'app ID/name' "$TMP/name.out"
 printf 'TERMINAL\n0\n' | TERMINAL_ARGS="$TMP/name-terminal.args" VAMPIRE_TERMINAL_CMD="$TMP/bin/terminal" sh "$LAUNCHER" > /dev/null
 grep -Fxq terminal "$TMP/name-terminal.args"
 
+
+# Partial searches launch a unique match directly and offer numbered choices
+# when multiple applications match the query.
+printf 'file\n0\n' | APP_ARGS="$TMP/partial.args" VAMPIRE_APP_CMD="$TMP/bin/app" sh "$LAUNCHER" > "$TMP/partial.out"
+grep -Fxq files "$TMP/partial.args"
+printf 's\n2\n0\n' | APP_ARGS="$TMP/multiple.args" VAMPIRE_APP_CMD="$TMP/bin/app" sh "$LAUNCHER" > "$TMP/multiple.out"
+grep -q '1) Settings' "$TMP/multiple.out"
+grep -q '2) Software Center' "$TMP/multiple.out"
+grep -Fxq software "$TMP/multiple.args"
+printf 's\n9\n0\n' | APP_ARGS="$TMP/invalid-selection.args" VAMPIRE_APP_CMD="$TMP/bin/app" sh "$LAUNCHER" > "$TMP/invalid-selection.out"
+grep -q 'outside the result list' "$TMP/invalid-selection.out"
+
 # Each clickable Weston panel launcher has a bundled Vampire icon.
 python3 - "$ROOT" <<'PY'
 import pathlib, re, struct, sys, zlib
