@@ -63,4 +63,13 @@ if sh "$ROOT/rootfs-overlay/usr/bin/vdisplay" --json unexpected >/dev/null 2>&1;
   echo "vdisplay accepted extra arguments after --json" >&2
   exit 1
 fi
+# Accept the canonical /sys/class/drm -> /sys/devices connector link shape.
+DEVICES="$TMP/devices"
+mkdir -p "$DEVICES/pci0000:00/card0-DP-4"
+printf 'connected\n' > "$DEVICES/pci0000:00/card0-DP-4/status"
+printf '3200x1800\n' > "$DEVICES/pci0000:00/card0-DP-4/modes"
+ln -s "$DEVICES/pci0000:00/card0-DP-4" "$SYS/card0-DP-4"
+LINKED_OUT="$(VAMPIRE_DRM_SYSFS="$SYS" VAMPIRE_SYSFS_DEVICES_ROOT="$DEVICES" sh "$ROOT/rootfs-overlay/usr/bin/vdisplay")"
+grep -q 'DP-4: connected' <<<"$LINKED_OUT"
+grep -q 'DP-4: connected' <<<"$(VAMPIRE_DRM_SYSFS="$SYS" VAMPIRE_SYSFS_DEVICES_ROOT="$DEVICES" sh "$ROOT/rootfs-overlay/usr/bin/vdisplay" --json)"
 echo "Vampire display inventory, JSON and unsafe-entry tests passed."
