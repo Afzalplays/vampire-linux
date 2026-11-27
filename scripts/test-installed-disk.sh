@@ -168,12 +168,12 @@ PY
     # The installed image must carry every distinct app icon and the adaptive wallpaper,
     # not merely the source-tree assets. Verify each launcher points at its own icon.
     for app_icon in terminal launcher files settings software monitor; do
-      grep -Fqx "icon=/usr/share/vampire/icons/$app_icon.png" "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" \\
+      grep -Fqx "icon=/usr/share/vampire/icons/$app_icon.png" "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" \
         || die "$mode installed Weston config omitted the $app_icon application icon"
     done
-    grep -Fqx 'background-image=/usr/share/vampire/wallpaper.png' "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" \\
+    grep -Fqx 'background-image=/usr/share/vampire/wallpaper.png' "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" \
       || die "$mode installed Weston config omitted the Vampire wallpaper"
-    grep -Fqx 'background-type=scale-crop' "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" \\
+    grep -Fqx 'background-type=scale-crop' "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" \
       || die "$mode installed wallpaper is not configured for adaptive display fitting"
   fi
 
