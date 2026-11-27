@@ -20,6 +20,13 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertEqual(manifest["orientation"], "any")
         self.assertTrue(manifest["icons"])
 
+    def test_manifest_exposes_launcher_and_portal_shortcuts(self):
+        manifest = json.loads((MOBILE / "manifest.webmanifest").read_text())
+        shortcuts = {item["short_name"]: item for item in manifest["shortcuts"]}
+        self.assertEqual(shortcuts["Launcher"]["url"], "./experience.html")
+        self.assertEqual(shortcuts["Portal"]["url"], "./index.html")
+        self.assertTrue(all(item["icons"] for item in manifest["shortcuts"]))
+
     def test_page_declares_mobile_and_apple_home_screen_support(self):
         html = (MOBILE / "index.html").read_text()
         for marker in ('name="viewport"', 'rel="manifest"', 'apple-mobile-web-app-capable', 'apple-touch-icon'):
