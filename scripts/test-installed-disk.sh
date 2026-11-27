@@ -93,10 +93,13 @@ run_boot() {
   INSPECT_MOUNT="$WORK/inspect-$mode"
   mkdir -p "$INSPECT_MOUNT"
   sudo mount -o ro,noload "${loop}p2" "$INSPECT_MOUNT" || die "$mode installed root partition could not be mounted read-only"
-  # Supply the host's real null device to chrooted diagnostics while the
-  # installed root remains read-only (its /dev is populated at boot by devtmpfs).
-  INSPECT_NULL_MOUNT="$INSPECT_MOUNT/dev/null"
-  sudo mount --bind /dev/null "$INSPECT_NULL_MOUNT" || die "$mode could not provide /dev/null to installed-root diagnostics"
+  # Bind the host's /dev directory into the read-only inspection root. The
+  # target /dev/null character node is not present in a mounted rootfs archive,
+  # so binding that individual file fails with ENOENT. A directory bind also
+  # supplies the other device nodes required by chrooted diagnostics.
+  INSPECT_NULL_MOUNT="$INSPECT_MOUNT/dev"
+  [[ -d "$INSPECT_NULL_MOUNT" ]] || die "$mode installed root has no /dev directory"
+  sudo mount --bind /dev "$INSPECT_NULL_MOUNT" || die "$mode could not provide /dev to installed-root diagnostics"
   local root_partuuid
   root_partuuid="$(sudo blkid -s PARTUUID -o value "${loop}p2")"
   [[ -n "$root_partuuid" ]] || die "$mode installed root partition has no PARTUUID"
