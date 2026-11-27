@@ -19,14 +19,18 @@ for key in ro.product.manufacturer ro.product.model ro.product.device ro.product
 done
 printf '\n## Boot and partition information\n\n'
 printf '### Kernel command line\n\n'
-adb shell cat /proc/cmdline 2>/dev/null | tr -d '\r' || true
+adb shell cat /proc/cmdline 2>/dev/null | tr -d '\r' | sed -E 's/(androidboot\\.(serialno|serial|imei)=)[^ ]+/\\1[redacted]/g' || true
 printf '\n\n### Named partitions\n\n'
 adb shell 'for p in /dev/block/by-name /dev/block/bootdevice/by-name; do if [ -d "$p" ]; then echo "$p"; ls -l "$p"; fi; done' 2>/dev/null | tr -d '\r' || true
 printf '\n\n## Fastboot availability\n\n'
 if command -v fastboot >/dev/null 2>&1; then
-  fastboot getvar product 2>&1 || true
-  fastboot getvar unlocked 2>&1 || true
-  fastboot getvar current-slot 2>&1 || true
+  if fastboot devices 2>/dev/null | grep -q .; then
+    fastboot getvar product 2>&1 || true
+    fastboot getvar unlocked 2>&1 || true
+    fastboot getvar current-slot 2>&1 || true
+  else
+    echo 'No device is currently in fastboot mode; ADB properties were collected.'
+  fi
 else
   echo 'fastboot is not installed on this host.'
 fi
