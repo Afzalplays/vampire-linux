@@ -73,7 +73,7 @@ if VAMPIRE_APP_CMD="$TMP/bin/app" sh "$LAUNCHER" --launch nonexistent >/dev/null
 fi
 printf 'file\nfiles\n0\n' | APP_ARGS="$TMP/menu.args" VAMPIRE_APP_CMD="$TMP/bin/app" sh "$LAUNCHER" > "$TMP/menu.out"
 grep -q 'Search applications or enter an app ID' "$TMP/menu.out"
-grep -Eq '^  files +Files +Browse and manage files
+grep -Eq "^  files +Files +Browse and manage files$" "$TMP/menu.out"
 grep -Fxq files "$TMP/menu.args"
 
 # Interactive launcher accepts stable IDs and case-insensitive display names.
