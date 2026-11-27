@@ -117,7 +117,7 @@ run_boot() {
   grep -Fq "root=PARTUUID=$root_partuuid" "$INSPECT_MOUNT/boot/grub/grub.cfg" || die "$mode GRUB root PARTUUID does not match the installed partition"
   grep -Fq ' / ext4 ' "$INSPECT_MOUNT/etc/fstab" || die "$mode installed fstab does not mount the root filesystem"
   if [[ "$EDITION" == desktop ]]; then
-    for required in usr/bin/vdesktop usr/bin/vgraphical usr/bin/vampire-app usr/bin/vsh usr/bin/vampire-terminal usr/lib/vampire/settings_apply.py etc/xdg/weston/weston.ini etc/xdg/foot/foot.ini usr/share/vampire/wallpaper.png usr/share/vampire/icons/terminal.png usr/share/vampire/icons/launcher.png usr/share/vampire/icons/files.png usr/share/vampire/icons/settings.png usr/share/vampire/icons/software.png usr/share/vampire/icons/monitor.png; do
+    for required in usr/bin/vdesktop usr/bin/vdesktop-session usr/lib/vampire/session-runtime usr/lib/vampire/settings-bootstrap usr/bin/vgraphical usr/bin/vampire-app usr/bin/vsh usr/bin/vampire-terminal usr/lib/vampire/settings_apply.py etc/xdg/weston/weston.ini etc/xdg/foot/foot.ini usr/share/vampire/wallpaper.png usr/share/vampire/icons/terminal.png usr/share/vampire/icons/launcher.png usr/share/vampire/icons/files.png usr/share/vampire/icons/settings.png usr/share/vampire/icons/software.png usr/share/vampire/icons/monitor.png; do
       [[ -s "$INSPECT_MOUNT/$required" ]] || die "$mode Desktop install is missing /$required"
     done
     grep -Fxq 'alpha=0.90' "$INSPECT_MOUNT/etc/xdg/foot/foot.ini" || die "$mode installed Desktop terminal transparency default is incorrect"
@@ -171,6 +171,12 @@ PY
     grep -Fq ' -F _vampire_complete vpower' "$WORK/$mode.vsh-completion.log" || die "$mode installed Vampire Shell did not register command completion"
     sudo chroot "$INSPECT_MOUNT" /usr/bin/vdesktop --help > "$WORK/$mode.vdesktop-help.log" 2>&1 || die "$mode installed Desktop launcher help failed"
     grep -Fq "Usage: vdesktop [--settings]" "$WORK/$mode.vdesktop-help.log" || die "$mode installed Desktop launcher help is invalid"
+    sudo chroot "$INSPECT_MOUNT" /usr/bin/vdesktop-session --help > "$WORK/$mode.desktop-session-help.log" 2>&1 || die "$mode installed desktop session wrapper help failed"
+    grep -Fq "Usage: vdesktop-session [vgraphical options]" "$WORK/$mode.desktop-session-help.log" || die "$mode installed desktop session wrapper help is invalid"
+    if sudo chroot "$INSPECT_MOUNT" /usr/bin/vdesktop-session > "$WORK/$mode.desktop-session-root.log" 2>&1; then
+      die "$mode installed desktop session wrapper accepted a root session"
+    fi
+    grep -Fq "unprivileged vampire account" "$WORK/$mode.desktop-session-root.log" || die "$mode installed desktop session wrapper did not explain its account restriction"
     grep -Fq "path=/usr/bin/vampire-app files" "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" || die "$mode installed Weston config omitted Vampire Files"
     # The installed image must carry every distinct app icon and the adaptive wallpaper,
     # not merely the source-tree assets. Verify each launcher points at its own icon.
