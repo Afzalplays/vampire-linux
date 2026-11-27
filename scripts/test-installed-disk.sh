@@ -115,6 +115,16 @@ run_boot() {
   grep -Fq "vssh authorize USER" "$WORK/$mode.vssh-help.log" || die "$mode installed SSH onboarding help is invalid"
   grep -Fxq "FIRMWARE=$mode" "$INSPECT_MOUNT/etc/vampire/install.conf" || die "$mode installed firmware metadata is incorrect"
   grep -Fq "root=PARTUUID=$root_partuuid" "$INSPECT_MOUNT/boot/grub/grub.cfg" || die "$mode GRUB root PARTUUID does not match the installed partition"
+  if [[ "$EDITION" == desktop ]]; then
+    sudo chroot "$INSPECT_MOUNT" /usr/lib/vampire/session-runtime > "$WORK/$mode.session-runtime.log" 2>&1 || die "$mode installed session runtime bootstrap failed"
+    for uid in 0 1000; do
+      runtime_dir="$INSPECT_MOUNT/run/user/$uid"
+      [[ -d "$runtime_dir" && ! -L "$runtime_dir" ]] || die "$mode session runtime directory for UID $uid is missing or unsafe"
+      [[ "$(stat -c %u "$runtime_dir")" == "$uid" ]] || die "$mode session runtime directory for UID $uid has incorrect ownership"
+      [[ "$(stat -c %a "$runtime_dir")" == 700 ]] || die "$mode session runtime directory for UID $uid is not private (0700)"
+    done
+    grep -Fq "vampire" "$INSPECT_MOUNT/etc/passwd" || die "$mode installed Desktop account is missing"
+  fi
   grep -Fq ' / ext4 ' "$INSPECT_MOUNT/etc/fstab" || die "$mode installed fstab does not mount the root filesystem"
   if [[ "$EDITION" == desktop ]]; then
     for required in usr/bin/vdesktop usr/bin/vdesktop-session usr/lib/vampire/session-runtime usr/lib/vampire/settings-bootstrap usr/bin/vgraphical usr/bin/vampire-app usr/bin/vsh usr/bin/vampire-terminal usr/lib/vampire/settings_apply.py etc/xdg/weston/weston.ini etc/xdg/foot/foot.ini usr/share/vampire/wallpaper.png usr/share/vampire/icons/terminal.png usr/share/vampire/icons/launcher.png usr/share/vampire/icons/files.png usr/share/vampire/icons/settings.png usr/share/vampire/icons/software.png usr/share/vampire/icons/monitor.png; do
