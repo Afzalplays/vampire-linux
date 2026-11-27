@@ -66,6 +66,7 @@ class SettingsApplyTests(unittest.TestCase):
         self.assertIn("background-image=/usr/share/vampire/wallpaper.png", config)
         self.assertIn("background-type=scale-crop", config)
         self.assertIn("[libinput]\nenable-tap=true", config)
+        self.assertIn("[keyboard]\nrepeat-rate=40\nrepeat-delay=400", config)
         self.assertNotRegex(config, r"(?m)^\s*output-mode\s*=")
         self.assertNotRegex(config, r"(?m)^\s*output-scale\s*=")
 
