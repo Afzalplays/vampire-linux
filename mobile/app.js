@@ -6,6 +6,18 @@ function setInstallStatus(message) {
   if (installStatus) installStatus.textContent = message;
 }
 
+function updateConnectionStatus() {
+  const connectionStatus = document.querySelector("#connection-status");
+  if (!connectionStatus) return;
+  connectionStatus.textContent = navigator.onLine
+    ? "Connection: online. The portal can refresh project links and release information."
+    : "Connection: offline. Only previously cached portal pages and assets are available; external project links need a connection.";
+}
+
+window.addEventListener("online", updateConnectionStatus);
+window.addEventListener("offline", updateConnectionStatus);
+updateConnectionStatus();
+
 function isStandalone() {
   return window.matchMedia("(display-mode: standalone)").matches ||
     navigator.standalone === true;
