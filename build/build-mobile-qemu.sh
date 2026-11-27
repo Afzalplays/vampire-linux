@@ -24,7 +24,7 @@ set_config_string() {
   value=$2
   config="$BUILD_DIR/output/.config"
   sed -i "/^$key=/d; /^# $key is not set$/d" "$config"
-  printf '%s="%s"\\n' "$key" "$value" >> "$config"
+  printf '%s="%s"\n' "$key" "$value" >> "$config"
 }
 set_config_string BR2_ROOTFS_OVERLAY "$ROOT_DIR/rootfs-overlay:$ROOT_DIR/mobile/rootfs-overlay"
 set_config_string BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES "$ROOT_DIR/build/vampire_mobile_qemu.fragment"
