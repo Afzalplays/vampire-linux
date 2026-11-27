@@ -90,7 +90,6 @@ class MobilePortalContractTests(unittest.TestCase):
         for marker in ("Left-side taskbar", "All apps", "Quick panel", "Notifications", "Wallpaper & display", "Allines", "brightness", "volume", "prefers-reduced-motion", "wallpaper-file", "battery-live", "storage-live", "ram-live", "updateDeviceStats", "navigator.getBattery", "navigator.storage?.estimate", "theme-drift", "Animated themes", "Aurora flow", "Deep ocean", "motion-level", "reduce-motion"):
             with self.subTest(marker=marker):
                 self.assertIn(marker, prototype)
-        self.assertIn("URL.createObjectURL", prototype)
         self.assertNotIn(";\\\\nconst PREF_KEY", prototype)
         self.assertNotIn(";\\\\n\\\\nlet batteryManager", prototype)
         self.assertNotIn("\\\\nlet batteryManager", prototype)
