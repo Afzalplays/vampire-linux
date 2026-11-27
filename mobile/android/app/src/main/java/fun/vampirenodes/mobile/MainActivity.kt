@@ -164,9 +164,17 @@ class MainActivity : Activity() {
         if (hasFocus) hideSystemBarsForLauncher()
     }
 
-    @Deprecated("Deprecated in Android API; Home action is handled explicitly")
+    @Deprecated("Deprecated Android callback retained for the launcher back action")
     override fun onBackPressed() {
-        if (::webView.isInitialized && webView.canGoBack()) webView.goBack() else exitToSystemHome()
+        if (!::webView.isInitialized) {
+            exitToSystemHome()
+            return
+        }
+        webView.evaluateJavascript("window.vampireHandleBack ? window.vampireHandleBack() : false") { result ->
+            if (result != "true") {
+                if (webView.canGoBack()) webView.goBack() else exitToSystemHome()
+            }
+        }
     }
 
     private fun exitToSystemHome() {
