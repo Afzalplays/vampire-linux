@@ -2,6 +2,7 @@
 """Apply validated Vampire appearance preferences to the live Wayland session."""
 from __future__ import annotations
 
+import math
 import os
 import pathlib
 import re
@@ -87,6 +88,23 @@ def atomic_write(path: pathlib.Path, content: str) -> None:
             pass
         raise
 
+def display_scale(modes: list[tuple[int, int]], edid_file: pathlib.Path) -> int:
+    """Choose integer UI scale from physical pixel density when EDID is valid."""
+    try:
+        edid = edid_file.read_bytes()
+        header = bytes((0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00))
+        if (len(edid) >= 128 and edid[:8] == header
+                and sum(edid[:128]) % 256 == 0
+                and edid[21] > 0 and edid[22] > 0 and modes):
+            diagonal_inches = math.hypot(edid[21], edid[22]) / 2.54
+            width_px, height_px = max(modes, key=lambda mode: mode[0] * mode[1])
+            diagonal_pixels = math.hypot(width_px, height_px)
+            return 2 if diagonal_pixels / diagonal_inches >= 180 else 1
+    except (OSError, ValueError, ZeroDivisionError):
+        pass
+    # Fallback for panels without readable EDID (including virtual displays).
+    return 2 if any(width >= 2800 and height >= 1600 for width, height in modes) else 1
+
 def adaptive_output_config(drm_root: pathlib.Path) -> str:
     """Return Weston scale hints, following only trusted sysfs device links."""
     if drm_root.is_symlink() or not drm_root.is_dir():
@@ -125,7 +143,7 @@ def adaptive_output_config(drm_root: pathlib.Path) -> str:
                         modes.append((int(match.group(1)), int(match.group(2))))
         except OSError:
             continue
-        scale = 2 if any(width >= 2800 and height >= 1600 for width, height in modes) else 1
+        scale = display_scale(modes, connector_dir / "edid")
         output_name = name.split("-", 1)[1]
         sections.append(f"\n[output]\nname={output_name}\nscale={scale}\n")
     return "".join(sections)
