@@ -161,8 +161,7 @@ static void activate(int x,int y) {
 }
 int main(int argc,char **argv) {
     int self_test = argc > 1 && strcmp(argv[1],"--self-test")==0;
-    if(self_test) SDL_setenv("SDL_VIDEODRIVER","dummy",1);
-    else SDL_setenv("SDL_VIDEODRIVER","fbcon",0);
+    SDL_setenv("SDL_VIDEODRIVER","fbcon",1);
     SDL_setenv("SDL_FBDEV","/dev/fb0",0);
     if(SDL_Init(SDL_INIT_VIDEO|SDL_INIT_EVENTS)!=0){fprintf(stderr,"Vampire Mobile UI: SDL init failed: %s\n",SDL_GetError());return 1;}
     if(TTF_Init()!=0){fprintf(stderr,"Vampire Mobile UI: font subsystem failed: %s\n",TTF_GetError());SDL_Quit();return 1;}
