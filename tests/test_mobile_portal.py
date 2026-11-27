@@ -111,7 +111,7 @@ class MobilePortalContractTests(unittest.TestCase):
 
     def test_launcher_page_has_its_own_install_metadata(self):
         prototype = (MOBILE / "experience.html").read_text()
-        for marker in ('rel="manifest"', 'apple-mobile-web-app-capable', 'apple-touch-icon', '<title>Vampire OS Launcher</title>'):
+        for marker in ('rel="manifest"', 'apple-mobile-web-app-capable', 'apple-touch-icon', '<title>Vampire OS Launcher</title>', 'navigator.serviceWorker.register("./sw.js")'):
             with self.subTest(marker=marker):
                 self.assertIn(marker, prototype)
 
