@@ -61,6 +61,8 @@ class MobileArm64BringupTests(unittest.TestCase):
         self.assertIn("--self-test", shell)
         self.assertIn("VAMPIRE", shell)
         self.assertIn("native SDL2 shell self-test passed", rc)
+        self.assertIn("DRM devices:", rc)
+        self.assertIn("Input devices:", rc)
         self.assertIn("SDL_VIDEODRIVER", (MOBILE / "rootfs-overlay" / "usr" / "bin" / "vmobile-ui").read_text())
         self.assertIn("sh /usr/bin/vmobile", (MOBILE / "rootfs-overlay" / "etc" / "profile.d" / "vampire-mobile.sh").read_text())
 
