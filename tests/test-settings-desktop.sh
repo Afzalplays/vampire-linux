@@ -256,9 +256,6 @@ grep -q 'Current keyboard_repeat_rate: 40' "$TMP/keyboard-settings-menu.out"
 grep -q '19) Keyboard repeat delay ms (200..800)' "$TMP/keyboard-settings-menu.out"
 test "$("$TMP/vsettings" get keyboard_repeat_rate)" = 50
 test "$("$TMP/vsettings" get keyboard_repeat_delay)" = 600
-grep -q '^repeat-rate=50
- "$TMP/weston.ini"
-grep -q '^repeat-delay=600
- "$TMP/weston.ini"
-
+grep -q '^repeat-rate=50$' "$TMP/weston.ini"
+grep -q '^repeat-delay=600$' "$TMP/weston.ini"
 echo "Vampire settings, Desktop preference menu, service/power controls, log/monitor dispatch, Vampire Shell dispatch and monitor tests passed."
