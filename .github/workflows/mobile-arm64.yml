@@ -61,6 +61,7 @@ jobs:
             exit "$status"
           fi
           grep -q "VAMPIRE MOBILE OS" qemu-mobile-boot.log
+          grep -q "native SDL2 shell self-test passed" qemu-mobile-boot.log
           grep -q "ttyAMA0" qemu-mobile-boot.log
       - name: Upload ARM64 boot artifacts and serial log
         uses: actions/upload-artifact@v4
