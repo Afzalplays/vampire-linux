@@ -74,7 +74,7 @@ grep -Fxq 'settings|Settings|Configure appearance and desktop preferences' "$TMP
 grep -Fxq 'software|Software Center|Search, install and remove VPM packages' "$TMP/system-category"
 grep -Fxq 'files|Files|Browse and manage files' "$TMP/utilities-category"
 grep -Fxq 'monitor|System Monitor|View CPU, memory, thermal and network status' "$TMP/utilities-category"
-if grep -Eq '^(files|monitor)\\|' "$TMP/system-category" || grep -Eq '^(terminal|settings|software)\\|' "$TMP/utilities-category"; then
+if grep -Eq '^(files|monitor)\|' "$TMP/system-category" || grep -Eq '^(terminal|settings|software)\|' "$TMP/utilities-category"; then
   echo "Vampire Launcher category filter leaked an app into the wrong category" >&2; exit 1
 fi
 if sh "$LAUNCHER" --category unknown >/dev/null 2>&1; then
