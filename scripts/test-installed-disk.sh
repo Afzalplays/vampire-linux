@@ -92,10 +92,14 @@ run_boot() {
   LOOPS+=("$loop")
   INSPECT_MOUNT="$WORK/inspect-$mode"
   mkdir -p "$INSPECT_MOUNT"
-  sudo mount -o ro,noload "${loop}p2" "$INSPECT_MOUNT" || die "$mode installed root partition could not be mounted read-only"
-  # Bind the host's /dev directory into the read-only inspection root. The
-  # target /dev/null character node is not present in a mounted rootfs archive,
-  # so binding that individual file fails with ENOENT. A directory bind also
+  # Mount the disposable test image read-write: the checks below deliberately
+  # exercise first-boot settings initialization, which must create /etc/vampire/
+  # settings.conf and generated runtime appearance files. This is an isolated
+  # throwaway image, not a production disk.
+  sudo mount -o noload "${loop}p2" "$INSPECT_MOUNT" || die "$mode installed root partition could not be mounted for diagnostics"
+  # Bind the host's /dev directory into the inspection root. The target
+  # /dev/null character node is not present in a mounted rootfs archive, so
+  # binding that individual file fails with ENOENT. A directory bind also
   # supplies the other device nodes required by chrooted diagnostics.
   INSPECT_NULL_MOUNT="$INSPECT_MOUNT/dev"
   [[ -d "$INSPECT_NULL_MOUNT" ]] || die "$mode installed root has no /dev directory"
