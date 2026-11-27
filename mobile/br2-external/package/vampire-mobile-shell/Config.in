@@ -1,0 +1,8 @@
+config BR2_PACKAGE_VAMPIRE_MOBILE_SHELL
+	bool "Vampire Mobile touch shell"
+	depends on BR2_PACKAGE_SDL2
+	depends on BR2_PACKAGE_SDL2_TTF
+	depends on BR2_PACKAGE_DEJAVU
+	help
+	  Native SDL2 touch-first home shell for the ARM64 mobile bring-up image.
+	  It reports available devices and can return to the console.
