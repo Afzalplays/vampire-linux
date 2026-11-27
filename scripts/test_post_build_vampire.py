@@ -22,7 +22,7 @@ def main():
         ):
             source = overlay / relative
             source.parent.mkdir(parents=True, exist_ok=True)
-            source.write_text("#!/bin/sh\\nexit 0\\n", encoding="utf-8")
+            source.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
             source.chmod(0o644)
         kernel = binaries / "bzImage"
         kernel.write_bytes(b"test-kernel-image")
@@ -66,11 +66,11 @@ def main():
         conflict = root / "conflicting-target"
         (conflict / "etc").mkdir(parents=True)
         (conflict / "etc/passwd").write_text(
-            "root:x:0:0:root:/root:/bin/sh\\nvampire:x:1001:1000:Vampire:/home/vampire:/bin/sh\\n",
+            "root:x:0:0:root:/root:/bin/sh\nvampire:x:1001:1000:Vampire:/home/vampire:/bin/sh\n",
             encoding="utf-8",
         )
-        (conflict / "etc/group").write_text("root:x:0:\\n", encoding="utf-8")
-        (conflict / "etc/shadow").write_text("root:*:19000:0:99999:7:::\\nvampire:!:19000:0:99999:7:::\\n", encoding="utf-8")
+        (conflict / "etc/group").write_text("root:x:0:\n", encoding="utf-8")
+        (conflict / "etc/shadow").write_text("root:*:19000:0:99999:7:::\nvampire:!:19000:0:99999:7:::\n", encoding="utf-8")
         conflict_kernel = binaries / "conflict-bzImage"
         conflict_kernel.write_bytes(b"test-kernel-image")
         conflict_env = dict(env, BINARIES_DIR=str(binaries))
