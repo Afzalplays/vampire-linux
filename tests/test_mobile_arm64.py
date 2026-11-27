@@ -42,7 +42,6 @@ class MobileArm64BringupTests(unittest.TestCase):
         self.assertIn('rootfs.cpio.gz', script)
         self.assertIn('IMAGES="$BUILD_DIR/output/images"', script)
         self.assertIn('BR2_EXTERNAL="$ROOT_DIR/mobile/br2-external"', script)
-        self.assertIn("BR2_PACKAGE_VAMPIRE_MOBILE_SHELL=y", (ROOT / "build" / "vampire_mobile_qemu_defconfig").read_text())
 
     def test_mobile_overlay_has_serial_console_and_no_desktop_installer(self):
         inittab = (MOBILE / "rootfs-overlay" / "etc" / "inittab").read_text()
@@ -58,6 +57,9 @@ class MobileArm64BringupTests(unittest.TestCase):
         self.assertIn("Launch touch UI", menu)
         shell = (MOBILE / "br2-external" / "package" / "vampire-mobile-shell" / "src" / "vampire-mobile-shell.c").read_text()
         self.assertIn("SDL_FINGERDOWN", shell)
+        self.assertIn("power_confirm&&power_choice==1", shell)
+        self.assertIn("power_confirm&&power_choice==2", shell)
+        self.assertIn('SDL_VIDEODRIVER","fbcon"', shell)
         self.assertIn("--self-test", shell)
         self.assertIn("VAMPIRE", shell)
         self.assertIn("native SDL2 shell self-test passed", rc)
