@@ -70,6 +70,14 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn("Offline support could not be enabled", app)
         self.assertIn("portal still works online", app)
 
+    def test_vampire_mobile_prototype_has_requested_interactive_surfaces(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        for marker in ("Left-side taskbar", "All apps", "Quick panel", "Notifications", "Wallpaper & display", "Allines", "brightness", "volume", "prefers-reduced-motion", "wallpaper-file"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prototype)
+        self.assertIn("URL.createObjectURL", prototype)
+        self.assertIn("aria-pressed", prototype)
+
     def test_phone_image_warning_is_visible(self):
         html = (MOBILE / "index.html").read_text()
         self.assertIn("not installable phone images", html)
