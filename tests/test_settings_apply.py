@@ -216,6 +216,29 @@ class SettingsApplyTests(unittest.TestCase):
             self.assertIn("[output]\nname=eDP-1\nscale=2", config)
             self.assertIn("[output]\nname=HDMI-A-1\nscale=1", config)
 
+    def test_edid_scaling_threshold_is_exact_at_180_ppi(self):
+        import math
+
+        with tempfile.TemporaryDirectory() as temp:
+            edid_file = pathlib.Path(temp) / "edid"
+            edid = bytearray(128)
+            edid[:8] = bytes((0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00))
+            edid[21], edid[22] = 69, 69
+            edid[127] = (-sum(edid[:127])) % 256
+            edid_file.write_bytes(edid)
+
+            # 69 x 69 cm gives a 38.34-inch diagonal. These two modes
+            # straddle the 180-PPI policy boundary without relying on rounding.
+            self.assertLess(math.hypot(6890, 6890) / (math.hypot(69, 69) / 2.54), 180)
+            self.assertGreaterEqual(math.hypot(6900, 6900) / (math.hypot(69, 69) / 2.54), 180)
+
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("vampire_settings_apply", APPLY)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            self.assertEqual(module.display_scale([(6890, 6890)], edid_file), 1)
+            self.assertEqual(module.display_scale([(6900, 6900)], edid_file), 2)
+
     def test_invalid_or_symlinked_edid_uses_safe_resolution_fallback(self):
         with tempfile.TemporaryDirectory() as temp:
             base = pathlib.Path(temp)
