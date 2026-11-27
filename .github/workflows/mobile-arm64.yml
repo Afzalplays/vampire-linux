@@ -50,6 +50,7 @@ jobs:
             -initrd out/mobile-arm64/rootfs.cpio.gz \
             -append "console=ttyAMA0,115200 rdinit=/sbin/init" \
             -nic user,model=virtio-net-pci \
+            -device virtio-gpu-pci -device virtio-keyboard-pci -device virtio-tablet-pci \
             -nographic -no-reboot > qemu-mobile-boot.log 2>&1
           status=$?
           set -e
