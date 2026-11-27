@@ -38,6 +38,8 @@ def configure_local_user(target: pathlib.Path) -> None:
     group_gid = ensure_group(group, "vampire", 1000)
     video_gid = ensure_group(group, "video", 27)
     input_gid = ensure_group(group, "input", 100)
+    render_gid = ensure_group(group, "render", 107)
+    audio_gid = ensure_group(group, "audio", 29)
     if any(len(line.split(":")) > 2 and line.split(":")[2] == "1000" and line.split(":")[0] != "vampire" for line in passwd_lines):
         raise SystemExit("Vampire OS: uid 1000 is already assigned to another account")
     if not any(line.split(":")[0] == "vampire" for line in passwd_lines):
@@ -54,7 +56,8 @@ def configure_local_user(target: pathlib.Path) -> None:
     # post-fakeroot-vampire.sh after the target tree enters fakeroot.
     print(
         "Vampire OS: provisioned locked local account 'vampire' "
-        f"(uid 1000; video gid {video_gid}; input gid {input_gid}). "
+        f"(uid 1000; video gid {video_gid}; input gid {input_gid}; "
+        f"render gid {render_gid}; audio gid {audio_gid}). "
         "Set its password from the root console before interactive login."
     )
 
