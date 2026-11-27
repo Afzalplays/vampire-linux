@@ -177,6 +177,8 @@ PY
     grep -Fq "unknown app: unknown" "$WORK/$mode.app-reject.log" || die "$mode installed app launcher rejection was unclear"
     grep -Fq "path=/usr/bin/vampire-terminal" "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" || die "$mode installed Weston config omitted Vampire Terminal"
     grep -Fq "path=/usr/bin/vampire-app launcher" "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" || die "$mode installed Weston config omitted Vampire Launcher"
+    sudo chroot "$INSPECT_MOUNT" /usr/bin/vlauncher --check > "$WORK/$mode.vlauncher-check.log" 2>&1 || die "$mode installed Vampire Launcher payload validation failed"
+    grep -Fq "all seven desktop commands and six application icons are present" "$WORK/$mode.vlauncher-check.log" || die "$mode installed Vampire Launcher payload validation output is invalid"
     sudo chroot "$INSPECT_MOUNT" /usr/bin/vlauncher --search Settings > "$WORK/$mode.vlauncher-search.log" 2>&1 || die "$mode installed Vampire Launcher search failed"
     grep -Fq "Settings|Configure appearance" "$WORK/$mode.vlauncher-search.log" || die "$mode installed Vampire Launcher search output is invalid"
     sudo chroot "$INSPECT_MOUNT" /usr/bin/vsh --version > "$WORK/$mode.vsh-version.log" 2>&1 || die "$mode installed Vampire Shell version command failed"
