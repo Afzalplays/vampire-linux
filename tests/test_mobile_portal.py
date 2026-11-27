@@ -93,6 +93,7 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn("URL.createObjectURL", prototype)
         self.assertNotIn(";\\\\nconst PREF_KEY", prototype)
         self.assertNotIn(";\\\\n\\\\nlet batteryManager", prototype)
+        self.assertNotIn("\\\\nlet batteryManager", prototype)
         self.assertEqual(prototype.count('querySelector("#voice-assistant").addEventListener'), 1)
         self.assertIn("../rootfs-overlay/usr/share/vampire/wallpaper.png", prototype)
         self.assertIn("aria-pressed", prototype)
