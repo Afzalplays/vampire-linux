@@ -1,0 +1,5 @@
+# Vampire Mobile ARM64 QEMU bring-up console
+::sysinit:/etc/init.d/rcS
+::ctrlaltdel:/sbin/reboot
+::shutdown:/etc/init.d/rcK
+ttyAMA0::respawn:/sbin/getty -L 115200 ttyAMA0 vt100
