@@ -90,6 +90,19 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn("Browser storage is unavailable", prototype)
         self.assertIn("Wallpaper images are previewed locally", prototype)
 
+    def test_launcher_app_shortcuts_route_to_preview_panels(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        for marker in ('Phone:"caller"', '"Vampire Caller":"caller"', '"Game Booster":"game"', 'Terminal:"terminal"', 'Allines:"assistant"', 'Security:"terminal"'):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prototype)
+
+    def test_launcher_panels_support_backdrop_and_touch_dismiss(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        self.assertIn('if(e.target===panel)closePanels()', prototype)
+        self.assertIn('panel.addEventListener("touchstart"', prototype)
+        self.assertIn('panel.addEventListener("touchend"', prototype)
+        self.assertIn('endY-touchStartY>130', prototype)
+
     def test_phone_image_warning_is_visible(self):
         html = (MOBILE / "index.html").read_text()
         self.assertIn("not installable phone images", html)
