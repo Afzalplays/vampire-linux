@@ -56,3 +56,7 @@ without a configured package repository.
 The build outputs are isolated in `.build/output-desktop` and
 `.build/output-server`, and ISO names include the edition. Test either image
 with the same `VAMPIRE_EDITION` value passed to `scripts/test-live-iso.sh`.
+
+## ARM64 mobile bring-up (QEMU)
+
+`build/build-mobile-qemu.sh` builds a separate AArch64 Buildroot kernel + initramfs profile for QEMU's generic `virt` machine. This is a console bring-up target for validating the ARM64 toolchain, kernel and initramfs path; it is **not** a device image and does not imply phone hardware support. The target has no phone modem, camera, touchscreen or vendor firmware integration. See `docs/MOBILE-SUPPORT.md` before treating any artifact as installable.
