@@ -110,7 +110,7 @@ run_boot() {
   grep -Fq "root=PARTUUID=$root_partuuid" "$INSPECT_MOUNT/boot/grub/grub.cfg" || die "$mode GRUB root PARTUUID does not match the installed partition"
   grep -Fq ' / ext4 ' "$INSPECT_MOUNT/etc/fstab" || die "$mode installed fstab does not mount the root filesystem"
   if [[ "$EDITION" == desktop ]]; then
-    for required in usr/bin/vdesktop usr/bin/vgraphical usr/bin/vampire-app usr/bin/vsh usr/bin/vampire-terminal usr/lib/vampire/settings_apply.py etc/xdg/weston/weston.ini etc/xdg/foot/foot.ini; do
+    for required in usr/bin/vdesktop usr/bin/vgraphical usr/bin/vampire-app usr/bin/vsh usr/bin/vampire-terminal usr/lib/vampire/settings_apply.py etc/xdg/weston/weston.ini etc/xdg/foot/foot.ini usr/share/vampire/wallpaper.png usr/share/vampire/icons/terminal.png usr/share/vampire/icons/launcher.png usr/share/vampire/icons/files.png usr/share/vampire/icons/settings.png usr/share/vampire/icons/software.png usr/share/vampire/icons/monitor.png; do
       [[ -s "$INSPECT_MOUNT/$required" ]] || die "$mode Desktop install is missing /$required"
     done
     grep -Fxq 'alpha=0.90' "$INSPECT_MOUNT/etc/xdg/foot/foot.ini" || die "$mode installed Desktop terminal transparency default is incorrect"
@@ -165,6 +165,16 @@ PY
     sudo chroot "$INSPECT_MOUNT" /usr/bin/vdesktop --help > "$WORK/$mode.vdesktop-help.log" 2>&1 || die "$mode installed Desktop launcher help failed"
     grep -Fq "Usage: vdesktop [--settings]" "$WORK/$mode.vdesktop-help.log" || die "$mode installed Desktop launcher help is invalid"
     grep -Fq "path=/usr/bin/vampire-app files" "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" || die "$mode installed Weston config omitted Vampire Files"
+    # The installed image must carry every distinct app icon and the adaptive wallpaper,
+    # not merely the source-tree assets. Verify each launcher points at its own icon.
+    for app_icon in terminal launcher files settings software monitor; do
+      grep -Fqx "icon=/usr/share/vampire/icons/$app_icon.png" "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" \\
+        || die "$mode installed Weston config omitted the $app_icon application icon"
+    done
+    grep -Fqx 'background-image=/usr/share/vampire/wallpaper.png' "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" \\
+      || die "$mode installed Weston config omitted the Vampire wallpaper"
+    grep -Fqx 'background-type=scale-crop' "$INSPECT_MOUNT/etc/xdg/weston/weston.ini" \\
+      || die "$mode installed wallpaper is not configured for adaptive display fitting"
   fi
 
   sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/bin/vpower status > "$WORK/$mode.vpower.log" 2>&1 || die "$mode installed vpower status failed"
