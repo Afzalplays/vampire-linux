@@ -37,6 +37,9 @@ jobs:
       - name: Check mobile portal JavaScript syntax
         run: node --check mobile/app.js && node --check mobile/sw.js
 
+      - name: Check embedded Vampire OS launcher JavaScript
+        run: python tests/check_mobile_launcher_js.py
+
       - name: Validate shell syntax
         shell: bash
         run: |
