@@ -40,6 +40,15 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn("url.search", worker)
         self.assertNotRegex(worker, re.compile(r"Authorization|localStorage|sessionStorage|indexedDB", re.I))
 
+    def test_service_worker_refreshes_navigation_and_limits_offline_fallback(self):
+        worker = (MOBILE / "sw.js").read_text()
+        self.assertIn('const CACHE="vampire-mobile-v3"', worker)
+        self.assertIn('if(request.mode==="navigate")', worker)
+        self.assertIn('fetch(request)', worker)
+        self.assertIn('.catch(()=>caches.match("./index.html"))', worker)
+        self.assertIn('key.startsWith("vampire-mobile-")', worker)
+        self.assertIn('caches.match(request).then(cached=>cached||fetch(request)', worker)
+
     def test_install_ui_reports_platform_specific_fallback_and_user_choice(self):
         app = (MOBILE / "app.js").read_text()
         for marker in (
