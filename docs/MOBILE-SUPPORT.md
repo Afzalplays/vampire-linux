@@ -1,6 +1,6 @@
 # Vampire OS mobile support
 
-**Status:** Current deliverable is the Vampire Mobile Launcher Beta (PWA/web launcher preview) only. A full bootable mobile OS is a later project, to begin after the main Vampire OS is complete. No bootable phone image is promised in the beta.
+**Status:** Mobile-first priority approved. The immediate deliverable is the Vampire Mobile launcher experience; the next major engineering track is a real, bootable Android/Linux mobile edition. Desktop and server polish is deferred while this mobile track is active. The current PWA is still a prototype and is not a bootable phone OS.
 
 ## Goals
 
@@ -63,11 +63,14 @@ Every release artifact should show architecture, edition, version, checksum, sig
 ## Delivery phases
 
 1. [x] Build the responsive PWA portal and installable offline shell (`mobile/`).
-2. [x] Create the Vampire Mobile Launcher Beta prototype with app drawer, taskbar, quick panel, notifications, Allines preview, Caller/Game Booster/Terminal previews, live browser-available stats and built-in animated themes.
-3. [ ] Polish and validate the launcher beta on real Android and iPhone browsers; fix responsive, touch, accessibility and offline issues. Keep unsupported hardware readings clearly labelled.
-4. [ ] Complete and validate the main Vampire OS Desktop/Server releases before starting phone-OS porting.
-5. [ ] Later project: choose supported ARM64 Android devices, port kernel/drivers/firmware, build a bootable mobile image and validate calls, data, camera, sensors, power, security, recovery and updates.
-6. [ ] iPhone support remains a PWA/native companion; do not promise replacing or booting over iOS on ordinary iPhones.
+2. [x] Create the Vampire Mobile launcher prototype with app drawer, quick panel, notifications, Allines preview, Caller/Game Booster/Terminal previews, browser-available stats and built-in themes.
+3. [ ] Complete launcher beta quality: responsive layouts, app icon consistency, touch gestures, accessibility, local settings persistence and offline/update behaviour.
+4. [ ] Select and document a supported Android reference device (SoC, bootloader, partition map, firmware and unlock policy) before building a device image.
+5. [ ] Build the native ARM64 mobile base: kernel, device tree, vendor firmware, init, graphics/display, touch, audio, Wi-Fi/Bluetooth and power management.
+6. [ ] Build the native touch shell and core mobile services: lock screen, notifications, quick settings, app lifecycle, permissions, keyboard, telephony/data where supported, camera and sensors.
+7. [ ] Produce a device-specific boot/recovery image; validate boot, install, encryption, update/rollback, suspend/resume and recovery on the reference device.
+8. [ ] Keep iPhone support as a PWA/native companion; do not promise replacing or booting over iOS on ordinary iPhones.
+9. [ ] Resume desktop/server release polish after the mobile boot milestone.
 
 ## Acceptance criteria
 
