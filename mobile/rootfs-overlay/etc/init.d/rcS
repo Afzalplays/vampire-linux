@@ -8,6 +8,13 @@ mount_one sysfs /sys sysfs
 mount_one devtmpfs /dev devtmpfs
 mkdir -p /dev/pts /run /tmp /var/log /var/lib/vampire /run/vampire
 mount_one devpts /dev/pts devpts
+if command -v ip >/dev/null 2>&1; then
+  ip link set lo up 2>/dev/null || true
+  ip link set eth0 up 2>/dev/null || true
+fi
+if command -v udhcpc >/dev/null 2>&1; then
+  udhcpc -b -i eth0 -p /run/vampire-udhcpc.pid -s /usr/share/udhcpc/default.script 2>/dev/null || log "DHCP client did not start on eth0"
+fi
 chmod 1777 /tmp 2>/dev/null || true
 hostname vampire-mobile 2>/dev/null || true
 chmod 0755 /usr/bin/vmobile 2>/dev/null || true
