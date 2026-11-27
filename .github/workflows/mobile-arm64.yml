@@ -2,7 +2,7 @@ name: Vampire Mobile ARM64 QEMU boot
 
 concurrency:
   group: vampire-mobile-arm64-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 on:
   push:
