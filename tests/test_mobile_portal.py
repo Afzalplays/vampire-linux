@@ -59,7 +59,8 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn("async function networkFirst(request)", worker)
         self.assertIn("if(response.ok)return cacheResponse(request,response)", worker)
         self.assertIn("return await offlinePage(request)||response", worker)
-        self.assertIn('.catch(()=>caches.match(request).then(cached=>cached||caches.match("./index.html")))', worker)
+        self.assertIn("return await offlinePage(request)||response", worker)
+        self.assertIn("return offlinePage(request)", worker)
         self.assertIn('key.startsWith("vampire-mobile-")', worker)
         self.assertIn("caches.match(request).then(cached=>cached||fetch(request)", worker)
 
