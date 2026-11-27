@@ -56,3 +56,14 @@ Use `vsettings list`, `vsettings set KEY VALUE`, `vsettings validate` and
 Weston or Foot configuration mapping are applied to the next graphical
 session; dock, blur and several panel-item preferences are stored but are not
 yet implemented by this early desktop preview.
+
+
+## Private desktop state
+
+The interactive launcher rejects symlinks in the XDG configuration path and
+the per-user runtime state path before creating or changing permissions. It
+then verifies that both `vampire` state directories are owned by the desktop
+user and have mode `0700`. This protects the settings and generated Weston
+configuration from being redirected through pre-existing links. The
+preflight regression suite checks that these guards remain in the startup
+path.
