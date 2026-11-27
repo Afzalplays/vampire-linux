@@ -210,3 +210,11 @@ class MobilePortalContractTests(unittest.TestCase):
         prototype = (MOBILE / "experience.html").read_text()
         self.assertIn("Reserved for the bootable Vampire Mobile OS release", prototype)
         self.assertIn("Native permissions arrive with the bootable OS", prototype)
+
+    def test_launcher_clock_recorder_and_media_previews_clean_up_resources(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        self.assertIn('setInterval(()=>{clock.textContent=new Date().toLocaleTimeString()', prototype)
+        self.assertIn('new MediaRecorder(stream)', prototype)
+        self.assertIn('navigator.mediaDevices.getUserMedia({audio:true})', prototype)
+        self.assertIn('URL.revokeObjectURL(objectUrl)', prototype)
+        self.assertIn('activePreviewCleanup();activePreviewCleanup=()=>{}', prototype)
