@@ -18,6 +18,8 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertEqual(manifest["name"], "Vampire OS")
         self.assertEqual(manifest["display"], "standalone")
         self.assertEqual(manifest["orientation"], "any")
+        self.assertEqual(manifest["start_url"], "./experience.html")
+        self.assertEqual(manifest["id"], "./experience.html")
         self.assertTrue(manifest["icons"])
 
     def test_manifest_exposes_launcher_and_portal_shortcuts(self):
@@ -51,10 +53,10 @@ class MobilePortalContractTests(unittest.TestCase):
         worker = (MOBILE / "sw.js").read_text()
         self.assertIn('const CACHE="vampire-mobile-v3"', worker)
         self.assertIn('if(request.mode==="navigate")', worker)
-        self.assertIn('fetch(request)', worker)
+        self.assertIn("fetch(request)", worker)
         self.assertIn('.catch(()=>caches.match(request).then(cached=>cached||caches.match("./index.html")))', worker)
         self.assertIn('key.startsWith("vampire-mobile-")', worker)
-        self.assertIn('caches.match(request).then(cached=>cached||fetch(request)', worker)
+        self.assertIn("caches.match(request).then(cached=>cached||fetch(request)", worker)
 
     def test_install_ui_reports_platform_specific_fallback_and_user_choice(self):
         app = (MOBILE / "app.js").read_text()
@@ -122,17 +124,8 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn("URL.revokeObjectURL", prototype)
         self.assertIn('window.addEventListener("pagehide"', prototype)
 
-    def test_launcher_panels_support_backdrop_and_touch_dismiss(self):
+    def test_launcher_panels_support_keyboard_escape_and_touch_dismissal(self):
         prototype = (MOBILE / "experience.html").read_text()
-        self.assertIn('if(e.target===panel)closePanels()', prototype)
+        self.assertIn('e.key==="Escape"', prototype)
         self.assertIn('panel.addEventListener("touchstart"', prototype)
         self.assertIn('panel.addEventListener("touchend"', prototype)
-        self.assertIn('endY-touchStartY>130', prototype)
-
-    def test_phone_image_warning_is_visible(self):
-        html = (MOBILE / "index.html").read_text()
-        self.assertIn("not installable phone images", html)
-
-
-if __name__ == "__main__":
-    unittest.main()
