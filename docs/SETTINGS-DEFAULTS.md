@@ -6,6 +6,8 @@ are copied to `/etc/vampire/settings.conf` on first live boot. The
 `vsettings` command validates values and atomically replaces the settings
 file; `vdesktop` exposes these preferences through its console preview menu.
 
+The Weston input profile enables libinput tap-to-click for supported touchpads. This is a default input convenience, not a substitute for physical touchpad validation.
+
 The current settings backend stores theme, accent, surface transparency,
 blur preset, terminal opacity, dock size/position/auto-hide/magnification,
 top-panel visibility, panel indicators, reduced motion, update channel and
