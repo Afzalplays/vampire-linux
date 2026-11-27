@@ -9,6 +9,7 @@ while :; do
   printf '  4) Open shell\n'
   printf '  5) Reboot\n'
   printf '  6) Power off\n'
+  printf '  7) Launch touch UI (local display)\n'
   printf '  0) Exit menu\n'
   printf '  Select: '
   IFS= read -r choice || exit 0
@@ -19,6 +20,7 @@ while :; do
     4) exec /bin/sh ;;
     5) printf 'Rebooting...\n'; reboot ;;
     6) printf 'Powering off...\n'; poweroff ;;
+    7) /usr/bin/vmobile-ui || printf 'Touch UI could not start; returning to console.\\n' ;;
     0) exit 0 ;;
     *) printf 'Invalid selection.\n' ;;
   esac
