@@ -82,6 +82,14 @@ class MobilePortalContractTests(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertIn(marker, prototype)
 
+    def test_launcher_preferences_persist_locally_and_fail_safely(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        for marker in ("vampire-mobile-preferences-v1", "readPreferences()", "savePreferences()", "localStorage.getItem", "localStorage.setItem", "savedPreferences.quick", "savedPreferences.reduceMotion"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prototype)
+        self.assertIn("Browser storage is unavailable", prototype)
+        self.assertIn("Wallpaper images are previewed locally", prototype)
+
     def test_phone_image_warning_is_visible(self):
         html = (MOBILE / "index.html").read_text()
         self.assertIn("not installable phone images", html)
