@@ -121,7 +121,12 @@ feature release-ready.
 - [ ] Design secure mobile server-administration UX with authentication and MFA.
 - [ ] Select and document a supported ARM64 Android reference device and bootloader requirements.
 - [ ] Bring up a device-specific kernel, device tree, firmware and core hardware drivers.
-- [ ] Implement a touch-first mobile shell and adaptive phone/tablet interfaces.
+- [x] Prototype the touch-first mobile shell with Allines voice-command demo, simulated screen lock, Vampire Caller UI, Game Booster profiles, expanded quick panel and authorized Security Lab terminal preview; these are not native device integrations.
+- [ ] Implement a production touch-first mobile shell and adaptive phone/tablet interfaces.
+- [ ] Implement native Allines voice services with permission controls and hardware-backed authentication for unlock; voice alone must never unlock the device.
+- [ ] Implement lawful Vampire Caller number reputation, caller ID, spam reporting, blocking and privacy controls using licensed/consented data.
+- [ ] Implement native game performance profiles, thermal safeguards, power controls and measured latency/performance targets.
+- [ ] Integrate signed, sandboxed defensive security tools in an explicit authorized Security Lab; no stealth or security bypass.
 - [ ] Validate radio, audio, camera, sensors, GPU, suspend/resume, encryption, recovery and updates on each supported device.
 - [ ] Evaluate a native iOS companion app if PWA capabilities are insufficient; no iOS replacement OS/ISO is planned.
 
