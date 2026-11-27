@@ -53,6 +53,17 @@ fi
 test "$(stat -c %a "$CONFIG")" = 600
 "$TMP/vsettings" set blur extreme
 test "$("$TMP/vsettings" get blur)" = extreme
+"$TMP/vsettings" set keyboard_repeat_rate 50
+"$TMP/vsettings" set keyboard_repeat_delay 600
+"$TMP/vsettings" apply
+grep -q "^repeat-rate=50$" "$TMP/weston.ini"
+grep -q "^repeat-delay=600$" "$TMP/weston.ini"
+if "$TMP/vsettings" set keyboard_repeat_rate 99 >/dev/null 2>&1; then
+  echo "settings accepted an out-of-range keyboard repeat rate" >&2; exit 1
+fi
+if "$TMP/vsettings" set keyboard_repeat_delay 100 >/dev/null 2>&1; then
+  echo "settings accepted an out-of-range keyboard repeat delay" >&2; exit 1
+fi
 "$TMP/vsettings" set terminal_opacity 70
 test "$("$TMP/vsettings" get terminal_opacity)" = 70
 "$TMP/vsettings" set accent rose
