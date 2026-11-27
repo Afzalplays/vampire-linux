@@ -80,40 +80,51 @@ case "${1:-}" in
   *) error 'usage: vgraphical [--check]'; exit 2 ;;
 esac
 
+# Interactive sessions are restricted to the dedicated unprivileged account.
+# Keep --check available to administrators for diagnostics.
+session_uid=$(id -u)
+session_user=$(id -un)
+[ "$session_uid" = 1000 ] && [ "$session_user" = vampire ] || {
+  error "interactive desktop must be started by the unprivileged vampire account (uid 1000)."
+  exit 1
+}
+session_tty=$(tty 2>/dev/null || true)
+case "$session_tty" in
+  /dev/tty[0-9]*)
+    session_tty_number=${session_tty#/dev/tty}
+    case "$session_tty_number" in
+      ''|*[!0-9]*|0) error "a local Linux virtual terminal is required (not SSH or a serial console)."; exit 1 ;;
+    esac
+    ;;
+  *) error "a local Linux virtual terminal is required (not SSH or a serial console)."; exit 1 ;;
+esac
+
 if command -v modprobe >/dev/null 2>&1; then
   # Probe common in-tree DRM modules before checking for a DRM card.
   for module in i915 amdgpu nouveau virtio_gpu; do modprobe "$module" 2>/dev/null || true; done
 fi
 check
-uid=$(id -u)
-if [ "$uid" -eq 0 ]; then
-  export XDG_RUNTIME_DIR="$RUNTIME_BASE/0"
-  export XDG_CONFIG_HOME=/run/vampire
-  export VAMPIRE_SETTINGS_FILE=/etc/vampire/settings.conf
-  mkdir -p "$XDG_RUNTIME_DIR" "$XDG_CONFIG_HOME"
-  chmod 0700 "$XDG_RUNTIME_DIR" "$XDG_CONFIG_HOME"
-else
-  home=${HOME:-}
-  [ -n "$home" ] && [ -d "$home" ] && [ -w "$home" ] || {
-    error "a writable home directory is required for a non-root desktop session."
-    exit 1
-  }
-  export XDG_RUNTIME_DIR="$RUNTIME_BASE/$uid"
-  reject_symlink_path "$RUNTIME_BASE" || exit 1
-  reject_symlink_path "$XDG_RUNTIME_DIR" || exit 1
-  [ -d "$XDG_RUNTIME_DIR" ] && [ "$(stat -c %u "$XDG_RUNTIME_DIR" 2>/dev/null || echo -1)" = "$uid" ] || {
-    error "runtime directory $XDG_RUNTIME_DIR is missing or not owned by this user; log in locally after boot."
-    exit 1
-  }
-  [ "$(stat -c %a "$XDG_RUNTIME_DIR" 2>/dev/null || echo 000)" = 700 ] || {
-    error "runtime directory must have mode 0700."
-    exit 1
-  }
-  export XDG_CONFIG_HOME="$home/.config"
-  export VAMPIRE_SETTINGS_FILE="$XDG_CONFIG_HOME/vampire/settings.conf"
-  mkdir -p "$XDG_CONFIG_HOME/vampire" "$XDG_RUNTIME_DIR/vampire"
-  chmod 0700 "$XDG_CONFIG_HOME/vampire" "$XDG_RUNTIME_DIR/vampire"
-fi
+uid=$session_uid
+home=${HOME:-}
+[ -n "$home" ] && [ -d "$home" ] && [ -w "$home" ] || {
+  error "a writable home directory is required for a non-root desktop session."
+  exit 1
+}
+export XDG_RUNTIME_DIR="$RUNTIME_BASE/$uid"
+reject_symlink_path "$RUNTIME_BASE" || exit 1
+reject_symlink_path "$XDG_RUNTIME_DIR" || exit 1
+[ -d "$XDG_RUNTIME_DIR" ] && [ "$(stat -c %u "$XDG_RUNTIME_DIR" 2>/dev/null || echo -1)" = "$uid" ] || {
+  error "runtime directory $XDG_RUNTIME_DIR is missing or not owned by this user; log in locally after boot."
+  exit 1
+}
+[ "$(stat -c %a "$XDG_RUNTIME_DIR" 2>/dev/null || echo 000)" = 700 ] || {
+  error "runtime directory must have mode 0700."
+  exit 1
+}
+export XDG_CONFIG_HOME="$home/.config"
+export VAMPIRE_SETTINGS_FILE="$XDG_CONFIG_HOME/vampire/settings.conf"
+mkdir -p "$XDG_CONFIG_HOME/vampire" "$XDG_RUNTIME_DIR/vampire"
+chmod 0700 "$XDG_CONFIG_HOME/vampire" "$XDG_RUNTIME_DIR/vampire"
 export VAMPIRE_WESTON_RUNTIME_CONFIG="$XDG_RUNTIME_DIR/vampire/weston.ini"
 if [ ! -s "$VAMPIRE_SETTINGS_FILE" ]; then
   vsettings reset
