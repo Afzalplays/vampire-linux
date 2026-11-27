@@ -140,6 +140,7 @@ def main() -> None:
     panel_color = "0x" + format(alpha, "02x") + accent_rgb
     motion = "none" if reduced_motion else "fade"
     panel_position = "top" if top_panel else "none"
+    clock_format = "minutes-24h" if values.get("show_clock", "true") == "true" else "none"
 
     base_weston = pathlib.Path(os.environ.get("VAMPIRE_WESTON_BASE", "/etc/xdg/weston/weston.ini"))
     base_foot = pathlib.Path(os.environ.get("VAMPIRE_FOOT_BASE", "/etc/xdg/foot/foot.ini"))
@@ -161,6 +162,7 @@ def main() -> None:
         ("background-color", background),
         ("panel-color", panel_color),
         ("panel-position", panel_position),
+        ("clock-format", clock_format),
         ("animation", motion),
         ("close-animation", motion),
         ("startup-animation", motion),
@@ -180,7 +182,7 @@ def main() -> None:
     print("Vampire Desktop appearance applied for the next graphical session.")
     applied = {
         "theme", "accent", "surface_transparency", "terminal_opacity",
-        "top_panel", "reduced_motion",
+        "top_panel", "show_clock", "reduced_motion",
     }
     pending = sorted(set(values) - applied)
     if pending:
