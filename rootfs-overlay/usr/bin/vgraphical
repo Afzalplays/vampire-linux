@@ -123,8 +123,24 @@ reject_symlink_path "$XDG_RUNTIME_DIR" || exit 1
 }
 export XDG_CONFIG_HOME="$home/.config"
 export VAMPIRE_SETTINGS_FILE="$XDG_CONFIG_HOME/vampire/settings.conf"
+# Refuse pre-existing links before mkdir/chmod can follow them. Keep both
+# per-user state directories private and owned by the desktop account.
+reject_symlink_path "$XDG_CONFIG_HOME" || exit 1
+reject_symlink_path "$XDG_CONFIG_HOME/vampire" || exit 1
+reject_symlink_path "$XDG_RUNTIME_DIR/vampire" || exit 1
 mkdir -p "$XDG_CONFIG_HOME/vampire" "$XDG_RUNTIME_DIR/vampire"
 chmod 0700 "$XDG_CONFIG_HOME/vampire" "$XDG_RUNTIME_DIR/vampire"
+for private_dir in "$XDG_CONFIG_HOME/vampire" "$XDG_RUNTIME_DIR/vampire"; do
+  reject_symlink_path "$private_dir" || exit 1
+  [ -d "$private_dir" ] && [ "$(stat -c %u "$private_dir" 2>/dev/null || echo -1)" = "$uid" ] || {
+    error "private desktop state directory has the wrong owner: $private_dir"
+    exit 1
+  }
+  [ "$(stat -c %a "$private_dir" 2>/dev/null || echo 000)" = 700 ] || {
+    error "private desktop state directory must have mode 0700: $private_dir"
+    exit 1
+  }
+done
 export VAMPIRE_WESTON_RUNTIME_CONFIG="$XDG_RUNTIME_DIR/vampire/weston.ini"
 if [ ! -s "$VAMPIRE_SETTINGS_FILE" ]; then
   vsettings reset
