@@ -117,6 +117,11 @@ jobs:
           bash -n build/build-mobile-qemu.sh
           sh -n mobile/rootfs-overlay/etc/init.d/rcS
           sh -n mobile/rootfs-overlay/usr/bin/vmobile
+          sh -n mobile/rootfs-overlay/usr/bin/vmobile-ui
+          test -s mobile/br2-external/external.desc
+          test -s mobile/br2-external/Config.in
+          test -s mobile/br2-external/package/vampire-mobile-shell/vampire-mobile-shell.mk
+          test -s mobile/br2-external/package/vampire-mobile-shell/src/vampire-mobile-shell.c
           grep -qx 'BR2_x86_64=y' build/vampire_defconfig
           grep -qx 'BR2_TOOLCHAIN_BUILDROOT_MUSL=y' build/vampire_defconfig
           grep -qx 'BR2_LINUX_KERNEL=y' build/vampire_defconfig
