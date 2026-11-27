@@ -2,5 +2,5 @@
 ::sysinit:/etc/init.d/rcS
 ::ctrlaltdel:/sbin/reboot
 ::shutdown:/etc/init.d/rcK
-tty1::respawn:/sbin/getty -L 0 tty1 vt100
+tty1::respawn:/usr/bin/vmobile-ui || exec /sbin/getty -L 0 tty1 vt100
 ttyAMA0::respawn:/sbin/getty -L 115200 ttyAMA0 vt100
