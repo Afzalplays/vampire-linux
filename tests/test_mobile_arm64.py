@@ -37,6 +37,8 @@ class MobileArm64BringupTests(unittest.TestCase):
         self.assertIn("mobile/rootfs-overlay", script)
         self.assertIn("vampire_mobile_qemu.fragment", script)
         self.assertIn("BR2_PACKAGE_IPROUTE2=y", (ROOT / "build" / "vampire_mobile_qemu_defconfig").read_text())
+        for option in ("BR2_PACKAGE_SDL2=y", "BR2_PACKAGE_SDL2_TTF=y", "BR2_PACKAGE_DEJAVU=y", "BR2_PACKAGE_VAMPIRE_MOBILE_SHELL=y"):
+            self.assertIn(option, (ROOT / "build" / "vampire_mobile_qemu_defconfig").read_text())
         self.assertIn('rootfs.cpio.gz', script)
         self.assertIn('IMAGES="$BUILD_DIR/output/images"', script)
         self.assertIn('BR2_EXTERNAL="$ROOT_DIR/mobile/br2-external"', script)
@@ -48,6 +50,7 @@ class MobileArm64BringupTests(unittest.TestCase):
         os_release = (MOBILE / "rootfs-overlay" / "etc" / "os-release").read_text()
         menu = (MOBILE / "rootfs-overlay" / "usr" / "bin" / "vmobile").read_text()
         self.assertIn("ttyAMA0", inittab)
+        self.assertIn("/usr/bin/vmobile-ui", inittab)
         self.assertIn("VAMPIRE MOBILE OS", rc)
         self.assertIn("ARM64 bring-up", os_release)
         self.assertNotIn("vinstall", menu)
