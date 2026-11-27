@@ -1,4 +1,4 @@
-const CACHE="vampire-mobile-v3";
+const CACHE="vampire-mobile-v4";
 const CORE=["./","./index.html","./experience.html","./styles.css","./app.js","./manifest.webmanifest","./icon.svg"];
 const ASSETS=new Set(CORE.map(path=>new URL(path,self.location.href).pathname));
 
