@@ -39,6 +39,8 @@ class MobileArm64BringupTests(unittest.TestCase):
         self.assertIn("BR2_PACKAGE_IPROUTE2=y", (ROOT / "build" / "vampire_mobile_qemu_defconfig").read_text())
         self.assertIn('rootfs.cpio.gz', script)
         self.assertIn('IMAGES="$BUILD_DIR/output/images"', script)
+        self.assertIn('BR2_EXTERNAL="$ROOT_DIR/mobile/br2-external"', script)
+        self.assertIn("BR2_PACKAGE_VAMPIRE_MOBILE_SHELL=y", (ROOT / "build" / "vampire_mobile_qemu_defconfig").read_text())
 
     def test_mobile_overlay_has_serial_console_and_no_desktop_installer(self):
         inittab = (MOBILE / "rootfs-overlay" / "etc" / "inittab").read_text()
@@ -50,6 +52,11 @@ class MobileArm64BringupTests(unittest.TestCase):
         self.assertIn("ARM64 bring-up", os_release)
         self.assertNotIn("vinstall", menu)
         self.assertIn("Display and input devices", menu)
+        self.assertIn("Launch touch UI", menu)
+        shell = (MOBILE / "br2-external" / "package" / "vampire-mobile-shell" / "src" / "vampire-mobile-shell.c").read_text()
+        self.assertIn("SDL_FINGERDOWN", shell)
+        self.assertIn("VAMPIRE", shell)
+        self.assertIn("SDL_VIDEODRIVER", (MOBILE / "rootfs-overlay" / "usr" / "bin" / "vmobile-ui").read_text())
         self.assertIn("sh /usr/bin/vmobile", (MOBILE / "rootfs-overlay" / "etc" / "profile.d" / "vampire-mobile.sh").read_text())
 
 
