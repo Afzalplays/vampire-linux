@@ -103,7 +103,7 @@ feature release-ready.
 - [x] Add read-only DRM connector and advertised-mode inventory (`vdisplay`) with fake-sysfs regression coverage; current active mode and display control remain unsupported.
 - [x] Add a validated JSON output mode to `vdisplay` for future desktop settings clients, with connected/disconnected, mode-filtering and empty-inventory regression tests.
 - [x] Execute installed `vdisplay --json` in the Desktop rootfs chroot and parse its empty-inventory response before BIOS/UEFI disk boot.
-- [x] Generate per-connected-output Weston scale hints using EDID physical dimensions and advertised modes (2x at 180+ PPI, 1x below); retain a resolution-based fallback when EDID is unavailable, reject symlinked EDID files, and regression-test a high-density laptop panel against a large 4K monitor.
+- [x] Generate per-connected-output Weston scale hints using EDID physical dimensions and advertised modes (2x at 180+ PPI, 1x below); retain a resolution-based fallback when EDID is unavailable, reject symlinked EDID files, and regression-test high-density laptop, large 4K monitor, invalid/symlinked EDID fallback, and the exact 180-PPI threshold.
 - [ ] Validate adaptive scaling on physical displays and add display, network, sound, power and personalization controls.
 - [ ] Validate audio, Bluetooth, printing, touchpads, multi-monitor and accessibility.
 - [ ] Implement Voice Access with confirmation-gated destructive actions.
