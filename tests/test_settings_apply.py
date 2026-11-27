@@ -173,6 +173,49 @@ class SettingsApplyTests(unittest.TestCase):
             self.assertNotIn("name=DP-1", config)
             self.assertNotIn("name=DP-5", config)
 
+    def test_edid_physical_density_overrides_resolution_only_scaling(self):
+        with tempfile.TemporaryDirectory() as temp:
+            base = pathlib.Path(temp)
+            drm = base / "drm"
+            devices = base / "devices"
+            drm.mkdir()
+            devices.mkdir()
+            for name, width_cm, height_cm, mode in (
+                ("card0-eDP-1", 31, 18, "2880x1800"),
+                ("card0-HDMI-A-1", 70, 39, "3840x2160"),
+            ):
+                connector = drm / name
+                connector.mkdir()
+                (connector / "status").write_text("connected\\n")
+                (connector / "modes").write_text(mode + "\\n")
+                edid = bytearray(128)
+                edid[:8] = bytes((0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x00))
+                edid[21], edid[22] = width_cm, height_cm
+                edid[127] = (-sum(edid[:127])) % 256
+                (connector / "edid").write_bytes(edid)
+            settings = base / "settings.conf"
+            settings.write_text("theme=dark\\n")
+            runtime = base / "run" / "vampire"
+            config_home = base / "config"
+            env = os.environ.copy()
+            env.update({
+                "VAMPIRE_SETTINGS_FILE": str(settings),
+                "VAMPIRE_WESTON_BASE": str(WESTON),
+                "VAMPIRE_FOOT_BASE": str(FOOT),
+                "VAMPIRE_WESTON_RUNTIME_CONFIG": str(runtime / "weston.ini"),
+                "XDG_CONFIG_HOME": str(config_home),
+                "VAMPIRE_DRM_SYSFS": str(drm),
+                "VAMPIRE_SYSFS_DEVICES_ROOT": str(devices),
+            })
+            result = subprocess.run(
+                ["python3", str(APPLY)], env=env, text=True,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            config = (runtime / "weston.ini").read_text()
+            self.assertIn("[output]\\nname=eDP-1\\nscale=2", config)
+            self.assertIn("[output]\\nname=HDMI-A-1\\nscale=1", config)
+
     def test_missing_drm_inventory_keeps_default_weston_scaling(self):
         with tempfile.TemporaryDirectory() as temp:
             result, weston, _ = self.run_apply(temp, "theme=dark\n")
