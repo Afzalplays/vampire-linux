@@ -253,6 +253,8 @@ grep -q '7) Reconnect saved Wi-Fi profile' "$TMP/network-menu.out"
 printf '18\n50\n19\n600\n0\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" "$ROOT/rootfs-overlay/usr/bin/vdesktop" --settings > "$TMP/keyboard-settings-menu.out"
 grep -q '18) Keyboard repeat rate (20/30/40/50/60)' "$TMP/keyboard-settings-menu.out"
 grep -q 'Current keyboard_repeat_rate: 40' "$TMP/keyboard-settings-menu.out"
+grep -q 'Current keyboard_repeat_delay: 400' "$TMP/keyboard-settings-menu.out"
+! grep -Fq '\\n' "$TMP/keyboard-settings-menu.out"
 grep -q '19) Keyboard repeat delay ms (200..800)' "$TMP/keyboard-settings-menu.out"
 test "$("$TMP/vsettings" get keyboard_repeat_rate)" = 50
 test "$("$TMP/vsettings" get keyboard_repeat_delay)" = 600
