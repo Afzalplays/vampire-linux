@@ -24,7 +24,7 @@ static SDL_Rect cards[APP_COUNT];
 static SDL_Rect back_button;
 static SDL_Rect action_one;
 static SDL_Rect action_two;
-static int screen_w = 480, screen_h = 800, page = -1, power_confirm = 0;
+static int screen_w = 480, screen_h = 800, page = -1, power_confirm = 0, power_choice = 0;
 static int running = 1;
 
 static SDL_Color color(Uint8 r, Uint8 g, Uint8 b) { SDL_Color c={r,g,b,255}; return c; }
@@ -58,7 +58,7 @@ static void list_directory(const char *path,char *out,size_t size) {
     while((entry=readdir(dir))!=NULL && used+2<size) {
         if(entry->d_name[0]=='.')continue;
         int n=snprintf(out+used,size-used,"%s%s",used?", ":"",entry->d_name);
-        if(n<0)break; used+=(size_t)n;
+        if(n<0)break;\n        if((size_t)n>=size-used){used=size-1;break;}\n        used+=(size_t)n;
     }
     closedir(dir);
     if(!used)snprintf(out,size,"No devices detected.");
