@@ -19,7 +19,12 @@ username=$(id -un)
 }
 tty_path=$(tty 2>/dev/null || true)
 case "$tty_path" in
-  /dev/tty[0-9]*) ;;
+  /dev/tty[0-9]*)
+    tty_number=${tty_path#/dev/tty}
+    case "$tty_number" in
+      ''|*[!0-9]*) error "a local Linux virtual terminal is required (not SSH or a serial console)."; exit 1 ;;
+    esac
+    ;;
   *) error "a local Linux virtual terminal is required (not SSH or a serial console)."; exit 1 ;;
 esac
 home=${HOME:-}
