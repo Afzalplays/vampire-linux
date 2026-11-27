@@ -133,6 +133,15 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn('x.setAttribute("aria-hidden",String(!active))', prototype)
         self.assertIn("lastPanelTrigger.focus()", prototype)
 
+    def test_quick_panel_brightness_and_volume_preferences_persist(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        self.assertIn('brightness:document.querySelector("#brightness").value', prototype)
+        self.assertIn('volume:document.querySelector("#volume").value', prototype)
+        self.assertIn('["brightness",75,10,100],["volume",60,0,100]', prototype)
+        self.assertIn('style.filter="brightness("', prototype)
+        self.assertIn('id==="brightness")document.querySelector("#home").style.filter', prototype)
+        self.assertIn('savePreferences()}));', prototype)
+
     def test_wallpaper_is_saved_locally_and_restored_on_next_launch(self):
         prototype = (MOBILE / "experience.html").read_text()
         self.assertIn("2*1024*1024", prototype)
