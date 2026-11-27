@@ -120,6 +120,12 @@ class MobilePortalContractTests(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertIn(marker, prototype)
 
+    def test_launcher_app_drawer_supports_categories_and_sorting(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        for marker in ('id="app-category"', 'id="app-sort"', 'value="communication"', 'value="productivity"', 'value="games"', 'value="az"', 'value="za"', 'function renderAppDrawer()', 'el.dataset.category', 'appCategory.addEventListener("change",renderAppDrawer)', 'appSort.addEventListener("change",renderAppDrawer)'):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prototype)
+
     def test_launcher_search_reports_empty_and_matching_results(self):
         prototype = (MOBILE / "experience.html").read_text()
         self.assertIn('id="app-search-status"', prototype)
