@@ -113,14 +113,16 @@ feature release-ready.
 
 ## Mobile support
 
+**Current scope (beta): build only the Vampire Mobile launcher/experience preview.** Do not divert the current core OS milestone into a bootable phone port. After the Desktop/Server Vampire OS is substantially complete and validated, start a separate ARM64 mobile-OS programme for selected supported devices. The present launcher is not a bootable OS.
+
 - [x] Define platform boundaries: responsive PWA, device-specific Android port and iOS companion experience; document why desktop/server x86_64 ISOs are not phone images.
 - [x] Implement responsive Vampire OS mobile portal with PWA manifest, install prompt, safe-area-aware layouts and static offline cache; add automated contract tests.
 - [x] Build responsive Vampire OS project/download PWA for Android and iOS browsers (static portal, manifest, install prompt and offline shell implemented; HTTPS hosting remains to be enabled).
 - [x] Add automated PWA contract tests for install metadata, viewport/safe-area handling, reduced motion and static-only offline caching.
 - [ ] Run manual installability, touch accessibility, portrait/landscape and offline-documentation checks on physical Android and iOS devices.
 - [ ] Design secure mobile server-administration UX with authentication and MFA.
-- [ ] Select and document a supported ARM64 Android reference device and bootloader requirements.
-- [ ] Bring up a device-specific kernel, device tree, firmware and core hardware drivers.
+- [ ] Future phase, after core Vampire OS completion: select and document a supported ARM64 Android reference device and bootloader requirements.
+- [ ] Future phase, after core Vampire OS completion: bring up a device-specific kernel, device tree, firmware and core hardware drivers.
 - [x] Prototype the touch-first mobile shell with Allines voice-command demo, simulated screen lock, Vampire Caller UI, Game Booster profiles, expanded quick panel and authorized Security Lab terminal preview; these are not native device integrations.
 - [ ] Implement a production touch-first mobile shell and adaptive phone/tablet interfaces.
 - [ ] Implement native Allines voice services with permission controls and hardware-backed authentication for unlock; voice alone must never unlock the device.
