@@ -120,6 +120,12 @@ class MobilePortalContractTests(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertIn(marker, prototype)
 
+    def test_desktop_launcher_uses_revealable_center_dock_without_taskbar(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        for marker in ('@media(min-width:800px)', '.edge-dock{left:50%;top:auto;bottom:24px', '.edge-dock:hover,.edge-dock:focus-within', '.bottom-nav{display:none}', 'aria-label="Launcher dock"'):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prototype)
+
     def test_launcher_app_drawer_supports_categories_and_sorting(self):
         prototype = (MOBILE / "experience.html").read_text()
         for marker in ('id="app-category"', 'id="app-sort"', 'value="communication"', 'value="productivity"', 'value="games"', 'value="az"', 'value="za"', 'function renderAppDrawer()', 'el.dataset.category', 'appCategory.addEventListener("change",renderAppDrawer)', 'appSort.addEventListener("change",renderAppDrawer)'):
