@@ -86,6 +86,7 @@ feature release-ready.
 - [x] Set Foot terminal and terminal-hosted Settings preview to translucent 90% opacity by default; keep opacity user-adjustable with a solid-background option (regression-tested).
 - [x] Add Weston panel launchers for Terminal, Files, Settings, Software Center and Monitor.
 - [x] Add a searchable keyboard-driven Vampire Launcher with stable app IDs, `--list`, `--search` and `--launch` modes, interactive catalog filtering, case-insensitive app ID/display-name dispatch, and a direct entry in the main console Desktop menu; test application dispatch and expose it as a Weston panel entry. The graphical floating dock and native graphical launcher remain pending.
+- [x] Add `vlauncher --check` to validate the installed Desktop command set and all six distinct application icons; regression-test both complete and deliberately incomplete rootfs payloads.
 - [x] Require the Desktop live-ISO smoke test to verify vsettings, settings bootstrap/apply helpers and Weston/Foot base configurations are present in the initramfs.
 - [x] Require the Desktop installer-rootfs artifact check to verify the same settings runtime and base configuration payload.
 - [x] Add console file manager, hardware inventory and diagnostics.
