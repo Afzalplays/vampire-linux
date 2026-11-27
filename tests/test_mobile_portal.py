@@ -96,6 +96,25 @@ class MobilePortalContractTests(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertIn(marker, prototype)
 
+    def test_launcher_search_reports_empty_and_matching_results(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        self.assertIn('id="app-search-status"', prototype)
+        self.assertIn('aria-live="polite"', prototype)
+        self.assertIn("No apps match your search", prototype)
+        self.assertIn("toLocaleLowerCase()", prototype)
+
+    def test_launcher_panels_manage_focus_and_accessibility_state(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        self.assertIn("lastPanelTrigger", prototype)
+        self.assertIn('x.setAttribute("aria-hidden",String(!active))', prototype)
+        self.assertIn("lastPanelTrigger.focus()", prototype)
+
+    def test_wallpaper_preview_limits_size_and_releases_object_urls(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        self.assertIn("12*1024*1024", prototype)
+        self.assertIn("URL.revokeObjectURL", prototype)
+        self.assertIn('window.addEventListener("pagehide"', prototype)
+
     def test_launcher_panels_support_backdrop_and_touch_dismiss(self):
         prototype = (MOBILE / "experience.html").read_text()
         self.assertIn('if(e.target===panel)closePanels()', prototype)
