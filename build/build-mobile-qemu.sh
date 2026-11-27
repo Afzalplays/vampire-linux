@@ -19,6 +19,8 @@ fi
 BR_DIR="$BUILD_DIR/buildroot"
 [[ "$(git -C "$BR_DIR" describe --tags --exact-match HEAD)" == "$BUILDROOT_VERSION" ]]
 make -C "$BR_DIR" O="$BUILD_DIR/output" BR2_DEFCONFIG="$ROOT_DIR/build/vampire_mobile_qemu_defconfig" defconfig
+sed -i "s|^BR2_ROOTFS_OVERLAY=.*|BR2_ROOTFS_OVERLAY=\\\"$ROOT_DIR/rootfs-overlay\\\"|" "$BUILD_DIR/output/.config"
+make -C "$BR_DIR" O="$BUILD_DIR/output" olddefconfig
 make -C "$BR_DIR" O="$BUILD_DIR/output" -j"$JOBS"
 IMAGES="$BUILD_DIR/output/images"
 [[ -s "$IMAGES/Image" ]] || { printf 'ARM64 kernel Image missing\n' >&2; exit 1; }
