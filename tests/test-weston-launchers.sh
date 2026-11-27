@@ -41,6 +41,12 @@ grep -q 'path=/usr/bin/vampire-app software' "$ROOT/rootfs-overlay/etc/xdg/westo
 grep -q 'path=/usr/bin/vampire-app monitor' "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
 
 LAUNCHER="$ROOT/rootfs-overlay/usr/bin/vlauncher"
+VAMPIRE_ROOT="$ROOT/rootfs-overlay" sh "$LAUNCHER" --check > "$TMP/desktop-check.out"
+grep -Fq "all seven desktop commands and six application icons are present" "$TMP/desktop-check.out"
+if VAMPIRE_ROOT="$TMP/empty-root" sh "$LAUNCHER" --check > "$TMP/desktop-check-fail.out" 2>&1; then
+  echo "Vampire Launcher accepted an incomplete desktop payload" >&2; exit 1
+fi
+grep -Fq "desktop payload validation failed" "$TMP/desktop-check-fail.out"
 sh "$LAUNCHER" --list > "$TMP/catalog"
 sh "$LAUNCHER" --json > "$TMP/catalog.json"
 python3 - "$TMP/catalog.json" "$ROOT" <<'PY'
