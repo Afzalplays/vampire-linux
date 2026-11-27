@@ -15,6 +15,14 @@ contains '@vampire-os'
 contains '────────────────────────────────────────'
 contains '●'
 
+# VFetch must not need writable temporary storage (the installed-disk
+# inspection runs it against a read-only root filesystem).
+UNWRITABLE_TMP="$(mktemp -d)"
+chmod 500 "$UNWRITABLE_TMP"
+trap 'chmod 700 "$UNWRITABLE_TMP"; rmdir "$UNWRITABLE_TMP"' EXIT
+READONLY_TMP_OUTPUT="$(TMPDIR="$UNWRITABLE_TMP" bash "$ROOT_DIR/fetch/vfetch")"
+grep -Fq 'V A M P I R E' <<<"$READONLY_TMP_OUTPUT" || fail 'VFetch failed without writable temporary storage'
+
 previous=0
 for field in \
   'OS:' 'Host:' 'Kernel:' 'Uptime:' 'Packages:' 'Shell:' 'Display:' \

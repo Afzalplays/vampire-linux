@@ -14,6 +14,7 @@ TIMEOUT_SECONDS=$((10#$TIMEOUT_SECONDS))
 LOOPS=()
 VARS_FILES=()
 INSPECT_MOUNT=
+INSPECT_NULL_MOUNT=
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 need() { command -v "$1" >/dev/null 2>&1 || die "Missing test tool: $1"; }
 WORK_ABS="$(python3 -c 'import os,sys; print(os.path.abspath(sys.argv[1]))' "$WORK")"
@@ -34,6 +35,7 @@ done
 VAMPIRE_ROOTFS_STAGE="$ROOT_DIR/scripts/stage-rootfs.py" "$ROOT_DIR/rootfs-overlay/usr/bin/vinstall" validate "$ROOTFS_TAR"
 cleanup() {
   set +e
+  if [[ -n "$INSPECT_NULL_MOUNT" ]]; then sudo umount "$INSPECT_NULL_MOUNT" >/dev/null 2>&1 || true; fi
   if [[ -n "$INSPECT_MOUNT" ]]; then sudo umount "$INSPECT_MOUNT" >/dev/null 2>&1 || true; fi
   for loop in "${LOOPS[@]}"; do sudo losetup -d "$loop" >/dev/null 2>&1 || true; done
   for vars_file in "${VARS_FILES[@]}"; do rm -f -- "$vars_file"; done
@@ -91,6 +93,10 @@ run_boot() {
   INSPECT_MOUNT="$WORK/inspect-$mode"
   mkdir -p "$INSPECT_MOUNT"
   sudo mount -o ro,noload "${loop}p2" "$INSPECT_MOUNT" || die "$mode installed root partition could not be mounted read-only"
+  # Supply the host's real null device to chrooted diagnostics while the
+  # installed root remains read-only (its /dev is populated at boot by devtmpfs).
+  INSPECT_NULL_MOUNT="$INSPECT_MOUNT/dev/null"
+  sudo mount --bind /dev/null "$INSPECT_NULL_MOUNT" || die "$mode could not provide /dev/null to installed-root diagnostics"
   local root_partuuid
   root_partuuid="$(sudo blkid -s PARTUUID -o value "${loop}p2")"
   [[ -n "$root_partuuid" ]] || die "$mode installed root partition has no PARTUUID"
@@ -173,6 +179,8 @@ PY
   sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/bin/vinstall system-check > "$WORK/$mode.installer-check.log" 2>&1 || die "$mode installed installer system-check failed"
   grep -Fq 'Architecture: x86_64' "$WORK/$mode.installer-check.log" || die "$mode installed installer system-check omitted architecture"
 
+  sudo umount "$INSPECT_NULL_MOUNT"
+  INSPECT_NULL_MOUNT=
   sudo umount "$INSPECT_MOUNT"
   INSPECT_MOUNT=
   sudo losetup -d "$loop"
