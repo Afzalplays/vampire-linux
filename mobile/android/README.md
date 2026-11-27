@@ -10,7 +10,9 @@ Install the APK on a test Android device, open **Vampire Mobile**, and select it
 
 ## Included
 
-- Native Android Activity hosts the bundled UI in WebView; it does not load a remote website.
+- Native Android Activity hosts the bundled UI through AndroidX WebViewAssetLoader on a trusted local HTTPS origin; it does not load the UI from a remote website.
+- External HTTPS/mail/tel links are handed to Android instead of being loaded into the privileged WebView.
+- Microphone access is requested only when the user starts the recorder; Android runtime permission is required and only WebView audio capture is granted.
 - Android HOME/DEFAULT intent filters make it selectable as the system launcher.
 - Immersive mode hides system bars; a swipe can reveal transient bars.
 - The power button calls a narrow JavaScript bridge to return to Android Home.
