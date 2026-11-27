@@ -76,3 +76,8 @@ Every release artifact should show architecture, edition, version, checksum, sig
 - PWA install guidance and offline static-page behaviour are contract-tested; real browser/device installation still requires Android and iOS device validation.
 - Download labels prevent users from mistaking x86_64 ISOs for phone images.
 - Native mobile claims are backed by named-device boot, driver, power-management and recovery tests.
+
+
+## Expanded Vampire Mobile concept
+
+The mobile interface prototype now includes Allines voice-command recognition where the browser supports the Web Speech API, a simulated screen-lock flow, Vampire Caller UI, Game Booster profiles, an expanded quick panel, and a simulated Vampire Security Lab terminal command. These are UI demonstrations only. The browser cannot lock or unlock the device, authenticate biometrically, identify or block live callers, tune CPU/GPU performance, or run native security utilities. Voice recognition must never be treated as an authentication factor. A real unlock must remain behind the device's trusted PIN/biometric lock screen. Caller identification needs lawful data provenance, explicit permissions, opt-out and correction workflows. Security tools must be signed, permission-scoped and used only on systems the operator is authorized to test.
