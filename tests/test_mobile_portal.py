@@ -218,3 +218,12 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn('navigator.mediaDevices.getUserMedia({audio:true})', prototype)
         self.assertIn('URL.revokeObjectURL(objectUrl)', prototype)
         self.assertIn('activePreviewCleanup();activePreviewCleanup=()=>{}', prototype)
+
+    def test_contacts_calendar_and_security_shortcut_have_safe_launcher_behaviour(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        self.assertIn('vampire-launcher-contacts', prototype)
+        self.assertIn('shown.setMonth(shown.getMonth()+1)', prototype)
+        self.assertIn('shown.setMonth(shown.getMonth()-1)', prototype)
+        self.assertIn('Security features are intentionally deferred', prototype)
+        self.assertNotIn('Contacts:"contacts"', prototype)
+        self.assertNotIn('Security:"terminal"', prototype)
