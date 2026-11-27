@@ -22,7 +22,7 @@ case "$tty_path" in
   /dev/tty[0-9]*)
     tty_number=${tty_path#/dev/tty}
     case "$tty_number" in
-      ''|*[!0-9]*) error "a local Linux virtual terminal is required (not SSH or a serial console)."; exit 1 ;;
+      ''|*[!0-9]*|0) error "a local Linux virtual terminal is required (not SSH or a serial console)."; exit 1 ;;
     esac
     ;;
   *) error "a local Linux virtual terminal is required (not SSH or a serial console)."; exit 1 ;;
