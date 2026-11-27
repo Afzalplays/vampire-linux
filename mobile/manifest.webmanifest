@@ -1,9 +1,9 @@
 {
-  "id": "./",
+  "id": "./experience.html",
   "name": "Vampire OS",
-  "short_name": "Vampire OS",
-  "description": "Vampire OS project portal and mobile companion.",
-  "start_url": "./index.html",
+  "short_name": "Vampire",
+  "description": "Vampire OS touch-first launcher and mobile companion.",
+  "start_url": "./experience.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
@@ -21,7 +21,7 @@
     {
       "name": "Vampire Mobile Launcher",
       "short_name": "Launcher",
-      "description": "Open the touch-first Vampire Mobile launcher preview.",
+      "description": "Open the touch-first Vampire OS launcher.",
       "url": "./experience.html",
       "icons": [
         {
