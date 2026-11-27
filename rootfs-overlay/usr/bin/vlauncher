@@ -57,6 +57,11 @@ case "${1:-}" in
     catalog
     exit 0
     ;;
+  --check)
+    [ "$#" -eq 1 ] || { usage >&2; exit 2; }
+    check_installation
+    exit $?
+    ;;
   --category)
     [ "$#" -eq 2 ] || { usage >&2; exit 2; }
     case "$2" in
@@ -67,7 +72,7 @@ case "${1:-}" in
         catalog | awk -F'|' '$1 == "files" || $1 == "monitor" { print }'
         ;;
       *)
-        printf 'Vampire Launcher: unknown category: %s\\n' "$2" >&2
+        printf 'Vampire Launcher: unknown category: %s\n' "$2" >&2
         exit 2
         ;;
     esac
