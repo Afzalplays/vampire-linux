@@ -45,6 +45,13 @@ if VAMPIRE_GRAPHICAL_CMD="$TMP/bin/vgraphical" PATH="$TMP/bin:$PATH" "$SCRIPT" >
 fi
 grep -q 'log in as the unprivileged vampire account' "$TMP/root.out"
 test ! -e "$TMP/graphical.args"
+if VAMPIRE_TEST_UID=1000 VAMPIRE_TEST_USER=vampire VAMPIRE_TEST_TTY=/dev/tty1-not-a-vt \
+VAMPIRE_GRAPHICAL_CMD="$TMP/bin/vgraphical" VAMPIRE_RUNTIME_BASE="$TMP/run/user" \
+HOME="$TMP/home" PATH="$TMP/bin:$PATH" "$SCRIPT" >"$TMP/malformed-tty.out" 2>&1; then
+  echo "desktop session accepted a malformed virtual-terminal path" >&2; exit 1
+fi
+grep -q 'a local Linux virtual terminal is required' "$TMP/malformed-tty.out"
+test ! -e "$TMP/graphical.args"
 
 # A symlinked home directory (or any ancestor) must not be accepted.
 ln -s "$TMP/home" "$TMP/home-link"
