@@ -51,7 +51,7 @@ class MobilePortalContractTests(unittest.TestCase):
 
     def test_service_worker_refreshes_navigation_and_limits_offline_fallback(self):
         worker = (MOBILE / "sw.js").read_text()
-        self.assertIn('const CACHE="vampire-mobile-v3"', worker)
+        self.assertIn('const CACHE="vampire-mobile-v4"', worker)
         self.assertIn('if(request.mode==="navigate")', worker)
         self.assertIn("fetch(request)", worker)
         self.assertIn('.catch(()=>caches.match(request).then(cached=>cached||caches.match("./index.html")))', worker)
