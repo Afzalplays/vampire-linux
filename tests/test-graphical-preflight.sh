@@ -29,6 +29,12 @@ if "$ROOT/rootfs-overlay/usr/bin/vgraphical" --unknown >/dev/null 2>&1; then
 fi
 "$ROOT/rootfs-overlay/usr/bin/vgraphical" --help | grep -q -- '--check'
 grep -q 'modprobe "$module"' "$ROOT/rootfs-overlay/usr/bin/vgraphical"
+# Weston must use the VT where the user launched the session, not a hard-coded tty2.
+grep -Fq -- '--tty="$session_tty_number"' "$ROOT/rootfs-overlay/usr/bin/vgraphical"
+if grep -Fq -- '--tty=2' "$ROOT/rootfs-overlay/usr/bin/vgraphical"; then
+  echo "vgraphical hard-codes Weston to tty2 instead of the active login VT" >&2
+  exit 1
+fi
 # Interactive state setup must reject symlinked XDG/runtime state paths before
 # mkdir/chmod, then verify both private directories have the expected owner
 # and restrictive mode.
