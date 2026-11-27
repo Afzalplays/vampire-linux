@@ -50,4 +50,6 @@ if VAMPIRE_INSTALL_TEST_DIR="$TMP/parent-link/nested/work" bash "$ROOT/scripts/t
 fi
 assert_output "$TMP/ancestor.out" 'symlinked test path component'
 [[ ! -e "$TMP/real-parent/nested" ]] || { echo "created files through symlinked ancestor" >&2; exit 1; }
-echo "installed-disk harness argument and path-safety tests: PASS"
+grep -Fq '/usr/bin/vlauncher --check' "$ROOT/scripts/test-installed-disk.sh" || { echo "installed-disk harness omitted the installed launcher payload check" >&2; exit 1; }
+grep -Fq 'installed Vampire Launcher payload validation failed' "$ROOT/scripts/test-installed-disk.sh" || { echo "installed-disk harness omitted launcher validation failure handling" >&2; exit 1; }
+echo "installed-disk harness argument, path-safety and installed launcher contract tests: PASS"
