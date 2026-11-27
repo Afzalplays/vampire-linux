@@ -6,6 +6,12 @@
 
 Vampire OS should be usable from a phone for project downloads, documentation, release notes and remote administration. Its web interfaces must adapt to narrow touch screens, portrait/landscape orientation, safe-area insets and larger accessibility text.
 
+## Vampire Mobile interface prototype (new)
+
+`mobile/experience.html` is an interactive, touch-first visual prototype for the proposed phone experience. It includes a left-edge taskbar, searchable app drawer, notification panel, quick-setting tiles, brightness/volume sliders, local wallpaper preview, accent colour, appearance toggle and the Allines assistant concept. The wallpaper is selected locally in the browser and is not uploaded. Quick toggles and launcher entries are simulated UI state only; they do not control phone radios, installed apps or protected system settings. The assistant uses browser speech synthesis where available and does not connect to a cloud AI service.
+
+This prototype is a design and interaction preview, not a phone operating system. Native app compatibility, real system panels, telephony, biometric security, encryption, verified boot and hardware-level settings require a device-specific native implementation.
+
 ## Three distinct deliverables
 
 ### 1. Mobile web experience (Android and iOS)
