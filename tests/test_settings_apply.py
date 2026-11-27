@@ -73,7 +73,7 @@ class SettingsApplyTests(unittest.TestCase):
             result, weston, foot = self.run_apply(
                 temp,
                 "theme=light\naccent=ice\nsurface_transparency=40\n"
-                "terminal_opacity=70\ntop_panel=false\nreduced_motion=true\n",
+                "terminal_opacity=70\ntop_panel=false\nshow_clock=false\nreduced_motion=true\n",
             )
             self.assertEqual(result.returncode, 0, result.stderr)
             weston_text = weston.read_text()
@@ -91,11 +91,11 @@ class SettingsApplyTests(unittest.TestCase):
 
     def test_panel_clock_defaults_to_24_hour_and_can_be_hidden(self):
         with tempfile.TemporaryDirectory() as temp:
-            result, weston, _ = self.run_apply(temp, "theme=dark\\nshow_clock=true\\n")
+            result, weston, _ = self.run_apply(temp, "theme=dark\nshow_clock=true\n")
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("clock-format=minutes-24h", weston.read_text())
         with tempfile.TemporaryDirectory() as temp:
-            result, weston, _ = self.run_apply(temp, "theme=dark\\nshow_clock=false\\n")
+            result, weston, _ = self.run_apply(temp, "theme=dark\nshow_clock=false\n")
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("clock-format=none", weston.read_text())
 
