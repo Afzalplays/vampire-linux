@@ -18,7 +18,7 @@ else
 fi
 BR_DIR="$BUILD_DIR/buildroot"
 [[ "$(git -C "$BR_DIR" describe --tags --exact-match HEAD)" == "$BUILDROOT_VERSION" ]]
-make -C "$BR_DIR" O="$BUILD_DIR/output" BR2_DEFCONFIG="$ROOT_DIR/build/vampire_mobile_qemu_defconfig" defconfig
+make -C "$BR_DIR" O="$BUILD_DIR/output" BR2_EXTERNAL="$ROOT_DIR/mobile/br2-external" BR2_DEFCONFIG="$ROOT_DIR/build/vampire_mobile_qemu_defconfig" defconfig
 set_config_string() {
   key=$1
   value=$2
@@ -28,8 +28,8 @@ set_config_string() {
 }
 set_config_string BR2_ROOTFS_OVERLAY "$ROOT_DIR/rootfs-overlay:$ROOT_DIR/mobile/rootfs-overlay"
 set_config_string BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES "$ROOT_DIR/build/vampire_mobile_qemu.fragment"
-make -C "$BR_DIR" O="$BUILD_DIR/output" olddefconfig
-make -C "$BR_DIR" O="$BUILD_DIR/output" -j"$JOBS"
+make -C "$BR_DIR" O="$BUILD_DIR/output" BR2_EXTERNAL="$ROOT_DIR/mobile/br2-external" olddefconfig
+make -C "$BR_DIR" O="$BUILD_DIR/output" BR2_EXTERNAL="$ROOT_DIR/mobile/br2-external" -j"$JOBS"
 IMAGES="$BUILD_DIR/output/images"
 [[ -s "$IMAGES/Image" ]] || { printf 'ARM64 kernel Image missing\n' >&2; exit 1; }
 [[ -s "$IMAGES/rootfs.cpio.gz" ]] || { printf 'ARM64 initramfs missing\n' >&2; exit 1; }
