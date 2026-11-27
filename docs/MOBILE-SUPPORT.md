@@ -73,7 +73,9 @@ Every release artifact should show architecture, edition, version, checksum, sig
 1. [x] Build the responsive PWA portal and installable offline shell (`mobile/`).
 2. [x] Create the Vampire Mobile launcher prototype with app drawer, quick panel, notifications, Allines preview, Caller/Game Booster/Terminal previews, browser-available stats and built-in themes.
 3. [ ] Complete launcher beta quality: responsive layouts, app icon consistency, touch gestures, accessibility, local settings persistence and offline/update behaviour.
-4. [x] Add native Android HOME launcher shell and automated debug-APK build (launcher only; not a replacement OS).\n5. [x] Add generic ARM64 QEMU kernel/initramfs bring-up profile (emulator only).\n6. [ ] Select and document a supported Android reference device (SoC, bootloader, partition map, firmware and unlock policy) before building a device image.
+4. [x] Add native Android HOME launcher shell and automated debug-APK build (launcher only; not a replacement OS).
+5. [x] Add generic ARM64 QEMU kernel/initramfs bring-up profile (emulator only).
+6. [ ] Select and document a supported Android reference device (SoC, bootloader, partition map, firmware and unlock policy) before building a device image.
 7. [ ] Build the native ARM64 mobile base: kernel, device tree, vendor firmware, init, graphics/display, touch, audio, Wi-Fi/Bluetooth and power management.
 8. [ ] Build the native touch shell and core mobile services: lock screen, notifications, quick settings, app lifecycle, permissions, keyboard, telephony/data where supported, camera and sensors.
 9. [ ] Produce a device-specific boot/recovery image; validate boot, install, encryption, update/rollback, suspend/resume and recovery on the reference device.
