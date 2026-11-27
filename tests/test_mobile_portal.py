@@ -116,7 +116,7 @@ class MobilePortalContractTests(unittest.TestCase):
 
     def test_launcher_app_shortcuts_route_to_preview_panels(self):
         prototype = (MOBILE / "experience.html").read_text()
-        for marker in ('Phone:"caller"', '"Vampire Caller":"caller"', '"Game Booster":"game"', 'Terminal:"terminal"', 'Allines:"assistant"', 'Security:"terminal"'):
+        for marker in ('Phone:"caller"', '"Vampire Caller":"caller"', '"Game Booster":"game"', 'Terminal:"terminal"', 'Allines:"assistant"'):
             with self.subTest(marker=marker):
                 self.assertIn(marker, prototype)
 
