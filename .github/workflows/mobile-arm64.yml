@@ -29,16 +29,24 @@ permissions:
 jobs:
   build-and-boot:
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
+      - name: Cache Buildroot downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/buildroot-dl
+          key: buildroot-${{ runner.os }}-2025.02-${{ hashFiles('build/vampire_mobile_qemu_defconfig', 'build/vampire_mobile_qemu.fragment', 'mobile/br2-external/**') }}
+          restore-keys: |
+            buildroot-${{ runner.os }}-2025.02-
       - name: Install Buildroot and QEMU host dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y bc bison build-essential cpio file flex git libelf-dev libncurses-dev libssl-dev patch perl python3 qemu-system-arm rsync unzip wget
       - name: Build ARM64 kernel and initramfs
         env:
-          JOBS: "2"
+          JOBS: "4"
+          BR2_DL_DIR: /home/runner/.cache/buildroot-dl
         run: bash build/build-mobile-qemu.sh
       - name: Boot the image in QEMU
         shell: bash
