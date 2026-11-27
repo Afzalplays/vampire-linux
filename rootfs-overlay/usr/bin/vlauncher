@@ -29,21 +29,21 @@ check_installation() {
   failed=0
   for binary in vampire-terminal vampire-app vlauncher vfiles vdesktop vsoftware vmonitor; do
     if [ ! -x "$ROOT/usr/bin/$binary" ]; then
-      printf 'Missing or non-executable desktop command: /usr/bin/%s\\n' "$binary" >&2
+      printf 'Missing or non-executable desktop command: /usr/bin/%s\n' "$binary" >&2
       failed=1
     fi
   done
   for icon in terminal launcher files settings software monitor; do
     if [ ! -s "$ROOT/usr/share/vampire/icons/$icon.png" ]; then
-      printf 'Missing desktop application icon: /usr/share/vampire/icons/%s.png\\n' "$icon" >&2
+      printf 'Missing desktop application icon: /usr/share/vampire/icons/%s.png\n' "$icon" >&2
       failed=1
     fi
   done
   if [ "$failed" -ne 0 ]; then
-    printf 'Vampire Launcher: desktop payload validation failed.\\n' >&2
+    printf 'Vampire Launcher: desktop payload validation failed.\n' >&2
     return 1
   fi
-  printf 'Vampire Launcher: all seven desktop commands and six application icons are present.\\n'
+  printf 'Vampire Launcher: all seven desktop commands and six application icons are present.\n'
 }
 case "${1:-}" in
   --help|-h) usage; exit 0 ;;
@@ -104,11 +104,11 @@ while :; do
     0|q|quit) exit 0 ;;
     "") continue ;;
     system|utilities)
-      printf '\\n  %s applications:\\n' "$choice"
+      printf '\n  %s applications:\n' "$choice"
       if [ "$choice" = system ]; then
-        catalog | awk -F'|' '$1 == "terminal" || $1 == "settings" || $1 == "software" { printf "  %-9s %-15s %s\\n", $1, $2, $3 }'
+        catalog | awk -F'|' '$1 == "terminal" || $1 == "settings" || $1 == "software" { printf "  %-9s %-15s %s\n", $1, $2, $3 }'
       else
-        catalog | awk -F'|' '$1 == "files" || $1 == "monitor" { printf "  %-9s %-15s %s\\n", $1, $2, $3 }'
+        catalog | awk -F'|' '$1 == "files" || $1 == "monitor" { printf "  %-9s %-15s %s\n", $1, $2, $3 }'
       fi
       continue
       ;;
