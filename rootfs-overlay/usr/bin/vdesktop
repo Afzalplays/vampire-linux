@@ -165,7 +165,7 @@ appearance_menu() {
       *) echo "Invalid choice."; continue ;;
     esac
     current_value=$("$SETTINGS" get "$key" 2>/dev/null || printf 'unset')
-    printf 'Current %s: %s\\n' "$key" "$current_value"
+    printf 'Current %s: %s\n' "$key" "$current_value"
     printf 'New value for %s: ' "$key"
     IFS= read -r value || return
     if "$SETTINGS" set "$key" "$value"; then
