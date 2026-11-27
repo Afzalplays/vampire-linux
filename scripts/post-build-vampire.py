@@ -59,6 +59,30 @@ def configure_local_user(target: pathlib.Path) -> None:
     )
 
 
+def install_desktop_session_runtime(target: pathlib.Path) -> None:
+    """Ensure desktop login entry points are present in both rootfs images."""
+    if os.environ.get("VAMPIRE_EDITION", "desktop") != "desktop":
+        return
+    overlay_value = os.environ.get("VAMPIRE_ROOTFS_OVERLAY")
+    if not overlay_value:
+        raise SystemExit("Vampire OS: VAMPIRE_ROOTFS_OVERLAY is required for Desktop builds")
+    overlay = pathlib.Path(overlay_value)
+    required = (
+        "usr/bin/vdesktop-session",
+        "usr/lib/vampire/session-runtime",
+        "usr/lib/vampire/settings-bootstrap",
+    )
+    for relative in required:
+        source = overlay / relative
+        if source.is_symlink() or not source.is_file():
+            raise SystemExit(f"Vampire OS: required Desktop session source is missing or unsafe: {source}")
+        destination = target / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(source, destination)
+        destination.chmod(0o755)
+        print(f"Vampire OS: staged Desktop session component {destination}")
+
+
 def main():
     if len(sys.argv) != 2:
         raise SystemExit("usage: post-build-vampire.py TARGET_DIR")
@@ -68,6 +92,7 @@ def main():
     if not kernel.is_file() or kernel.stat().st_size == 0:
         raise SystemExit(f"Vampire OS: kernel image missing: {kernel}")
     configure_local_user(target)
+    install_desktop_session_runtime(target)
     boot = target / "boot"
     boot.mkdir(parents=True, exist_ok=True)
     shutil.copyfile(kernel, boot / "vmlinuz")
