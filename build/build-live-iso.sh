@@ -49,6 +49,10 @@ BR_DIR="$BUILD_DIR/buildroot"
 ACTUAL_BUILDROOT_VERSION="$(git -C "$BR_DIR" describe --tags --exact-match HEAD 2>/dev/null || true)"
 [[ "$ACTUAL_BUILDROOT_VERSION" == "$BUILDROOT_VERSION" ]] || die "Buildroot checkout mismatch: requested $BUILDROOT_VERSION, got ${ACTUAL_BUILDROOT_VERSION:-untagged}"
 
+# The post-build hook explicitly stages these entry points so the generated
+# initramfs and installer rootfs cannot drift apart on Desktop images.
+export VAMPIRE_EDITION="$EDITION"
+export VAMPIRE_ROOTFS_OVERLAY="$OVERLAY"
 make -C "$BR_DIR" O="$BUILD_OUTPUT" BR2_DEFCONFIG="$DEFCONFIG" defconfig
 python3 "$ROOT_DIR/scripts/configure-build-output.py" "$BUILD_OUTPUT/.config" "$OVERLAY" "$EDITION"
 make -C "$BR_DIR" O="$BUILD_OUTPUT" olddefconfig
