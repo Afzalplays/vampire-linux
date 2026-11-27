@@ -38,5 +38,8 @@ grep -Fq '[[ "$ACTUAL_BUILDROOT_VERSION" == "$BUILDROOT_VERSION" ]]' "$BUILDER"
 # executable mode explicit instead of relying on the checkout's file mode.
 grep -Fq '"$OVERLAY/usr/bin/vdesktop-session" "$OVERLAY/usr/lib/vampire/settings-bootstrap"' "$BUILDER"
 grep -Fq '"$OVERLAY/usr/lib/vampire/session-runtime"' "$BUILDER"
+grep -Fq 'export VAMPIRE_EDITION="$EDITION"' "$BUILDER"
+grep -Fq 'export VAMPIRE_ROOTFS_OVERLAY="$OVERLAY"' "$BUILDER"
+grep -Fq 'install_desktop_session_runtime(target)' "$ROOT_DIR/scripts/post-build-vampire.py"
 printf 'PASS: ISO builder pins and verifies the exact Buildroot release tag\\n'
 printf 'PASS: ISO builder explicitly installs executable desktop session tools\\n'
