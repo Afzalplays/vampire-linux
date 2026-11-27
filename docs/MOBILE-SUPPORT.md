@@ -32,7 +32,7 @@ On iPhone, users can add the PWA to the Home Screen through Safari where support
 
 ### 2. Native Android launcher milestone
 
-`mobile/android/` now contains a native Android HOME-app shell around the bundled touch UI. Android can offer it as a default launcher after the user explicitly selects it. It uses immersive system-bar mode and the in-app power button returns to Android Home through a native intent. A dedicated CI workflow builds a debug APK. This is an Android application running on top of Android, **not** a bootable Vampire OS image; system services and hardware integration remain incomplete.
+`mobile/android/` now contains a native Android HOME-app shell around the bundled touch UI. Android can offer it as a default launcher after the user explicitly selects it. It uses immersive system-bar mode, loads bundled assets through a trusted local HTTPS origin, opens external links outside the privileged WebView, requests microphone access only when needed, and the in-app power button returns to Android Home through a native intent. A dedicated CI workflow builds a debug APK. This is an Android application running on top of Android, **not** a bootable Vampire OS image; system services and hardware integration remain incomplete.
 
 ### 3. ARM64 QEMU bring-up target
 
