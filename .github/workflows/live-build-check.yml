@@ -114,6 +114,10 @@ jobs:
           grep -qx 'BR2_LINUX_KERNEL=y' build/vampire_mobile_qemu_defconfig
           grep -qx 'BR2_TARGET_ROOTFS_CPIO_GZIP=y' build/vampire_mobile_qemu_defconfig
           grep -qx 'BR2_PACKAGE_IPROUTE2=y' build/vampire_mobile_qemu_defconfig
+          grep -qx 'BR2_PACKAGE_SDL2=y' build/vampire_mobile_qemu_defconfig
+          grep -qx 'BR2_PACKAGE_SDL2_TTF=y' build/vampire_mobile_qemu_defconfig
+          grep -qx 'BR2_PACKAGE_DEJAVU=y' build/vampire_mobile_qemu_defconfig
+          grep -qx 'BR2_PACKAGE_VAMPIRE_MOBILE_SHELL=y' build/vampire_mobile_qemu_defconfig
           bash -n build/build-mobile-qemu.sh
           sh -n mobile/rootfs-overlay/etc/init.d/rcS
           sh -n mobile/rootfs-overlay/usr/bin/vmobile
