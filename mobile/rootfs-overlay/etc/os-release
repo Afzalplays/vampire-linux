@@ -1,0 +1,11 @@
+NAME="Vampire Mobile OS"
+PRETTY_NAME="Vampire Mobile OS 0.1.0-dev (ARM64 bring-up)"
+ID=vampire-mobile
+ID_LIKE=vampire
+VERSION="0.1.0-dev"
+VERSION_ID="0.1.0-dev"
+VERSION_CODENAME=nightfall
+BUILD_ID=arm64-qemu-bringup
+ANSI_COLOR="1;31"
+HOME_URL="https://github.com/Afzalplays/vampire-linux"
+SUPPORT_URL="https://github.com/Afzalplays/vampire-linux/issues"
