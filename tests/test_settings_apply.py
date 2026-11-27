@@ -91,6 +91,22 @@ class SettingsApplyTests(unittest.TestCase):
             self.assertIn("background=f2f2f6", foot_text)
 
 
+    def test_keyboard_repeat_rate_and_delay_are_applied(self):
+        with tempfile.TemporaryDirectory() as temp:
+            result, weston, _ = self.run_apply(
+                temp, "theme=dark\nkeyboard_repeat_rate=50\nkeyboard_repeat_delay=600\n"
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("repeat-rate=50", weston.read_text())
+            self.assertIn("repeat-delay=600", weston.read_text())
+
+    def test_rejects_out_of_range_keyboard_repeat_values(self):
+        for settings in ("keyboard_repeat_rate=99\n", "keyboard_repeat_delay=100\n"):
+            with self.subTest(settings=settings), tempfile.TemporaryDirectory() as temp:
+                result, weston, _ = self.run_apply(temp, settings)
+                self.assertNotEqual(result.returncode, 0)
+                self.assertFalse(weston.exists())
+
     def test_panel_clock_defaults_to_24_hour_and_can_be_hidden(self):
         with tempfile.TemporaryDirectory() as temp:
             result, weston, _ = self.run_apply(temp, "theme=dark\nshow_clock=true\n")
