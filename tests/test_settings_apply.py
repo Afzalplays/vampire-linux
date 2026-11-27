@@ -19,9 +19,15 @@ class SettingsApplyTests(unittest.TestCase):
         settings_file.write_text(settings)
         runtime = base / "run" / "vampire"
         config_home = base / "home" / "user" / ".config"
+        drm = base / "drm"
+        devices = base / "devices"
+        drm.mkdir()
+        devices.mkdir()
         env = os.environ.copy()
         env.update({
             "VAMPIRE_SETTINGS_FILE": str(settings_file),
+            "VAMPIRE_DRM_SYSFS": str(drm),
+            "VAMPIRE_SYSFS_DEVICES_ROOT": str(devices),
             "VAMPIRE_WESTON_BASE": str(WESTON),
             "VAMPIRE_FOOT_BASE": str(FOOT),
             "VAMPIRE_WESTON_RUNTIME_CONFIG": str(runtime / "weston.ini"),
