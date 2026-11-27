@@ -67,3 +67,14 @@ user and have mode `0700`. This protects the settings and generated Weston
 configuration from being redirected through pre-existing links. The
 preflight regression suite checks that these guards remain in the startup
 path.
+
+
+## DRM connector discovery and scaling
+
+Linux exposes many entries in `/sys/class/drm` as class symlinks to their
+device directories under `/sys/devices`. The display inventory and adaptive
+Weston scale policy follow only connector links whose canonical target remains
+inside the trusted sysfs devices tree; arbitrary links outside that tree remain
+ignored. Connector status and mode attributes are still treated as read-only
+sysfs inputs. The regression suite covers both the real class-link layout and
+an out-of-tree symlink target.
