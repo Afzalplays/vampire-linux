@@ -39,8 +39,9 @@ test "$("$TMP/vsettings" get update_channel)" = stable
 test "$("$TMP/vsettings" get voice_access)" = false
 "$TMP/vsettings" set theme light
 "$TMP/vsettings" apply > "$TMP/apply.out"
-grep -q "^Stored but not applied by this desktop build: blur, dock_auto_hide, dock_magnification, dock_position, dock_size, show_clock, show_date, show_network, show_power, update_channel, voice_access$" "$TMP/apply.out"
+grep -q "^Stored but not applied by this desktop build: blur, dock_auto_hide, dock_magnification, dock_position, dock_size, show_date, show_network, show_power, update_channel, voice_access$" "$TMP/apply.out"
 grep -q "^alpha=0.90$" "$TMP/xdg/foot/foot.ini"
+grep -q "^clock-format=minutes-24h$" "$TMP/weston.ini"
 grep -q "^background-image=/usr/share/vampire/wallpaper.png$" "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
 grep -q "^background-type=scale-crop$" "$ROOT/rootfs-overlay/etc/xdg/weston/weston.ini"
 python3 -c "import pathlib,sys; d=pathlib.Path(sys.argv[1]).read_bytes(); assert d[:8]==bytes([137,80,78,71,13,10,26,10]); assert d[16:24]==bytes([0,0,2,128,0,0,1,104])" "$ROOT/rootfs-overlay/usr/share/vampire/wallpaper.png"
@@ -59,6 +60,12 @@ test "$("$TMP/vsettings" get accent)" = rose
 "$TMP/vsettings" set surface_transparency 60
 "$TMP/vsettings" set top_panel false
 "$TMP/vsettings" set reduced_motion true
+"$TMP/vsettings" set show_clock false
+"$TMP/vsettings" apply
+grep -q "^clock-format=none$" "$TMP/weston.ini"
+"$TMP/vsettings" set show_clock true
+"$TMP/vsettings" apply
+grep -q "^clock-format=minutes-24h$" "$TMP/weston.ini"
 test "$("$TMP/vsettings" get surface_transparency)" = 60
 "$TMP/vsettings" set dock_auto_hide false
 test "$("$TMP/vsettings" get dock_auto_hide)" = false
