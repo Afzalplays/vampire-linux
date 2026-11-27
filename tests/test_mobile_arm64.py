@@ -32,7 +32,7 @@ class MobileArm64BringupTests(unittest.TestCase):
         self.assertIn("mobile/rootfs-overlay", script)
         self.assertIn("vampire_mobile_qemu.fragment", script)
         self.assertIn('rootfs.cpio.gz', script)
-        self.assertIn('images/Image', script)
+        self.assertIn('IMAGES="$BUILD_DIR/output/images"', script)
 
     def test_mobile_overlay_has_serial_console_and_no_desktop_installer(self):
         inittab = (MOBILE / "rootfs-overlay" / "etc" / "inittab").read_text()
