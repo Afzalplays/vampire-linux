@@ -16,3 +16,5 @@ show_power=true
 reduced_motion=false
 update_channel=stable
 voice_access=false
+keyboard_repeat_rate=40
+keyboard_repeat_delay=400
