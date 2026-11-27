@@ -58,7 +58,9 @@ static void list_directory(const char *path,char *out,size_t size) {
     while((entry=readdir(dir))!=NULL && used+2<size) {
         if(entry->d_name[0]=='.')continue;
         int n=snprintf(out+used,size-used,"%s%s",used?", ":"",entry->d_name);
-        if(n<0)break;\n        if((size_t)n>=size-used){used=size-1;break;}\n        used+=(size_t)n;
+        if(n<0)break;
+        if((size_t)n>=size-used){used=size-1;break;}
+        used+=(size_t)n;
     }
     closedir(dir);
     if(!used)snprintf(out,size,"No devices detected.");
