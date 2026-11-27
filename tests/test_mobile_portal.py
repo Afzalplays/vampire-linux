@@ -145,3 +145,10 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn('e.key==="Escape"', prototype)
         self.assertIn('panel.addEventListener("touchstart"', prototype)
         self.assertIn('panel.addEventListener("touchend"', prototype)
+
+    def test_launcher_dialogs_hide_from_accessibility_tree_and_trap_keyboard_focus(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        self.assertIn('panel.setAttribute("aria-hidden","true")', prototype)
+        self.assertIn('e.key!=="Tab"', prototype)
+        self.assertIn('e.shiftKey&&(document.activeElement===first||!active.contains(document.activeElement))', prototype)
+        self.assertIn('!e.shiftKey&&(document.activeElement===last||!active.contains(document.activeElement))', prototype)
