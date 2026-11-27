@@ -119,6 +119,8 @@ jobs:
           grep -qx 'BR2_PACKAGE_DEJAVU=y' build/vampire_mobile_qemu_defconfig
           grep -qx 'BR2_PACKAGE_VAMPIRE_MOBILE_SHELL=y' build/vampire_mobile_qemu_defconfig
           bash -n build/build-mobile-qemu.sh
+          bash -n scripts/mobile-device-report.sh
+          bash tests/test_mobile_device_report.sh
           sh -n mobile/rootfs-overlay/etc/init.d/rcS
           sh -n mobile/rootfs-overlay/usr/bin/vmobile
           sh -n mobile/rootfs-overlay/usr/bin/vmobile-ui
