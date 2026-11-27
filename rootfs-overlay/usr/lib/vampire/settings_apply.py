@@ -85,6 +85,38 @@ def atomic_write(path: pathlib.Path, content: str) -> None:
             pass
         raise
 
+def adaptive_output_config(drm_root: pathlib.Path) -> str:
+    """Return Weston per-output scale hints from connected DRM mode inventories."""
+    if drm_root.is_symlink() or not drm_root.is_dir():
+        return ""
+    sections: list[str] = []
+    for connector in sorted(drm_root.glob("card[0-9]*-*")):
+        if connector.is_symlink() or not connector.is_dir():
+            continue
+        name = connector.name
+        if not re.fullmatch(r"card[0-9]+-[A-Za-z0-9_-]+", name):
+            continue
+        status_file = connector / "status"
+        modes_file = connector / "modes"
+        if status_file.is_symlink() or not status_file.is_file():
+            continue
+        try:
+            if status_file.read_text(encoding="ascii").strip() != "connected":
+                continue
+            modes: list[tuple[int, int]] = []
+            if not modes_file.is_symlink() and modes_file.is_file():
+                for raw in modes_file.read_text(encoding="ascii").splitlines():
+                    match = re.fullmatch(r"([0-9]{2,5})x([0-9]{2,5})", raw.strip())
+                    if match:
+                        modes.append((int(match.group(1)), int(match.group(2))))
+        except OSError:
+            continue
+        scale = 2 if any(width >= 2800 and height >= 1600 for width, height in modes) else 1
+        output_name = name.split("-", 1)[1]
+        sections.append(f"\n[output]\nname={output_name}\nscale={scale}\n")
+    return "".join(sections)
+
+
 def main() -> None:
     values = load_settings()
     theme = values.get("theme", "dark")
@@ -134,6 +166,8 @@ def main() -> None:
         ("startup-animation", motion),
     ):
         weston_text = replace_key(weston_text, key, value)
+    weston_text += adaptive_output_config(pathlib.Path(os.environ.get("VAMPIRE_DRM_SYSFS", "/sys/class/drm")))
+
     for key, value in (
         ("background", foot_background),
         ("foreground", foot_foreground),
