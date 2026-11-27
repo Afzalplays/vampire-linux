@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -Eeuxo pipefail
+set -Eeuo pipefail
 ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd -P)"
 APP_LAUNCHER="$ROOT/rootfs-overlay/usr/bin/vampire-app"
 test -x "$APP_LAUNCHER" || { echo "Missing tracked Vampire app launcher: $APP_LAUNCHER" >&2; ls -la "$ROOT/rootfs-overlay/usr/bin" >&2; exit 1; }
