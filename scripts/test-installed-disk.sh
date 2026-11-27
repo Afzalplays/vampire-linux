@@ -123,7 +123,7 @@ run_boot() {
       [[ "$(stat -c %u "$runtime_dir")" == "$uid" ]] || die "$mode session runtime directory for UID $uid has incorrect ownership"
       [[ "$(stat -c %a "$runtime_dir")" == 700 ]] || die "$mode session runtime directory for UID $uid is not private (0700)"
     done
-    grep -Fq "vampire" "$INSPECT_MOUNT/etc/passwd" || die "$mode installed Desktop account is missing"
+    grep -Eq "^vampire:[^:]*:1000:" "$INSPECT_MOUNT/etc/passwd" || die "$mode installed Desktop account is missing or does not use UID 1000"
   fi
   grep -Fq ' / ext4 ' "$INSPECT_MOUNT/etc/fstab" || die "$mode installed fstab does not mount the root filesystem"
   if [[ "$EDITION" == desktop ]]; then
@@ -153,6 +153,9 @@ assert inventory == {"connectors": [], "count": 0, "connected": 0}, inventory
 PY
     sudo chroot "$INSPECT_MOUNT" /usr/bin/vsettings keys > "$WORK/$mode.settings-keys.log" 2>&1 || die "$mode installed vsettings keys failed"
     grep -Fxq dock_auto_hide "$WORK/$mode.settings-keys.log" || die "$mode installed settings schema omitted dock_auto_hide"
+    sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/lib/vampire/settings-bootstrap > "$WORK/$mode.settings-bootstrap.log" 2>&1 || die "$mode installed first-boot settings bootstrap failed"
+    sudo chroot "$INSPECT_MOUNT" /bin/sh /usr/lib/vampire/settings-bootstrap > "$WORK/$mode.settings-bootstrap-repeat.log" 2>&1 || die "$mode installed settings bootstrap was not idempotent"
+    sudo chroot "$INSPECT_MOUNT" /usr/bin/vsettings validate > "$WORK/$mode.settings-bootstrap-validate.log" 2>&1 || die "$mode first-boot settings bootstrap produced invalid settings"
     sudo chroot "$INSPECT_MOUNT" /usr/bin/vsettings list > "$WORK/$mode.settings-list.log" 2>&1 || die "$mode installed vsettings could not load defaults"
     grep -Eq "^theme[[:space:]]+dark$" "$WORK/$mode.settings-list.log" || die "$mode installed settings did not load dark theme default"
     grep -Eq "^dock_auto_hide[[:space:]]+true$" "$WORK/$mode.settings-list.log" || die "$mode installed settings did not load dock auto-hide default"
