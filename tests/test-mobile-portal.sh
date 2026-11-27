@@ -26,7 +26,7 @@ assert "navigator.onLine" in js
 assert "previously cached portal pages and assets" in js
 assert "focus-visible" in css and "forced-colors:active" in css
 assert "pointer:coarse" in css
-for asset in ("index.html", "styles.css", "app.js", "manifest.webmanifest", "icon.svg"):
+for asset in ("index.html", "experience.html", "styles.css", "app.js", "manifest.webmanifest", "icon.svg"):
     assert (root / asset).is_file(), asset
     assert f'"./{asset}"' in sw, f"{asset} missing from service-worker cache allowlist"
 assert "request.method!==\"GET\"" in sw
@@ -34,7 +34,11 @@ assert "url.origin!==self.location.origin" in sw
 assert "url.search" in sw
 assert 'if(request.mode==="navigate")' in sw
 assert 'fetch(request)' in sw
-assert '.catch(()=>caches.match("./index.html"))' in sw
+assert '.catch(()=>caches.match(request).then(cached=>cached||caches.match("./index.html")))' in sw
 assert 'key.startsWith("vampire-mobile-")' in sw
-print("Vampire mobile PWA install, offline, responsive and accessibility checks passed.")
+prototype = (root / "experience.html").read_text()
+for marker in ("Vampire Caller", "Game Booster", "Vampire Terminal", "SpeechRecognition", "vampire -activate hacker mode -y", "secure-unlock"):
+    assert marker in prototype, marker
+assert '"./experience.html"' in sw
+print("Vampire mobile PWA and interactive phone experience checks passed.")
 PY
