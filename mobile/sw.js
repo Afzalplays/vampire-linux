@@ -1,5 +1,5 @@
 const CACHE="vampire-mobile-v3";
-const CORE=["./","./index.html","./styles.css","./app.js","./manifest.webmanifest","./icon.svg"];
+const CORE=["./","./index.html","./experience.html","./styles.css","./app.js","./manifest.webmanifest","./icon.svg"];
 const ASSETS=new Set(CORE.map(path=>new URL(path,self.location.href).pathname));
 
 async function cacheResponse(request,response){
@@ -31,8 +31,8 @@ self.addEventListener("fetch",event=>{
   if(request.mode==="navigate"){
     event.respondWith(
       fetch(request)
-        .then(response=>cacheResponse(new Request(new URL("./index.html",self.location.href)),response))
-        .catch(()=>caches.match("./index.html"))
+        .then(response=>cacheResponse(request,response))
+        .catch(()=>caches.match(request).then(cached=>cached||caches.match("./index.html")))
     );
     return;
   }
