@@ -2,6 +2,7 @@ package fun.vampirenodes.mobile
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.View
@@ -22,8 +23,25 @@ class MainActivity : Activity() {
             settings.domStorageEnabled = true
             settings.allowFileAccess = true
             settings.allowContentAccess = false
+            settings.allowFileAccessFromFileURLs = false
+            settings.allowUniversalAccessFromFileURLs = false
+            settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW
             settings.mediaPlaybackRequiresUserGesture = true
-            webViewClient = WebViewClient()
+            webViewClient = object : WebViewClient() {
+                override fun shouldOverrideUrlLoading(view: WebView, request: android.webkit.WebResourceRequest): Boolean {
+                    val uri = request.url
+                    if (uri.scheme == "file" && uri.path?.startsWith("/android_asset/") == true) return false
+                    if (uri.scheme == "https" || uri.scheme == "mailto" || uri.scheme == "tel") {
+                        return try {
+                            startActivity(Intent(Intent.ACTION_VIEW, uri))
+                            true
+                        } catch (_: Exception) {
+                            true
+                        }
+                    }
+                    return true
+                }
+            }
             webChromeClient = WebChromeClient()
             addJavascriptInterface(HomeBridge(), "VampireNative")
             loadUrl("file:///android_asset/experience.html")
