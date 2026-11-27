@@ -134,11 +134,15 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn('x.setAttribute("aria-hidden",String(!active))', prototype)
         self.assertIn("lastPanelTrigger.focus()", prototype)
 
-    def test_wallpaper_preview_limits_size_and_releases_object_urls(self):
+    def test_wallpaper_is_saved_locally_and_restored_on_next_launch(self):
         prototype = (MOBILE / "experience.html").read_text()
-        self.assertIn("12*1024*1024", prototype)
-        self.assertIn("URL.revokeObjectURL", prototype)
-        self.assertIn('window.addEventListener("pagehide"', prototype)
+        self.assertIn("2*1024*1024", prototype)
+        self.assertIn("new FileReader()", prototype)
+        self.assertIn("savedPreferences.wallpaper=reader.result", prototype)
+        self.assertIn("wallpaper:savedPreferences.wallpaper||null", prototype)
+        self.assertIn('typeof savedPreferences.wallpaper==="string"', prototype)
+        self.assertIn("data:image\\\\/(png|jpeg|webp|gif);base64,", prototype)
+        self.assertIn("Wallpaper images up to 2 MB are saved locally", prototype)
 
     def test_launcher_panels_support_keyboard_escape_and_touch_dismissal(self):
         prototype = (MOBILE / "experience.html").read_text()
