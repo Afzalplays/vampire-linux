@@ -157,6 +157,14 @@ printf '9\n\n10\n\n0\n' | PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bi
 grep -q 'Command failed (exit 1)' "$TMP/errors.out"
 
 sh "$ROOT/rootfs-overlay/usr/bin/vmonitor" > "$TMP/monitor.out"
+
+# The interactive desktop settings menu applies the native panel clock immediately.
+printf '2\\n12\\nfalse\\n0\\n0\\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/clock-menu.out"
+grep -q "^clock-format=none$" "$TMP/weston.ini"
+printf '2\\n12\\ntrue\\n0\\n0\\n' | VAMPIRE_SETTINGS_CMD="$TMP/vsettings" PATH="$TMP/mockbin:$PATH" "$ROOT/rootfs-overlay/usr/bin/vdesktop" > "$TMP/clock-menu.out"
+grep -q "^clock-format=minutes-24h$" "$TMP/weston.ini"
+
+
 grep -q "VAMPIRE MONITOR" "$TMP/monitor.out"
 
 # Recent/following log and live monitor menu entries must dispatch exact arguments.
