@@ -16,7 +16,7 @@ catalog() {
 }
 category_catalog() {
   [ "$#" -eq 1 ] || { usage >&2; return 2; }
-  case "$1" in system|utilities) ;; *) printf 'Vampire Launcher: unknown category: %s\\n' "$1" >&2; return 2 ;; esac
+  case "$1" in system|utilities) ;; *) printf 'Vampire Launcher: unknown category: %s\n' "$1" >&2; return 2 ;; esac
   catalog | awk -F'|' -v wanted="$1" '
     ($1 == "terminal" || $1 == "settings" || $1 == "software") && wanted == "system" { print; next }
     ($1 == "files" || $1 == "monitor") && wanted == "utilities" { print }
@@ -64,6 +64,11 @@ case "${1:-}" in
     [ "$#" -eq 1 ] || { usage >&2; exit 2; }
     catalog
     exit 0
+    ;;
+  --category)
+    [ "$#" -eq 2 ] || { usage >&2; exit 2; }
+    category_catalog "$2"
+    exit $?
     ;;
   --search)
     [ "$#" -eq 2 ] || { usage >&2; exit 2; }
