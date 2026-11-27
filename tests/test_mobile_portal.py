@@ -122,7 +122,7 @@ class MobilePortalContractTests(unittest.TestCase):
 
     def test_desktop_launcher_uses_revealable_center_dock_without_taskbar(self):
         prototype = (MOBILE / "experience.html").read_text()
-        for marker in ('@media(min-width:800px)', '.edge-dock{left:50%;top:auto;bottom:24px', '.edge-dock:hover,.edge-dock:focus-within', '.bottom-nav{display:none}', 'aria-label="Launcher dock"'):
+        for marker in ('@media(min-width:800px)', 'Revealable center dock', '.edge-dock{left:50%;top:auto;bottom:24px', '.edge-dock:hover,.edge-dock:focus-within{opacity:1}', '.bottom-nav{display:none}', 'aria-label="Launcher dock"'):
             with self.subTest(marker=marker):
                 self.assertIn(marker, prototype)
 
