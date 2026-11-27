@@ -3,12 +3,12 @@
 set -eu
 CONFIG=${VAMPIRE_SETTINGS_FILE:-/etc/vampire/settings.conf}
 DEFAULTS=${VAMPIRE_SETTINGS_DEFAULTS:-/etc/vampire/settings.defaults}
-KEYS='theme accent surface_transparency blur terminal_opacity dock_size dock_position dock_auto_hide dock_magnification top_panel show_date show_clock show_network show_power reduced_motion update_channel voice_access'
+KEYS='theme accent surface_transparency blur terminal_opacity dock_size dock_position dock_auto_hide dock_magnification top_panel show_date show_clock show_network show_power reduced_motion update_channel voice_access keyboard_repeat_rate keyboard_repeat_delay'
 usage() { echo "Usage: vsettings {list|keys|get KEY|set KEY VALUE|validate|reset|apply}" >&2; exit 2; }
 help() { echo "Usage: vsettings {list|keys|get KEY|set KEY VALUE|validate|reset|apply}"; }
 valid_key() {
   case "$1" in
-    theme|accent|surface_transparency|blur|terminal_opacity|dock_size|dock_position|dock_auto_hide|dock_magnification|top_panel|show_date|show_clock|show_network|show_power|reduced_motion|update_channel|voice_access) return 0 ;;
+    theme|accent|surface_transparency|blur|terminal_opacity|dock_size|dock_position|dock_auto_hide|dock_magnification|top_panel|show_date|show_clock|show_network|show_power|reduced_motion|update_channel|voice_access|keyboard_repeat_rate|keyboard_repeat_delay) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -26,6 +26,8 @@ valid_value() {
     top_panel:true|top_panel:false|show_date:true|show_date:false|show_clock:true|show_clock:false|show_network:true|show_network:false|show_power:true|show_power:false) return 0 ;;
     reduced_motion:true|reduced_motion:false|voice_access:true|voice_access:false) return 0 ;;
     update_channel:stable|update_channel:testing) return 0 ;;
+    keyboard_repeat_rate:20|keyboard_repeat_rate:30|keyboard_repeat_rate:40|keyboard_repeat_rate:50|keyboard_repeat_rate:60) return 0 ;;
+    keyboard_repeat_delay:200|keyboard_repeat_delay:300|keyboard_repeat_delay:400|keyboard_repeat_delay:500|keyboard_repeat_delay:600|keyboard_repeat_delay:700|keyboard_repeat_delay:800) return 0 ;;
     *) return 1 ;;
   esac
 }
