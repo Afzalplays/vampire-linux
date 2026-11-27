@@ -195,7 +195,7 @@ class MobilePortalContractTests(unittest.TestCase):
         prototype = (MOBILE / "experience.html").read_text()
         self.assertGreaterEqual(prototype.count("data-exit-launcher"), 3)
         self.assertIn('aria-label="Exit launcher"', prototype)
-        self.assertIn("Native launcher exit will return Home", prototype)
+        self.assertIn("Native launcher exit is available in the Android app", prototype)
         self.assertIn("Launcher preview cannot close the phone OS", prototype)
 
     def test_launcher_supports_local_animated_wallpaper_selection(self):
