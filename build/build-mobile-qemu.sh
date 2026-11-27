@@ -4,11 +4,12 @@ set -Eeuo pipefail
 ROOT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="${VAMPIRE_MOBILE_BUILD_DIR:-$ROOT_DIR/.build/mobile-arm64}"
 OUTPUT_DIR="${VAMPIRE_MOBILE_OUTPUT_DIR:-$ROOT_DIR/out/mobile-arm64}"
+DL_DIR="${BR2_DL_DIR:-$ROOT_DIR/.build/downloads}"
 BUILDROOT_VERSION="${BUILDROOT_VERSION:-2025.02}"
 JOBS="${JOBS:-$(getconf _NPROCESSORS_ONLN 2>/dev/null || printf '2')}"
 need(){ command -v "$1" >/dev/null 2>&1 || { printf 'Missing host tool: %s\n' "$1" >&2; exit 1; }; }
 for tool in git make gcc g++ perl python3 rsync cpio file patch bc bison flex wget; do need "$tool"; done
-mkdir -p "$BUILD_DIR" "$OUTPUT_DIR"
+mkdir -p "$BUILD_DIR" "$OUTPUT_DIR" "$DL_DIR"
 git check-ref-format "refs/tags/$BUILDROOT_VERSION" >/dev/null
 if [[ ! -d "$BUILD_DIR/buildroot/.git" ]]; then
   git clone --depth 1 --branch "$BUILDROOT_VERSION" https://github.com/buildroot/buildroot.git "$BUILD_DIR/buildroot"
@@ -18,7 +19,7 @@ else
 fi
 BR_DIR="$BUILD_DIR/buildroot"
 [[ "$(git -C "$BR_DIR" describe --tags --exact-match HEAD)" == "$BUILDROOT_VERSION" ]]
-make -C "$BR_DIR" O="$BUILD_DIR/output" BR2_EXTERNAL="$ROOT_DIR/mobile/br2-external" BR2_DEFCONFIG="$ROOT_DIR/build/vampire_mobile_qemu_defconfig" defconfig
+make -C "$BR_DIR" O="$BUILD_DIR/output" BR2_DL_DIR="$DL_DIR" BR2_EXTERNAL="$ROOT_DIR/mobile/br2-external" BR2_DEFCONFIG="$ROOT_DIR/build/vampire_mobile_qemu_defconfig" defconfig
 set_config_string() {
   key=$1
   value=$2
