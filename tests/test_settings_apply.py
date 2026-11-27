@@ -87,6 +87,47 @@ class SettingsApplyTests(unittest.TestCase):
             self.assertIn("alpha=0.70", foot_text)
             self.assertIn("background=f2f2f6", foot_text)
 
+    def test_adaptive_output_scaling_uses_connected_display_modes(self):
+        with tempfile.TemporaryDirectory() as temp:
+            drm = pathlib.Path(temp) / "drm"
+            (drm / "card0-eDP-1").mkdir(parents=True)
+            (drm / "card0-HDMI-A-1").mkdir()
+            (drm / "card0-DP-1").mkdir()
+            (drm / "card0-eDP-1" / "status").write_text("connected\n")
+            (drm / "card0-eDP-1" / "modes").write_text("2880x1800\n1920x1200\n")
+            (drm / "card0-HDMI-A-1" / "status").write_text("connected\n")
+            (drm / "card0-HDMI-A-1" / "modes").write_text("1920x1080\n")
+            (drm / "card0-DP-1" / "status").write_text("disconnected\n")
+            (drm / "card0-DP-1" / "modes").write_text("3840x2160\n")
+            settings = pathlib.Path(temp) / "settings.conf"
+            settings.write_text("theme=dark\n")
+            runtime = pathlib.Path(temp) / "run" / "vampire"
+            config_home = pathlib.Path(temp) / "config"
+            env = os.environ.copy()
+            env.update({
+                "VAMPIRE_SETTINGS_FILE": str(settings),
+                "VAMPIRE_WESTON_BASE": str(WESTON),
+                "VAMPIRE_FOOT_BASE": str(FOOT),
+                "VAMPIRE_WESTON_RUNTIME_CONFIG": str(runtime / "weston.ini"),
+                "XDG_CONFIG_HOME": str(config_home),
+                "VAMPIRE_DRM_SYSFS": str(drm),
+            })
+            result = subprocess.run(
+                ["python3", str(APPLY)], env=env, text=True,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False,
+            )
+            self.assertEqual(result.returncode, 0, result.stderr)
+            config = (runtime / "weston.ini").read_text()
+            self.assertIn("[output]\nname=eDP-1\nscale=2", config)
+            self.assertIn("[output]\nname=HDMI-A-1\nscale=1", config)
+            self.assertNotIn("name=DP-1", config)
+
+    def test_missing_drm_inventory_keeps_default_weston_scaling(self):
+        with tempfile.TemporaryDirectory() as temp:
+            result, weston, _ = self.run_apply(temp, "theme=dark\n")
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertNotIn("[output]", weston.read_text())
+
     def test_accepts_complete_shipped_settings_defaults(self):
         with tempfile.TemporaryDirectory() as temp:
             result, weston, foot = self.run_apply(temp, (ROOT / "rootfs-overlay" / "etc" / "vampire" / "settings.defaults").read_text())
