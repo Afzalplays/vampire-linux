@@ -34,7 +34,11 @@ On iPhone, users can add the PWA to the Home Screen through Safari where support
 
 `mobile/android/` now contains a native Android HOME-app shell around the bundled touch UI. Android can offer it as a default launcher after the user explicitly selects it. It uses immersive system-bar mode and the in-app power button returns to Android Home through a native intent. A dedicated CI workflow builds a debug APK. This is an Android application running on top of Android, **not** a bootable Vampire OS image; system services and hardware integration remain incomplete.
 
-### 3. Native Android/Linux mobile edition
+### 3. ARM64 QEMU bring-up target
+
+`build/vampire_mobile_qemu_defconfig` and `build/build-mobile-qemu.sh` define a separate AArch64 Buildroot profile for QEMU `virt`. This is a generic kernel/initramfs bring-up path only; it is not a phone image and does not validate touch, cellular, cameras, sensors, suspend or vendor firmware. A device-specific port remains blocked on selecting a real reference device.
+
+### 4. Native Android/Linux mobile edition
 
 A true mobile OS image is a separate ARM64 port, not an x86_64 ISO resized for a phone. Before promising device downloads, select specific supported devices and validate:
 
@@ -46,7 +50,7 @@ A true mobile OS image is a separate ARM64 port, not an x86_64 ISO resized for a
 
 Initial scope should be a small, explicitly listed Android-device compatibility target. Generic Android APK support or a generic ARM64 ISO does not prove a bootable phone port.
 
-### 4. iOS
+### 5. iOS
 
 A custom Vampire OS kernel/ISO cannot be installed as a replacement for iOS on ordinary iPhones. iOS is controlled by Apple's signed boot chain and platform restrictions. The supported near-term iPhone experience is the PWA or a separately developed native iOS companion app distributed under Apple's rules. Do not advertise an iOS bootable ISO.
 
@@ -69,12 +73,12 @@ Every release artifact should show architecture, edition, version, checksum, sig
 1. [x] Build the responsive PWA portal and installable offline shell (`mobile/`).
 2. [x] Create the Vampire Mobile launcher prototype with app drawer, quick panel, notifications, Allines preview, Caller/Game Booster/Terminal previews, browser-available stats and built-in themes.
 3. [ ] Complete launcher beta quality: responsive layouts, app icon consistency, touch gestures, accessibility, local settings persistence and offline/update behaviour.
-4. [x] Add native Android HOME launcher shell and automated debug-APK build (launcher only; not a replacement OS).\n5. [ ] Select and document a supported Android reference device (SoC, bootloader, partition map, firmware and unlock policy) before building a device image.
-6. [ ] Build the native ARM64 mobile base: kernel, device tree, vendor firmware, init, graphics/display, touch, audio, Wi-Fi/Bluetooth and power management.
-7. [ ] Build the native touch shell and core mobile services: lock screen, notifications, quick settings, app lifecycle, permissions, keyboard, telephony/data where supported, camera and sensors.
-8. [ ] Produce a device-specific boot/recovery image; validate boot, install, encryption, update/rollback, suspend/resume and recovery on the reference device.
-9. [ ] Keep iPhone support as a PWA/native companion; do not promise replacing or booting over iOS on ordinary iPhones.
-10. [ ] Resume desktop/server release polish after the mobile boot milestone.
+4. [x] Add native Android HOME launcher shell and automated debug-APK build (launcher only; not a replacement OS).\n5. [x] Add generic ARM64 QEMU kernel/initramfs bring-up profile (emulator only).\n6. [ ] Select and document a supported Android reference device (SoC, bootloader, partition map, firmware and unlock policy) before building a device image.
+7. [ ] Build the native ARM64 mobile base: kernel, device tree, vendor firmware, init, graphics/display, touch, audio, Wi-Fi/Bluetooth and power management.
+8. [ ] Build the native touch shell and core mobile services: lock screen, notifications, quick settings, app lifecycle, permissions, keyboard, telephony/data where supported, camera and sensors.
+9. [ ] Produce a device-specific boot/recovery image; validate boot, install, encryption, update/rollback, suspend/resume and recovery on the reference device.
+10. [ ] Keep iPhone support as a PWA/native companion; do not promise replacing or booting over iOS on ordinary iPhones.
+11. [ ] Resume desktop/server release polish after the mobile boot milestone.
 
 ## Acceptance criteria
 
