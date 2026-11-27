@@ -22,6 +22,8 @@ class MobileArm64BringupTests(unittest.TestCase):
             "CONFIG_VIRTIO=y",
             "CONFIG_VIRTIO_MMIO=y",
             "CONFIG_VIRTIO_BLK=y",
+            "CONFIG_VIRTIO_NET=y",
+            "CONFIG_VIRTIO_PCI=y",
             "CONFIG_DEVTMPFS=y",
         ):
             with self.subTest(option=option):
@@ -31,6 +33,7 @@ class MobileArm64BringupTests(unittest.TestCase):
         script = (ROOT / "build" / "build-mobile-qemu.sh").read_text()
         self.assertIn("mobile/rootfs-overlay", script)
         self.assertIn("vampire_mobile_qemu.fragment", script)
+        self.assertIn("BR2_PACKAGE_IPROUTE2=y", (ROOT / "build" / "vampire_mobile_qemu_defconfig").read_text())
         self.assertIn('rootfs.cpio.gz', script)
         self.assertIn('IMAGES="$BUILD_DIR/output/images"', script)
 
