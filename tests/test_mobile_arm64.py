@@ -24,6 +24,9 @@ class MobileArm64BringupTests(unittest.TestCase):
             "CONFIG_VIRTIO_BLK=y",
             "CONFIG_VIRTIO_NET=y",
             "CONFIG_VIRTIO_PCI=y",
+            "CONFIG_VIRTIO_INPUT=y",
+            "CONFIG_DRM_VIRTIO_GPU=y",
+            "CONFIG_INPUT_EVDEV=y",
             "CONFIG_DEVTMPFS=y",
         ):
             with self.subTest(option=option):
@@ -46,6 +49,7 @@ class MobileArm64BringupTests(unittest.TestCase):
         self.assertIn("VAMPIRE MOBILE OS", rc)
         self.assertIn("ARM64 bring-up", os_release)
         self.assertNotIn("vinstall", menu)
+        self.assertIn("Display and input devices", menu)
         self.assertIn("sh /usr/bin/vmobile", (MOBILE / "rootfs-overlay" / "etc" / "profile.d" / "vampire-mobile.sh").read_text())
 
 
