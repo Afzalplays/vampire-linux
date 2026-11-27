@@ -26,6 +26,13 @@ if command -v udevd >/dev/null 2>&1; then
     udevadm settle --timeout=10 || log "udev settle timed out"
   fi
 fi
+if [ -x /usr/bin/vampire-mobile-shell ]; then
+  if SDL_VIDEODRIVER=dummy /usr/bin/vampire-mobile-shell --self-test; then
+    log "native SDL2 shell self-test passed"
+  else
+    log "WARNING: native SDL2 shell self-test failed"
+  fi
+fi
 printf '\n  VAMPIRE MOBILE OS | ARM64 bring-up\n'
 printf '  Device: QEMU virt (generic emulator target)\n'
 printf '  Architecture: '
