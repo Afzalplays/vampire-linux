@@ -6,7 +6,7 @@ are copied to `/etc/vampire/settings.conf` on first live boot. The
 `vsettings` command validates values and atomically replaces the settings
 file; `vdesktop` exposes these preferences through its console preview menu.
 
-The Weston input profile enables libinput tap-to-click for supported touchpads and sets keyboard repeat to 40 keys per second after a 400 ms delay. These are default input conveniences, not a substitute for physical keyboard and touchpad validation.
+The Weston input profile enables libinput tap-to-click for supported touchpads. Keyboard repeat rate (20–60 keys per second) and initial delay (200–800 ms) are configurable through Settings and applied at the next graphical-session start; defaults are 40 keys per second and 400 ms. Physical keyboard and touchpad validation remains pending.
 
 The current settings backend stores theme, accent, surface transparency,
 blur preset, terminal opacity, dock size/position/auto-hide/magnification,
