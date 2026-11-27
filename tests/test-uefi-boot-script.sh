@@ -92,9 +92,11 @@ if [[ "${VAMPIRE_EDITION:-desktop}" == "desktop" ]]; then
 ./usr/bin/weston
 ./usr/bin/foot
 ./usr/bin/vampire-terminal
+./usr/bin/vdesktop-session
 ./usr/bin/vsettings
 ./usr/bin/vdisplay
 ./usr/lib/vampire/settings_apply.py
+./usr/lib/vampire/session-runtime
 ./usr/lib/vampire/settings-bootstrap
 ./etc/vampire/settings.defaults
 ./etc/xdg/weston/weston.ini
