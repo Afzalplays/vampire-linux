@@ -60,3 +60,8 @@ with the same `VAMPIRE_EDITION` value passed to `scripts/test-live-iso.sh`.
 ## ARM64 mobile bring-up (QEMU)
 
 `build/build-mobile-qemu.sh` builds a separate AArch64 Buildroot kernel + initramfs profile for QEMU's generic `virt` machine. This is a console bring-up target for validating the ARM64 toolchain, kernel and initramfs path; it is **not** a device image and does not imply phone hardware support. The target has no phone modem, camera, touchscreen or vendor firmware integration. See `docs/MOBILE-SUPPORT.md` before treating any artifact as installable.
+
+
+## Mobile ARM64 QEMU console
+
+The ARM64 image now uses a separate mobile rootfs overlay: it prints an architecture-aware Vampire Mobile boot banner, starts a PL011 serial getty on `ttyAMA0`, and provides the honest early bring-up menu via `vmobile`. The menu exposes only operations actually present in this console image; it does not pretend to control phone radios, camera, touch, sensors or lock screen. The build script merges the ARM64 QEMU kernel fragment and layers `mobile/rootfs-overlay` over the shared base rootfs.
