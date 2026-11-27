@@ -250,3 +250,5 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn("Intent.ACTION_MAIN", activity)
         self.assertIn("Intent.CATEGORY_HOME", activity)
         self.assertIn("window.VampireNative.exitToHome()", prototype)
+        self.assertIn("window.vampireHandleBack", prototype)
+        self.assertIn("window.vampireHandleBack", activity)
