@@ -13,6 +13,9 @@ assert manifest["display"] == "standalone"
 assert manifest["orientation"] == "any"
 assert manifest["scope"] == "./"
 assert 'name="viewport"' in html and "viewport-fit=cover" in html
+assert 'class="skip-link" href="#main-content"' in html
+assert 'id="main-content" class="main-content-anchor" tabindex="-1"' in html
+assert '.skip-link:focus{' in css and 'transform:translateY(0)' in css
 assert 'id="install-button"' in html
 assert 'id="install-status"' in html
 assert 'id="connection-status"' in html
