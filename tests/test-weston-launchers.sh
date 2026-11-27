@@ -73,7 +73,70 @@ if VAMPIRE_APP_CMD="$TMP/bin/app" sh "$LAUNCHER" --launch nonexistent >/dev/null
 fi
 printf 'file\nfiles\n0\n' | APP_ARGS="$TMP/menu.args" VAMPIRE_APP_CMD="$TMP/bin/app" sh "$LAUNCHER" > "$TMP/menu.out"
 grep -q 'Search applications or enter an app ID' "$TMP/menu.out"
-grep -q "files|Files|Browse and manage files" "$TMP/menu.out"
+grep -Eq '^  files +Files +Browse and manage files
+grep -Fxq files "$TMP/menu.args"
+
+# Interactive launcher accepts stable IDs and case-insensitive display names.
+printf 'Files\n0\n' | APP_ARGS="$TMP/name.args" VAMPIRE_APP_CMD="$TMP/bin/app" sh "$LAUNCHER" > "$TMP/name.out"
+grep -Fxq files "$TMP/name.args"
+grep -q 'app ID/name' "$TMP/name.out"
+printf 'TERMINAL\n0\n' | TERMINAL_ARGS="$TMP/name-terminal.args" VAMPIRE_TERMINAL_CMD="$TMP/bin/terminal" sh "$LAUNCHER" > /dev/null
+grep -Fxq terminal "$TMP/name-terminal.args"
+
+
+# Partial searches launch a unique match directly and offer numbered choices
+# when multiple applications match the query.
+printf 'file\n0\n' | APP_ARGS="$TMP/partial.args" VAMPIRE_APP_CMD="$TMP/bin/app" sh "$LAUNCHER" > "$TMP/partial.out"
+grep -Fxq files "$TMP/partial.args"
+printf 's\n3\n0\n' | APP_ARGS="$TMP/multiple.args" VAMPIRE_APP_CMD="$TMP/bin/app" sh "$LAUNCHER" > "$TMP/multiple.out"
+grep -q '1) Files' "$TMP/multiple.out"
+grep -q '2) Settings' "$TMP/multiple.out"
+grep -q '3) Software Center' "$TMP/multiple.out"
+grep -Fxq software "$TMP/multiple.args"
+printf 's\n9\n0\n' | APP_ARGS="$TMP/invalid-selection.args" VAMPIRE_APP_CMD="$TMP/bin/app" sh "$LAUNCHER" > "$TMP/invalid-selection.out"
+grep -q 'outside the result list' "$TMP/invalid-selection.out"
+
+# Each clickable Weston panel launcher has a bundled Vampire icon.
+python3 - "$ROOT" <<'PY'
+import pathlib, re, struct, sys, zlib
+root = pathlib.Path(sys.argv[1])
+config = (root / "rootfs-overlay/etc/xdg/weston/weston.ini").read_text()
+blocks = re.findall(r"(?ms)^\[launcher\]\s*\n(.*?)(?=^\[|\Z)", config)
+assert len(blocks) == 6, len(blocks)
+expected = {
+    "/usr/bin/vampire-terminal": "terminal.png",
+    "/usr/bin/vampire-app launcher": "launcher.png",
+    "/usr/bin/vampire-app files": "files.png",
+    "/usr/bin/vampire-app settings": "settings.png",
+    "/usr/bin/vampire-app software": "software.png",
+    "/usr/bin/vampire-app monitor": "monitor.png",
+}
+for block in blocks:
+    values = dict(line.split("=", 1) for line in block.splitlines() if "=" in line)
+    assert values.get("path") in expected, values
+    icon = values.get("icon", "")
+    assert icon == "/usr/share/vampire/icons/" + expected[values["path"]], (values, icon)
+    path = root / "rootfs-overlay" / icon.lstrip("/")
+    data = path.read_bytes()
+    assert data[:8] == bytes((137,80,78,71,13,10,26,10)), path
+    offset, seen_ihdr, idat = 8, False, []
+    while offset < len(data):
+        length = struct.unpack(">I", data[offset:offset+4])[0]
+        kind = data[offset+4:offset+8]
+        payload = data[offset+8:offset+8+length]
+        crc = struct.unpack(">I", data[offset+8+length:offset+12+length])[0]
+        assert zlib.crc32(kind + payload) & 0xffffffff == crc, path
+        if kind == b"IHDR":
+            width, height, depth, color, comp, filt, interlace = struct.unpack(">IIBBBBB", payload)
+            assert (width,height,depth,color,comp,filt,interlace) == (64,64,8,6,0,0,0)
+            seen_ihdr = True
+        elif kind == b"IDAT": idat.append(payload)
+        offset += length + 12
+    assert seen_ihdr and len(zlib.decompress(b"".join(idat))) == 64 * (1 + 64 * 4), path
+PY
+
+echo "Vampire Weston desktop launcher tests passed."
+ "$TMP/menu.out"
 grep -Fxq files "$TMP/menu.args"
 
 # Interactive launcher accepts stable IDs and case-insensitive display names.
