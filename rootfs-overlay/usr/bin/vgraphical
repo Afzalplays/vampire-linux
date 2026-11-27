@@ -5,6 +5,7 @@ set -eu
 CONFIG=${VAMPIRE_WESTON_RUNTIME_CONFIG:-/run/vampire/weston.ini}
 BASE_CONFIG=${VAMPIRE_WESTON_BASE:-/etc/xdg/weston/weston.ini}
 FOOT_CONFIG=${VAMPIRE_FOOT_BASE:-/etc/xdg/foot/foot.ini}
+LAUNCHER_CHECK=${VAMPIRE_LAUNCHER_CHECK:-vlauncher}
 DRM_DIR=${VAMPIRE_DRM_DIR:-/dev/dri}
 RUNTIME_BASE=${VAMPIRE_RUNTIME_BASE:-/run/user}
 
@@ -29,6 +30,8 @@ check() {
   command -v foot >/dev/null 2>&1 || { error "Foot terminal is not installed."; return 1; }
   require_file "$BASE_CONFIG" || return 1
   require_file "$FOOT_CONFIG" || return 1
+  command -v "$LAUNCHER_CHECK" >/dev/null 2>&1 || { error "Vampire Launcher is not installed; desktop payload validation cannot run."; return 1; }
+  "$LAUNCHER_CHECK" --check || { error "desktop applications or icons failed the installed-payload check."; return 1; }
   session_uid=$(id -u)
   session_runtime="$RUNTIME_BASE/$session_uid"
   reject_symlink_path "$RUNTIME_BASE" || return 1
