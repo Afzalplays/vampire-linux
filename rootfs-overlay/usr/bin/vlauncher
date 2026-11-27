@@ -98,11 +98,20 @@ while :; do
   catalog | while IFS='|' read -r id name description; do
     printf '  %-9s %-15s %s\n' "$id" "$name" "$description"
   done
-  printf '\n  Search applications or enter an app ID/name (0 to close): '
+  printf '\n  Search apps, enter an app ID/name, or type system/utilities (0 to close): '
   IFS= read -r choice || exit 0
   case "$choice" in
     0|q|quit) exit 0 ;;
     "") continue ;;
+    system|utilities)
+      printf '\\n  %s applications:\\n' "$choice"
+      if [ "$choice" = system ]; then
+        catalog | awk -F'|' '$1 == "terminal" || $1 == "settings" || $1 == "software" { printf "  %-9s %-15s %s\\n", $1, $2, $3 }'
+      else
+        catalog | awk -F'|' '$1 == "files" || $1 == "monitor" { printf "  %-9s %-15s %s\\n", $1, $2, $3 }'
+      fi
+      continue
+      ;;
   esac
   exact=$(catalog | awk -F'|' -v query="$choice" 'tolower($1) == tolower(query) || tolower($2) == tolower(query)')
   if [ -n "$exact" ]; then
