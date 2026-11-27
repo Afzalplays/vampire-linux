@@ -102,6 +102,12 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn("Browser storage is unavailable", prototype)
         self.assertIn("Wallpaper images are previewed locally", prototype)
 
+    def test_launcher_page_has_its_own_install_metadata(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        for marker in ('rel="manifest"', 'apple-mobile-web-app-capable', 'apple-touch-icon', '<title>Vampire OS Launcher</title>'):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prototype)
+
     def test_launcher_app_shortcuts_route_to_preview_panels(self):
         prototype = (MOBILE / "experience.html").read_text()
         for marker in ('Phone:"caller"', '"Vampire Caller":"caller"', '"Game Booster":"game"', 'Terminal:"terminal"', 'Allines:"assistant"', 'Security:"terminal"'):
