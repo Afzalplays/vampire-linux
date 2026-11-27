@@ -1,0 +1,23 @@
+#!/bin/sh
+# Minimal native ARM64 bring-up console; no fake phone hardware controls.
+set -eu
+while :; do
+  printf '\n  VAMPIRE MOBILE OS\n'
+  printf '  1) System information\n'
+  printf '  2) Network interfaces\n'
+  printf '  3) Open shell\n'
+  printf '  4) Reboot\n'
+  printf '  5) Power off\n'
+  printf '  0) Exit menu\n'
+  printf '  Select: '
+  IFS= read -r choice || exit 0
+  case "$choice" in
+    1) printf '\n'; cat /etc/os-release; printf '\nKernel: '; uname -a; printf '\nMemory:\n'; cat /proc/meminfo | head -n 5 ;;
+    2) if command -v ip >/dev/null 2>&1; then ip addr; else printf 'ip utility is not installed.\n'; fi ;;
+    3) exec /bin/sh ;;
+    4) printf 'Rebooting...\n'; reboot ;;
+    5) printf 'Powering off...\n'; poweroff ;;
+    0) exit 0 ;;
+    *) printf 'Invalid selection.\n' ;;
+  esac
+done
