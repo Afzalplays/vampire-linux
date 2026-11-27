@@ -42,11 +42,20 @@ def configure_local_user(target: pathlib.Path) -> None:
     audio_gid = ensure_group(group, "audio", 29)
     if any(len(line.split(":")) > 2 and line.split(":")[2] == "1000" and line.split(":")[0] != "vampire" for line in passwd_lines):
         raise SystemExit("Vampire OS: uid 1000 is already assigned to another account")
-    if not any(line.split(":")[0] == "vampire" for line in passwd_lines):
-        passwd_lines.append(f"vampire:x:1000:{group_gid}:Vampire OS User:/home/vampire:/bin/sh")
+    vampire_entries = [line.split(":") for line in passwd_lines if line.split(":")[0] == "vampire"]
+    expected_passwd = ["vampire", "x", "1000", str(group_gid), "Vampire OS User", "/home/vampire", "/bin/sh"]
+    if vampire_entries:
+        if len(vampire_entries) != 1 or vampire_entries[0] != expected_passwd:
+            raise SystemExit("Vampire OS: existing 'vampire' account conflicts with the required uid, primary group, home or shell")
+    else:
+        passwd_lines.append(":".join(expected_passwd))
         passwd.write_text("\n".join(passwd_lines) + "\n", encoding="utf-8")
     shadow_lines = shadow.read_text(encoding="utf-8").splitlines() if shadow.exists() else []
-    if not any(line.split(":")[0] == "vampire" for line in shadow_lines):
+    vampire_shadow = [line.split(":") for line in shadow_lines if line.split(":")[0] == "vampire"]
+    if vampire_shadow:
+        if len(vampire_shadow) != 1 or vampire_shadow[0][1] not in ("!", "*"):
+            raise SystemExit("Vampire OS: existing 'vampire' password entry is not uniquely locked")
+    else:
         shadow_lines.append("vampire:!:19000:0:99999:7:::")
         shadow.write_text("\n".join(shadow_lines) + "\n", encoding="utf-8")
     shadow.chmod(0o640)
