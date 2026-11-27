@@ -28,7 +28,7 @@ The static, installable Progressive Web App (PWA) project portal lives in `mobil
 - Do not cache credentials, private keys, tokens or privileged API responses.
 - A PWA is a web app; it does **not** boot or replace the phone's operating system.
 
-On iPhone, users can add the PWA to the Home Screen through Safari where supported. On Android, supported browsers can install it. Browser and OS capabilities differ. Ordinary iPhones are not a supported target for replacing iOS; iPhone support remains a PWA/native companion.
+On iPhone, users can add the PWA to the Home Screen through Safari where supported. On Android, supported browsers can install it. Browser and OS capabilities differ. ordinary iPhones are not a supported target for replacing iOS; iPhone support remains a PWA/native companion.
 
 ### 2. Native Android/Linux mobile edition
 
