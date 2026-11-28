@@ -653,3 +653,15 @@ class MobilePortalContractTests(unittest.TestCase):
         for marker in ('id="clear-allines"', 'feed.children.length>41', 'feed.replaceChildren()', 'ghadi:"clock"', 'mausam:"weather"', 'sandesh:"messages"', 'tasveer:"gallery"', 'naksha:"maps"', '["recorder","app:Recorder"]', '["downloads","app:Downloads"]', 'q.includes("internet")', 'q.includes("blue tooth")', 'q.includes("what can i ask")'):
             with self.subTest(marker=marker):
                 self.assertIn(marker, prototype)
+
+    def test_allince_voice_language_lifecycle_and_android_fallback_are_wired(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        asset = (MOBILE / "android" / "app" / "src" / "main" / "assets" / "experience.html").read_text()
+        activity = (MOBILE / "android" / "app" / "src" / "main" / "java" / "fun" / "vampirenodes" / "mobile" / "MainActivity.kt").read_text()
+        self.assertEqual(prototype, asset)
+        for marker in ('id="allines-language"', 'value="hi-IN"', 'value="en-IN"', 'function allinceVoiceLanguage()', 'rec.lang=language', 'stopAllinceListening("Ready")', 'aria-pressed="false"', 'e.error==="not-allowed"'):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prototype)
+        self.assertIn("fun startVoiceInput(languageTag: String)", activity)
+        self.assertIn("RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE", activity)
+        self.assertIn("Voice input cancelled", activity)
