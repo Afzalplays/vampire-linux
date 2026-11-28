@@ -198,6 +198,28 @@ class MainActivity : Activity() {
         fun exitToHome() { runOnUiThread { exitToSystemHome() } }
 
         @JavascriptInterface
+        fun launchApp(name: String): Boolean {
+            val intent: Intent = when (name) {
+                "Phone" -> Intent(Intent.ACTION_DIAL)
+                "Messages" -> Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:"))
+                "Camera" -> Intent("android.media.action.IMAGE_CAPTURE")
+                "Gallery" -> Intent(Intent.ACTION_GET_CONTENT).setType("image/*")
+                "Files", "Downloads" -> Intent(Intent.ACTION_OPEN_DOCUMENT).addCategory(Intent.CATEGORY_OPENABLE).setType("*/*")
+                "Contacts" -> Intent(Intent.ACTION_VIEW, android.provider.ContactsContract.Contacts.CONTENT_URI)
+                "Calendar" -> Intent(Intent.ACTION_MAIN).addCategory("android.intent.category.APP_CALENDAR")
+                "Browser" -> Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com"))
+                "Maps" -> Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=nearby"))
+                "Settings" -> Intent(android.provider.Settings.ACTION_SETTINGS)
+                else -> return false
+            }
+            return try {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+                true
+            } catch (_: Exception) { false }
+        }
+
+        @JavascriptInterface
         fun openSystemPanel(action: String) {
             val actions = mapOf(
                 "wifi" to android.provider.Settings.ACTION_WIFI_SETTINGS,
