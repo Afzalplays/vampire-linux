@@ -665,3 +665,11 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn("fun startVoiceInput(languageTag: String)", activity)
         self.assertIn("RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE", activity)
         self.assertIn("Voice input cancelled", activity)
+
+    def test_allince_reply_queue_is_cancelled_on_new_message_clear_and_panel_close(self):
+        html = (MOBILE / "experience.html").read_text()
+        for marker in ("let allinesReplyTimer=null", "function cancelAllinesReply()", "cancelAllinesReply();if(\"speechSynthesis\"in window)speechSynthesis.cancel()", "allinesReplyTimer=setTimeout", "document.querySelector(\"#allines-status\").textContent=\"Thinking…\"", "stopAllinceListening(\"Ready\");cancelAllinesReply()"):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, html)
+        asset = (MOBILE / "android" / "app" / "src" / "main" / "assets" / "experience.html").read_text()
+        self.assertEqual(html, asset)
