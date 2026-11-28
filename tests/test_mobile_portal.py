@@ -175,6 +175,12 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn('fun setWindowBrightness(level: Double)', native)
         self.assertIn('fun setMediaVolume(percent: Int)', native)
 
+    def test_notification_shade_is_persistent_and_has_empty_state(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        for marker in ('id="notice-count"', 'id="notice-date"', 'id="notice-done"', 'const NOTICE_KEY=', 'function readNotices()', 'function renderNotices()', 'function addNotification(', 'localStorage.setItem(NOTICE_KEY', 'All caught up'):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prototype)
+
     def test_wallpaper_is_saved_locally_and_restored_on_next_launch(self):
         prototype = (MOBILE / "experience.html").read_text()
         self.assertIn("2*1024*1024", prototype)
