@@ -641,3 +641,9 @@ class MobilePortalContractTests(unittest.TestCase):
         for marker in ('"Clock" -> Intent(Intent.ACTION_MAIN).addCategory("android.intent.category.APP_CLOCK")', '"Calculator" -> Intent(Intent.ACTION_MAIN).addCategory("android.intent.category.APP_CALCULATOR")', '"Music" -> Intent(Intent.ACTION_MAIN).addCategory("android.intent.category.APP_MUSIC")', '"Store" -> Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.android.vending"))'):
             with self.subTest(marker=marker):
                 self.assertIn(marker, activity)
+
+    def test_allince_understands_common_hinglish_voice_and_text_commands(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        for marker in ('kholo:"open"', 'dikhao:"show"', 'samay:"time"', 'tarikh:"date"', 'kitni:"how much"', 'chalu:"turn on"', 'q.includes(phrase+" open")', 'namaste|namaskar'):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prototype)
