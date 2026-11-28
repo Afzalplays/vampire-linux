@@ -153,8 +153,27 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn('volume:document.querySelector("#volume").value', prototype)
         self.assertIn('["brightness",75,10,100],["volume",60,0,100]', prototype)
         self.assertIn('style.filter="brightness("', prototype)
-        self.assertIn('id==="brightness")document.querySelector("#home").style.filter', prototype)
+        self.assertIn('if(id==="brightness"){document.querySelector("#home").style.filter', prototype)
+        self.assertIn('window.VampireNative?.setWindowBrightness(value/100)', prototype)
+        self.assertIn('window.VampireNative?.setMediaVolume(value)', prototype)
         self.assertIn('savePreferences()}));', prototype)
+
+    def test_quick_panel_routes_protected_controls_to_android_settings(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        for marker in ('["Internet","⌁","wifi"]', '["Bluetooth","ᛒ","bluetooth"]', '["Display","☼","display"]', 'window.VampireNative.openSystemPanel(action)', 'cannot toggle protected system radios'):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prototype)
+
+    def test_allince_voice_assistant_has_native_fallback_and_speaks_replies(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        native = (MOBILE / "android" / "app" / "src" / "main" / "java" / "fun" / "vampirenodes" / "mobile" / "MainActivity.kt").read_text()
+        self.assertIn('id="allines-conversation"', prototype)
+        self.assertIn('id="allines-speak"', prototype)
+        self.assertIn('window.VampireNative.startVoiceInput()', prototype)
+        self.assertIn('window.VampireNative?.openSystemPanel', prototype)
+        self.assertIn('fun startVoiceInput()', native)
+        self.assertIn('fun setWindowBrightness(level: Double)', native)
+        self.assertIn('fun setMediaVolume(percent: Int)', native)
 
     def test_wallpaper_is_saved_locally_and_restored_on_next_launch(self):
         prototype = (MOBILE / "experience.html").read_text()
