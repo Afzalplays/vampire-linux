@@ -2,6 +2,10 @@ package com.vampirenodes.mobile
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
+import android.media.AudioManager
+import android.speech.RecognizerIntent
+import java.util.Locale
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -127,6 +131,12 @@ class MainActivity : Activity() {
             pendingFileChooser = null
             val result = if (resultCode == RESULT_OK && data?.data != null) arrayOf(data.data!!) else null
             callback?.onReceiveValue(result)
+        } else if (requestCode == REQUEST_VOICE && resultCode == RESULT_OK) {
+            val spoken = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
+            if (!spoken.isNullOrBlank() && ::webView.isInitialized) {
+                val encoded = org.json.JSONObject.quote(spoken)
+                webView.evaluateJavascript("window.allinesHandleSpeech && window.allinesHandleSpeech($encoded)", null)
+            }
         }
     }
 
@@ -186,6 +196,67 @@ class MainActivity : Activity() {
     private inner class HomeBridge {
         @JavascriptInterface
         fun exitToHome() { runOnUiThread { exitToSystemHome() } }
+
+        @JavascriptInterface
+        fun openSystemPanel(action: String) {
+            val actions = mapOf(
+                "wifi" to android.provider.Settings.ACTION_WIFI_SETTINGS,
+                "bluetooth" to android.provider.Settings.ACTION_BLUETOOTH_SETTINGS,
+                "display" to android.provider.Settings.ACTION_DISPLAY_SETTINGS,
+                "sound" to android.provider.Settings.ACTION_SOUND_SETTINGS,
+                "location" to android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS,
+                "dnd" to android.provider.Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS,
+                "airplane" to android.provider.Settings.ACTION_AIRPLANE_MODE_SETTINGS,
+                "hotspot" to android.provider.Settings.ACTION_WIRELESS_SETTINGS,
+                "settings" to android.provider.Settings.ACTION_SETTINGS
+            )
+            val target = actions[action] ?: return
+            runOnUiThread {
+                try { startActivity(Intent(target)) } catch (_: Exception) {
+                    try { startActivity(Intent(android.provider.Settings.ACTION_SETTINGS)) } catch (_: Exception) { }
+                }
+            }
+        }
+
+        @JavascriptInterface
+        fun setWindowBrightness(level: Double) {
+            val safe = level.coerceIn(0.05, 1.0).toFloat()
+            runOnUiThread {
+                val params = window.attributes
+                params.screenBrightness = safe
+                window.attributes = params
+            }
+        }
+
+        @JavascriptInterface
+        fun setMediaVolume(percent: Int) {
+            runOnUiThread {
+                val audio = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                val max = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+                val target = ((percent.coerceIn(0, 100) / 100.0) * max).toInt()
+                audio.setStreamVolume(AudioManager.STREAM_MUSIC, target, 0)
+            }
+        }
+
+        @JavascriptInterface
+        fun startVoiceInput() {
+            runOnUiThread {
+                try {
+                    val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault().toLanguageTag())
+                        putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak to Allince")
+                    }
+                    startActivityForResult(intent, REQUEST_VOICE)
+                } catch (_: Exception) {
+                    webView.evaluateJavascript("document.querySelector('#allines-status').textContent='Voice service unavailable'", null)
+                }
+            }
+        }
     }
-    companion object { private const val REQUEST_AUDIO = 7101; private const val REQUEST_IMAGE = 7102 }
+    companion object {
+        private const val REQUEST_AUDIO = 7101
+        private const val REQUEST_IMAGE = 7102
+        private const val REQUEST_VOICE = 7103
+    }
 }
