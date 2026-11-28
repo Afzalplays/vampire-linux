@@ -290,6 +290,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 @media(max-width:380px){.home-actions button{font-size:9px}.widget{padding:10px}}
 @media(prefers-reduced-motion:reduce){.home-actions button{transition:none}}
 
+/* Allince voice input controls */
+#allines-language{max-width:82px;min-width:66px;height:42px;padding:0 5px;border:1px solid var(--line);border-radius:12px;background:#211b2a;color:var(--text);font:inherit;font-size:11px}
+#voice-assistant[aria-pressed="true"]{background:linear-gradient(145deg,#f15a72,#a42149);box-shadow:0 0 0 3px #f15a7230}
 </style>
 </head>
 <body>
@@ -410,9 +413,6 @@ document.querySelector("#terminal-command").addEventListener("keydown",e=>{if(e.
 document.querySelector("#voice-assistant").addEventListener("click",()=>{if(activeAllinceRecognition){stopAllinceListening("Ready");return}const SR=window.SpeechRecognition||window.webkitSpeechRecognition;const overlay=document.querySelector("#assistant"),mic=document.querySelector("#voice-assistant"),language=allinceVoiceLanguage();overlay.classList.add("listening");mic.setAttribute("aria-pressed","true");document.querySelector("#allines-status").textContent="Listening…";if(SR){const rec=new SR();activeAllinceRecognition=rec;rec.lang=language;rec.interimResults=false;rec.maxAlternatives=1;rec.onresult=e=>{activeAllinceRecognition=null;mic.setAttribute("aria-pressed","false");overlay.classList.remove("listening");document.querySelector("#allines-status").textContent="Processing";const transcript=e.results?.[0]?.[0]?.transcript;if(transcript)window.allinesHandleSpeech(transcript);else document.querySelector("#allines-status").textContent="No speech detected"};rec.onerror=e=>{activeAllinceRecognition=null;mic.setAttribute("aria-pressed","false");overlay.classList.remove("listening");document.querySelector("#allines-status").textContent="Voice unavailable";toast(e.error==="not-allowed"?"Microphone permission was denied. You can still type to Allince.":"Speech recognition failed. Try again or use Android voice input.")};rec.onend=()=>{if(activeAllinceRecognition===rec)activeAllinceRecognition=null;mic.setAttribute("aria-pressed","false");overlay.classList.remove("listening")};try{rec.start()}catch{stopAllinceListening("Voice unavailable");toast("Could not start speech recognition. Try again.")}return}if(window.VampireNative?.startVoiceInput){window.VampireNative.startVoiceInput(language);return}stopAllinceListening("Voice input unavailable");toast("This browser does not provide speech recognition. You can still type and hear replies.")});
 
 
-/* Allince voice input controls */
-#allines-language{max-width:82px;min-width:66px;height:42px;padding:0 5px;border:1px solid var(--line);border-radius:12px;background:#211b2a;color:var(--text);font:inherit;font-size:11px}
-#voice-assistant[aria-pressed="true"]{background:linear-gradient(145deg,#f15a72,#a42149);box-shadow:0 0 0 3px #f15a7230}
 /* Home gestures: swipe up opens the app drawer; swipe down from home returns to the glance screen. */
 let homeTouchStart=null;
 const homeSurface=document.querySelector("#home");
