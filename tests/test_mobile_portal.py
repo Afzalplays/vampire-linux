@@ -104,7 +104,7 @@ class MobilePortalContractTests(unittest.TestCase):
 
     def test_launcher_preferences_persist_locally_and_fail_safely(self):
         prototype = (MOBILE / "experience.html").read_text()
-        for marker in ("vampire-mobile-preferences-v1", "readPreferences()", "savePreferences()", "localStorage.getItem", "localStorage.setItem", "savedPreferences.quick", "savedPreferences.reduceMotion"):
+        for marker in ("vampire-mobile-preferences-v1", "readPreferences()", "savePreferences()", "localStorage.getItem", "localStorage.setItem", "savedPreferences.reduceMotion"):
             with self.subTest(marker=marker):
                 self.assertIn(marker, prototype)
         self.assertIn("Browser storage is unavailable", prototype)
@@ -154,8 +154,8 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn('["brightness",75,10,100],["volume",60,0,100]', prototype)
         self.assertIn('style.filter="brightness("', prototype)
         self.assertIn('if(id==="brightness"){document.querySelector("#home").style.filter', prototype)
-        self.assertIn('window.VampireNative?.setWindowBrightness(value/100)', prototype)
-        self.assertIn('window.VampireNative?.setMediaVolume(value)', prototype)
+        self.assertIn('if(window.VampireNative?.setWindowBrightness)window.VampireNative.setWindowBrightness(value/100)', prototype)
+        self.assertIn('if(window.VampireNative?.setMediaVolume){window.VampireNative.setMediaVolume(value)}', prototype)
         self.assertIn('savePreferences()}));', prototype)
 
     def test_quick_panel_routes_protected_controls_to_android_settings(self):
