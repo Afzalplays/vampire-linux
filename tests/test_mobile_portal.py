@@ -629,3 +629,9 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn('.widget-row{display:flex!important', prototype)
         self.assertIn('homeSurface.addEventListener("touchstart"', prototype)
         self.assertIn('if(dy<0)openPanel("drawer")', prototype)
+
+    def test_allince_can_report_available_battery_storage_and_memory_telemetry(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        for marker in ('q.includes("battery")', 'q.includes("storage")', 'q.includes("memory")', 'document.querySelector("#battery-live")', 'document.querySelector("#storage-live")', 'document.querySelector("#ram-live")'):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prototype)
