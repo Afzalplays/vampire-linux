@@ -176,7 +176,7 @@ class MobilePortalContractTests(unittest.TestCase):
         native = (MOBILE / "android" / "app" / "src" / "main" / "java" / "fun" / "vampirenodes" / "mobile" / "MainActivity.kt").read_text()
         self.assertIn('id="allines-conversation"', prototype)
         self.assertIn('id="allines-speak"', prototype)
-        self.assertIn('window.VampireNative?.startVoiceInput(language)', prototype)
+        self.assertIn('window.VampireNative.startVoiceInput(language)', prototype)
         self.assertIn('window.VampireNative?.openSystemPanel', prototype)
         self.assertIn('fun startVoiceInput(languageTag: String)', native)
         self.assertIn('fun setWindowBrightness(level: Double)', native)
