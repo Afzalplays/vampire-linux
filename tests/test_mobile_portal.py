@@ -700,3 +700,23 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn('id="allines-conversation" role="log" aria-live="polite" aria-relevant="additions" aria-atomic="false"', html)
         asset = (MOBILE / "android" / "app" / "src" / "main" / "assets" / "experience.html").read_text()
         self.assertEqual(html, asset)
+
+    def test_mobile_touch_performance_and_background_refresh_are_adaptive(self):
+        html = (MOBILE / "experience.html").read_text()
+        asset = (MOBILE / "android" / "app" / "src" / "main" / "assets" / "experience.html").read_text()
+        self.assertEqual(html, asset)
+        for marker in (
+            "@media(max-width:799px) and (pointer:coarse)",
+            "background-attachment:scroll",
+            "overscroll-behavior:contain",
+            "touch-action:manipulation",
+            "prefers-reduced-transparency:reduce",
+            "min-height:100dvh",
+            "if(document.hidden)return;",
+            "setInterval(updateDeviceStats,60000)",
+            'document.addEventListener("visibilitychange"',
+            "setInterval(updateClock,15000)",
+            'if(document.querySelector("#lockscreen").classList.contains("open"))updateLockClock()',
+        ):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, html)
