@@ -663,7 +663,7 @@ class MobilePortalContractTests(unittest.TestCase):
 
     def test_allince_opens_protected_airplane_location_hotspot_and_dnd_settings(self):
         prototype = (MOBILE / "experience.html").read_text()
-        for marker in ('jagah:"location"', 'vimaan:"airplane"', '["airplane mode","airplane","Airplane mode"]', '["flight mode","airplane","Airplane mode"]', '["location","location","Location"]', '["hotspot","hotspot","Hotspot"]', '["do not disturb","dnd","Do Not Disturb"]', 'window.VampireNative?.openSystemPanel(action)', 'Review and confirm the change there.'):
+        for marker in ('jagah:"location"', 'vimaan:"airplane"', '["airplane mode","airplane","Airplane mode"]', '["flight mode","airplane","Airplane mode"]', '["location","location","Location"]', '["hotspot","hotspot","Hotspot"]', '["do not disturb","dnd","Do Not Disturb"]', 'if(window.VampireNative?.openSystemPanel){window.VampireNative.openSystemPanel(action)', 'Review and confirm the change there.'):
             with self.subTest(marker=marker):
                 self.assertIn(marker, prototype)
         asset = (MOBILE / "android" / "app" / "src" / "main" / "assets" / "experience.html").read_text()
