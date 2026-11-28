@@ -635,3 +635,9 @@ class MobilePortalContractTests(unittest.TestCase):
         for marker in ('q.includes("battery")', 'q.includes("storage")', 'q.includes("memory")', 'document.querySelector("#battery-live")', 'document.querySelector("#storage-live")', 'document.querySelector("#ram-live")'):
             with self.subTest(marker=marker):
                 self.assertIn(marker, prototype)
+
+    def test_native_launcher_routes_more_shortcuts_to_android_apps(self):
+        activity = (ROOT / "mobile" / "android" / "app" / "src" / "main" / "java" / "fun" / "vampirenodes" / "mobile" / "MainActivity.kt").read_text()
+        for marker in ('"Clock" -> Intent(Intent.ACTION_MAIN).addCategory("android.intent.category.APP_CLOCK")', '"Calculator" -> Intent(Intent.ACTION_MAIN).addCategory("android.intent.category.APP_CALCULATOR")', '"Music" -> Intent(Intent.ACTION_MAIN).addCategory("android.intent.category.APP_MUSIC")', '"Store" -> Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.android.vending"))'):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, activity)
