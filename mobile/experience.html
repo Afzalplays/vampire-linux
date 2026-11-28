@@ -268,6 +268,28 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .app>span:last-child{font-weight:550;letter-spacing:-.01em;text-shadow:0 1px 8px #0008}
 @media(min-width:700px){.app-icon{width:60px;height:60px;border-radius:19px}}
 @media(prefers-reduced-motion:reduce){.app{transition:none}}
+
+/* Home screen glance cards and reachable one-tap controls */
+.home-actions{display:flex;gap:9px;flex-wrap:wrap;margin:20px 0 4px}
+.home-actions button{display:flex;align-items:center;gap:8px;min-height:42px;padding:0 13px;border:1px solid rgba(255,255,255,.14);border-radius:15px;background:rgba(255,255,255,.075);color:#f8f1fa;font-size:12px;font-weight:650;box-shadow:inset 0 1px rgba(255,255,255,.08);backdrop-filter:blur(18px);transition:transform .18s,border-color .18s,background .18s}
+.home-actions button span{font-size:16px;color:#ff9aaa}
+.home-actions button:active{transform:scale(.96);background:rgba(237,64,92,.2)}
+.home-actions button:focus-visible{outline:2px solid #ff9aaa;outline-offset:3px}
+@media(max-width:799px){
+ .home{padding-top:clamp(22px,5vh,42px)}
+ .home-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:18px 0 2px}
+ .home-actions button{justify-content:center;flex-direction:column;gap:4px;min-width:0;min-height:62px;padding:8px 4px;border-radius:17px;font-size:10px;white-space:nowrap}
+ .home-actions button span{font-size:19px}
+ .widget-row{display:flex!important;gap:8px;margin:18px 0 0}
+ .widget-row:nth-of-type(2){display:none!important}
+ .widget{padding:11px 12px;border-radius:16px;background:rgba(21,19,31,.62);border-color:rgba(255,255,255,.12)}
+ .widget b{font-size:12px;letter-spacing:-.01em}
+ .widget span{display:block;margin-top:4px;font-size:10px;line-height:1.4}
+ .section-title{margin-top:30px}
+}
+@media(max-width:380px){.home-actions button{font-size:9px}.widget{padding:10px}}
+@media(prefers-reduced-motion:reduce){.home-actions button{transition:none}}
+
 </style>
 </head>
 <body>
@@ -275,6 +297,7 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 <header class="status"><span id="status-time">9:41</span><span class="status-icons"><span>◉</span><span>⌁</span><span>▰</span></span></header>
 <main class="home" id="home">
 <div class="date" id="date">MONDAY, NOVEMBER 27</div><div class="clock" id="clock">9:41</div><div class="greeting">Good evening · Welcome back</div>
+<div class="home-actions" aria-label="Quick actions"><button type="button" data-panel="quick"><span>☷</span> Quick settings</button><button type="button" data-panel="notifications"><span>♧</span> Notifications</button><button type="button" data-panel="assistant"><span>✧</span> Ask Allince</button></div>
 <div class="widget-row"><div class="widget"><b id="battery-live">Battery · Checking</b><span id="battery-detail">Waiting for browser battery access</span></div><div class="widget"><b id="storage-live">Storage · Checking</b><span id="storage-detail">Reading available site storage</span></div></div><div class="widget-row"><div class="widget"><b id="ram-live">Memory · Limited data</b><span id="ram-detail">Device memory access varies by browser</span></div><div class="widget"><b id="runtime-live">System · Live</b><span id="runtime-detail">Local clock and browser status</span></div></div>
 <div class="section-title">Your apps <button id="open-drawer">All apps ↗</button></div>
 <div class="apps" id="home-apps"></div>
@@ -381,6 +404,19 @@ function runDemoCommand(){const input=document.querySelector("#terminal-command"
 document.querySelector("#run-command").addEventListener("click",runDemoCommand);
 document.querySelector("#terminal-command").addEventListener("keydown",e=>{if(e.key==="Enter")runDemoCommand()});
 document.querySelector("#voice-assistant").addEventListener("click",()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;const overlay=document.querySelector("#assistant");overlay.classList.add("listening");document.querySelector("#allines-status").textContent="Listening…";if(SR){const rec=new SR();rec.lang=navigator.language||"en-US";rec.interimResults=false;rec.maxAlternatives=1;rec.onresult=e=>{overlay.classList.remove("listening");document.querySelector("#allines-status").textContent="Processing";window.allinesHandleSpeech(e.results[0][0].transcript)};rec.onerror=()=>{overlay.classList.remove("listening");document.querySelector("#allines-status").textContent="Voice unavailable";toast("Speech recognition failed. Try typing or use Android voice input.")};rec.onend=()=>overlay.classList.remove("listening");rec.start();return}if(window.VampireNative?.startVoiceInput){window.VampireNative.startVoiceInput();return}overlay.classList.remove("listening");document.querySelector("#allines-status").textContent="Voice input unavailable";toast("This browser does not provide speech recognition. You can still type and hear replies.")});
+
+
+/* Home gestures: swipe up opens the app drawer; swipe down from home returns to the glance screen. */
+let homeTouchStart=null;
+const homeSurface=document.querySelector("#home");
+homeSurface.addEventListener("touchstart",e=>{if(e.touches.length===1)homeTouchStart={x:e.touches[0].clientX,y:e.touches[0].clientY}},{passive:true});
+homeSurface.addEventListener("touchend",e=>{
+ if(!homeTouchStart)return;
+ const end=e.changedTouches[0],dx=end.clientX-homeTouchStart.x,dy=end.clientY-homeTouchStart.y;
+ if(Math.abs(dy)>70&&Math.abs(dy)>Math.abs(dx)*1.2){if(dy<0)openPanel("drawer");else window.scrollTo({top:0,behavior:"smooth"})}
+ homeTouchStart=null;
+},{passive:true});
+document.querySelectorAll(".home-actions [data-panel]").forEach(button=>button.addEventListener("click",()=>openPanel(button.dataset.panel)));
 
 let batteryManager=null;const fmtBytes=n=>{if(!Number.isFinite(n))return null;const units=["B","KB","MB","GB","TB"];let i=0;while(n>=1024&&i<units.length-1){n/=1024;i++}return n.toFixed(i?1:0)+" "+units[i]};function durationLabel(seconds){if(!Number.isFinite(seconds)||seconds<0)return "time estimate unavailable";const mins=Math.round(seconds/60);return mins>=60?Math.floor(mins/60)+"h "+(mins%60)+"m":mins+"m"}async function updateDeviceStats(){const battery=document.querySelector("#battery-live"),batteryDetail=document.querySelector("#battery-detail");if(!batteryManager&&navigator.getBattery){try{batteryManager=await navigator.getBattery();["levelchange","chargingchange","chargingtimechange","dischargingtimechange"].forEach(ev=>batteryManager.addEventListener(ev,updateDeviceStats))}catch{}}if(batteryManager){battery.textContent="Battery · "+Math.round(batteryManager.level*100)+"%";batteryDetail.textContent=batteryManager.charging?"Charging · "+durationLabel(batteryManager.chargingTime)+" to full":"On battery · "+durationLabel(batteryManager.dischargingTime)+" estimated"}else{battery.textContent="Battery · Unavailable";batteryDetail.textContent="This browser / iOS does not expose battery telemetry."}const storage=document.querySelector("#storage-live"),storageDetail=document.querySelector("#storage-detail");if(navigator.storage?.estimate){try{const e=await navigator.storage.estimate(),used=fmtBytes(e.usage),quota=fmtBytes(e.quota);storage.textContent=used&&quota?"Site storage · "+used:"Storage · Limited";storageDetail.textContent=used&&quota?"PWA origin usage · "+quota+" quota":"Browser did not provide storage totals"}catch{storage.textContent="Storage · Unavailable";storageDetail.textContent="Storage estimate unavailable."}}else{storage.textContent="Storage · Unavailable";storageDetail.textContent="This browser does not expose storage estimates."}const ram=document.querySelector("#ram-live"),ramDetail=document.querySelector("#ram-detail"),deviceMemory=navigator.deviceMemory,heap=performance.memory?.usedJSHeapSize;ram.textContent=deviceMemory?"Device RAM · ~"+deviceMemory+" GB":"Device RAM · Restricted";ramDetail.textContent=heap?"Web app memory · "+fmtBytes(heap)+" JS heap (not total RAM)":"Exact RAM and live system memory are protected by this browser."}updateDeviceStats();setInterval(updateDeviceStats,15000);function updateClock(){const now=new Date();document.querySelector("#clock").textContent=new Intl.DateTimeFormat(undefined,{hour:"numeric",minute:"2-digit"}).format(now);document.querySelector("#status-time").textContent=new Intl.DateTimeFormat(undefined,{hour:"2-digit",minute:"2-digit"}).format(now);document.querySelector("#date").textContent=new Intl.DateTimeFormat(undefined,{weekday:"long",month:"long",day:"numeric"}).format(now).toUpperCase();document.querySelector("#runtime-detail").textContent="Updated "+new Intl.DateTimeFormat(undefined,{hour:"numeric",minute:"2-digit",second:"2-digit"}).format(now)+" · browser session"}updateClock();setInterval(updateClock,1000);
 const statusBar=document.querySelector(".status");let statusTouchY=0;statusBar.addEventListener("touchstart",e=>{statusTouchY=e.touches[0]?.clientY??0},{passive:true});statusBar.addEventListener("touchend",e=>{const end=e.changedTouches[0]?.clientY??statusTouchY;if(end-statusTouchY>55)openPanel("quick")},{passive:true});
