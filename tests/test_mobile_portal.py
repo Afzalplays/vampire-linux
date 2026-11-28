@@ -647,3 +647,9 @@ class MobilePortalContractTests(unittest.TestCase):
         for marker in ('kholo:"open"', 'dikhao:"show"', 'samay:"time"', 'tarikh:"date"', 'kitni:"how much"', 'chalu:"turn on"', 'q.includes(phrase+" open")', 'namaste|namaskar'):
             with self.subTest(marker=marker):
                 self.assertIn(marker, prototype)
+
+    def test_allince_chat_controls_aliases_and_app_command_coverage(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        for marker in ('id="clear-allines"', 'feed.children.length>41', 'feed.replaceChildren()', 'ghadi:"clock"', 'mausam:"weather"', 'sandesh:"messages"', 'tasveer:"gallery"', 'naksha:"maps"', '["recorder","app:Recorder"]', '["downloads","app:Downloads"]', 'q.includes("internet")', 'q.includes("blue tooth")', 'q.includes("what can i ask")'):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prototype)
