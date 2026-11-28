@@ -661,6 +661,20 @@ class MobilePortalContractTests(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertIn(marker, prototype)
 
+    def test_allince_opens_protected_airplane_location_hotspot_and_dnd_settings(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        for marker in ('jagah:"location"', 'vimaan:"airplane"', '["airplane mode","airplane","Airplane mode"]', '["flight mode","airplane","Airplane mode"]', '["location","location","Location"]', '["hotspot","hotspot","Hotspot"]', '["do not disturb","dnd","Do Not Disturb"]', 'window.VampireNative?.openSystemPanel(action)', 'Review and confirm the change there.'):
+            with self.subTest(marker=marker):
+                self.assertIn(marker, prototype)
+        asset = (MOBILE / "android" / "app" / "src" / "main" / "assets" / "experience.html").read_text()
+        self.assertEqual(prototype, asset)
+
+    def test_dark_mode_state_stays_synchronised_with_quick_panel_tile(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        self.assertIn('document.querySelectorAll("#quick-grid [data-action=dark]").forEach(tile=>tile.setAttribute("aria-pressed",String(on)))', prototype)
+        asset = (MOBILE / "android" / "app" / "src" / "main" / "assets" / "experience.html").read_text()
+        self.assertEqual(prototype, asset)
+
     def test_allince_voice_language_lifecycle_and_android_fallback_are_wired(self):
         prototype = (MOBILE / "experience.html").read_text()
         asset = (MOBILE / "android" / "app" / "src" / "main" / "assets" / "experience.html").read_text()
