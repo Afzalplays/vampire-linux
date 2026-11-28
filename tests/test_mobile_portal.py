@@ -673,3 +673,9 @@ class MobilePortalContractTests(unittest.TestCase):
                 self.assertIn(marker, html)
         asset = (MOBILE / "android" / "app" / "src" / "main" / "assets" / "experience.html").read_text()
         self.assertEqual(html, asset)
+
+    def test_allince_conversation_uses_accessible_incremental_chat_log(self):
+        html = (MOBILE / "experience.html").read_text()
+        self.assertIn('id="allines-conversation" role="log" aria-live="polite" aria-relevant="additions" aria-atomic="false"', html)
+        asset = (MOBILE / "android" / "app" / "src" / "main" / "assets" / "experience.html").read_text()
+        self.assertEqual(html, asset)
