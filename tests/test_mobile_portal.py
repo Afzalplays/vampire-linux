@@ -164,6 +164,13 @@ class MobilePortalContractTests(unittest.TestCase):
             with self.subTest(marker=marker):
                 self.assertIn(marker, prototype)
 
+    def test_quick_panel_only_marks_real_toggle_as_pressed(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        self.assertIn('if(action==="dark")b.setAttribute("aria-pressed",document.querySelector("#dark-toggle").getAttribute("aria-pressed"))', prototype)
+        self.assertNotIn('b.type="button";b.setAttribute("aria-pressed","false");b.dataset.action=action', prototype)
+        asset = (MOBILE / "android" / "app" / "src" / "main" / "assets" / "experience.html").read_text()
+        self.assertEqual(prototype, asset)
+
     def test_allince_voice_assistant_has_native_fallback_and_speaks_replies(self):
         prototype = (MOBILE / "experience.html").read_text()
         native = (MOBILE / "android" / "app" / "src" / "main" / "java" / "fun" / "vampirenodes" / "mobile" / "MainActivity.kt").read_text()
