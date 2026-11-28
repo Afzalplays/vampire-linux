@@ -619,3 +619,13 @@ class MobilePortalContractTests(unittest.TestCase):
         self.assertIn("window.VampireNative.exitToHome()", prototype)
         self.assertIn("window.vampireHandleBack", prototype)
         self.assertIn("window.vampireHandleBack", activity)
+
+    def test_home_screen_has_reachable_quick_actions_glance_widgets_and_swipe_drawer(self):
+        prototype = (MOBILE / "experience.html").read_text()
+        self.assertIn('class="home-actions"', prototype)
+        for panel in ('data-panel="quick"', 'data-panel="notifications"', 'data-panel="assistant"'):
+            with self.subTest(panel=panel):
+                self.assertIn(panel, prototype)
+        self.assertIn('.widget-row{display:flex!important', prototype)
+        self.assertIn('homeSurface.addEventListener("touchstart"', prototype)
+        self.assertIn('if(dy<0)openPanel("drawer")', prototype)
