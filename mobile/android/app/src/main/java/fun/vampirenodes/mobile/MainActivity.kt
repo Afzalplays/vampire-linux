@@ -131,11 +131,15 @@ class MainActivity : Activity() {
             pendingFileChooser = null
             val result = if (resultCode == RESULT_OK && data?.data != null) arrayOf(data.data!!) else null
             callback?.onReceiveValue(result)
-        } else if (requestCode == REQUEST_VOICE && resultCode == RESULT_OK) {
-            val spoken = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull()
-            if (!spoken.isNullOrBlank() && ::webView.isInitialized) {
-                val encoded = org.json.JSONObject.quote(spoken)
-                webView.evaluateJavascript("window.allinesHandleSpeech && window.allinesHandleSpeech($encoded)", null)
+        } else if (requestCode == REQUEST_VOICE) {
+            val spoken = if (resultCode == RESULT_OK) data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)?.firstOrNull() else null
+            if (::webView.isInitialized) {
+                if (!spoken.isNullOrBlank()) {
+                    val encoded = org.json.JSONObject.quote(spoken)
+                    webView.evaluateJavascript("window.allinesHandleSpeech && window.allinesHandleSpeech($encoded)", null)
+                } else {
+                    webView.evaluateJavascript("document.querySelector('#allines-status').textContent='Voice input cancelled'", null)
+                }
             }
         }
     }
@@ -265,12 +269,14 @@ class MainActivity : Activity() {
         }
 
         @JavascriptInterface
-        fun startVoiceInput() {
+        fun startVoiceInput(languageTag: String) {
             runOnUiThread {
                 try {
+                    val safeLanguage = if (languageTag.matches(Regex("^[a-zA-Z]{2,3}(-[a-zA-Z]{2,4})?$"))) languageTag else Locale.getDefault().toLanguageTag()
                     val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault().toLanguageTag())
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE, safeLanguage)
+                        putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, safeLanguage)
                         putExtra(RecognizerIntent.EXTRA_PROMPT, "Speak to Allince")
                     }
                     startActivityForResult(intent, REQUEST_VOICE)
